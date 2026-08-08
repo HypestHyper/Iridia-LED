@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: iridia
+Version: 1.0.0
+Summary: Standalone LED brightness sync for Linux — wallpaper colors to OpenRGB
+Author: Iridia Contributors
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: System :: Hardware
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: openrgb-python>=0.3.0
+Requires-Dist: Pillow>=9.0.0
+Requires-Dist: watchdog>=3.0.0
+Requires-Dist: pystray>=0.19.0
+Provides-Extra: material
+Requires-Dist: material-color-utilities>=0.1.0; extra == "material"

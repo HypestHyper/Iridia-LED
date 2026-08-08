@@ -1,0 +1,4 @@
+[console_scripts]
+iridia = iridia.cli:main
+iridia-daemon = iridia.daemon:main
+iridia-gui = iridia.gui:main

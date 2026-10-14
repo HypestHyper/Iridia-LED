@@ -1,0 +1,93 @@
+# Command line
+
+Everything the window does can also be done with the `iridia` command. It lives in
+`~/.local/share/iridia-venv/bin/`; add that folder to your `PATH` to type just `iridia` (see
+[Installation](Installation.md#running-it)). `iridia --help` and `iridia COMMAND --help` list every
+option.
+
+## Status and health
+
+| Command | What it does |
+| --- | --- |
+| `iridia status` | Daemon, wallpaper, colors, OpenRGB, devices and zones |
+| `iridia doctor` | A full health check that explains what's wrong, if anything |
+| `iridia log [-n 40]` | The daemon's most recent log lines (works with file logging off) |
+| `iridia --version` | The installed version |
+
+## Daemon and service
+
+| Command | What it does |
+| --- | --- |
+| `iridia daemon start` | Start the daemon (through systemd if the service is installed) |
+| `iridia daemon stop` | Stop it, however it was started |
+| `iridia daemon status` | Running or stopped, and who started it |
+| `iridia restart` | Soft restart: reconnect and re-send everything |
+| `iridia service install` | Write and enable the systemd user service, the launcher and icons |
+| `iridia service remove` | Remove them |
+| `iridia service status / start / stop / restart` | Control the systemd service |
+| `iridia autostart` | Print the autostart line for every compositor |
+| `iridia autostart xdg-install / xdg-remove` | Add or remove the XDG autostart entry |
+| `iridia uninstall [--yes] [--keep-settings]` | Remove Iridia |
+
+## OpenRGB
+
+| Command | What it does |
+| --- | --- |
+| `iridia openrgb reconnect` | Drop the connection and connect again |
+| `iridia openrgb restart` | Restart OpenRGB's server (a systemd `openrgb-server.service` or a headless `openrgb --server`) |
+
+## Wallpaper and colors
+
+| Command | What it does |
+| --- | --- |
+| `iridia refresh` | Check the wallpaper again now |
+| `iridia wallpaper` | Show the current wallpaper |
+| `iridia wallpaper PATH` | Always use this image |
+| `iridia wallpaper --reset-detection` | Forget which wallpaper tool was found and look again |
+| `iridia preview HEX` / `iridia preview off` | Show one color on every LED without saving it (ends by itself after 5 minutes) |
+| `iridia freeze [toggle]` / `iridia unfreeze` | Ignore or follow wallpaper changes |
+| `iridia palette list / reset / path` | The 48 color palette |
+
+## Lights, night mode and keybinds
+
+| Command | What it does |
+| --- | --- |
+| `iridia lights on / off / toggle` | Every LED on or off |
+| `iridia night show` | Night mode settings |
+| `iridia night on / off / toggle [--start 23:00] [--end 07:00] [--cap 20]` | Night mode |
+| `iridia zone list` | Strip names to use with `iridia zone` |
+| `iridia zone NAME[,NAME] [on/off] [color HEX] [bright N] [--set]` | Temporary strip changes; see [Keybinds](Keybinds.md) |
+| `iridia zone NAME normal` | Undo keybind changes |
+| `iridia identify DEVICE [-z ZONE] [-s SECONDS]` / `iridia identify off` | Light only one zone |
+
+## Setups
+
+| Command | What it does |
+| --- | --- |
+| `iridia setup list` | Saved setups and automatic backups |
+| `iridia setup save NAME` | Save everything under a name |
+| `iridia setup load NAME` | Load it (backs up the current state first) |
+| `iridia setup delete NAME` | Delete it |
+| `iridia setup export NAME FILE` / `iridia setup import FILE` | Move setups between machines |
+
+## Devices and config
+
+| Command | What it does |
+| --- | --- |
+| `iridia config show / edit / path` | The config file (`edit` uses `$EDITOR` and reloads the daemon) |
+| `iridia device NAME ACTION [-z ZONE] [-v VALUE]` | Change a device or zone, see below |
+
+`iridia device` actions:
+
+| Action | Value |
+| --- | --- |
+| `enable`, `disable` | |
+| `mode` | `full`, `palette` or `calibrated` (color correction) |
+| `pattern`, `zone-pattern` | `solid`, `gradient`, `segments`, `center_out`, `edges_in`, `alternating`, `paint` |
+| `zone-colors` | Comma list of wallpaper color numbers (from 0) and hex colors: `0,2,ff8800` |
+| `brightness-sync`, `invert`, `gamma` | `on` or `off` |
+| `manual-brightness` | 0 to 100 |
+| `brightness-range` | `min,max`, like `20,80` |
+| `led-count` | Number of LEDs |
+
+Device and zone names are the ones OpenRGB reports; `iridia status` lists them. Quote names with spaces.

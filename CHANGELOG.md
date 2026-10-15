@@ -14,6 +14,10 @@
   LEDs are on the Layout tab, in the direction set with a dial. The Layout tab animates live while open.
 - Settings, Animations: run animations (off shows each animated zone's first color), frame rate (15, 30,
   60), pause or slow animations during night mode.
+- Embers glow in the zone's picked colors, each point drifting slowly through them, or in fire colors.
+  Colors blend as light does, Breathing moves evenly for the eye, and Comet heads glide between LEDs.
+- Sliders and number boxes don't react to the mouse wheel (it scrolls the page), so scrolling past
+  them never changes a setting.
 - Breathing's minimum and maximum are relative to the zone's brightness. When the monitor's brightness
   changes, LEDs glide to it over about 0.3 s, for static patterns too.
 - Lights off, sleep, Identify, Count LEDs, Test colors, color previews and keybind colors pause the

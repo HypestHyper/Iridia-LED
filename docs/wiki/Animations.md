@@ -33,10 +33,14 @@ again puts the strip back.
 | **Breathing** | Fades between a minimum and a maximum brightness | Seconds per breath; brightness range (default 10% to 100%); easing (sine, smooth, sharp); next color at each breath |
 | **Comet** | Bright heads with a fading tail run along the strip | Speed (LEDs per second); tail length; heads; spacing (0 spreads them evenly); bounce back and forth; reverse; background (off, dim, the second color) |
 | **Fill** | The strip fills up with its pattern, then empties | Speed; pause when full and empty; fill from the start, the end or the center; empty back, the same way, or reset |
-| **Embers** | Points drift to another color and back, like a calm fire | Speed; density; softness (blend with neighbours); flicker; colors (warm or the zone's) |
+| **Embers** | Points glow up and die down like embers, each drifting slowly through the zone's colors | Speed; density; softness (blend with neighbours); flicker; colors (the picked colors, or fire colors: deep red to amber, yellower when hotter) |
 | **Rainbow** | A moving rainbow wave (ignores the zone's colors) | Speed; width (LEDs per rainbow); saturation; reverse |
 | **Rainbow vomit** | The loud one: a fast, uneven rainbow with random sparkles | Speed; chaos (sparkles); width |
 | **Color cycle** | The whole zone fades from one color to the next | Fade time; hold each color |
+
+Colors fade into each other as light does (red to green passes through yellow, not a dull brown), and
+Breathing moves through its range evenly for the eye rather than lingering near the top. Comet heads
+glide between LEDs instead of hopping.
 
 Breathing with *next color at each breath* off breathes the zone's static pattern, so a gradient zone
 breathes as a gradient. Fill fills with the static pattern too. Every effect runs on a clock, not a frame

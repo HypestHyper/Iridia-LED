@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# English translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 16:32+0000\n"
+"POT-Creation-Date: 2026-10-15 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -285,19 +285,6 @@ msgstr "Suspend the spectacles at night"
 
 msgid "Slow animations during night mode"
 msgstr "Slow the spectacles at night"
-
-msgid "Controller effects"
-msgstr "The controller's own spectacles"
-
-msgid ""
-"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
-"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
-msgstr ""
-"Permits a device to perform one of its own spectacles (those OpenRGB lists, such as Breathing or "
-"Spectrum Cycle). They are performed by the controller itself and are therefore ever graceful, "
-"though they pay no heed to the wallpaper, your colours or the arrangement. Choose them device by "
-"device upon the Devices tab."
 
 msgid "Appearance"
 msgstr "Comportment"
@@ -1320,8 +1307,12 @@ msgstr "Bright heads with fading tails promenade along the strip."
 msgid "The strip fills up with its pattern, then empties."
 msgstr "The strip fills with its pattern, then politely empties."
 
-msgid "Points drift to another color and back, like a calm fire."
-msgstr "Points drift to another colour and back again, as a contented hearth."
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Points glow and fade like embers in the drawing-room hearth, drifting through the colours chosen "
+"below. Fire uses proper fire colours instead."
 
 msgid "A moving rainbow. Ignores the zone's colors."
 msgstr "A travelling rainbow. It disregards the zone's colours."
@@ -1449,11 +1440,11 @@ msgstr "The same way"
 msgid "Reset"
 msgstr "Begin anew"
 
-msgid "Warm"
-msgstr "Warm"
+msgid "Fire"
+msgstr "Hearth fire"
 
-msgid "Zone colors"
-msgstr "The zone's colours"
+msgid "Picked colors"
+msgstr "Chosen colours"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
@@ -1461,49 +1452,6 @@ msgid ""
 msgstr ""
 "Following the arrangement conducts the spectacle through the room, across every strip that "
 "follows it, according to where the LEDs sit upon the Layout tab."
-
-msgid "Left"
-msgstr "Left"
-
-msgid "Right"
-msgstr "Right"
-
-msgid "Up"
-msgstr "Up"
-
-msgid "Down"
-msgstr "Down"
-
-msgid "Horizontal"
-msgstr "Horizontal"
-
-msgid "Vertical"
-msgstr "Vertical"
-
-msgid "Controller effect"
-msgstr "The controller's own spectacle"
-
-msgid ""
-"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
-"colors or the layout."
-msgstr ""
-"Performed by the controller itself, so ever graceful, though it pays no heed to the wallpaper, "
-"your colours or the arrangement."
-
-msgid "Effect"
-msgstr "Spectacle"
-
-msgid "Follow Iridia"
-msgstr "Follow Iridia"
-
-msgid "On this device a lower number is faster."
-msgstr "Upon this device, a lower number is the swifter."
-
-msgid "Brightness"
-msgstr "Brightness"
-
-msgid "Effect color"
-msgstr "Colour of the spectacle"
 
 msgid "All lights off / on"
 msgstr "All lamps out / alight"
@@ -1582,8 +1530,14 @@ msgstr "As you were"
 msgid "Pick the color"
 msgstr "Choose the colour"
 
+msgid "Brightness"
+msgstr "Brightness"
+
 msgid "Static pattern"
 msgstr "A still pattern"
+
+msgid "Effect"
+msgstr "Spectacle"
 
 msgid "Do"
 msgstr "Undertake"
@@ -2282,14 +2236,6 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "This device has no Direct mode, so it wears a single colour throughout (the first of the pattern)."
-
-#, python-brace-format
-msgid ""
-"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-"settings again."
-msgstr ""
-"This device performs its own spectacle ({name}). Return it to Follow Iridia above to use these "
-"settings once more."
 
 msgid "Red"
 msgstr "Crimson"

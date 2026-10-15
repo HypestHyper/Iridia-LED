@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# English (United Kingdom) translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 16:32+0000\n"
+"POT-Creation-Date: 2026-10-15 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -279,18 +279,6 @@ msgstr "Pause animations during night mode"
 
 msgid "Slow animations during night mode"
 msgstr "Slow animations during night mode"
-
-msgid "Controller effects"
-msgstr "Controller effects"
-
-msgid ""
-"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
-"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
-msgstr ""
-"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
-"wallpaper, your colours or the layout. Pick them per device on the Devices tab."
 
 msgid "Appearance"
 msgstr "Appearance"
@@ -1300,8 +1288,12 @@ msgstr "Bright heads with a fading tail run along the strip."
 msgid "The strip fills up with its pattern, then empties."
 msgstr "The strip fills up with its pattern, then empties."
 
-msgid "Points drift to another color and back, like a calm fire."
-msgstr "Points drift to another colour and back, like a calm fire."
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Points glow up and die down like embers, drifting through the colours picked below. Fire uses "
+"fire colours instead."
 
 msgid "A moving rainbow. Ignores the zone's colors."
 msgstr "A moving rainbow. Ignores the zone's colours."
@@ -1429,11 +1421,11 @@ msgstr "Same way"
 msgid "Reset"
 msgstr "Reset"
 
-msgid "Warm"
-msgstr "Warm"
+msgid "Fire"
+msgstr "Fire"
 
-msgid "Zone colors"
-msgstr "Zone colours"
+msgid "Picked colors"
+msgstr "Picked colours"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
@@ -1441,49 +1433,6 @@ msgid ""
 msgstr ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
 "where the LEDs are on the Layout tab."
-
-msgid "Left"
-msgstr "Left"
-
-msgid "Right"
-msgstr "Right"
-
-msgid "Up"
-msgstr "Up"
-
-msgid "Down"
-msgstr "Down"
-
-msgid "Horizontal"
-msgstr "Horizontal"
-
-msgid "Vertical"
-msgstr "Vertical"
-
-msgid "Controller effect"
-msgstr "Controller effect"
-
-msgid ""
-"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
-"colors or the layout."
-msgstr ""
-"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
-"colours or the layout."
-
-msgid "Effect"
-msgstr "Effect"
-
-msgid "Follow Iridia"
-msgstr "Follow Iridia"
-
-msgid "On this device a lower number is faster."
-msgstr "On this device a lower number is faster."
-
-msgid "Brightness"
-msgstr "Brightness"
-
-msgid "Effect color"
-msgstr "Effect colour"
 
 msgid "All lights off / on"
 msgstr "All lights off / on"
@@ -1561,8 +1510,14 @@ msgstr "Back to normal"
 msgid "Pick the color"
 msgstr "Pick the colour"
 
+msgid "Brightness"
+msgstr "Brightness"
+
 msgid "Static pattern"
 msgstr "Static pattern"
+
+msgid "Effect"
+msgstr "Effect"
 
 msgid "Do"
 msgstr "Do"
@@ -2261,14 +2216,6 @@ msgid ""
 msgstr ""
 "This device has no Direct mode, so it shows one colour for the whole device (the first one of the"
 " pattern)."
-
-#, python-brace-format
-msgid ""
-"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-"settings again."
-msgstr ""
-"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-"settings again."
 
 msgid "Red"
 msgstr "Red"

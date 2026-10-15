@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# English translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 16:32+0000\n"
+"POT-Creation-Date: 2026-10-15 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -279,18 +279,6 @@ msgstr "Still the lanterns when night falls"
 
 msgid "Slow animations during night mode"
 msgstr "Slow the lanterns when night falls"
-
-msgid "Controller effects"
-msgstr "The ship's own tricks"
-
-msgid ""
-"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
-"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
-msgstr ""
-"Lets a ship run its own tricks (the ones OpenRGB knows, like Breathing or Spectrum Cycle). The "
-"controller runs 'em, so they be smooth, but they ignore the wallpaper, yer colours and the map. "
-"Pick 'em per ship in the Cargo hold."
 
 msgid "Appearance"
 msgstr "Ship's colors"
@@ -1302,8 +1290,12 @@ msgstr "Bright heads with fadin' tails race along the lanterns."
 msgid "The strip fills up with its pattern, then empties."
 msgstr "The lanterns fill up like a barrel o' rum, then drain."
 
-msgid "Points drift to another color and back, like a calm fire."
-msgstr "Points drift to another colour and back, like a calm galley fire."
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Points glow an' fade like embers in the galley stove, driftin' through the colours ye picked "
+"below. Fire uses fire colours instead."
 
 msgid "A moving rainbow. Ignores the zone's colors."
 msgstr "A sailin' rainbow. Pays no mind to the zone's colours."
@@ -1431,11 +1423,11 @@ msgstr "Same way"
 msgid "Reset"
 msgstr "Start over"
 
-msgid "Warm"
-msgstr "Warm as a galley"
+msgid "Fire"
+msgstr "Fire"
 
-msgid "Zone colors"
-msgstr "Zone colours"
+msgid "Picked colors"
+msgstr "Yer colours"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
@@ -1443,49 +1435,6 @@ msgid ""
 msgstr ""
 "Follow the map sails the dance through the whole room, across every lantern string that follows "
 "it, using where they hang on the Treasure Map."
-
-msgid "Left"
-msgstr "Port"
-
-msgid "Right"
-msgstr "Starboard"
-
-msgid "Up"
-msgstr "Aloft"
-
-msgid "Down"
-msgstr "Below"
-
-msgid "Horizontal"
-msgstr "Along the deck"
-
-msgid "Vertical"
-msgstr "Up the mast"
-
-msgid "Controller effect"
-msgstr "The ship's own trick"
-
-msgid ""
-"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
-"colors or the layout."
-msgstr ""
-"Runs on the ship's own controller, so it's always smooth, but it ignores the wallpaper, yer "
-"colours and the map."
-
-msgid "Effect"
-msgstr "Trick"
-
-msgid "Follow Iridia"
-msgstr "Follow Iridia"
-
-msgid "On this device a lower number is faster."
-msgstr "On this ship, the lower the number the faster she sails."
-
-msgid "Brightness"
-msgstr "Brightness"
-
-msgid "Effect color"
-msgstr "Trick colour"
 
 msgid "All lights off / on"
 msgstr "All lanterns doused / lit"
@@ -1563,8 +1512,14 @@ msgstr "As ye were"
 msgid "Pick the color"
 msgstr "Pick the color"
 
+msgid "Brightness"
+msgstr "Brightness"
+
 msgid "Static pattern"
 msgstr "Still pattern"
+
+msgid "Effect"
+msgstr "Trick"
 
 msgid "Do"
 msgstr "Order"
@@ -2263,14 +2218,6 @@ msgid ""
 msgstr ""
 "This device has no Direct mode, so it flies one color fer the whole device (the first one o' the "
 "pattern)."
-
-#, python-brace-format
-msgid ""
-"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-"settings again."
-msgstr ""
-"This ship runs its own trick ({name}). Set it back to Follow Iridia above to use these settings "
-"again."
 
 msgid "Red"
 msgstr "Blood red"

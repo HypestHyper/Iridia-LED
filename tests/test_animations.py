@@ -79,7 +79,7 @@ def test_embers_differ_between_zones_but_not_between_calls():
     a, b = A.render("embers", p, 50, 5.0, [], seed=1), A.render("embers", p, 50, 5.0, [], seed=2)
     assert a != b and a == A.render("embers", p, 50, 5.0, [], seed=1)
     reds = sum(c[0] for c in a) / 50
-    assert reds > sum(c[2] for c in a) / 50                       # warm by default
+    assert reds > sum(c[2] for c in a) / 50                       # fire colors when there are none
 
 
 def test_rainbow_ignores_the_zone_colors_and_covers_the_hues():
@@ -113,3 +113,46 @@ def test_follow_layout_uses_one_extent_for_all_strips():
     right = A.render("comet", p, 10, 1.5, [RED], positions=[float(i) for i in range(10, 20)], extent=(0, 20))
     # at 1.5 s the head is around LED 14 of 20: in the right strip, not the left one
     assert max(c[0] for c in right) > 200 and max(c[0] for c in left) < 50
+
+
+def test_embers_use_the_zone_colors_unless_fire_is_picked():
+    p = A.defaults("embers")
+    assert p["palette"] == "zone"
+    blue = A.render("embers", p, 60, 7.0, [(0, 40, 255), (90, 0, 255)], seed=4)
+    assert all(c[2] >= c[0] and c[2] >= c[1] for c in blue)        # only ever the picked colors
+    assert len(set(blue)) > 10                                     # but not all the same
+    fire = A.render("embers", dict(p, palette="warm"), 60, 7.0, [(0, 40, 255)], seed=4)
+    assert all(c[0] >= c[1] >= c[2] for c in fire)                 # reds, oranges, ambers
+    one = A.render("embers", dict(p, flicker=0, softness=0), 60, 7.0, [(0, 200, 100)], seed=4)
+    assert all(abs(c[1] - 2 * c[2]) <= 2 for c in one)             # one color: only its brightness moves
+
+
+def test_embers_never_jump():
+    p = dict(A.defaults("embers"), flicker=0)
+    cols = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+    prev = A.render("embers", p, 40, 0.0, cols, seed=9)
+    for k in range(1, 400):
+        cur = A.render("embers", p, 40, k / 20.0, cols, seed=9)
+        assert max(abs(a - b) for x, y in zip(prev, cur) for a, b in zip(x, y)) <= 40
+        prev = cur
+
+
+def test_comet_head_glides_between_leds():
+    p = dict(A.defaults("comet"), speed=10.0, tail=4)
+    a = A.render("comet", p, 30, 1.0, [(255, 255, 255)])
+    b = A.render("comet", p, 30, 1.05, [(255, 255, 255)])          # half an LED further
+    ahead = [i for i in range(30) if b[i][0] > a[i][0]]
+    assert ahead and 0 < b[ahead[-1]][0] < 255                     # the next LED is half lit
+
+
+def test_color_cycle_blends_in_light():
+    p = dict(A.defaults("color_cycle"), hold=0.0, speed=2.0)
+    mid = A.render("color_cycle", p, 1, 1.0, [(255, 0, 0), (0, 255, 0)])[0]
+    assert mid[0] > 170 and mid[1] > 170                           # a clear yellow, not a dark 128/128
+
+
+def test_breathing_keeps_its_ends():
+    p = dict(A.defaults("breathing"), min=20, max=80, cycle_colors=False)
+    top = A.render("breathing", p, 1, p["speed"] / 2, [(255, 255, 255)])[0][0]
+    low = A.render("breathing", p, 1, 0.0, [(255, 255, 255)])[0][0]
+    assert abs(top - 204) <= 1 and abs(low - 51) <= 1

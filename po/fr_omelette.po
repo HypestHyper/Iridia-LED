@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# French translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 16:32+0000\n"
+"POT-Creation-Date: 2026-10-15 17:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -272,15 +272,6 @@ msgstr "La nuit, tous les chats sont gris"
 
 msgid "Slow animations during night mode"
 msgstr "La nuit porte conseil"
-
-msgid "Controller effects"
-msgstr "Les tours de magie du contrôleur"
-
-msgid ""
-"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
-"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
-msgstr "Le boulanger m'a promis une brioche demain, mais je ne le crois plus."
 
 msgid "Appearance"
 msgstr "Moustache"
@@ -1231,8 +1222,12 @@ msgstr "Le train de 7 h 12 ne s'arrête plus ici."
 msgid "The strip fills up with its pattern, then empties."
 msgstr "Le verre est à moitié plein de limonade."
 
-msgid "Points drift to another color and back, like a calm fire."
-msgstr "Grand-mère tricote près du feu en écoutant la radio."
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Les braises dansent la valse avec les couleurs choisies en bas. Feu met les couleurs du barbecue "
+"de tonton."
 
 msgid "A moving rainbow. Ignores the zone's colors."
 msgstr "Un arc-en-ciel qui a raté son bus."
@@ -1360,57 +1355,16 @@ msgstr "Par le même chemin"
 msgid "Reset"
 msgstr "On recommence tout"
 
-msgid "Warm"
-msgstr "Chaud comme un croissant"
+msgid "Fire"
+msgstr "Feu"
 
-msgid "Zone colors"
-msgstr "Les couleurs du quartier"
+msgid "Picked colors"
+msgstr "Couleurs choisies"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
 "where the LEDs are on the Layout tab."
 msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
-
-msgid "Left"
-msgstr "À gauche"
-
-msgid "Right"
-msgstr "À droite"
-
-msgid "Up"
-msgstr "En haut"
-
-msgid "Down"
-msgstr "En bas"
-
-msgid "Horizontal"
-msgstr "Allongé sur le canapé"
-
-msgid "Vertical"
-msgstr "Debout dans le bus"
-
-msgid "Controller effect"
-msgstr "Le tour du contrôleur"
-
-msgid ""
-"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
-"colors or the layout."
-msgstr "Mon oncle répare des horloges qui ne donnent jamais l'heure."
-
-msgid "Effect"
-msgstr "L'effet papillon"
-
-msgid "Follow Iridia"
-msgstr "Suivre Iridia"
-
-msgid "On this device a lower number is faster."
-msgstr "Ici, le plus petit court le plus vite."
-
-msgid "Brightness"
-msgstr "Bisou"
-
-msgid "Effect color"
-msgstr "La couleur du papillon"
 
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
@@ -1482,8 +1436,14 @@ msgstr "Bisou"
 msgid "Pick the color"
 msgstr "Éclair"
 
+msgid "Brightness"
+msgstr "Bisou"
+
 msgid "Static pattern"
 msgstr "Le motif de la nappe"
+
+msgid "Effect"
+msgstr "L'effet papillon"
 
 msgid "Do"
 msgstr "Bof"
@@ -2135,12 +2095,6 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "Je suis une baguette. La tour Eiffel est fermée aujourd'hui."
-
-#, python-brace-format
-msgid ""
-"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-"settings again."
-msgstr "Cet appareil fait son numéro ({name}). Choisissez Suivre Iridia plus haut pour revenir."
 
 msgid "Red"
 msgstr "Quiche"

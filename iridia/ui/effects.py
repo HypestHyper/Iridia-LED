@@ -27,7 +27,8 @@ EFFECT_NOTES = {
                    "that step at low brightness."),
     "comet": _("Bright heads with a fading tail run along the strip."),
     "fill": _("The strip fills up with its pattern, then empties."),
-    "embers": _("Points drift to another color and back, like a calm fire."),
+    "embers": _("Points glow up and die down like embers, drifting through the colors picked below. Fire "
+                "uses fire colors instead."),
     "rainbow": _("A moving rainbow. Ignores the zone's colors."),
     "rainbow_vomit": _("The loud one: a fast, uneven rainbow with random sparkles."),
     "color_cycle": _("The whole zone fades from one color to the next."),
@@ -73,7 +74,7 @@ _CHOICES = {
     "off": _("Off"), "dim": _("Dim"), "second": _("Second color"),
     "start": _("Start"), "end": _("End"), "center": _("Center"),
     "reverse": _("Back"), "same": _("Same way"), "reset": _("Reset"),
-    "warm": _("Warm"), "zone": _("Zone colors"),
+    "warm": _("Fire"), "zone": _("Picked colors"),
 }
 
 

@@ -54,7 +54,7 @@ EFFECTS: Dict[str, Dict[str, tuple]] = {
         "density": ("int", 35, 0, 100),              # % of points changing at once
         "softness": ("int", 50, 0, 100),             # blend with neighbours
         "flicker": ("int", 20, 0, 100),
-        "palette": ("choice", "warm", ("warm", "zone")),
+        "palette": ("choice", "zone", ("zone", "warm")),  # the zone's colors, or fire colors
     },
     "rainbow": {
         "speed": ("float", 20.0, 0.0, 300.0),        # LEDs per second
@@ -78,7 +78,7 @@ COMMON: Dict[str, tuple] = {
     "sync": ("bool", True),                          # same clock as other zones with this effect
 }
 ORDER = ["breathing", "comet", "fill", "embers", "rainbow", "rainbow_vomit", "color_cycle"]
-WARM = [(140, 18, 0), (255, 70, 0), (255, 150, 10)]   # deep red, orange, amber
+WARM = [(110, 8, 0), (200, 32, 0), (255, 80, 0), (255, 150, 18)]   # glowing to hot: deep red to amber
 OFF: RGB = (0, 0, 0)
 
 
@@ -158,6 +158,20 @@ def _wobble(seed: int, n: int) -> Tuple[Tuple[float, float, float, float], ...]:
                   2.9 + 3.7 * _hash(seed, i, 13), 6.283 * _hash(seed, i, 14)) for i in range(n))
 
 
+def _mix_light(a: RGB, b: RGB, t: float) -> RGB:
+    """Blend in light (roughly squared values), not in the numbers sent: red to green passes
+    through a clear yellow instead of a dark, muddy one."""
+    return (int(math.sqrt(a[0] * a[0] + (b[0] * b[0] - a[0] * a[0]) * t) + 0.5),
+            int(math.sqrt(a[1] * a[1] + (b[1] * b[1] - a[1] * a[1]) * t) + 0.5),
+            int(math.sqrt(a[2] * a[2] + (b[2] * b[2] - a[2] * a[2]) * t) + 0.5))
+
+
+@lru_cache(maxsize=64)
+def _drift(seed: int, n: int) -> Tuple[Tuple[float, float], ...]:
+    """Per LED: where it starts among the colors and how fast it moves through them."""
+    return tuple((_hash(seed, i, 21), 0.6 + 0.8 * _hash(seed, i, 22)) for i in range(n))
+
+
 def _mix(a: RGB, b: RGB, t: float) -> RGB:
     return (int(a[0] + (b[0] - a[0]) * t + 0.5), int(a[1] + (b[1] - a[1]) * t + 0.5),
             int(a[2] + (b[2] - a[2]) * t + 0.5))
@@ -204,7 +218,10 @@ def _breathing(p, n, t, colors, seed, pos, base):
         shape = tri * tri * (3 - 2 * tri)
     else:
         shape = tri
-    level = (p["min"] + (p["max"] - p["min"]) * shape) / 100.0
+    # move evenly for the eye: LEDs look brighter than their numbers near the dark end, so go
+    # through the range in square-root steps (the ends stay exactly min and max)
+    lo, hi = math.sqrt(p["min"] / 100.0), math.sqrt(p["max"] / 100.0)
+    level = (lo + (hi - lo) * shape) ** 2
     if p["cycle_colors"] and len(colors) > 1:
         c = colors[int(t // p["speed"]) % len(colors)]
         return [_scale(c, level)] * n
@@ -240,8 +257,10 @@ def _comet(p, n, t, colors, seed, pos, base):
             hx, fwd = length - 1 - hx, not fwd
         for i, px in enumerate(pos):
             d = (hx - (px - lo)) if fwd else ((px - lo) - hx)
-            if -0.5 <= d < tail:
-                v = 1.0 if d <= 0 else (1 - d / tail) ** 2
+            if -1.0 < d < tail:
+                # the head lights the LED it's coming to in step with its position, so it glides
+                # instead of hopping from LED to LED
+                v = 1.0 + d if d < 0 else (1 - d / tail) ** 2
                 if v > level[i]:
                     level[i], which[i] = v, h
     for i in range(n):
@@ -286,19 +305,26 @@ def _fill(p, n, t, colors, seed, pos, base):
 
 
 def _embers(p, n, t, colors, seed, pos, base):
-    pal = WARM if p["palette"] == "warm" or not colors else list(colors)
-    npal = len(pal)
-    dr, dg, db = _scale(pal[0], 0.35)
+    """Each point glows up and dies down on its own. With the zone's colors every point drifts
+    slowly through them; with fire colors a hotter point is also yellower."""
+    fire = p["palette"] == "warm" or not colors
+    pal = WARM if fire else colors
+    lin = [(r * r, g * g, b * b) for r, g, b in pal]     # blend in light, see _mix_light
+    npal = len(lin)
+    rest = 0.3 if fire else 0.22                         # a resting ember still glows a little
     dens = p["density"] / 100.0
     flick = p["flicker"] / 200.0
     s = p["speed"]
     t = math.floor(t * 20) / 20.0               # slow effect: 20 steps a second are plenty
     offs = _offsets(seed, n)
     wob = _wobble(seed, n) if flick else None
+    drift = _drift(seed, n) if not fire and npal > 1 else None
     ts = t * s
     floor = math.floor
     lat = _lattice
     sin = math.sin
+    sqrt = math.sqrt
+    top = npal - 1
     vals = []
     for i in range(n):
         x = ts + offs[i]
@@ -307,19 +333,24 @@ def _embers(p, n, t, colors, seed, pos, base):
         f = f * f * (3 - 2 * f)
         a = lat(seed, i, k)
         a += (lat(seed, i, k + 1) - a) * f
-        act = (a - (1 - dens)) / dens if dens > 0 else 0.0
-        if act <= 0:
-            r, g, b = dr, dg, db
+        heat = (a - (1 - dens)) / dens if dens > 0 else 0.0
+        heat = 0.0 if heat < 0 else (1.0 if heat > 1 else heat * heat * (3 - 2 * heat))
+        if fire:
+            c = heat * top                               # hotter: further along deep red to amber
+        elif drift is not None:
+            ph, rate = drift[i]
+            c = (ph * npal + ts * 0.35 * rate) % npal    # wanders through the colors
         else:
-            if act > 1:
-                act = 1.0
-            tr, tg, tb = pal[int(lat(seed, i, int(x // 3)) * npal) % npal]
-            r, g, b = dr + (tr - dr) * act, dg + (tg - dg) * act, db + (tb - db) * act
+            c = 0.0
+        j = int(c)
+        f = c - j
+        r0, g0, b0 = lin[j % npal]
+        r1, g1, b1 = lin[(j + 1) % npal] if not fire else lin[min(j + 1, top)]
+        m = rest + (1 - rest) * heat
         if flick:
             f1, p1, f2, p2 = wob[i]
-            m = 1 - flick * (0.5 + 0.25 * (sin(t * f1 + p1) + sin(t * f2 + p2)))
-            r, g, b = r * m, g * m, b * m
-        vals.append((r, g, b))
+            m *= 1 - flick * (0.5 + 0.25 * (sin(t * f1 + p1) + sin(t * f2 + p2)))
+        vals.append((sqrt(r0 + (r1 - r0) * f) * m, sqrt(g0 + (g1 - g0) * f) * m, sqrt(b0 + (b1 - b0) * f) * m))
     k = p["softness"] / 150.0
     if k <= 0 or n < 3:
         return [(int(r + 0.5), int(g + 0.5), int(b + 0.5)) for r, g, b in vals]
@@ -381,7 +412,7 @@ def _color_cycle(p, n, t, colors, seed, pos, base):
     if m < p["hold"]:
         return [a] * n
     f = (m - p["hold"]) / p["speed"]
-    return [_mix(a, b, 0.5 - 0.5 * math.cos(math.pi * f))] * n
+    return [_mix_light(a, b, 0.5 - 0.5 * math.cos(math.pi * f))] * n
 
 
 _RENDER = {"breathing": _breathing, "comet": _comet, "fill": _fill, "embers": _embers, "rainbow": _rainbow,

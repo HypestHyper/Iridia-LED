@@ -126,6 +126,8 @@ class OpenRGBController:
         self._last_warned: Optional[str] = None
         self.lock = threading.RLock()
         self._asserted: set = set()          # devices put in Direct mode since this connection
+        self._link = None                    # FrameLink: animation frames that wait for OpenRGB
+        self._link_tried = 0.0
 
     def _warn_once(self, msg: str):
         """Warn only when the message changes — send() runs on every
@@ -188,6 +190,7 @@ class OpenRGBController:
             self.connected_since = time.time()
             self._asserted.clear()               # (re)connected: put devices in Direct mode again
             self._enumerate()
+            self._close_link()
             return self.client is not None
         except ConnectionRefusedError:
             self._record_error(f"No SDK server responding on {self.host}:{self.port}")
@@ -378,6 +381,39 @@ class OpenRGBController:
                            "single_color": self._color_kind.get(name) == "single"})
         return result
 
+    # ---------------------------------------------------------- the frame connection
+    LINK_RETRY_SEC = 30.0
+
+    def _send_by_link(self, dev, device_name: str, body: bytes) -> bool:
+        """Send a whole-device frame over the protocol 6 connection and wait until OpenRGB has
+        written it (see sdk_frames). False when that connection can't be used: the caller sends
+        the frame over the main connection instead."""
+        from iridia.sdk_frames import FrameLink
+        if self._link is None:
+            if time.monotonic() - self._link_tried < self.LINK_RETRY_SEC:
+                return False
+            self._link_tried = time.monotonic()
+            link = FrameLink(self.host, self.port)
+            if not link.open():
+                logger.info("OpenRGB doesn't speak SDK protocol 6 (it came with OpenRGB 1.0): animation "
+                            "frames go over the main connection")
+                return False
+            logger.info("Animation frames go over their own OpenRGB connection, one written frame at a time")
+            self._link = link
+        try:
+            return self._link.send_leds(dev.id, body)
+        except (OSError, ConnectionError, struct.error) as e:
+            logger.info(f"Frame connection to OpenRGB failed ({e}); using the main connection for now")
+            self._close_link()
+            self._link_tried = time.monotonic()
+            return False
+
+    def _close_link(self):
+        if self._link is not None:
+            self._link.close()
+        self._link = None
+        self._link_tried = 0.0
+
     def zone_rgb(self, device_name: str, zone_name: str) -> List[Tuple[int, int, int]]:
         """The colours OpenRGB last reported for a zone (for zones Iridia hasn't sent to yet)."""
         dev = self.devices.get(device_name)
@@ -416,6 +452,8 @@ class OpenRGBController:
                     return None
                 cols = _fit_rgb(frames[""], n)
                 body = struct.pack("H", n) + _pack_rgb(cols)
+                if self._send_by_link(dev, device_name, body):
+                    return True
                 comms.send_header(dev.id, _UPDATE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
                 return True
@@ -464,6 +502,7 @@ class OpenRGBController:
         """The link is dead (not a data problem): reset for a real reconnect."""
         logger.warning(f"OpenRGB {msg}, will reconnect")
         self._record_error(msg)
+        self._close_link()
         self.client = None
         self.devices = {}
         self.connected_since = None
@@ -478,6 +517,7 @@ class OpenRGBController:
                 self.client.disconnect()
             except Exception:
                 pass
+        self._close_link()
         self.client = None
         self.devices = {}
         self.connected_since = None

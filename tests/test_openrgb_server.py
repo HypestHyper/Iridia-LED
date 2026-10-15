@@ -521,13 +521,15 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
 
 
 def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
-    """OpenRGB 1.0 queues zone updates per controller and answers everything else at once, so a
-    controller slower than the frame rate let frames pile up: going back to static showed up a
-    minute late. Whole-device updates are merged instead, so animations only send those."""
+    """OpenRGB 1.0 queues every colour update per controller and writes them one by one, telling
+    only protocol 6 clients when one is written. A controller slower than the frame rate let frames
+    pile up: going back to static showed up a minute late. Frames now go over a protocol 6
+    connection, one written frame at a time."""
     packets = tmp_path / "packets.log"
     monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
     monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
     monkeypatch.setenv("FAKE_OPENRGB_UPDATE_DELAY", "0.05")        # 20 colour packets a second at most
+    monkeypatch.setenv("FAKE_OPENRGB_PROTOCOL", "6")                # like OpenRGB 1.0
     d = _daemon(env, monkeypatch)
     try:
         for _ in range(100):
@@ -542,6 +544,7 @@ def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
         assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake RAM", "zone": "Stick",
                                  "animation": {"effect": "rainbow"}})["ok"]
         _run(d, 3.0)
+        assert d.openrgb._link is not None and d.openrgb._link.ok   # frames went over protocol 6
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": None})["ok"]
         stopped = time.time()
         _run(d, 1.5)

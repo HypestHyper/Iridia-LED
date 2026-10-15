@@ -20,10 +20,11 @@
   anywhere or set the wire gap, Join again removes it),
   hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
   names and LED numbers, and no more B1, B2... tags on the bend knobs.
-- Animations always send one update per device and frame, with the zones that don't animate in their
-  static colors. OpenRGB queues zone-by-zone updates, and a controller slower than the frame rate fell
-  behind by minutes (going back to static showed up a minute or more later); whole-device updates are
-  merged, so they can't pile up. Small packets go out without TCP's delay.
+- Animations no longer fall behind on slow controllers (going back to static could show up a minute or
+  more later). OpenRGB 1.0 writes every colour update in turn at the controller's pace and only tells
+  SDK protocol 6 clients when one is done, so frames now go over a second, protocol 6 connection, one
+  whole-device update at a time, each sent once the one before is written. A slow controller gets
+  fewer frames instead of a queue. With OpenRGB before 1.0, frames use the main connection as before.
 - `iridia animations status` shows each device's frame rate and frame time and warns when the daemon
   runs older code than what's installed; the log notes every effect change. The installer links
   `iridia` and `iridia-gui` into `~/.local/bin`.

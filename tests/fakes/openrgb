@@ -10,10 +10,12 @@ FAKE_OPENRGB_MODE (default "zero"):
 FAKE_OPENRGB_LOG: a file each start is appended to ("PID ARG ARG...").
 FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE TIME").
 FAKE_OPENRGB_UPDATE_DELAY: seconds each colour write takes, like a slow controller (default 0).
-  Then, like OpenRGB 1.0 on the user's machine: zone updates go into a queue per controller that
-  its own thread works through; whole-device updates only mark the device as needing an update
-  (the thread writes the latest colours, so they never pile up); everything else is answered at
-  once, including device data (so waiting for an answer says nothing about the queue).
+  Then, like OpenRGB 1.0: every colour update goes into one queue per controller (shared by all
+  clients) that the controller's thread writes one by one; everything else is answered at once,
+  including device data, so a protocol 0 client can't tell how far behind the controller is.
+FAKE_OPENRGB_PROTOCOL: the SDK protocol the server speaks (default 3). 6, like OpenRGB 1.0: the
+  controller count lists controller IDs, colour packets name a controller by its ID, and each one
+  is acknowledged (packet 10) once it has been written.
 """
 import copy
 import os
@@ -102,6 +104,38 @@ if mode == "devices":
     VERSION = 3
 PACKETS = os.environ.get("FAKE_OPENRGB_PACKETS")
 UPDATE_DELAY = float(os.environ.get("FAKE_OPENRGB_UPDATE_DELAY") or 0)
+PROTOCOL = int(os.environ.get("FAKE_OPENRGB_PROTOCOL") or VERSION)
+IDS = [500 + i for i in range(len(DEVICES))]       # protocol 6 controller IDs (not the indexes)
+WORKERS = {}
+WORKERS_LOCK = threading.Lock()
+
+
+class Worker:
+    """One controller's thread: writes queued colour updates one by one, then acknowledges them
+    to protocol 6 clients."""
+
+    def __init__(self, dev):
+        self.dev, self.q, self.cv = dev, [], threading.Condition()
+        threading.Thread(target=self.run, daemon=True).start()
+
+    def run(self):
+        while True:
+            with self.cv:
+                while not self.q:
+                    self.cv.wait()
+                ptype, size, ack = self.q.pop(0)
+            time.sleep(UPDATE_DELAY)
+            note(ptype, self.dev, size)
+            if ack:
+                try:
+                    ack()
+                except OSError:
+                    pass
+
+
+def worker(dev):
+    with WORKERS_LOCK:
+        return WORKERS.get(dev) or WORKERS.setdefault(dev, Worker(dev))
 
 
 def note(ptype, dev, size):
@@ -124,54 +158,53 @@ def device_data(conn, dev, data, send_lock):
 
 def serve(conn):
     send_lock = threading.Lock()
-    workers = {}
+    proto = 0                               # what this client and the server agreed on
 
-    class Worker:
-        """One controller: a queue of zone updates and a 'whole device is dirty' flag."""
-        def __init__(self, dev):
-            self.dev, self.q, self.dirty, self.cv = dev, [], None, threading.Condition()
-            threading.Thread(target=self.run, daemon=True).start()
-
-        def run(self):
-            while True:
-                with self.cv:
-                    while not self.q and self.dirty is None:
-                        self.cv.wait()
-                    if self.q:
-                        ptype, size = self.q.pop(0)
-                    else:
-                        (ptype, size), self.dirty = self.dirty, None
-                time.sleep(UPDATE_DELAY)
-                note(ptype, self.dev, size)
+    def send(dev, ptype, payload):
+        with send_lock:
+            conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, ptype, len(payload)) + payload)
 
     try:
         while True:
             _o, _r, _g, _b, dev, ptype, size = struct.unpack("ccccIII", recv_exact(conn, 16))
             data = recv_exact(conn, size) if size else b""
-            if ptype == 40:                 # protocol version (1: no profiles; 3 with devices)
-                with send_lock:
-                    reply(conn, 40, struct.pack("I", VERSION))
-            elif ptype == 0:                # controller count
-                with send_lock:
-                    reply(conn, 0, struct.pack("I", len(DEVICES)))
+            if ptype == 40:                 # protocol version: the server answers with its own
+                asked = struct.unpack("I", data[:4])[0] if len(data) >= 4 else 0
+                proto = min(asked, PROTOCOL)
+                send(0, 40, struct.pack("I", PROTOCOL))
+                if proto >= 6:
+                    send(0, 51, b"Fake OpenRGB\0")         # server name, protocol 6 only
+                    send(0, 10, struct.pack("II", 40, 0))   # and everything gets an ACK
+                continue
+            if proto >= 6 and ptype in (1050, 1051, 1052, 1100, 1101):
+                if dev not in IDS:
+                    continue
+                dev = IDS.index(dev)        # protocol 6 names controllers by ID
+            if ptype == 0:                  # controller count
+                send(0, 0, struct.pack("I", len(DEVICES))
+                     + (struct.pack(f"{len(IDS)}I", *IDS) if proto >= 6 else b""))
             elif ptype == 150:              # profile list: none
-                with send_lock:
-                    reply(conn, 150, struct.pack("IH", 6, 0))
+                send(0, 150, struct.pack("IH", 6, 0))
             elif ptype == 1 and dev < len(DEVICES):
                 device_data(conn, dev, data, send_lock)
             elif ptype in (1000, 1050, 1051, 1052, 1100, 1101):
                 if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
                     DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
+                ack = None
+                if proto >= 6:
+                    cid = IDS[dev] if dev < len(IDS) else dev
+                    ack = (lambda cid=cid, pt=ptype: send(cid, 10, struct.pack("II", pt, 0)))
                 if UPDATE_DELAY and ptype in (1050, 1051, 1052):
-                    w = workers.get(dev) or workers.setdefault(dev, Worker(dev))
+                    w = worker(dev)
                     with w.cv:
-                        if ptype == 1050:
-                            w.dirty = (ptype, size)          # merged: only the latest is written
-                        else:
-                            w.q.append((ptype, size))        # queued one by one
+                        w.q.append((ptype, size, ack))
                         w.cv.notify()
                 else:
                     note(ptype, dev, size)
+                    if ack:
+                        ack()
+            elif proto >= 6:
+                send(dev, 10, struct.pack("II", ptype, 0))
     except (ConnectionError, OSError, struct.error):
         pass
     finally:

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- The daemon's socket is created with mode 600 from the start, instead of being tightened right after
+  it appears.
+- Unit tests (`tests/`) and a GitHub Actions workflow running them on Python 3.8 to 3.13, with ruff and
+  shellcheck. `pip install -e ".[dev]"` installs the tools.
+
 ## 1.1.0
 
 - Iridia starts OpenRGB's server: with systemd through a user service, `iridia-openrgb.service`, set up by

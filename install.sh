@@ -86,7 +86,7 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
                 # One group at a time: a package your distro doesn't have (OpenRGB isn't in
                 # every repository) must not stop GTK or Python from being installed.
                 for m in "${MISSING[@]}"; do
-                    group=($(pkgname "$m"))
+                    read -r -a group <<< "$(pkgname "$m")"
                     [ ${#group[@]} -eq 0 ] && continue
                     "${INSTALL_CMD[@]}" "${group[@]}" || echo "WARNING: couldn't install ${group[*]} (see above), continuing."
                 done

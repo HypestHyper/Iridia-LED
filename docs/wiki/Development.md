@@ -53,6 +53,7 @@ scripts/
   build_fonts.py     rebuilds the bundled font subsets
   build_locales.py   extracts strings and compiles the translations
 po/                  translation sources (iridia.pot and one .po per language)
+tests/               unit tests (pytest)
 install.sh, uninstall.sh
 docs/wiki/           this wiki
 systemd/             reference user service (the installer writes its own)
@@ -113,6 +114,18 @@ translation, but a translation can't add one that the English string doesn't hav
 checks this. To add a language, copy `po/iridia.pot` to `po/<code>.po`, set its `Language:` header,
 and add the code and its name to `LANGUAGES` in `iridia/i18n.py`. Language names are shown in their
 own language and are not translated.
+
+## Tests and checks
+
+The pure parts (patterns, colors, layout geometry, config repair, calibration, IPC) have unit tests
+that need no hardware or GTK. CI runs them on Python 3.8 to 3.13, along with ruff and shellcheck:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/pytest -q
+.venv/bin/ruff check iridia scripts tests
+shellcheck install.sh uninstall.sh
+```
 
 ## Testing without hardware
 

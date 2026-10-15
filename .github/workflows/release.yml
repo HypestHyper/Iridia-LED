@@ -1,10 +1,12 @@
 name: Release
 
-# Push a tag like v1.1.1 (matching the version in pyproject.toml) to publish a release:
-# the source archive without tests, and the notes from that version's section in CHANGELOG.md.
+# Publishes a release: the source archive without tests, and the notes from that version's section in
+# CHANGELOG.md. Either push a tag like v1.1.1, or run this workflow by hand (Actions tab, Release, Run
+# workflow): it then tags the current commit with the version in pyproject.toml.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,32 +16,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check that the tag matches the version
+      - name: Work out the version
         run: |
-          v="${GITHUB_REF_NAME#v}"
-          grep -q "^version = \"$v\"" pyproject.toml || { echo "pyproject.toml isn't version $v"; exit 1; }
+          v=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "v$v" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match pyproject.toml's version $v"; exit 1
+          fi
           grep -q "^## $v\$" CHANGELOG.md || { echo "CHANGELOG.md has no '## $v' section"; exit 1; }
+          echo "VERSION=$v" >> "$GITHUB_ENV"
       - name: Build the archive
-        run: git archive --format=tar.gz --prefix=iridia/ -o "iridia-${GITHUB_REF_NAME#v}.tar.gz" "$GITHUB_REF_NAME"
+        run: git archive --format=tar.gz --prefix=iridia/ -o "iridia-$VERSION.tar.gz" HEAD
       - name: Write the release notes
         run: |
-          v="${GITHUB_REF_NAME#v}"
-          awk -v head="## $v" '$0 == head {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          awk -v head="## $VERSION" '$0 == head {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
           cat >> notes.md <<NOTES
 
           ## Install or update
 
-              tar xzf iridia-$v.tar.gz
+              tar xzf iridia-$VERSION.tar.gz
               cd iridia
               bash install.sh
 
           Or from git: \`git clone https://github.com/${GITHUB_REPOSITORY}.git\`, then \`bash install.sh\` in that folder
           (to update an existing clone: \`git pull && bash install.sh\`). Your settings are kept.
-          See the [installation guide](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/wiki/Installation.md).
+          See the [installation guide](https://github.com/${GITHUB_REPOSITORY}/blob/v$VERSION/docs/wiki/Installation.md).
           NOTES
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          v="${GITHUB_REF_NAME#v}"
-          gh release create "$GITHUB_REF_NAME" "iridia-$v.tar.gz" --title "Iridia $v" --notes-file notes.md --verify-tag
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists"; exit 1
+          fi
+          gh release create "v$VERSION" "iridia-$VERSION.tar.gz" --title "Iridia $VERSION" \
+            --notes-file notes.md --target "$GITHUB_SHA"

@@ -671,8 +671,38 @@ class IridiaWindow(Gtk.ApplicationWindow):
     # ============================================================ settings tab
     def _build_settings(self):
         p = self._settings_page
+        # appearance
+        p.append(section(_("Appearance"), None, 10))
+        c = card()
+        r = hbox(10)
+        r.append(label(_("Font"), ("body", "dim")))
+        fams = [_("Google Sans Flex (built in)"), _("System font")]
+        try:
+            fams += sorted({f.get_name() for f in self.get_pango_context().list_families()} - {fonts.TEXT_FAMILY,
+                                                                                               fonts.ICON_FAMILY})
+        except Exception:
+            pass
+        cur_font = self.prefs.get("font", "")
+        cur_label = _("System font") if cur_font == "system" else (cur_font or _("Google Sans Flex (built in)"))
+        r.append(Dropdown(fams, cur_label, self._set_font))
+        c.append(r)
+        r = hbox(10)
+        # Never translated, so this row can be found again from any language.
+        r.append(icon("language", classes=("dim",)))
+        r.append(label("Language", ("body", "dim")))
+        self._langs = list(i18n.available().items())
+        names = dict(self._langs)
+        cur_lang = self.prefs.get("language", "") or i18n.DEFAULT
+        r.append(Dropdown([n for _c, n in self._langs], names.get(cur_lang, names.get(i18n.DEFAULT, "")),
+                          self._set_language))
+        c.append(r)
+        row, _u = switch_row(_("Reduce motion"), bool(self.prefs.get("reduce_motion", False)), self._set_reduce_motion)
+        c.append(row)
+        c.append(label(_("Turns off shape morphs, sliding panels and the color cross-fade."), ("small", "faint")))
+        p.append(c)
+
         # night + sleep
-        p.append(section(_("Night mode and sleep"), _("Dim the LEDs at night, and turn them off while the PC sleeps."), 10))
+        p.append(section(_("Night mode and sleep"), _("Dim the LEDs at night, and turn them off while the PC sleeps.")))
         c = card()
         night = self.config.get("night", {}) or {}
         row, self._night_sw = switch_row(_("Night mode"), bool(night.get("enabled", False)), lambda v: self._save_night())
@@ -774,36 +804,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
                        "method. Reset this after changing wallpaper tool or shell."), ("small", "faint"), wrap=True))
         self._extract_live = label("", ("small", "accent"), wrap=True)
         c.append(self._extract_live)
-        p.append(c)
-
-        # appearance
-        p.append(section(_("Appearance")))
-        c = card()
-        r = hbox(10)
-        r.append(label(_("Font"), ("body", "dim")))
-        fams = [_("Google Sans Flex (built in)"), _("System font")]
-        try:
-            fams += sorted({f.get_name() for f in self.get_pango_context().list_families()} - {fonts.TEXT_FAMILY,
-                                                                                               fonts.ICON_FAMILY})
-        except Exception:
-            pass
-        cur_font = self.prefs.get("font", "")
-        cur_label = _("System font") if cur_font == "system" else (cur_font or _("Google Sans Flex (built in)"))
-        r.append(Dropdown(fams, cur_label, self._set_font))
-        c.append(r)
-        r = hbox(10)
-        # Never translated, so this row can be found again from any language.
-        r.append(icon("language", classes=("dim",)))
-        r.append(label("Language", ("body", "dim")))
-        self._langs = list(i18n.available().items())
-        names = dict(self._langs)
-        cur_lang = self.prefs.get("language", "") or i18n.DEFAULT
-        r.append(Dropdown([n for _c, n in self._langs], names.get(cur_lang, names.get(i18n.DEFAULT, "")),
-                          self._set_language))
-        c.append(r)
-        row, _u = switch_row(_("Reduce motion"), bool(self.prefs.get("reduce_motion", False)), self._set_reduce_motion)
-        c.append(row)
-        c.append(label(_("Turns off shape morphs, sliding panels and the color cross-fade."), ("small", "faint")))
         p.append(c)
 
         # logging

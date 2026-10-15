@@ -4,7 +4,7 @@
 
 - The daemon's socket is created with mode 600 from the start, instead of being tightened right after
   it appears.
-- Unit tests (`tests/`) and a GitHub Actions workflow running them on Python 3.8 to 3.13, with ruff and
+- Unit tests (`tests/`, including the daemon's commands and rendering against a fake OpenRGB) and a GitHub Actions workflow running them on Python 3.8 to 3.13, with ruff and
   shellcheck. `pip install -e ".[dev]"` installs the tools.
 
 ## 1.1.0

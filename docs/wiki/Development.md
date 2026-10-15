@@ -117,7 +117,8 @@ own language and are not translated.
 
 ## Tests and checks
 
-The pure parts (patterns, colors, layout geometry, config repair, calibration, IPC) have unit tests
+The pure parts (patterns, colors, layout geometry, config repair, calibration, IPC) and the daemon's
+command handling and rendering (with OpenRGB and DDC replaced by fakes) have unit tests
 that need no hardware or GTK. CI runs them on Python 3.8 to 3.13, along with ruff and shellcheck:
 
 ```bash

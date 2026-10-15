@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A command naming a zone a device doesn't have (a keybind typo, a zone OpenRGB renamed) gets a plain
+  "zone not found" reply instead of being logged as a failed command.
 - The daemon's socket is created with mode 600 from the start, instead of being tightened right after
   it appears.
 - Unit tests (`tests/`, including the daemon's commands and rendering against a fake OpenRGB) and a GitHub Actions workflow running them on Python 3.8 to 3.13, with ruff and

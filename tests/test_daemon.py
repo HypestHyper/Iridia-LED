@@ -141,9 +141,12 @@ def test_zone_mode_validation(d):
     assert not _cmd(d, "set_zone_mode", device="Strip", zone="", mode="vivid")["ok"]
 
 
-def test_unknown_zone_on_zoned_device_is_an_error(d):
-    with pytest.raises(ValueError):
-        _cmd(d, "set_zone_pattern", device="Hub v1.0", zone="Z", pattern="solid")
+def test_unknown_zone_on_zoned_device_is_an_error_reply(d):
+    for cmd, kw in (("set_zone_pattern", {"pattern": "solid"}), ("set_zone_colors", {"indices": [0]}),
+                    ("set_zone_manual_brightness", {"value": 50}), ("set_zone_enabled", {"enabled": False})):
+        resp = _cmd(d, cmd, device="Hub v1.0", zone="Z", **kw)
+        assert resp == {"ok": False, "error": "zone 'Z' not found on 'Hub v1.0'"}, cmd
+    assert "Z" not in d.config.get(("devices", "Hub v1.0", "zones"))
 
 
 def test_set_all(d):

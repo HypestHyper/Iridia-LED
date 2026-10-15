@@ -37,6 +37,10 @@ def _num(v, default, lo, hi):
     return max(lo, min(hi, v))
 
 
+class ZoneNotFound(ValueError):
+    """A command named a zone the device doesn't have; answered as a normal error reply."""
+
+
 STRIP_TYPES = ("addressable", "addressable12", "single", "rgbw")
 COLOR_ORDERS = ("RGB", "RBG", "GRB", "GBR", "BRG", "BGR")
 
@@ -1516,6 +1520,13 @@ class Daemon:
         return f"{r:02x}{g:02x}{b:02x}"
 
     def handle_command(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return self._dispatch(req)
+        except ZoneNotFound as e:
+            # A typo in a keybind or a zone OpenRGB renamed: tell the caller, not the error log.
+            return {"ok": False, "error": str(e)}
+
+    def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd", "")
         if cmd == "ping":
             from iridia import get_version
@@ -1876,7 +1887,7 @@ class Daemon:
         dev_cfg = self.config.devices.get(dev, {})
         if zone and dev_cfg.get("zones"):
             if zone not in dev_cfg["zones"]:
-                raise ValueError(f"zone '{zone}' not found on '{dev}'")
+                raise ZoneNotFound(f"zone '{zone}' not found on '{dev}'")
             return ("devices", dev, "zones", zone, field)
         return ("devices", dev, field)
 

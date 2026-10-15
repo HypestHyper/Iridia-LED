@@ -127,7 +127,7 @@ def _save_start_method(method: str) -> bool:
     return True
 
 
-METHOD_TEXT = {"daemon": "the Iridia daemon starts it (and restarts it if it exits)",
+METHOD_TEXT = {"daemon": "the Iridia daemon starts it, and starts it again if it exits",
                "systemd": "iridia-openrgb.service starts it with your graphical session",
                "off": "Iridia never starts or restarts it; you do"}
 
@@ -708,8 +708,13 @@ StartupWMClass={assets.APP_ID}
             print("Compositors that don't read ~/.config/autostart (Hyprland, Sway, niri, river, ...) need a line "
                   "in their own config instead: see `iridia autostart`.")
         elif how == "compositor":
+            from iridia import openrgb_server
             snip = autostart.snippet(autostart.detect_compositor())
-            if snip:
+            already = openrgb_server._startup_mentions(openrgb_server._starts_daemon)
+            if already:
+                print("Your compositor already starts the daemon: " + ", ".join(openrgb_server._short(p)
+                                                                             for p in already))
+            elif snip:
                 print(f"Add this to {snip['file']} so the daemon starts at login:\n")
                 print("    " + snip["text"].split("\n\n")[0].replace("\n", "\n    ") + "\n")
             else:

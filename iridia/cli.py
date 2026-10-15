@@ -111,7 +111,41 @@ def cmd_doctor(args):
               '(set "logging": {"enabled": true}), then restart the daemon.')
     return 0 if all(c.ok is not False for c in checks) else 1
 
+def _set_start_server(on: bool):
+    """Save openrgb.start_server and tell a running daemon to reload its config."""
+    from iridia.config import Config
+    try:
+        Config().set("openrgb.start_server", on)
+    except Exception as e:
+        print(f"Couldn't save openrgb.start_server in config.json: {e}")
+    _client().send({"cmd": "reload_config"})
+
+
 def cmd_openrgb(args):
+    from iridia import openrgb_server as osrv
+    if args.action == "enable":
+        _set_start_server(True)
+        ok, msg = osrv.enable()
+        print(msg)
+        return 0 if ok else 1
+    if args.action == "disable":
+        _set_start_server(False)
+        ok, msg = osrv.disable()
+        print(msg)
+        print("The daemon won't start OpenRGB by itself either. Undo with: iridia openrgb enable")
+        return 0 if ok else 1
+    if args.action == "status":
+        st = osrv.status()
+        cmd = " ".join(st["command"]) or "not found (install OpenRGB, or set openrgb.server_command)"
+        print(f"OpenRGB command:  {cmd}")
+        if st["managed"]:
+            print(f"Started by Iridia: {osrv.UNIT_NAME} ({st['active'] or '?'}, {st['enabled']})")
+        else:
+            print(f"Started by Iridia: no ({osrv.UNIT_NAME} not installed)")
+        print("Started by others: " + (", ".join(st["others"]) or "nothing found"))
+        print(f"Daemon may start it when unreachable: {'yes' if st['start_server'] else 'no'} (openrgb.start_server)")
+        print(f"OpenRGB process running now: {'yes' if osrv.running() else 'no'}")
+        return 0
     if args.action == "reconnect":
         resp = _client().send({"cmd": "reconnect_openrgb"})
     elif args.action == "restart":
@@ -281,6 +315,12 @@ def cmd_uninstall(args):
         pass
     print("Removing service, launcher and icons...")
     _service_remove()
+    try:
+        from iridia import openrgb_server
+        if openrgb_server.managed():
+            print(openrgb_server.disable()[1])
+    except Exception:
+        pass
     try:
         if autostart.xdg_installed():
             autostart.xdg_remove()
@@ -547,9 +587,10 @@ WantedBy=graphical-session.target
     apps_dir = os.path.expanduser("~/.local/share/applications")
     os.makedirs(apps_dir, exist_ok=True)
     desktop_path = os.path.join(apps_dir, f"{assets.APP_ID}.desktop")
-    legacy = os.path.join(apps_dir, "iridia.desktop")          # launcher name before 1.4.0
-    if os.path.exists(legacy):
-        os.remove(legacy)
+    for old in assets.OLD_LAUNCHERS:
+        legacy = os.path.join(apps_dir, old)
+        if os.path.exists(legacy):
+            os.remove(legacy)
     # Exec uses the resolved absolute path rather than the bare
     # `iridia-gui` command: a .desktop Exec= line is launched directly
     # by the desktop environment, not through a login shell, so it
@@ -590,7 +631,19 @@ StartupWMClass={assets.APP_ID}
     _systemctl("enable", SERVICE_NAME)
     _systemctl("start", SERVICE_NAME)
     print("Service installed and started.")
+    _openrgb_auto_setup()
     return 0
+
+
+def _openrgb_auto_setup():
+    """Have OpenRGB's server start at login too, unless something else already does it."""
+    from iridia import openrgb_server
+    try:
+        msg = openrgb_server.auto_setup()
+    except Exception as e:
+        msg = f"Note: couldn't set up OpenRGB's server: {e}"
+    if msg:
+        print(msg)
 
 def _icon_dirs():
     base = os.path.expanduser("~/.local/share/icons/hicolor")
@@ -654,7 +707,7 @@ def _service_remove():
     _systemctl("disable", SERVICE_NAME)
     if os.path.exists(SERVICE_PATH):
         os.remove(SERVICE_PATH)
-    for fn in (f"{assets.APP_ID}.desktop", "iridia.desktop"):
+    for fn in (f"{assets.APP_ID}.desktop",) + assets.OLD_LAUNCHERS:
         desktop_path = os.path.expanduser(f"~/.local/share/applications/{fn}")
         if os.path.exists(desktop_path):
             os.remove(desktop_path)
@@ -784,7 +837,9 @@ def main():
     subparsers.add_parser("status", help="Show daemon status")
     subparsers.add_parser("doctor", help="Run a full health check and explain what's wrong, if anything")
     orgb_parser = subparsers.add_parser("openrgb", help="Manage the OpenRGB connection")
-    orgb_parser.add_argument("action", choices=["reconnect", "restart"])
+    orgb_parser.add_argument("action", choices=["reconnect", "restart", "enable", "disable", "status"],
+                             help="reconnect, restart the server, enable/disable starting its server at login, "
+                                  "status")
     dev_parser = subparsers.add_parser("device", help="Control a device")
     dev_parser.add_argument("name", help="Device name")
     dev_parser.add_argument("action", choices=["enable", "disable", "mode", "pattern", "brightness-sync",

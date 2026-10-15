@@ -1,0 +1,1990 @@
+# Translations template for Iridia.
+# Copyright (C) 2026 Iridia Contributors
+# This file is distributed under the same license as the Iridia project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Iridia 1.1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-15 11:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Posh English\n"
+"Language: en_posh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#, python-brace-format
+msgid "Iridia {version}"
+msgstr "Iridia {version}, at your service"
+
+msgid "Target"
+msgstr "Intended"
+
+msgid "Sent to strip"
+msgstr "Dispatched to the strip"
+
+#, python-brace-format
+msgid "#{h} is shown exactly as picked"
+msgstr "#{h} shall be shown precisely as chosen"
+
+#, python-brace-format
+msgid "#{h} follows color correction again"
+msgstr "#{h} shall once more heed colour correction"
+
+#, python-brace-format
+msgid "#{h} is already in your saved colors"
+msgstr "#{h} already graces your treasured colours"
+
+#, python-brace-format
+msgid "Saved #{h}"
+msgstr "#{h} has been preserved"
+
+msgid "Rename"
+msgstr "Rechristen"
+
+msgid "Couldn't rename"
+msgstr "Most regrettably, the rechristening failed"
+
+msgid "Rename strip"
+msgstr "Rechristen the strip"
+
+#, python-brace-format
+msgid "A name for {zone} on {device}."
+msgstr "Pray, what shall we call {zone} upon {device}?"
+
+#, python-brace-format
+msgid "A name for {device}."
+msgstr "Pray, what shall we call {device}?"
+
+msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgstr ""
+"The name shall appear upon the Apparatus and Floor Plan pages. Leave it blank to restore its "
+"given name."
+
+msgid "Keep it under 40 characters."
+msgstr "Kindly keep it under forty characters."
+
+msgid "Iridia"
+msgstr "Iridia"
+
+msgid "Connecting…"
+msgstr "Establishing correspondence…"
+
+msgid "Freeze colors"
+msgstr "Preserve the colours"
+
+msgid "Status"
+msgstr "Situation"
+
+msgid "Devices"
+msgstr "Apparatus"
+
+msgid "Layout"
+msgstr "Floor Plan"
+
+msgid "Keybinds"
+msgstr "Key Bindings"
+
+msgid "Settings"
+msgstr "Preferences"
+
+msgid "Service"
+msgstr "Household"
+
+msgid "Refresh"
+msgstr "Refresh"
+
+msgid "Restart daemon"
+msgstr "Revive the daemon"
+
+msgid "Config folder"
+msgstr "Cabinet of settings"
+
+msgid "Log folder"
+msgstr "Ledger cabinet"
+
+msgid "Quit"
+msgstr "Take leave"
+
+#, python-brace-format
+msgid "Couldn't open a file manager. The folder is {path}"
+msgstr "Alas, no file manager answered. The folder resides at {path}"
+
+msgid "Waiting for the daemon…"
+msgstr "Awaiting the daemon's pleasure…"
+
+msgid "Now playing"
+msgstr "Presently performing"
+
+msgid "Wallpaper"
+msgstr "Wallpaper"
+
+msgid "Main color"
+msgstr "Principal colour"
+
+msgid "Monitor sync (DDC)"
+msgstr "Looking-glass accord (DDC)"
+
+msgid "Color correction"
+msgstr "Colour correction"
+
+msgid "Wallpaper colors"
+msgstr "Wallpaper colours"
+
+msgid "Night mode"
+msgstr "Nocturnal mode"
+
+msgid "Lights"
+msgstr "Illumination"
+
+msgid "Extraction backend"
+msgstr "Method of extraction"
+
+msgid "Color for this wallpaper"
+msgstr "Colour for this wallpaper"
+
+msgid ""
+"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
+"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
+" follows its own colors."
+msgstr ""
+"Do click a colour to bestow it upon all your lamps. Your choices, for every zone or but one, are "
+"remembered for this picture and shall return when you do. A wallpaper you have not yet favoured "
+"follows its own colours."
+
+msgid "Color correction preview"
+msgstr "A preview of colour correction"
+
+msgid "Your saved colors"
+msgstr "Your treasured colours"
+
+msgid "Custom color…"
+msgstr "A colour of one's own…"
+
+msgid "Reset saved colors for this wallpaper"
+msgstr "Forget the colours chosen for this wallpaper"
+
+#, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Wallpaper colour {n}  #{hex}"
+
+#, python-brace-format
+msgid "#{c}  (right-click to delete)"
+msgstr "#{c}  (right-click to dismiss)"
+
+msgid "None yet. Pick one with “Custom color…” below."
+msgstr "None as yet. Pray choose one with “A colour of one's own…” below."
+
+msgid "Your zones use different colors (see the Devices tab)"
+msgstr "Your zones are dressed in differing colours (see the Apparatus page)"
+
+#, python-brace-format
+msgid "All zones use #{hex}"
+msgstr "Every zone wears #{hex}"
+
+#, python-brace-format
+msgid "All zones use wallpaper color {n}"
+msgstr "Every zone wears wallpaper colour {n}"
+
+msgid "Palette is on. Top: the wallpaper color. Bottom: the closest palette color your LEDs show."
+msgstr ""
+"The palette is engaged. Above: the wallpaper's colour. Below: the nearest palette colour your "
+"lamps shall show."
+
+#, python-brace-format
+msgid ""
+"Calibrated ({profile}). Top: the wallpaper color. Bottom: the color sent to the strip so it looks"
+" right."
+msgstr ""
+"Calibrated ({profile}). Above: the wallpaper's colour. Below: the colour sent so that it looks "
+"proper upon the strip."
+
+msgid "Zones use different corrections, so this shows the colors as they are."
+msgstr "The zones differ in their corrections, so the colours are shown as they are."
+
+msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
+msgstr "Colour correction rests, so the strip receives the wallpaper's colours unaltered."
+
+msgid "Color"
+msgstr "Colour"
+
+msgid "Saved colors for this wallpaper were reset."
+msgstr "The colours chosen for this wallpaper have been forgotten."
+
+#, python-brace-format
+msgid "Deleted #{h} from your saved colors."
+msgstr "#{h} has been dismissed from your treasured colours."
+
+msgid "The daemon isn't running."
+msgstr "The daemon is not presently in attendance."
+
+msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgstr "Your apparatus shall appear once it attends. Summon it here or from the Household page."
+
+msgid "Start daemon"
+msgstr "Summon the daemon"
+
+msgid "No devices configured."
+msgstr "No apparatus has been arranged."
+
+msgid ""
+"Devices appear here once OpenRGB reports them. Start OpenRGB's SDK server (SDK Server tab, Start "
+"Server) and make sure it lists your devices."
+msgstr ""
+"Apparatus appears here once OpenRGB announces it. Kindly start OpenRGB's SDK server (the SDK "
+"Server page, Start Server) and see that it lists your devices."
+
+msgid "All devices"
+msgstr "All apparatus"
+
+#, python-brace-format
+msgid "Changes here apply to {n} zone."
+msgid_plural "Changes here apply to all {n} zones at once."
+msgstr[0] "Alterations here apply to {n} zone."
+msgstr[1] "Alterations here apply to all {n} zones at once."
+
+msgid "Everything"
+msgstr "The Entire Household"
+
+msgid "Disabled"
+msgstr "Indisposed"
+
+msgid "Whole device"
+msgstr "The entire device"
+
+msgid "Night mode and sleep"
+msgstr "Nocturnal mode and slumber"
+
+msgid "Dim the LEDs at night, and turn them off while the PC sleeps."
+msgstr "Dim the lamps at night, and extinguish them whilst the machine slumbers."
+
+msgid "From"
+msgstr "From"
+
+msgid "to"
+msgstr "until"
+
+msgid "brightness at most"
+msgstr "brightness no greater than"
+
+msgid "Times are 24 hour, like 23:00. The window can cross midnight."
+msgstr "Times are kept on the twenty-four hour clock, as 23:00. The span may cross midnight."
+
+msgid "Turn the LEDs off while the PC sleeps"
+msgstr "Extinguish the lamps whilst the machine slumbers"
+
+msgid "Setups and backups"
+msgstr "Arrangements and safekeeping"
+
+msgid ""
+"Save everything (devices, zones, layout, night mode, calibration, your colors for each wallpaper "
+"and your saved colors) under a name, and load it again later."
+msgstr ""
+"Preserve everything (apparatus, zones, arrangement, nocturnal mode, calibration, your colours for"
+" each wallpaper and your treasured colours) under a name, to be recalled at your leisure."
+
+msgid "Setup"
+msgstr "Arrangement"
+
+msgid "No setups yet"
+msgstr "No arrangements as yet"
+
+msgid "Save current as…"
+msgstr "Preserve the present as…"
+
+msgid "Load"
+msgstr "Recall"
+
+msgid "Export"
+msgstr "Dispatch"
+
+msgid "Import"
+msgstr "Receive"
+
+msgid "Delete"
+msgstr "Dispose of"
+
+msgid "Automatic backups"
+msgstr "Automatic safekeeping"
+
+msgid "No backups yet"
+msgstr "Nothing kept as yet"
+
+msgid "Restore"
+msgstr "Restore"
+
+msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
+msgstr "Recalling an arrangement first keeps your present state in safekeeping, so you may always return."
+
+msgid "Color calibration"
+msgstr "Colour calibration"
+
+msgid ""
+"Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
+" Calibrated on the Devices tab."
+msgstr ""
+"Profiles that correct colours for your manner of strip. Choose one per zone with Colour "
+"correction: Calibrated, upon the Apparatus page."
+
+msgid "Profile"
+msgstr "Profile"
+
+msgid "Edit"
+msgstr "Amend"
+
+msgid "Add"
+msgstr "Add"
+
+msgid "Color extraction"
+msgstr "Extraction of colour"
+
+msgid "How Iridia picks colors from your wallpaper."
+msgstr "How Iridia selects colours from your wallpaper."
+
+msgid ""
+"Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, otherwise "
+"Material, otherwise Pillow"
+msgstr ""
+"Automatic (most advisable): Caelestia's own colours if Caelestia hung the wallpaper, otherwise "
+"Material, otherwise Pillow"
+
+msgid "Material: prominent colors from the image (needs material-color-utilities)"
+msgstr "Material: the most prominent colours of the picture (requires material-color-utilities)"
+
+msgid "Pillow: median-cut dominant colors, no extra dependencies"
+msgstr "Pillow: dominant colours by the median cut, wanting nothing further"
+
+msgid "Reset wallpaper detection cache"
+msgstr "Forget how the wallpaper was found"
+
+msgid "Forget all saved wallpaper colors"
+msgstr "Forget every wallpaper's chosen colours"
+
+msgid ""
+"Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
+"Reset this after changing wallpaper tool or shell."
+msgstr ""
+"Once a manner of finding your wallpaper succeeds, Iridia remembers it rather than attempting "
+"every method. Reset this should you change your wallpaper tool or shell."
+
+msgid "Appearance"
+msgstr "Comportment"
+
+msgid "Font"
+msgstr "Typeface"
+
+msgid "Google Sans Flex (built in)"
+msgstr "Google Sans Flex (of the house)"
+
+msgid "System font"
+msgstr "The system's typeface"
+
+msgid "Reduce motion"
+msgstr "Restrain all motion"
+
+msgid "Turns off shape morphs, sliding panels and the color cross-fade."
+msgstr "Ceases the morphing of shapes, the sliding of panels and the gentle fading of colours."
+
+msgid "Logging"
+msgstr "Record keeping"
+
+msgid "Write a log file"
+msgstr "Keep a written ledger"
+
+msgid "Recent log"
+msgstr "The latest correspondence"
+
+msgid "The daemon's latest messages. Works even with the log file switched off."
+msgstr "The daemon's most recent remarks. These are kept even when the ledger is closed."
+
+msgid "Lines"
+msgstr "Lines"
+
+msgid "Show"
+msgstr "Show"
+
+msgid "Copy"
+msgstr "Transcribe"
+
+msgid "Log copied"
+msgstr "Ledger transcribed"
+
+msgid "Press Show to load the latest lines."
+msgstr "Pray press Show to read the latest lines."
+
+msgid "Saved."
+msgstr "Preserved."
+
+msgid "Couldn't save"
+msgstr "Most regrettably, it could not be preserved"
+
+#, python-brace-format
+msgid "Saved “{name}”."
+msgstr "“{name}” has been preserved."
+
+msgid "Save setup"
+msgstr "Preserve the arrangement"
+
+msgid "Name for this setup. Saving under an existing name replaces it."
+msgstr "A name for this arrangement. Preserving under an existing name shall replace it."
+
+msgid "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
+msgstr "Kindly use letters, numerals, spaces, dashes, underscores and brackets (forty characters at most)."
+
+msgid "Couldn't load"
+msgstr "Most regrettably, it could not be recalled"
+
+#, python-brace-format
+msgid "Loaded {what}. The previous state is in Automatic backups."
+msgstr "{what} has been recalled. The former state rests in Automatic safekeeping."
+
+msgid "Load setup"
+msgstr "Recall an arrangement"
+
+#, python-brace-format
+msgid "Load “{name}”? Your current settings are backed up first."
+msgstr "Recall “{name}”? Your present settings shall be kept safe beforehand."
+
+msgid "Restore backup"
+msgstr "Restore from safekeeping"
+
+#, python-brace-format
+msgid "Restore the backup from {date}? Your current settings are backed up first."
+msgstr "Restore what was kept on {date}? Your present settings shall be kept safe beforehand."
+
+#, python-brace-format
+msgid "the backup from {date}"
+msgstr "what was kept on {date}"
+
+#, python-brace-format
+msgid "Renamed to “{name}”."
+msgstr "Now known as “{name}”."
+
+msgid "Rename setup"
+msgstr "Rechristen the arrangement"
+
+#, python-brace-format
+msgid "New name for “{old}”."
+msgstr "A new name for “{old}”."
+
+msgid "Use letters, numbers, spaces, dashes and brackets."
+msgstr "Kindly use letters, numerals, spaces, dashes and brackets."
+
+msgid "Delete setup"
+msgstr "Dispose of the arrangement"
+
+#, python-brace-format
+msgid "Delete the setup “{name}”?"
+msgstr "Dispose of the arrangement “{name}”?"
+
+#, python-brace-format
+msgid "Deleted “{name}”."
+msgstr "“{name}” has been disposed of."
+
+msgid "Save a setup first, then export it."
+msgstr "Pray preserve an arrangement first, then dispatch it."
+
+msgid "Export setup"
+msgstr "Dispatch the arrangement"
+
+#, python-brace-format
+msgid "Saved {path}"
+msgstr "Preserved at {path}"
+
+msgid "Import setup"
+msgstr "Receive an arrangement"
+
+#, python-brace-format
+msgid "Imported as “{name}”. Select it and click Load."
+msgstr "Received as “{name}”. Do select it and press Recall."
+
+msgid "Couldn't import"
+msgstr "Most regrettably, it could not be received"
+
+#, python-brace-format
+msgid "A profile called “{name}” already exists."
+msgstr "A profile by the name “{name}” already exists."
+
+msgid "Calibration"
+msgstr "Calibration"
+
+msgid "Add a profile"
+msgstr "Add a profile"
+
+#, python-brace-format
+msgid "A new profile that starts as a copy of {base}. Give it a name, for example the strip it is for."
+msgstr ""
+"A new profile, begun as a copy of {base}. Pray give it a name, perhaps that of the strip it "
+"serves."
+
+#, python-brace-format
+msgid "Imported as “{name}”."
+msgstr "Received as “{name}”."
+
+msgid "Import a calibration profile"
+msgstr "Receive a calibration profile"
+
+msgid "Export profile"
+msgstr "Dispatch the profile"
+
+msgid "WS2812B can't be deleted. Open Edit and use Reset to defaults."
+msgstr "WS2812B cannot be disposed of. Do open Amend and use Restore the defaults."
+
+msgid "Delete profile"
+msgstr "Dispose of the profile"
+
+#, python-brace-format
+msgid "Delete “{name}”? Zones using it fall back to WS2812B."
+msgstr "Dispose of “{name}”? Zones in its service shall fall back upon WS2812B."
+
+msgid "Wallpaper detection will start over."
+msgstr "The search for your wallpaper shall begin anew."
+
+msgid "Forget saved colors"
+msgstr "Forget the chosen colours"
+
+msgid ""
+"Forget the colors you picked for every wallpaper? Zones will follow each wallpaper's own colors "
+"again."
+msgstr ""
+"Forget the colours you chose for every wallpaper? Zones shall once more follow each wallpaper's "
+"own colours."
+
+msgid "Saved wallpaper colors forgotten."
+msgstr "The chosen wallpaper colours are forgotten."
+
+msgid "Forget"
+msgstr "Forget"
+
+msgid "The language changes when the window restarts."
+msgstr "The language shall change once the window is revived."
+
+msgid "Restart"
+msgstr "Revive"
+
+#, python-brace-format
+msgid "Couldn't read the log: {error}"
+msgstr "The ledger could not be read: {error}"
+
+#, python-brace-format
+msgid "Daemon not reachable: {error}"
+msgstr "The daemon cannot be reached: {error}"
+
+msgid "Background daemon"
+msgstr "The background daemon"
+
+msgid ""
+"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
+"keeps working when this window is closed. This window only changes its settings."
+msgstr ""
+"The daemon is that faithful servant of Iridia who keeps your lamps in accord. It labours in the "
+"background and carries on when this window is closed. This window merely adjusts its "
+"instructions."
+
+msgid "Checking…"
+msgstr "Making enquiries…"
+
+msgid "Kill daemon"
+msgstr "Dismiss the daemon"
+
+msgid ""
+"Killing the daemon stops it completely. Your lights stay on their last colors until you start it "
+"again."
+msgstr ""
+"Dismissing the daemon stops it entirely. Your lamps keep their final colours until you summon it "
+"again."
+
+msgid "Start the daemon when I log in"
+msgstr "Summon the daemon upon my arrival"
+
+msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
+msgstr ""
+"Choose one manner. Should you enable more than one, no harm is done, for only one daemon ever "
+"serves."
+
+msgid "systemd service  ·  recommended"
+msgstr "systemd service  ·  most advisable"
+
+msgid "Enable at login"
+msgstr "Engage upon arrival"
+
+msgid "Disable"
+msgstr "Disengage"
+
+msgid "Remove completely"
+msgstr "Remove entirely"
+
+msgid "Other ways"
+msgstr "Other manners"
+
+msgid ""
+"Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
+"systemd."
+msgstr ""
+"Add one of these to your compositor's or desktop's own list of things begun at startup, instead "
+"of (or as well as) systemd."
+
+msgid "Environment"
+msgstr "Surroundings"
+
+msgid "Copied"
+msgstr "Transcribed"
+
+msgid "Install XDG autostart"
+msgstr "Install XDG autostart"
+
+msgid "OpenRGB connection"
+msgstr "Correspondence with OpenRGB"
+
+msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
+msgstr "OpenRGB is a separate establishment that speaks with your lamps. Iridia requires its attendance."
+
+msgid "Reconnect"
+msgstr "Renew acquaintance"
+
+msgid "Reconnecting…"
+msgstr "Renewing acquaintance…"
+
+msgid "Restart OpenRGB server"
+msgstr "Revive the OpenRGB server"
+
+msgid ""
+"Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
+"its systemd service); use it when a device stops responding and Reconnect doesn't bring it back. "
+"It won't touch an OpenRGB window."
+msgstr ""
+"Renewing acquaintance is swift and safe to attempt first. Revival stops and restarts OpenRGB's "
+"SDK server (or its systemd service); employ it when a device ceases to respond and renewal does "
+"not recover it. It shall not disturb an OpenRGB window."
+
+msgid "Diagnostics"
+msgstr "Examination"
+
+msgid "Run diagnostics"
+msgstr "Conduct an examination"
+
+msgid ""
+"Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing “iridia "
+"doctor” prints."
+msgstr ""
+"Examines the daemon, OpenRGB, the zones, DDC and the finding of the wallpaper all at once, much "
+"as “iridia doctor” reports."
+
+msgid "Uninstall"
+msgstr "Depart"
+
+msgid "Uninstall Iridia…"
+msgstr "Bid Iridia farewell…"
+
+msgid ""
+"Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
+"to keep your settings. Same as running “iridia uninstall”."
+msgstr ""
+"Stops the daemon and removes the service, the launcher, the icons and the program itself. You may"
+" decide whether your settings remain. Much the same as “iridia uninstall”."
+
+msgid ""
+"Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies on"
+" your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon)."
+msgstr ""
+"The iridia-daemon launcher could not be found beside Python, so its bare name is used, relying "
+"upon your login PATH. Should it fail to start, replace it with the full path (consult: which "
+"iridia-daemon)."
+
+#, python-brace-format
+msgid "Add this to: {file}"
+msgstr "Add this to: {file}"
+
+msgid "Remove XDG autostart"
+msgstr "Remove XDG autostart"
+
+msgid "XDG autostart removed"
+msgstr "XDG autostart removed"
+
+msgid "XDG autostart installed"
+msgstr "XDG autostart installed"
+
+msgid "Daemon"
+msgstr "The daemon"
+
+msgid "Couldn't stop it."
+msgstr "It declined to stop."
+
+msgid "Enabled. The daemon now starts at login."
+msgstr "Engaged. The daemon shall now attend at every arrival."
+
+msgid "Install failed:"
+msgstr "The installation failed:"
+
+msgid "Remove service"
+msgstr "Remove the service"
+
+msgid "Stop, disable and delete the systemd service (and the app launcher)? Your settings are kept."
+msgstr ""
+"Stop, disengage and dispose of the systemd service (and the launcher)? Your settings shall be "
+"kept."
+
+msgid "Removed."
+msgstr "Removed."
+
+msgid "Remove"
+msgstr "Remove"
+
+msgid ""
+"This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
+"other software using it."
+msgstr ""
+"This stops and restarts the OpenRGB SDK server (some four seconds), briefly inconveniencing any "
+"other software in its company."
+
+msgid "Uninstall Iridia"
+msgstr "Bid Iridia farewell"
+
+msgid ""
+"Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
+"something else changes them."
+msgstr ""
+"Remove Iridia from this machine? The daemon shall depart, and your lamps shall keep their final "
+"colours until something else should alter them."
+
+#, python-brace-format
+msgid "Couldn't start the uninstaller: {e}"
+msgstr "The uninstaller could not be engaged: {e}"
+
+msgid "Cancel"
+msgstr "Never mind"
+
+msgid "Remove, keep my settings"
+msgstr "Remove, but keep my settings"
+
+msgid "Remove everything"
+msgstr "Remove everything, I insist"
+
+msgid "Daemon stopped"
+msgstr "The daemon has retired"
+
+msgid "by systemd"
+msgstr "by systemd"
+
+msgid "without systemd"
+msgstr "without systemd"
+
+#, python-brace-format
+msgid "Running (pid {pid}, started {by})"
+msgstr "In attendance (pid {pid}, summoned {by})"
+
+msgid "Enabled. The daemon starts automatically when you log in."
+msgstr "Engaged. The daemon attends of its own accord whenever you arrive."
+
+msgid "Installed but not enabled. It won't start at login."
+msgstr "Installed but not engaged. It shall not attend upon your arrival."
+
+msgid "Not installed. Click “Enable at login” to set it up."
+msgstr "Not installed. Pray click “Engage upon arrival” to arrange it."
+
+#, python-brace-format
+msgid "systemd status: {status}"
+msgstr "systemd reports: {status}"
+
+msgid "Colors frozen. Wallpaper changes are ignored."
+msgstr "The colours are preserved. Changes of wallpaper shall be disregarded."
+
+msgid "Colors follow the wallpaper again."
+msgstr "The colours follow the wallpaper once more."
+
+msgid "Daemon restarting…"
+msgstr "The daemon is being revived…"
+
+msgid "Daemon not running"
+msgstr "The daemon is absent"
+
+msgid "The daemon isn't running"
+msgstr "The daemon is not in attendance"
+
+msgid "Start it from the Service tab."
+msgstr "Summon it from the Household page."
+
+msgid "OpenRGB not connected"
+msgstr "OpenRGB is not receiving"
+
+#, python-brace-format
+msgid "Can't see: {devices}"
+msgstr "Cannot perceive: {devices}"
+
+#, python-brace-format
+msgid "Night mode until {time}"
+msgstr "Nocturnal until {time}"
+
+msgid "Frozen"
+msgstr "Preserved"
+
+msgid "No wallpaper detected yet"
+msgstr "No wallpaper discovered as yet"
+
+msgid "Connected"
+msgstr "In correspondence"
+
+msgid "Not connected"
+msgstr "Not in correspondence"
+
+msgid "Available"
+msgstr "At hand"
+
+msgid "Not available"
+msgstr "Not at hand"
+
+msgid "Off"
+msgstr "At rest"
+
+msgid "Mixed"
+msgstr "Assorted"
+
+msgid "Frozen (wallpaper changes are ignored)"
+msgstr "Preserved (changes of wallpaper are disregarded)"
+
+msgid "Following the wallpaper"
+msgstr "Following the wallpaper"
+
+#, python-brace-format
+msgid "On until {end}, brightness capped at {cap}%"
+msgstr "Engaged until {end}, brightness restrained to {cap}%"
+
+#, python-brace-format
+msgid "Scheduled {start} to {end} (cap {cap}%)"
+msgstr "Appointed from {start} until {end} (restrained to {cap}%)"
+
+msgid "Off (PC asleep)"
+msgstr "At rest (the machine slumbers)"
+
+msgid "Off (turned off by command)"
+msgstr "At rest (by express instruction)"
+
+msgid "On"
+msgstr "Engaged"
+
+#, python-brace-format
+msgid "{n} strip changed by a keybind (see Keybinds)"
+msgid_plural "{n} strips changed by a keybind (see Keybinds)"
+msgstr[0] "{n} strip altered by a key binding (see Key Bindings)"
+msgstr[1] "{n} strips altered by key bindings (see Key Bindings)"
+
+#, python-brace-format
+msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
+msgstr "At present: the wallpaper was found by way of “{found}”{cached}, its colours drawn by “{engine}”."
+
+msgid "nothing yet"
+msgstr "nothing as yet"
+
+msgid " (cached)"
+msgstr " (from memory)"
+
+msgid "n/a (cached or not yet run)"
+msgstr "not applicable (from memory, or not yet attempted)"
+
+#, python-brace-format
+msgid "Connected, but not seeing: {devices}"
+msgstr "In correspondence, yet unable to perceive: {devices}"
+
+msgid "Connected. All configured devices visible."
+msgstr "In correspondence. All arranged apparatus is present and accounted for."
+
+msgid "Not connected."
+msgstr "Not in correspondence."
+
+#, python-brace-format
+msgid "Edit profile: {name}"
+msgstr "Amending the profile: {name}"
+
+#, python-brace-format
+msgid "Profile: {name}"
+msgstr "Profile: {name}"
+
+msgid "Reset to defaults"
+msgstr "Restore the defaults"
+
+msgid "Done"
+msgstr "Quite finished"
+
+msgid ""
+"Each row says which hex to send to the strip for a hue. Use Tune to change it while the strip "
+"shows exactly what you pick. Colors between rows are blended. Changes save automatically."
+msgstr ""
+"Each row declares which hex is to be sent to the strip for a given hue. Use Refine to adjust it "
+"whilst the strip shows precisely what you choose. Colours between rows are blended. Alterations "
+"are kept automatically."
+
+msgid "Saved"
+msgstr "Preserved"
+
+msgid "Hue"
+msgstr "Hue"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Meant"
+msgstr "Intended"
+
+msgid "Sent"
+msgstr "Dispatched"
+
+msgid "Hex to send"
+msgstr "Hex to dispatch"
+
+msgid "Wraps back to 0"
+msgstr "Returns to 0"
+
+msgid "Grey"
+msgstr "Grey"
+
+msgid "No color at all"
+msgstr "No colour whatsoever"
+
+msgid "Tune"
+msgstr "Refine"
+
+msgid "Add a row"
+msgstr "Add a row"
+
+msgid "Remove this row"
+msgstr "Remove this row"
+
+#, python-brace-format
+msgid "Tune {name}"
+msgstr "Refine {name}"
+
+#, python-brace-format
+msgid "hue {n}"
+msgstr "hue {n}"
+
+msgid "Tune grey"
+msgstr "Refine the grey"
+
+msgid "That hue is taken or out of range (1 to 359)."
+msgstr "That hue is already spoken for, or lies beyond the pale (1 to 359)."
+
+msgid "Keep at least two rows."
+msgstr "Kindly keep at least two rows."
+
+msgid "Type a hue from 1 to 359."
+msgstr "Pray state a hue from 1 to 359."
+
+msgid "That hue already has a row."
+msgstr "That hue already has a row."
+
+msgid "Which hue (degrees, 1 to 359)? It starts with the color the profile gives there now."
+msgstr "Which hue (in degrees, 1 to 359)? It begins with the colour the profile presently gives there."
+
+msgid "Try a color"
+msgstr "Sample a colour"
+
+msgid ""
+"Move the sliders to check a color. The left swatch is the color you mean, the right one is what "
+"this profile sends."
+msgstr ""
+"Move the sliders to examine a colour. The left swatch is the colour you intend; the right is what"
+" this profile dispatches."
+
+msgid "Saturation"
+msgstr "Saturation"
+
+msgid "Value"
+msgstr "Value"
+
+msgid "Show on LEDs"
+msgstr "Display upon the lamps"
+
+#, python-brace-format
+msgid ""
+"meant  #{want}\n"
+"sent   #{sent}"
+msgstr ""
+"intended  #{want}\n"
+"dispatched   #{sent}"
+
+msgid "Advanced"
+msgstr "For the connoisseur"
+
+msgid "Saturation floor"
+msgstr "Saturation floor"
+
+msgid ""
+"Colors are never sent whiter than this. Raise it if colors look pale, lower it if they look too "
+"strong. Near-greys are not affected."
+msgstr ""
+"Colours are never sent paler than this. Raise it should colours appear wan, lower it should they "
+"appear vulgar. Near-greys are left undisturbed."
+
+msgid "Saturation curve"
+msgstr "Saturation curve"
+
+msgid "How quickly pastel colors fade toward white. Lower is paler sooner."
+msgstr "How swiftly pastel colours fade toward white. Lower grows pale the sooner."
+
+msgid "Blue to sky blue"
+msgstr "Blue to sky blue"
+
+msgid "Pushes pale blues toward sky blue instead of violet."
+msgstr "Coaxes pale blues toward the sky rather than toward violet."
+
+msgid "Grey sharpness"
+msgstr "Keenness of grey"
+
+msgid "How close to no color a color must be before the grey takes over."
+msgstr "How nearly colourless a colour must be before the grey assumes command."
+
+msgid "Swatch"
+msgstr "Swatch"
+
+msgid "Wheel"
+msgstr "Wheel"
+
+msgid "current  →  new"
+msgstr "present  →  proposed"
+
+msgid "Hex  #"
+msgstr "Hex  #"
+
+msgid "Exact color"
+msgstr "Precise colour"
+
+msgid ""
+"The LEDs show this hex as it is: no Palette or Calibrated correction, only brightness. Saved "
+"colors with a dot are exact."
+msgstr ""
+"The lamps show this hex precisely as it is: no Palette nor Calibrated correction, only "
+"brightness. Treasured colours bearing a dot are precise."
+
+msgid "Recently used"
+msgstr "Lately employed"
+
+msgid "Select"
+msgstr "Select"
+
+msgid "Save color"
+msgstr "Treasure this colour"
+
+msgid "No saved colors yet. “Save color” keeps the current one here and in every color list."
+msgstr ""
+"No treasured colours as yet. “Treasure this colour” keeps the present one here and in every list "
+"of colours."
+
+msgid "OK"
+msgstr "Very good"
+
+msgid "Type a name."
+msgstr "Pray give it a name."
+
+msgid "Open"
+msgstr "Open"
+
+msgid "Save"
+msgstr "Preserve"
+
+#, python-brace-format
+msgid "Count LEDs: {name}"
+msgstr "Counting the lamps: {name}"
+
+msgid ""
+"Only one LED is lit. Move it with the slider, the buttons or the arrow keys until it is the last "
+"LED of the strip, then click “This is the last one”."
+msgstr ""
+"A single lamp is lit. Move it with the slider, the buttons or the arrow keys until it is the "
+"final lamp of the strip, then press “This is the final one”."
+
+msgid "Strip is longer? Set OpenRGB's size to"
+msgstr "The strip is longer? Set OpenRGB's size to"
+
+msgid "Resize"
+msgstr "Resize"
+
+msgid "This is the last one"
+msgstr "This is the final one"
+
+#, python-brace-format
+msgid "LED {n}"
+msgstr "Lamp {n}"
+
+msgid "The daemon didn't answer."
+msgstr "The daemon did not reply."
+
+#, python-brace-format
+msgid ""
+"OpenRGB drives {n} LEDs on this zone, so the light can't go further than LED {n}. If your strip "
+"has more, set the size below first."
+msgstr ""
+"OpenRGB drives {n} lamps upon this zone, so the light may go no further than lamp {n}. Should "
+"your strip have more, set the size below first."
+
+msgid ""
+"OpenRGB doesn't have a size for this zone yet, so nothing can light up. Set the size below to the"
+" number of LEDs on your strip (more is fine), click Resize, then count."
+msgstr ""
+"OpenRGB does not yet know the size of this zone, so nothing may be lit. Set the size below to the"
+" number of lamps upon your strip (more is quite acceptable), press Resize, and then count."
+
+msgid "OpenRGB isn't connected, so the strip can't light up right now."
+msgstr "OpenRGB is not in correspondence, so the strip cannot be lit at present."
+
+msgid "Resize failed"
+msgstr "The resizing failed"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "All lights off / on"
+msgstr "All lamps out / alight"
+
+msgid "Freeze colors / follow the wallpaper"
+msgstr "Preserve the colours / follow the wallpaper"
+
+msgid "Night mode on / off"
+msgstr "Nocturnal mode on / off"
+
+msgid "Load a setup"
+msgstr "Recall an arrangement"
+
+msgid "No modifier"
+msgstr "No modifier"
+
+msgid "All strips"
+msgstr "Every strip"
+
+msgid "sxhkd (X11 window managers)"
+msgstr "sxhkd (for X11 window managers)"
+
+msgid "~/.config/hypr/hyprland.conf (or a file it sources)"
+msgstr "~/.config/hypr/hyprland.conf (or a file it summons)"
+
+#, python-brace-format
+msgid "~/.config/niri/config.kdl, inside binds { }"
+msgstr "~/.config/niri/config.kdl, within binds { }"
+
+msgid ""
+"System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
+" press your key:"
+msgstr ""
+"System Settings, Keyboard, Shortcuts, Add New, Command or Script. Pray paste this as the command,"
+" then press your chosen key:"
+
+msgid ""
+"Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the command,"
+" then set your key:"
+msgstr ""
+"Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Pray paste this as the "
+"command, then set your chosen key:"
+
+msgid ""
+"Iridia doesn't listen to your keyboard. Your desktop does: you give a key a command, and pressing"
+" it runs that command. Build the command here, then add it to your desktop's config below."
+msgstr ""
+"Iridia does not eavesdrop upon your keyboard. Your desktop does: you assign a key a command, and "
+"pressing it carries out that command. Compose the command here, then add it to your desktop's "
+"configuration below."
+
+msgid "Change strips"
+msgstr "Alter the strips"
+
+msgid "Other actions"
+msgstr "Other undertakings"
+
+msgid "Strips"
+msgstr "Strips"
+
+msgid "Power"
+msgstr "Illumination"
+
+msgid "Leave as is"
+msgstr "Leave be"
+
+msgid "Turn on"
+msgstr "Kindle"
+
+msgid "Turn off"
+msgstr "Extinguish"
+
+msgid "Back to normal"
+msgstr "As you were"
+
+msgid "Pick the color"
+msgstr "Choose the colour"
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Do"
+msgstr "Undertake"
+
+msgid "Command"
+msgstr "Command"
+
+msgid "Copy command"
+msgstr "Transcribe the command"
+
+msgid "Try it"
+msgstr "Make an attempt"
+
+msgid "Add it to your desktop"
+msgstr "Add it to your desktop"
+
+msgid ""
+"Pick your desktop and a key. Paste the line into the file shown, then reload your desktop's "
+"config."
+msgstr ""
+"Choose your desktop and a key. Paste the line into the file shown, then have your desktop reread "
+"its configuration."
+
+msgid "Desktop"
+msgstr "Desktop"
+
+msgid "Key"
+msgstr "Key"
+
+msgid ""
+"Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a combination"
+" your desktop doesn't use yet."
+msgstr ""
+"Names of keys: F1 to F12, letters, numerals, or names such as Print, Pause, XF86Tools. Choose a "
+"combination your desktop has not yet claimed."
+
+msgid "Copy line"
+msgstr "Transcribe the line"
+
+msgid "Changed by a keybind right now"
+msgstr "Presently altered by a key binding"
+
+msgid ""
+"Strip keybinds are temporary: nothing is saved, and they end when you press the key again, run "
+"Back to normal, or restart the daemon."
+msgstr ""
+"Strip key bindings are fleeting: nothing is preserved, and they end when you press the key again,"
+" choose As you were, or revive the daemon."
+
+msgid "More examples"
+msgstr "Further examples"
+
+#, python-brace-format
+msgid ""
+"Short form for reading. In your desktop's config write the full path, {exe}, as the command above"
+" does: desktops often don't know where Iridia is installed."
+msgstr ""
+"The short form, for reading. In your desktop's configuration write the full path, {exe}, as the "
+"command above does: desktops seldom know where Iridia resides."
+
+msgid "the names you can use"
+msgstr "the names you may use"
+
+msgid "off, again: back to normal"
+msgstr "extinguished; again: as you were"
+
+msgid "one color, again: back to normal"
+msgstr "a single colour; again: as you were"
+
+msgid "every strip at 20%"
+msgstr "every strip at 20%"
+
+msgid "light a strip that is switched off"
+msgstr "kindle a strip that is indisposed"
+
+msgid "several at once"
+msgstr "several at once"
+
+msgid "several strips (commas)"
+msgstr "several strips (separated by commas)"
+
+msgid "undo every keybind change"
+msgstr "undo every key binding"
+
+msgid "always off, never switch back"
+msgstr "always extinguished, never restored"
+
+msgid "everything off / on"
+msgstr "all lamps out / alight"
+
+msgid "stop / start following the wallpaper"
+msgstr "cease / resume following the wallpaper"
+
+msgid "night mode on / off"
+msgstr "nocturnal mode on / off"
+
+msgid "load a saved setup (this one is permanent)"
+msgstr "recall a preserved arrangement (this one endures)"
+
+msgid ""
+"Names are the ones shown in the window (rename a strip with its pencil button). When two strips "
+"share a name, use Device/Zone, as `zone list` shows."
+msgstr ""
+"The names are those shown in the window (rechristen a strip with its pencil). When two strips "
+"share a name, use Device/Zone, as `zone list` shows."
+
+msgid "Pick at least one thing to change: Turn on or off, a color or a brightness."
+msgstr "Pray choose at least one thing to alter: Kindle or Extinguish, a colour or a brightness."
+
+msgid "Save a setup first (Settings, Setups and backups)."
+msgstr "Pray preserve an arrangement first (Preferences, Arrangements and safekeeping)."
+
+msgid "Undoes every keybind change on these strips."
+msgstr "Undoes every key binding upon these strips."
+
+msgid "Turns the strips off; press the key again to bring them back."
+msgstr "Extinguishes the strips; press the key again to restore them."
+
+msgid "turns them on (even when switched off)"
+msgstr "kindles them (even when indisposed)"
+
+msgid "shows one color"
+msgstr "shows a single colour"
+
+msgid "sets the brightness"
+msgstr "sets the brightness"
+
+#, python-brace-format
+msgid "One press: {actions}. The next press puts everything back."
+msgstr "One press: {actions}. The next press restores all as it was."
+
+msgid "Pick several strips to change them together."
+msgstr "Choose several strips to alter them in concert."
+
+msgid "Same key turns everything off, then back on."
+msgstr "The same key extinguishes everything, then kindles it again."
+
+msgid "Same key freezes the current colors, then follows the wallpaper again."
+msgstr "The same key preserves the present colours, then follows the wallpaper again."
+
+msgid "Switches night mode on or off (this one is saved)."
+msgstr "Engages or disengages nocturnal mode (this one is remembered)."
+
+msgid "Loads the setup and keeps it (an automatic backup is made first)."
+msgstr "Recalls the arrangement and keeps it (with safekeeping beforehand)."
+
+msgid "Keybind color"
+msgstr "Key binding colour"
+
+msgid "That didn't work"
+msgstr "That did not go according to plan"
+
+msgid "Nothing: every strip shows its normal colors."
+msgstr "Nothing whatsoever: every strip shows its customary colours."
+
+msgid "on"
+msgstr "alight"
+
+msgid "off"
+msgstr "extinguished"
+
+#, python-brace-format
+msgid "{n}% brightness"
+msgstr "{n}% brightness"
+
+msgid "Everything back to normal"
+msgstr "Everything as you were"
+
+msgid "Failed"
+msgstr "A failure, most regrettably"
+
+msgid "Arrange"
+msgstr "Arrange"
+
+msgid "Find LEDs: light one LED on the real strip"
+msgstr "Find lamps: light one lamp upon the real strip"
+
+msgid "Paint"
+msgstr "Paint"
+
+msgid "Erase (back to the zone's own color)"
+msgstr "Efface (restore the zone's own colour)"
+
+msgid "Fill"
+msgstr "Fill"
+
+msgid "Gradient"
+msgstr "Gradient"
+
+msgid "Paint color"
+msgstr "Paint colour"
+
+msgid "Zoom out"
+msgstr "Withdraw"
+
+msgid "Zoom in"
+msgstr "Draw nearer"
+
+msgid "Show everything"
+msgstr "Behold everything"
+
+msgid "Lock layout"
+msgstr "Secure the floor plan"
+
+msgid "No enabled zones yet. They show up here once the daemon reports them."
+msgstr "No zones engaged as yet. They shall appear once the daemon announces them."
+
+#, python-brace-format
+msgid "{n} LED"
+msgid_plural "{n} LEDs"
+msgstr[0] "{n} lamp"
+msgstr[1] "{n} lamps"
+
+msgid "clone"
+msgstr "twin"
+
+msgid "locked"
+msgstr "secured"
+
+msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
+msgstr "This strip is secured. Release it (side panel or the lock) to move or bend it."
+
+msgid "Gradient: now click the LED where it should end."
+msgstr "Gradient: now kindly click the lamp where it ought to end."
+
+#, python-brace-format
+msgid ""
+"LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the "
+"strip to move it. Right-click to add a bend there. Pick another tool to go back to normal."
+msgstr ""
+"Lamp {led} of {n} upon {strip} is lit on your strip; the rest are dark. Click or drag along the "
+"strip to move it. Right-click to add a bend there. Choose another instrument to return to normal."
+
+msgid "Layout locked: click a strip to select it, drag the diamonds to move color stops."
+msgstr "The floor plan is secured: click a strip to select it, and drag the diamonds to move colour stops."
+
+msgid ""
+"Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for the"
+" whole strip, outside each corner for a bend (it snaps to 15°, hold Shift for free angles). "
+"Right-click a LED to add a bend there. Scroll to zoom, drag the background to pan."
+msgstr ""
+"Drag a strip to move it. Select it, then turn a section by its round knob: behind lamp 1 for the "
+"whole strip, outside each corner for a bend (it settles every 15°; hold Shift for liberty). "
+"Right-click a lamp to add a bend there. Scroll to draw nearer, drag the background to wander."
+
+msgid ""
+"Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, so"
+" you can see where corners and bends are. Right-click it to add a bend there."
+msgstr ""
+"Find lamps: click a lamp (or drag along a strip) and only that lamp is lit upon your real strip, "
+"so you may see where the corners and bends lie. Right-click it to add a bend there."
+
+msgid "Gradient: click the first LED, then the last one. Uses both colors."
+msgstr "Gradient: click the first lamp, then the last. Both colours are employed."
+
+msgid "Fill: click a strip to give every LED of it the first color."
+msgstr "Fill: click a strip to give each of its lamps the first colour."
+
+msgid ""
+"Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or"
+" on Everything)."
+msgstr ""
+"Efface: click or drag across lamps to restore the zone's own colour (that set upon the zone or "
+"upon the Entire Household)."
+
+msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
+msgstr "Paint: click or drag across lamps. Painting obliges that zone to adopt the Painted pattern."
+
+msgid "Layout locked: click to unlock"
+msgstr "Floor plan secured: click to release"
+
+#, python-brace-format
+msgid "LED {led} of {n}"
+msgstr "Lamp {led} of {n}"
+
+msgid "Add a bend here"
+msgstr "Add a bend here"
+
+msgid "Remove this bend"
+msgstr "Remove this bend"
+
+msgid "Straighten"
+msgstr "Straighten"
+
+msgid "Flip LED order"
+msgstr "Reverse the order of lamps"
+
+msgid "Rename…"
+msgstr "Rechristen…"
+
+msgid "Clone this strip"
+msgstr "Make a twin of this strip"
+
+msgid "Hide this strip"
+msgstr "Conceal this strip"
+
+msgid "Delete this clone"
+msgstr "Dispose of this twin"
+
+msgid "Unlock this strip"
+msgstr "Release this strip"
+
+msgid "Lock this strip"
+msgstr "Secure this strip"
+
+msgid "Identify (light only this zone)"
+msgstr "Identify (illuminate this zone alone)"
+
+#, python-brace-format
+msgid "{strip} is hidden. Show it again from the strip list."
+msgstr "{strip} is concealed. Reveal it again from the list of strips."
+
+msgid "Undo"
+msgstr "Undo"
+
+msgid "Paint colors"
+msgstr "Paint colours"
+
+msgid ""
+"Click a color for the first paint color, right-click for the second (Gradient only). + saves the "
+"first one."
+msgstr ""
+"Click a colour for the first paint colour, right-click for the second (Gradient alone). + "
+"treasures the first."
+
+msgid "Nothing selected"
+msgstr "Nothing selected"
+
+msgid ""
+"Click a strip to select it. Each enabled zone has one strip; add clones for strips that share a "
+"wire."
+msgstr ""
+"Click a strip to select it. Each engaged zone has but one strip; add twins for strips sharing a "
+"wire."
+
+msgid "Snap to grid"
+msgstr "Settle upon the grid"
+
+msgid "Hide a strip to get it out of the way; it keeps its place and colors."
+msgstr "Conceal a strip to have it out of the way; it keeps its place and its colours."
+
+msgid "Show this strip"
+msgstr "Reveal this strip"
+
+#, python-brace-format
+msgid "{zone} on {device}"
+msgstr "{zone} upon {device}"
+
+msgid "Rename this strip"
+msgstr "Rechristen this strip"
+
+msgid "clone (shows the same colors)"
+msgstr "twin (shows the very same colours)"
+
+msgid "Identify"
+msgstr "Identify"
+
+msgid "Count LEDs"
+msgstr "Count the lamps"
+
+msgid "Pattern"
+msgstr "Pattern"
+
+msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
+msgstr "Painted: employ the Paint, Efface, Fill and Gradient instruments below."
+
+msgid "Shape"
+msgstr "Figure"
+
+msgid "Flip LED order (drawing only)"
+msgstr "Reverse the order of lamps (in the drawing only)"
+
+msgid "Turn"
+msgstr "Turn"
+
+msgid "Turn 90° left"
+msgstr "Turn 90° to the left"
+
+msgid "Turn 90° right"
+msgstr "Turn 90° to the right"
+
+msgid "LEDs per metre"
+msgstr "Lamps per metre"
+
+msgid ""
+"The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is drawn"
+" at its real length."
+msgstr ""
+"The density printed upon the strip or its advertisement: 30, 60, 96 or 144 are customary. The "
+"strip is drawn at its true length."
+
+#, python-brace-format
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgstr "Each dot is one pixel of {lpp} lamps (set upon the Apparatus page, Strip type)."
+
+msgid "Bends"
+msgstr "Bends"
+
+msgid "None yet. Right-click a LED, or add one below."
+msgstr "None as yet. Right-click a lamp, or add one below."
+
+#, python-brace-format
+msgid "Bend {i}"
+msgstr "Bend {i}"
+
+msgid "at LED"
+msgstr "at lamp"
+
+msgid "direction °"
+msgstr "bearing °"
+
+msgid "Add a bend at LED"
+msgstr "Add a bend at lamp"
+
+msgid ""
+"On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
+"strip, outside the corner for a bend."
+msgstr ""
+"Upon the canvas (the Arrange instrument), turn a section by its round knob: behind lamp 1 for the"
+" whole strip, outside the corner for a bend."
+
+msgid "Clone"
+msgstr "Twin"
+
+msgid "Hide"
+msgstr "Conceal"
+
+msgid "Delete clone"
+msgstr "Dispose of the twin"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color, right-click for the second"
+msgstr "#{hex}: click for the first colour, right-click for the second"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color"
+msgstr "#{hex}: click for the first colour"
+
+msgid "Save the first color to your saved colors"
+msgstr "Treasure the first colour among your saved colours"
+
+msgid "Saved colors"
+msgstr "Treasured colours"
+
+#, python-brace-format
+msgid "#{k}  (right-click to delete)"
+msgstr "#{k}  (right-click to dismiss)"
+
+msgid "Save a new color"
+msgstr "Treasure a new colour"
+
+msgid "Click to use. Right-click a saved color to delete it."
+msgstr "Click to employ. Right-click a treasured colour to dismiss it."
+
+msgid "Click to use, numbers show the order. Right-click a saved color to delete it."
+msgstr "Click to employ; the numerals show the order. Right-click a treasured colour to dismiss it."
+
+msgid "Palette"
+msgstr "Palette"
+
+msgid "Calibrated"
+msgstr "Calibrated"
+
+msgid "No correction. The color you pick is sent to the strip as it is."
+msgstr "No correction. The colour you choose is sent to the strip exactly as it is."
+
+msgid "Keeps every LED on the 48 safe colors that cheap LED strips show cleanly."
+msgstr "Keeps every lamp upon the 48 respectable colours that modest strips display cleanly."
+
+msgid ""
+"Corrects colors so they look right on your strip. Choose the profile that matches it (edit them "
+"in Settings)."
+msgstr ""
+"Corrects colours so they look proper upon your strip. Choose the profile befitting it (amend them"
+" in Preferences)."
+
+msgid "Zones use different corrections. Pick one to set them all."
+msgstr "The zones differ in their corrections. Choose one to settle them all."
+
+msgid "Solid"
+msgstr "Solid"
+
+msgid "Segments"
+msgstr "Segments"
+
+msgid "Center out"
+msgstr "From the centre"
+
+msgid "Edges in"
+msgstr "From the edges"
+
+msgid "Alternating"
+msgstr "Alternating"
+
+msgid "Painted"
+msgstr "Painted"
+
+msgid "Automatic"
+msgstr "Automatic"
+
+msgid "Addressable 5V (WS2812B, SK6812)"
+msgstr "Addressable 5V (WS2812B, SK6812)"
+
+msgid "Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."
+msgstr ""
+"Each lamp possesses its own chip and colour (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or "
+"digital."
+
+msgid "Addressable 12V in groups (WS2811, COB)"
+msgstr "Addressable 12V in companies (WS2811, COB)"
+
+msgid ""
+"One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
+"how many LEDs are in a pixel so the Layout tab draws the real length."
+msgstr ""
+"One chip governs a company of lamps, so a company is one pixel. OpenRGB counts pixels, not lamps;"
+" set how many lamps are in a pixel so the Floor Plan draws the true length."
+
+msgid "One color (plain 12V RGB, 4 pins)"
+msgstr "One colour (plain 12V RGB, 4 pins)"
+
+msgid ""
+"The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
+"apply, so they're hidden."
+msgstr ""
+"The whole strip wears a single colour (12V, R, G, B pins). Patterns, painting and colour stops do"
+" not apply, and are discreetly hidden."
+
+msgid "RGBW addressable (SK6812 RGBW, experimental)"
+msgstr "RGBW addressable (SK6812 RGBW, experimental)"
+
+msgid ""
+"OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
+"itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
+"sends GRB (like WS2812B); use Color order if colors come out swapped. Count LEDs doesn't work on "
+"these strips: set the LED count by hand."
+msgstr ""
+"OpenRGB sends 3 bytes per lamp; RGBW strips read 4. Iridia packs the white channel into the data "
+"itself, which requires the OpenRGB zone to be a third larger than the strip. It presumes the "
+"header sends GRB (as for WS2812B); use Colour order should colours arrive exchanged. Counting "
+"lamps does not serve these strips: set the count by hand."
+
+msgid "RGB (normal)"
+msgstr "RGB (customary)"
+
+msgid "mixed"
+msgstr "assorted"
+
+msgid "no correction"
+msgstr "uncorrected"
+
+msgid "palette"
+msgstr "palette"
+
+msgid "calibrated"
+msgstr "calibrated"
+
+msgid "LEDs"
+msgstr "Lamps"
+
+msgid "Identify lights only this zone, so you can see which strip it is."
+msgstr "Identify illuminates this zone alone, so you may see which strip it is."
+
+msgid "Edit layout"
+msgstr "Amend the arrangement"
+
+msgid "Reverse"
+msgstr "Reverse"
+
+msgid "Mirror"
+msgstr "Mirror"
+
+msgid "Follow monitor brightness"
+msgstr "Defer to the looking-glass's brightness"
+
+msgid "Manual"
+msgstr "By hand"
+
+msgid "Range"
+msgstr "Range"
+
+msgid "Invert (bias lighting)"
+msgstr "Invert (for bias lighting)"
+
+msgid "Gamma correction"
+msgstr "Gamma correction"
+
+msgid "Strip type and wiring"
+msgstr "Strip type and wiring"
+
+msgid "Strip type"
+msgstr "Strip type"
+
+msgid "Color order"
+msgstr "Colour order"
+
+msgid "Test colors"
+msgstr "Test the colours"
+
+msgid ""
+"Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far end "
+"(a one-color strip cycles red, green, blue). If the colors are wrong, change the order until they"
+" match."
+msgstr ""
+"Test the colours lights this strip red at the lamp 1 end, green in the middle and blue at the far"
+" end (a one-colour strip cycles red, green, blue). Should the colours be amiss, change the order "
+"until they agree."
+
+msgid "LEDs per pixel"
+msgstr "Lamps per pixel"
+
+msgid "Power limit"
+msgstr "Limit of power"
+
+msgid "A  (0 = no limit)"
+msgstr "A  (0 = no limit)"
+
+msgid ""
+"Long 5V strips at full white pull a lot of current: the far end turns orange or pink, or the "
+"controller resets. Set your power supply's amps (minus a bit) and Iridia dims only when a color "
+"would go over it. The estimate assumes 60 mA per LED at full white."
+msgstr ""
+"Long 5V strips at full white draw a great deal of current: the far end turns orange or pink, or "
+"the controller swoons. Set your power supply's amperes (less a little) and Iridia dims only when "
+"a colour would exceed them. The estimate presumes 60 mA per lamp at full white."
+
+msgid "Resize the OpenRGB zone"
+msgstr "Resize the OpenRGB zone"
+
+msgid "Stop test"
+msgstr "Conclude the test"
+
+#, python-brace-format
+msgid "Asked OpenRGB for {need} LEDs on this zone"
+msgstr "OpenRGB was asked for {need} lamps upon this zone"
+
+#, python-brace-format
+msgid "(looks like: {type})"
+msgstr "(it appears to be: {type})"
+
+#, python-brace-format
+msgid "Strip: {type}"
+msgstr "Strip: {type}"
+
+#, python-brace-format
+msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
+msgstr "At present some {now:.1f} A, {full:.1f} A at full white."
+
+#, python-brace-format
+msgid "Dimmed to stay under the limit (would be {amps:.1f} A)."
+msgstr "Dimmed to remain within the limit (it would have been {amps:.1f} A)."
+
+#, python-brace-format
+msgid "For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark."
+msgstr "For {n} RGBW lamps the OpenRGB zone requires {need}; at present the end of the strip remains dark."
+
+msgid "Erase"
+msgstr "Efface"
+
+msgid "Clear"
+msgstr "Clear"
+
+msgid "Done editing"
+msgstr "Amendments complete"
+
+msgid "Colors in order (click to change):"
+msgstr "Colours in order (click to change):"
+
+msgid "Change this color"
+msgstr "Change this colour"
+
+msgid ""
+"OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
+"set the size there."
+msgstr ""
+"OpenRGB does not yet know how many lamps this zone has, so nothing is lit. Pray click Count the "
+"lamps and set the size there."
+
+msgid ""
+"This device has no Direct mode, so it shows one color for the whole device (the first one of the "
+"pattern)."
+msgstr "This device has no Direct mode, so it wears a single colour throughout (the first of the pattern)."
+
+msgid "Red"
+msgstr "Crimson"
+
+msgid "Red-orange"
+msgstr "Vermilion"
+
+msgid "Orange"
+msgstr "Orange"
+
+msgid "Amber"
+msgstr "Amber"
+
+msgid "Yellow"
+msgstr "Primrose"
+
+msgid "Lime"
+msgstr "Lime"
+
+msgid "Green"
+msgstr "Verdant green"
+
+msgid "Spring green"
+msgstr "Spring green"
+
+msgid "Cyan"
+msgstr "Cyan"
+
+msgid "Teal"
+msgstr "Teal"
+
+msgid "Sky blue"
+msgstr "Sky blue"
+
+msgid "Blue"
+msgstr "Royal blue"
+
+msgid "Violet"
+msgstr "Violet"
+
+msgid "Magenta"
+msgstr "Magenta"
+
+msgid "Pink"
+msgstr "Rose"
+
+msgid "Red (wraps around)"
+msgstr "Crimson (returning whence it came)"
+
+msgid "Start OpenRGB's server with Iridia"
+msgstr "Have OpenRGB's server commence alongside Iridia"
+
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr "OpenRGB is not installed, and so there is nothing whatever to commence."
+
+msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
+msgstr "Iridia sets it going whenever you arrive (iridia-openrgb.service). It is presently at work."
+
+msgid ""
+"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
+"diagnostics to see why."
+msgstr ""
+"Iridia sets it going whenever you arrive (iridia-openrgb.service), yet it is not at work at "
+"present. Pray consult the diagnostics to learn why."
+
+#, python-brace-format
+msgid "Started by {what}. Iridia leaves that alone."
+msgstr "Commenced by {what}. Iridia shan't interfere."
+
+msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
+msgstr ""
+"There is no systemd in this household: the daemon shall start OpenRGB itself whenever it cannot "
+"reach it."
+
+msgid "Off. Start OpenRGB's server yourself."
+msgstr "Off. You must start OpenRGB's server yourself."
+
+msgid ""
+"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
+" can't reach it."
+msgstr ""
+"Not yet arranged. Engage this to have it commence at every arrival. Until then, the daemon starts"
+" it whenever it cannot reach it."
+
+msgid "OpenRGB"
+msgstr "OpenRGB"
+
+msgctxt "color correction"
+msgid "Off"
+msgstr "Unadorned"
+

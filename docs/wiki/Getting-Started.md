@@ -2,8 +2,8 @@
 
 ## Before the first run
 
-1. **OpenRGB is running with its SDK server on** (see [Installation](Installation.md#setting-up-openrgb)).
-   Check that your devices appear in OpenRGB itself.
+1. **OpenRGB is installed** and your devices appear in it. Iridia starts its server for you (see
+   [Installation](Installation.md#setting-up-openrgb)).
 2. **The Iridia daemon is running.** The installer starts it, and it starts on its own at every login.
    `iridia daemon status` tells you, or look at the *Service* tab.
 

@@ -11,7 +11,9 @@ import os
 _DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 ICON_NAME = "iridia"
-APP_ID = "io.github.iridia.Iridia"      # GTK application id; the launcher file is named after it
+APP_ID = "io.github.HypestHyper.Iridia"   # GTK application id; the launcher file is named after it
+# launcher file names used by older versions, removed on install and uninstall
+OLD_LAUNCHERS = ("iridia.desktop", "io.github.iridia.Iridia.desktop")
 
 
 def icon_svg_path() -> str:

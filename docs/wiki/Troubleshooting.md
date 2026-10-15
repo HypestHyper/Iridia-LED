@@ -10,7 +10,8 @@ log file, switch on file logging in *Settings, Logging*; for every detail, set `
 
 ## Nothing lights up
 
-1. `iridia status`: is OpenRGB connected? If not, start its SDK server (see
+1. `iridia status`: is OpenRGB connected? If not, `iridia openrgb status` shows what is supposed to
+   start its server, and `iridia openrgb enable` sets it up (see
    [Installation](Installation.md#setting-up-openrgb)). Iridia keeps retrying and sends colors as soon as
    it connects.
 2. Do your devices show up and change color in OpenRGB itself? If not, the problem is between OpenRGB and

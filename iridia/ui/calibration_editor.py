@@ -2,6 +2,7 @@
 
 from gi.repository import GLib, Gtk
 
+from iridia.i18n import _
 from iridia.calibration import DEFAULT_NAME, DEFAULT_PROFILE, HUE_NAMES, Profile, clean_hex, normalize
 from iridia.ui import dialogs
 from iridia.ui.widgets import (Spin, Swatch, Toggle, button, card, hbox, hsv_hex, label, vbox)
@@ -14,10 +15,10 @@ class ProfileEditor(dialogs.Dialog):
     """
 
     def __init__(self, parent, profiles, name: str, host):
-        super().__init__(parent, f"Edit profile: {name}", width=780, height=760, resizable=True,
+        super().__init__(parent, _("Edit profile: {name}").format(name=name), width=780, height=760, resizable=True,
                          on_close=self._closing)
         self.profiles, self.name, self.host = profiles, name, host
-        data, _ = normalize(profiles.read_data(name))
+        data, _u = normalize(profiles.read_data(name))
         data = data or normalize(profiles.read_data(DEFAULT_NAME))[0]
         self.data = data
         self.anchors = [list(a) for a in data["anchors"] if a[0] != 360]
@@ -29,15 +30,15 @@ class ProfileEditor(dialogs.Dialog):
         host.pause(1)
 
         top = hbox(8)
-        top.append(label(f"Profile: {name}", ("title",), xalign=0))
+        top.append(label(_('Profile: {name}').format(name=name), ("title",), xalign=0))
         top.append(Gtk.Box(hexpand=True))
         if name == DEFAULT_NAME:
-            top.append(button("Reset to defaults", "history", "tonal", self._reset))
-        top.append(button("Done", "check", "filled", self.close))
+            top.append(button(_("Reset to defaults"), "history", "tonal", self._reset))
+        top.append(button(_("Done"), "check", "filled", self.close))
         self.body.append(top)
-        self.body.append(label("Each row says which hex to send to the strip for a hue. Use Tune to change it while "
+        self.body.append(label(_("Each row says which hex to send to the strip for a hue. Use Tune to change it while "
                                "the strip shows exactly what you pick. Colors between rows are blended. Changes save "
-                               "automatically.", ("small", "dim"), wrap=True))
+                               "automatically."), ("small", "dim"), wrap=True))
         sc = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
         self._content = vbox(12)
         sc.set_child(self._content)
@@ -52,7 +53,7 @@ class ProfileEditor(dialogs.Dialog):
         return dict(self.data, anchors=[list(a) for a in sorted(self.anchors)], grey=self.grey, **self.params)
 
     def _changed(self, rebuild=True):
-        clean, _ = normalize(self._data_now())
+        clean, _u = normalize(self._data_now())
         if clean:
             self._profile = Profile(clean)
         self._update_test()
@@ -65,13 +66,13 @@ class ProfileEditor(dialogs.Dialog):
     def _save(self):
         self._save_job = None
         err = self.profiles.save(self.name, self._data_now())
-        self._msg.set_label(err or "Saved")
+        self._msg.set_label(err or _("Saved"))
         if not err:
             self.host.changed()
         return False
 
     def _reset(self):
-        data, _ = normalize(DEFAULT_PROFILE)
+        data, _u = normalize(DEFAULT_PROFILE)
         self.anchors = [list(a) for a in data["anchors"] if a[0] != 360]
         self.grey = data["grey"]
         self.params = {k: data[k] for k in self.params}
@@ -93,28 +94,28 @@ class ProfileEditor(dialogs.Dialog):
             c = n
         tbl = card(inner=True)
         grid = Gtk.Grid(column_spacing=10, row_spacing=6)
-        for col, t in enumerate(("Hue", "Name", "Meant", "Sent", "Hex to send", "", "")):
+        for col, t in enumerate((_("Hue"), _("Name"), _("Meant"), _("Sent"), _("Hex to send"), "", "")):
             grid.attach(label(t, ("tiny", "faint")), col, 0, 1, 1)
         rows = sorted(self.anchors)
         for i, (hue, hx) in enumerate(rows, start=1):
             self._anchor_row(grid, i, hue, hx)
         r = len(rows) + 1
         grid.attach(label("360", ("body", "faint")), 0, r, 1, 1)
-        grid.attach(label("Wraps back to 0", ("small", "faint")), 1, r, 4, 1)
+        grid.attach(label(_("Wraps back to 0"), ("small", "faint")), 1, r, 4, 1)
         g = r + 1
-        grid.attach(label("Grey", ("body",)), 0, g, 1, 1)
-        grid.attach(label("No color at all", ("small", "dim")), 1, g, 1, 1)
+        grid.attach(label(_("Grey"), ("body",)), 0, g, 1, 1)
+        grid.attach(label(_("No color at all"), ("small", "dim")), 1, g, 1, 1)
         grid.attach(Swatch("808080", 28), 2, g, 1, 1)
         grid.attach(Swatch(self.grey, 28), 3, g, 1, 1)
         e = Gtk.Entry(text=self.grey, width_chars=8, max_length=7)
         e.connect("activate", lambda en: self._commit_grey(en))
         fc = Gtk.EventControllerFocus()
-        fc.connect("leave", lambda *_: self._commit_grey(e))
+        fc.connect("leave", lambda *_a: self._commit_grey(e))
         e.add_controller(fc)
         grid.attach(e, 4, g, 1, 1)
-        grid.attach(button("Tune", style="tonal small", cb=self._tune_grey), 5, g, 1, 1)
+        grid.attach(button(_("Tune"), style="tonal small", cb=self._tune_grey), 5, g, 1, 1)
         tbl.append(grid)
-        tbl.append(button("Add a row", "add", "text small", self._add_anchor))
+        tbl.append(button(_("Add a row"), "add", "text small", self._add_anchor))
         self._content.append(tbl)
         self._build_test()
         self._build_advanced()
@@ -125,19 +126,19 @@ class ProfileEditor(dialogs.Dialog):
         else:
             sp = Spin(1, 359, hue, lambda v, h=hue: self._move_anchor(h, int(v)), delay=700)
             grid.attach(sp, 0, i, 1, 1)
-        grid.attach(label(HUE_NAMES.get(hue, ""), ("small", "dim")), 1, i, 1, 1)
+        grid.attach(label(_(HUE_NAMES[hue]) if hue in HUE_NAMES else "", ("small", "dim")), 1, i, 1, 1)
         grid.attach(Swatch(hsv_hex(hue, 1, 1), 28), 2, i, 1, 1)
         grid.attach(Swatch(hx, 28), 3, i, 1, 1)
         e = Gtk.Entry(text=hx, width_chars=8, max_length=7)
         e.connect("activate", lambda en, h=hue: self._commit_anchor(h, en))
         fc = Gtk.EventControllerFocus()
-        fc.connect("leave", lambda *_, h=hue, en=e: self._commit_anchor(h, en))
+        fc.connect("leave", lambda *_a, h=hue, en=e: self._commit_anchor(h, en))
         e.add_controller(fc)
         grid.attach(e, 4, i, 1, 1)
-        grid.attach(button("Tune", style="tonal small", cb=lambda h=hue: self._tune_anchor(h)), 5, i, 1, 1)
+        grid.attach(button(_("Tune"), style="tonal small", cb=lambda h=hue: self._tune_anchor(h)), 5, i, 1, 1)
         if hue != 0:
             grid.attach(button(icon_name="close", style="text small", cb=lambda h=hue: self._remove_anchor(h),
-                               tooltip="Remove this row"), 6, i, 1, 1)
+                               tooltip=_("Remove this row")), 6, i, 1, 1)
 
     def _find(self, hue):
         return next((a for a in self.anchors if a[0] == hue), None)
@@ -162,7 +163,7 @@ class ProfileEditor(dialogs.Dialog):
             if hx and hx != a[1]:
                 a[1] = hx
                 self._changed()
-        self.host.pick(a[1], f"Tune {HUE_NAMES.get(hue, f'hue {hue}')}", hsv_hex(hue, 1, 1), done)
+        self.host.pick(a[1], _("Tune {name}").format(name=_(HUE_NAMES[hue]) if hue in HUE_NAMES else _("hue {n}").format(n=hue)), hsv_hex(hue, 1, 1), done)
 
     def _commit_grey(self, entry):
         hx = clean_hex(entry.get_text())
@@ -177,14 +178,14 @@ class ProfileEditor(dialogs.Dialog):
             if hx and hx != self.grey:
                 self.grey = hx
                 self._changed()
-        self.host.pick(self.grey, "Tune grey", "808080", done)
+        self.host.pick(self.grey, _("Tune grey"), "808080", done)
 
     def _move_anchor(self, hue, new):
         a = self._find(hue)
         if a is None or new == hue:
             return
         if not 1 <= new <= 359 or self._find(new):
-            self._msg.set_label("That hue is taken or out of range (1 to 359).")
+            self._msg.set_label(_("That hue is taken or out of range (1 to 359)."))
             self._build()
             return
         a[0] = new
@@ -192,7 +193,7 @@ class ProfileEditor(dialogs.Dialog):
 
     def _remove_anchor(self, hue):
         if len(self.anchors) <= 2:
-            self._msg.set_label("Keep at least two rows.")
+            self._msg.set_label(_("Keep at least two rows."))
             return
         self.anchors = [a for a in self.anchors if a[0] != hue]
         self._changed()
@@ -202,28 +203,28 @@ class ProfileEditor(dialogs.Dialog):
             try:
                 h = int(float(t))
             except ValueError:
-                return "Type a hue from 1 to 359."
+                return _("Type a hue from 1 to 359.")
             if not 1 <= h <= 359:
-                return "Type a hue from 1 to 359."
-            return "That hue already has a row." if self._find(h) else None
+                return _("Type a hue from 1 to 359.")
+            return _("That hue already has a row.") if self._find(h) else None
 
         def done(t):
             hue = int(float(t))
             self.anchors.append([hue, self._profile.picker_to_led(hue, 1.0, 1.0)])
             self._changed()
-        dialogs.ask_text(self, "Add a row", "Which hue (degrees, 1 to 359)? It starts with the color the profile "
-                                            "gives there now.", "", done, check)
+        dialogs.ask_text(self, _("Add a row"), _("Which hue (degrees, 1 to 359)? It starts with the color the profile "
+                                            "gives there now."), "", done, check)
 
     # -------------------------------------------------------------- test
     def _build_test(self):
         c = card(inner=True)
-        c.append(label("Try a color", ("heading",)))
-        c.append(label("Move the sliders to check a color. The left swatch is the color you mean, the right one is "
-                       "what this profile sends.", ("small", "dim"), wrap=True))
+        c.append(label(_("Try a color"), ("heading",)))
+        c.append(label(_("Move the sliders to check a color. The left swatch is the color you mean, the right one is "
+                       "what this profile sends."), ("small", "dim"), wrap=True))
         self._tv = {}
         if not hasattr(self, "_test_vals"):
             self._test_vals = {"h": 30.0, "s": 100.0, "v": 100.0}
-        for key, name, hi in (("h", "Hue", 359), ("s", "Saturation", 100), ("v", "Value", 100)):
+        for key, name, hi in (("h", _("Hue"), 359), ("s", _("Saturation"), 100), ("v", _("Value"), 100)):
             row = hbox(10)
             lab = label(name, ("small", "dim"))
             lab.set_width_chars(11)
@@ -244,7 +245,7 @@ class ProfileEditor(dialogs.Dialog):
         sw.append(self._t_out)
         sw.append(self._t_lbl)
         c.append(sw)
-        row, self._leds = switch_row_local("Show on LEDs", self._toggle_leds)
+        row, self._leds = switch_row_local(_("Show on LEDs"), self._toggle_leds)
         c.append(row)
         self._content.append(c)
         self._update_test()
@@ -257,7 +258,7 @@ class ProfileEditor(dialogs.Dialog):
         sent = self._profile.picker_to_led(h, s, v)
         self._t_in.set_state(hex6=want)
         self._t_out.set_state(hex6=sent)
-        self._t_lbl.set_label(f"meant  #{want}\nsent   #{sent}")
+        self._t_lbl.set_label(_('meant  #{want}\nsent   #{sent}').format(want=want, sent=sent))
         if self._sender is not None:
             self._sender.send(sent)
 
@@ -275,19 +276,19 @@ class ProfileEditor(dialogs.Dialog):
 
     # -------------------------------------------------------------- advanced
     def _build_advanced(self):
-        exp = Gtk.Expander(label="Advanced")
+        exp = Gtk.Expander(label=_("Advanced"))
         exp.add_css_class("subheading")
         box = vbox(8)
         box.set_margin_top(8)
-        spec = (("min_out_sat", "Saturation floor", 0.0, 1.0, 0.01,
-                 "Colors are never sent whiter than this. Raise it if colors look pale, lower it if they look too "
-                 "strong. Near-greys are not affected."),
-                ("sat_exponent", "Saturation curve", 0.1, 3.0, 0.05,
-                 "How quickly pastel colors fade toward white. Lower is paler sooner."),
-                ("blue_nudge", "Blue to sky blue", 0.0, 1.0, 0.05,
-                 "Pushes pale blues toward sky blue instead of violet."),
-                ("grey_sharpness", "Grey sharpness", 1.0, 30.0, 0.5,
-                 "How close to no color a color must be before the grey takes over."))
+        spec = (("min_out_sat", _("Saturation floor"), 0.0, 1.0, 0.01,
+                 _("Colors are never sent whiter than this. Raise it if colors look pale, lower it if they look too "
+                   "strong. Near-greys are not affected.")),
+                ("sat_exponent", _("Saturation curve"), 0.1, 3.0, 0.05,
+                 _("How quickly pastel colors fade toward white. Lower is paler sooner.")),
+                ("blue_nudge", _("Blue to sky blue"), 0.0, 1.0, 0.05,
+                 _("Pushes pale blues toward sky blue instead of violet.")),
+                ("grey_sharpness", _("Grey sharpness"), 1.0, 30.0, 0.5,
+                 _("How close to no color a color must be before the grey takes over.")))
         for key, name, lo, hi, step, hint in spec:
             row = hbox(10)
             lab = label(name, ("small", "dim"))

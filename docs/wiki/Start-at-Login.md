@@ -21,6 +21,10 @@ iridia service remove
 
 In the window: **Service, Start the daemon when I log in**.
 
+`iridia service install` also sets up `iridia-openrgb.service`, which starts OpenRGB's server at login,
+unless something else already starts OpenRGB. See
+[Setting up OpenRGB](Installation.md#setting-up-openrgb).
+
 ## Your compositor's autostart
 
 If your compositor doesn't activate `graphical-session.target` (Hyprland started from a TTY without

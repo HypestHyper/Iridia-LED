@@ -8,6 +8,7 @@ from typing import Callable, List, Optional
 
 from gi.repository import Gdk, GLib, Gtk, Pango
 
+from iridia.i18n import _
 from iridia import theme
 from iridia.colors import resolve_colors
 from iridia.ui import fonts
@@ -172,7 +173,7 @@ class Toggle(Gtk.Switch):
         self._quiet = False
         self.connect("notify::active", self._changed)
 
-    def _changed(self, *_):
+    def _changed(self, *_a):
         if not self._quiet and self._cb:
             self._cb(self.get_active())
 
@@ -192,9 +193,9 @@ def switch_row(text: str, active: bool, cb: Optional[Callable[[bool], None]] = N
 
 class Dropdown(Gtk.DropDown):
     def __init__(self, items: List[str], selected: Optional[str] = None,
-                 cb: Optional[Callable[[str], None]] = None, width_chars: int = 0, placeholder: str = "Mixed"):
+                 cb: Optional[Callable[[str], None]] = None, width_chars: int = 0, placeholder: Optional[str] = None):
         self._items = list(items)
-        self._placeholder = placeholder
+        self._placeholder = _("Mixed") if placeholder is None else placeholder
         self._ph_shown = False
         super().__init__(model=Gtk.StringList.new(self._items))
         self._cb = cb
@@ -204,7 +205,7 @@ class Dropdown(Gtk.DropDown):
         self.connect("notify::selected", self._changed)
         self.set_valign(Gtk.Align.CENTER)
 
-    def _changed(self, *_):
+    def _changed(self, *_a):
         if self._quiet:
             return
         v = self.value()
@@ -272,7 +273,7 @@ class Spin(Gtk.SpinButton):
         self._delay = delay
         self.connect("value-changed", self._changed)
 
-    def _changed(self, *_):
+    def _changed(self, *_a):
         if self._quiet or not self._cb:
             return
         if self._job:
@@ -583,13 +584,14 @@ class QuickColors(Gtk.Box):
         flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=self._per_line,
                            min_children_per_line=min(self._per_line, max(1, len(colors) + (1 if add else 0))),
                            column_spacing=2, row_spacing=2, halign=Gtk.Align.START, homogeneous=True)
-        tip = "#{}: click for the first color" + (", right-click for the second" if self._on_b else "")
+        tip = (_("#{hex}: click for the first color, right-click for the second") if self._on_b
+               else _("#{hex}: click for the first color"))
         for c in colors:
-            flow.append(Swatch(c, self._size, tooltip=tip.format(c), on_click=lambda c=c: self._on_a(c),
+            flow.append(Swatch(c, self._size, tooltip=tip.format(hex=c), on_click=lambda c=c: self._on_a(c),
                                on_right=(lambda c=c: self._on_b(c)) if self._on_b else None))
         if add:
             flow.append(Swatch("000000", self._size, add=True, on_click=self._on_save,
-                               tooltip="Save the first color to your saved colors"))
+                               tooltip=_("Save the first color to your saved colors")))
         return flow
 
     def refresh(self):
@@ -600,11 +602,11 @@ class QuickColors(Gtk.Box):
             c = n
         saved = [c for c in (self._get_saved() or []) if isinstance(c, str) and len(c) == 6]
         recent = [c for c in (self._get_recent() or []) if isinstance(c, str) and len(c) == 6 and c not in saved]
-        self.append(label("Saved colors", ("tiny", "dim")))
+        self.append(label(_("Saved colors"), ("tiny", "dim")))
         if saved or self._on_save:
             self.append(self._flow(saved[:32], add=bool(self._on_save)))
         if recent:
-            self.append(label("Recently used", ("tiny", "dim")))
+            self.append(label(_("Recently used"), ("tiny", "dim")))
             self.append(self._flow(recent[:self._per_line * 2]))
 
 
@@ -641,16 +643,16 @@ class SwatchPicker(Gtk.Box):
             self.remove(child)
             child = nxt
         keys = self._keys()
-        self.append(label("Wallpaper colors", ("small", "dim")))
+        self.append(label(_("Wallpaper colors"), ("small", "dim")))
         flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=12, column_spacing=4,
                            row_spacing=4, homogeneous=False, halign=Gtk.Align.START)
         flow.set_min_children_per_line(max(1, min(10, len(self.extracted))))
         for i, c in enumerate(self.extracted):
             sel = i in keys
             flow.append(Swatch(c, self.size, sel, str(keys.index(i) + 1) if sel and self.max_select > 1 else "",
-                               on_click=lambda i=i: self._toggle(i), tooltip=f"Wallpaper color {i + 1}  #{c}"))
+                               on_click=lambda i=i: self._toggle(i), tooltip=_('Wallpaper color {n}  #{hex}').format(n=i + 1, hex=c)))
         self.append(flow)
-        self.append(label("Saved colors", ("small", "dim")))
+        self.append(label(_("Saved colors"), ("small", "dim")))
         flow2 = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=12, column_spacing=4,
                             row_spacing=4, halign=Gtk.Align.START)
         shown = list(self.custom)
@@ -663,14 +665,15 @@ class SwatchPicker(Gtk.Box):
             flow2.append(Swatch(k, self.size, sel, str(keys.index(k) + 1) if sel and self.max_select > 1 else "",
                                 on_click=lambda k=k: self._toggle(k),
                                 on_right=(lambda k=k: self.on_remove_custom(k)) if self.on_remove_custom else None,
-                                tooltip=f"#{k}  (right-click to delete)"))
+                                tooltip=_('#{k}  (right-click to delete)').format(k=k)))
         flow2.set_min_children_per_line(max(1, min(10, len(shown) + (1 if self.on_add else 0))))
         if self.on_add:
-            flow2.append(Swatch("000000", self.size, add=True, on_click=self.on_add, tooltip="Save a new color"))
+            flow2.append(Swatch("000000", self.size, add=True, on_click=self.on_add, tooltip=_("Save a new color")))
         self.append(flow2)
         if self.hint:
-            self.append(label("Click to use" + ("" if self.max_select == 1 else ", numbers show the order") +
-                              ". Right-click a saved color to delete it.", ("tiny", "faint"), wrap=True))
+            self.append(label(_("Click to use. Right-click a saved color to delete it.") if self.max_select == 1 else
+                              _("Click to use, numbers show the order. Right-click a saved color to delete it."),
+                              ("tiny", "faint"), wrap=True))
 
     def _toggle(self, key):
         keys = self._keys()
@@ -957,7 +960,7 @@ class DualRange(Gtk.DrawingArea):
         g = Gtk.GestureDrag()
         g.connect("drag-begin", self._begin)
         g.connect("drag-update", self._update)
-        g.connect("drag-end", lambda *_: setattr(self, "_drag", None))
+        g.connect("drag-end", lambda *_a: setattr(self, "_drag", None))
         self.add_controller(g)
 
     def dragging(self) -> bool:
@@ -1042,7 +1045,7 @@ class LoadingIndicator(Gtk.DrawingArea):
     def start(self):
         if self._tick is None and motion():
             self._t0 = time.monotonic()
-            self._tick = self.add_tick_callback(lambda *_: (self.queue_draw(), GLib.SOURCE_CONTINUE)[1])
+            self._tick = self.add_tick_callback(lambda *_a: (self.queue_draw(), GLib.SOURCE_CONTINUE)[1])
         self.set_visible(True)
 
     def stop(self):

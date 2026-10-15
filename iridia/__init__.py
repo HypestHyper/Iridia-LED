@@ -1,6 +1,6 @@
 """Iridia, LED wallpaper sync for Linux."""
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 def get_version() -> str:

@@ -1,0 +1,1974 @@
+# Translations template for Iridia.
+# Copyright (C) 2026 Iridia Contributors
+# This file is distributed under the same license as the Iridia project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Iridia 1.1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-15 11:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Pirate\n"
+"Language: en_pirate\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#, python-brace-format
+msgid "Iridia {version}"
+msgstr "Iridia {version}, arr"
+
+msgid "Target"
+msgstr "Aimin' for"
+
+msgid "Sent to strip"
+msgstr "Sent to the riggin'"
+
+#, python-brace-format
+msgid "#{h} is shown exactly as picked"
+msgstr "#{h} be shown exactly as ye picked it"
+
+#, python-brace-format
+msgid "#{h} follows color correction again"
+msgstr "#{h} heeds color correction again, aye"
+
+#, python-brace-format
+msgid "#{h} is already in your saved colors"
+msgstr "#{h} be already in yer treasure chest"
+
+#, python-brace-format
+msgid "Saved #{h}"
+msgstr "Stashed #{h} in the chest"
+
+msgid "Rename"
+msgstr "Rename"
+
+msgid "Couldn't rename"
+msgstr "Blast! Couldn't rename it"
+
+msgid "Rename strip"
+msgstr "Rename the strip"
+
+#, python-brace-format
+msgid "A name for {zone} on {device}."
+msgstr "What be the name for {zone} on {device}?"
+
+#, python-brace-format
+msgid "A name for {device}."
+msgstr "What be the name for {device}?"
+
+msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgstr "It shows on the Cargo and Treasure Map decks. Leave it empty fer the name she was born with."
+
+msgid "Keep it under 40 characters."
+msgstr "Keep it under 40 letters, ye scallywag."
+
+msgid "Iridia"
+msgstr "Iridia"
+
+msgid "Connecting…"
+msgstr "Hailin' the ship…"
+
+msgid "Freeze colors"
+msgstr "Drop anchor on colors"
+
+msgid "Status"
+msgstr "Crow's Nest"
+
+msgid "Devices"
+msgstr "Cargo"
+
+msgid "Layout"
+msgstr "Treasure Map"
+
+msgid "Keybinds"
+msgstr "Signal Flags"
+
+msgid "Settings"
+msgstr "Ship's Articles"
+
+msgid "Service"
+msgstr "Below Decks"
+
+msgid "Refresh"
+msgstr "Look again"
+
+msgid "Restart daemon"
+msgstr "Rouse the bosun"
+
+msgid "Config folder"
+msgstr "Chart room"
+
+msgid "Log folder"
+msgstr "Captain's log"
+
+msgid "Quit"
+msgstr "Abandon ship"
+
+#, python-brace-format
+msgid "Couldn't open a file manager. The folder is {path}"
+msgstr "No file manager answered the call. The folder be at {path}"
+
+msgid "Waiting for the daemon…"
+msgstr "Waitin' on the bosun…"
+
+msgid "Now playing"
+msgstr "On deck now"
+
+msgid "Wallpaper"
+msgstr "Wallpaper"
+
+msgid "Main color"
+msgstr "Main color"
+
+msgid "Monitor sync (DDC)"
+msgstr "Spyglass sync (DDC)"
+
+msgid "Color correction"
+msgstr "Color correction"
+
+msgid "Wallpaper colors"
+msgstr "Wallpaper colors"
+
+msgid "Night mode"
+msgstr "Night watch"
+
+msgid "Lights"
+msgstr "Lanterns"
+
+msgid "Extraction backend"
+msgstr "How we plunder the colors"
+
+msgid "Color for this wallpaper"
+msgstr "Color fer this wallpaper"
+
+msgid ""
+"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
+"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
+" follows its own colors."
+msgstr ""
+"Click a color to hoist it on all yer lanterns. Yer picks, fer the whole fleet or one strip, be "
+"remembered fer this picture and come back when ye return to it. A wallpaper ye haven't picked fer"
+" sails by its own colors."
+
+msgid "Color correction preview"
+msgstr "A peek at the color correction"
+
+msgid "Your saved colors"
+msgstr "Yer treasure chest o' colors"
+
+msgid "Custom color…"
+msgstr "A color o' yer own…"
+
+msgid "Reset saved colors for this wallpaper"
+msgstr "Throw this wallpaper's picks overboard"
+
+#, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Wallpaper color {n}  #{hex}"
+
+#, python-brace-format
+msgid "#{c}  (right-click to delete)"
+msgstr "#{c}  (right-click to make it walk the plank)"
+
+msgid "None yet. Pick one with “Custom color…” below."
+msgstr "Nothin' yet. Pick one with “A color o' yer own…” below."
+
+msgid "Your zones use different colors (see the Devices tab)"
+msgstr "Yer zones fly different colors (see the Cargo deck)"
+
+#, python-brace-format
+msgid "All zones use #{hex}"
+msgstr "Every zone flies #{hex}"
+
+#, python-brace-format
+msgid "All zones use wallpaper color {n}"
+msgstr "Every zone flies wallpaper color {n}"
+
+msgid "Palette is on. Top: the wallpaper color. Bottom: the closest palette color your LEDs show."
+msgstr "Palette be on. Top: the wallpaper's color. Bottom: the nearest palette color yer lanterns show."
+
+#, python-brace-format
+msgid ""
+"Calibrated ({profile}). Top: the wallpaper color. Bottom: the color sent to the strip so it looks"
+" right."
+msgstr ""
+"Calibrated ({profile}). Top: the wallpaper's color. Bottom: the color sent so it looks shipshape "
+"on the strip."
+
+msgid "Zones use different corrections, so this shows the colors as they are."
+msgstr "The zones be correctin' different ways, so here be the colors as they are."
+
+msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
+msgstr "Color correction be off, so the strip gets the wallpaper colors as they be."
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Saved colors for this wallpaper were reset."
+msgstr "This wallpaper's picks went overboard."
+
+#, python-brace-format
+msgid "Deleted #{h} from your saved colors."
+msgstr "#{h} walked the plank out o' yer chest."
+
+msgid "The daemon isn't running."
+msgstr "The bosun ain't aboard."
+
+msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgstr "Yer cargo shows up here once he's aboard. Rouse him here or from Below Decks."
+
+msgid "Start daemon"
+msgstr "Rouse the bosun"
+
+msgid "No devices configured."
+msgstr "No cargo in the hold."
+
+msgid ""
+"Devices appear here once OpenRGB reports them. Start OpenRGB's SDK server (SDK Server tab, Start "
+"Server) and make sure it lists your devices."
+msgstr ""
+"Cargo shows up here once OpenRGB reports it. Start OpenRGB's SDK server (SDK Server tab, Start "
+"Server) and make sure it lists yer devices."
+
+msgid "All devices"
+msgstr "The whole fleet"
+
+#, python-brace-format
+msgid "Changes here apply to {n} zone."
+msgid_plural "Changes here apply to all {n} zones at once."
+msgstr[0] "Changes here hit {n} zone."
+msgstr[1] "Changes here hit all {n} zones at once, broadside!"
+
+msgid "Everything"
+msgstr "The Whole Fleet"
+
+msgid "Disabled"
+msgstr "Marooned"
+
+msgid "Whole device"
+msgstr "The whole vessel"
+
+msgid "Night mode and sleep"
+msgstr "Night watch an' slumber"
+
+msgid "Dim the LEDs at night, and turn them off while the PC sleeps."
+msgstr "Dim the lanterns at night, and douse 'em while the ship sleeps."
+
+msgid "From"
+msgstr "From"
+
+msgid "to"
+msgstr "to"
+
+msgid "brightness at most"
+msgstr "brightness no more than"
+
+msgid "Times are 24 hour, like 23:00. The window can cross midnight."
+msgstr "Ship's time be 24 hour, like 23:00. The watch can sail past midnight."
+
+msgid "Turn the LEDs off while the PC sleeps"
+msgstr "Douse the lanterns while the ship sleeps"
+
+msgid "Setups and backups"
+msgstr "Charts an' buried treasure"
+
+msgid ""
+"Save everything (devices, zones, layout, night mode, calibration, your colors for each wallpaper "
+"and your saved colors) under a name, and load it again later."
+msgstr ""
+"Bury everything (cargo, zones, the treasure map, night watch, calibration, yer colors fer each "
+"wallpaper an' yer chest o' colors) under a name, and dig it up again later."
+
+msgid "Setup"
+msgstr "Chart"
+
+msgid "No setups yet"
+msgstr "No charts yet"
+
+msgid "Save current as…"
+msgstr "Bury what we have as…"
+
+msgid "Load"
+msgstr "Dig up"
+
+msgid "Export"
+msgstr "Send by bottle"
+
+msgid "Import"
+msgstr "Fish a bottle out"
+
+msgid "Delete"
+msgstr "Make 'em walk the plank"
+
+msgid "Automatic backups"
+msgstr "Automatic buried treasure"
+
+msgid "No backups yet"
+msgstr "Nothin' buried yet"
+
+msgid "Restore"
+msgstr "Dig it up"
+
+msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
+msgstr "Diggin' up a chart first buries what ye have now, so ye can always sail back."
+
+msgid "Color calibration"
+msgstr "Color calibration"
+
+msgid ""
+"Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
+" Calibrated on the Devices tab."
+msgstr ""
+"Profiles that correct colors fer yer kind o' strip. Pick one per zone with Color correction: "
+"Calibrated on the Cargo deck."
+
+msgid "Profile"
+msgstr "Profile"
+
+msgid "Edit"
+msgstr "Tinker"
+
+msgid "Add"
+msgstr "Add"
+
+msgid "Color extraction"
+msgstr "Plunderin' colors"
+
+msgid "How Iridia picks colors from your wallpaper."
+msgstr "How Iridia plunders colors from yer wallpaper."
+
+msgid ""
+"Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, otherwise "
+"Material, otherwise Pillow"
+msgstr ""
+"Automatic (the captain's choice): Caelestia's own colors if Caelestia hung the wallpaper, "
+"otherwise Material, otherwise Pillow"
+
+msgid "Material: prominent colors from the image (needs material-color-utilities)"
+msgstr "Material: the boldest colors in the picture (needs material-color-utilities)"
+
+msgid "Pillow: median-cut dominant colors, no extra dependencies"
+msgstr "Pillow: median-cut colors, no extra cargo needed"
+
+msgid "Reset wallpaper detection cache"
+msgstr "Forget how we found the wallpaper"
+
+msgid "Forget all saved wallpaper colors"
+msgstr "Throw every wallpaper's picks overboard"
+
+msgid ""
+"Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
+"Reset this after changing wallpaper tool or shell."
+msgstr ""
+"Once a way o' findin' yer wallpaper works, Iridia remembers it instead o' tryin' every trick. "
+"Reset this after changin' yer wallpaper tool or shell."
+
+msgid "Appearance"
+msgstr "Ship's colors"
+
+msgid "Font"
+msgstr "Lettering"
+
+msgid "Google Sans Flex (built in)"
+msgstr "Google Sans Flex (ship's own)"
+
+msgid "System font"
+msgstr "The system's lettering"
+
+msgid "Reduce motion"
+msgstr "Calm the seas"
+
+msgid "Turns off shape morphs, sliding panels and the color cross-fade."
+msgstr "Stops the shape-shiftin', slidin' panels and the color fades."
+
+msgid "Logging"
+msgstr "Captain's log"
+
+msgid "Write a log file"
+msgstr "Write in the log book"
+
+msgid "Recent log"
+msgstr "Latest log entries"
+
+msgid "The daemon's latest messages. Works even with the log file switched off."
+msgstr "The bosun's latest mutterings. Works even with the log book closed."
+
+msgid "Lines"
+msgstr "Lines"
+
+msgid "Show"
+msgstr "Show"
+
+msgid "Copy"
+msgstr "Copy"
+
+msgid "Log copied"
+msgstr "Log copied"
+
+msgid "Press Show to load the latest lines."
+msgstr "Press Show to read the latest lines."
+
+msgid "Saved."
+msgstr "Stashed."
+
+msgid "Couldn't save"
+msgstr "Blast! Couldn't stash it"
+
+#, python-brace-format
+msgid "Saved “{name}”."
+msgstr "Stashed “{name}”."
+
+msgid "Save setup"
+msgstr "Bury the chart"
+
+msgid "Name for this setup. Saving under an existing name replaces it."
+msgstr "A name fer this chart. Buryin' under an existing name replaces it."
+
+msgid "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
+msgstr "Use letters, numbers, spaces, dashes, underscores an' brackets (up to 40 of 'em)."
+
+msgid "Couldn't load"
+msgstr "Blast! Couldn't dig it up"
+
+#, python-brace-format
+msgid "Loaded {what}. The previous state is in Automatic backups."
+msgstr "Dug up {what}. The old state be buried in Automatic buried treasure."
+
+msgid "Load setup"
+msgstr "Dig up a chart"
+
+#, python-brace-format
+msgid "Load “{name}”? Your current settings are backed up first."
+msgstr "Dig up “{name}”? What ye have now gets buried first."
+
+msgid "Restore backup"
+msgstr "Dig up buried treasure"
+
+#, python-brace-format
+msgid "Restore the backup from {date}? Your current settings are backed up first."
+msgstr "Dig up what was buried on {date}? What ye have now gets buried first."
+
+#, python-brace-format
+msgid "the backup from {date}"
+msgstr "what was buried on {date}"
+
+#, python-brace-format
+msgid "Renamed to “{name}”."
+msgstr "Renamed to “{name}”, arr."
+
+msgid "Rename setup"
+msgstr "Rename the chart"
+
+#, python-brace-format
+msgid "New name for “{old}”."
+msgstr "A new name fer “{old}”."
+
+msgid "Use letters, numbers, spaces, dashes and brackets."
+msgstr "Use letters, numbers, spaces, dashes an' brackets."
+
+msgid "Delete setup"
+msgstr "Make the chart walk the plank"
+
+#, python-brace-format
+msgid "Delete the setup “{name}”?"
+msgstr "Make the chart “{name}” walk the plank?"
+
+#, python-brace-format
+msgid "Deleted “{name}”."
+msgstr "“{name}” walked the plank."
+
+msgid "Save a setup first, then export it."
+msgstr "Bury a chart first, then send it by bottle."
+
+msgid "Export setup"
+msgstr "Send the chart by bottle"
+
+#, python-brace-format
+msgid "Saved {path}"
+msgstr "Stashed at {path}"
+
+msgid "Import setup"
+msgstr "Fish a chart out of a bottle"
+
+#, python-brace-format
+msgid "Imported as “{name}”. Select it and click Load."
+msgstr "Fished out as “{name}”. Pick it an' click Dig up."
+
+msgid "Couldn't import"
+msgstr "Blast! Couldn't fish it out"
+
+#, python-brace-format
+msgid "A profile called “{name}” already exists."
+msgstr "A profile called “{name}” already sails these waters."
+
+msgid "Calibration"
+msgstr "Calibration"
+
+msgid "Add a profile"
+msgstr "Add a profile"
+
+#, python-brace-format
+msgid "A new profile that starts as a copy of {base}. Give it a name, for example the strip it is for."
+msgstr "A new profile that starts as a copy o' {base}. Give it a name, like the strip it serves."
+
+#, python-brace-format
+msgid "Imported as “{name}”."
+msgstr "Fished out as “{name}”."
+
+msgid "Import a calibration profile"
+msgstr "Fish a calibration profile out of a bottle"
+
+msgid "Export profile"
+msgstr "Send the profile by bottle"
+
+msgid "WS2812B can't be deleted. Open Edit and use Reset to defaults."
+msgstr "WS2812B can't walk the plank. Open Tinker and use Back to the old ways."
+
+msgid "Delete profile"
+msgstr "Make the profile walk the plank"
+
+#, python-brace-format
+msgid "Delete “{name}”? Zones using it fall back to WS2812B."
+msgstr "Make “{name}” walk the plank? Zones usin' it fall back on WS2812B."
+
+msgid "Wallpaper detection will start over."
+msgstr "The hunt fer yer wallpaper starts over."
+
+msgid "Forget saved colors"
+msgstr "Throw the picks overboard"
+
+msgid ""
+"Forget the colors you picked for every wallpaper? Zones will follow each wallpaper's own colors "
+"again."
+msgstr ""
+"Throw the colors ye picked fer every wallpaper overboard? Zones will follow each wallpaper's own "
+"colors again."
+
+msgid "Saved wallpaper colors forgotten."
+msgstr "Overboard they went."
+
+msgid "Forget"
+msgstr "Overboard"
+
+msgid "The language changes when the window restarts."
+msgstr "The lingo changes when the window comes back."
+
+msgid "Restart"
+msgstr "Bring 'er back"
+
+#, python-brace-format
+msgid "Couldn't read the log: {error}"
+msgstr "Couldn't read the log: {error}"
+
+#, python-brace-format
+msgid "Daemon not reachable: {error}"
+msgstr "Can't hail the bosun: {error}"
+
+msgid "Background daemon"
+msgstr "The bosun"
+
+msgid ""
+"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
+"keeps working when this window is closed. This window only changes its settings."
+msgstr ""
+"The bosun be the part o' Iridia that keeps yer lanterns in line. He works below decks and keeps "
+"at it when this window be closed. This window only gives him orders."
+
+msgid "Checking…"
+msgstr "Checkin'…"
+
+msgid "Kill daemon"
+msgstr "Make the bosun walk the plank"
+
+msgid ""
+"Killing the daemon stops it completely. Your lights stay on their last colors until you start it "
+"again."
+msgstr ""
+"Makin' the bosun walk the plank stops him cold. Yer lanterns keep their last colors till ye rouse"
+" him again."
+
+msgid "Start the daemon when I log in"
+msgstr "Rouse the bosun when I come aboard"
+
+msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
+msgstr "Pick one way. If ye enable more than one, nothin' breaks, fer only one bosun ever sails."
+
+msgid "systemd service  ·  recommended"
+msgstr "systemd service  ·  the captain's choice"
+
+msgid "Enable at login"
+msgstr "Rouse at boarding"
+
+msgid "Disable"
+msgstr "Stand down"
+
+msgid "Remove completely"
+msgstr "Scuttle it"
+
+msgid "Other ways"
+msgstr "Other ways"
+
+msgid ""
+"Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
+"systemd."
+msgstr ""
+"Add one o' these to yer compositor's or desktop's own startup orders, instead o' (or as well as) "
+"systemd."
+
+msgid "Environment"
+msgstr "Waters"
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "Install XDG autostart"
+msgstr "Install XDG autostart"
+
+msgid "OpenRGB connection"
+msgstr "Hailin' OpenRGB"
+
+msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
+msgstr "OpenRGB be a separate ship that talks to yer lanterns. Iridia needs it afloat."
+
+msgid "Reconnect"
+msgstr "Hail again"
+
+msgid "Reconnecting…"
+msgstr "Hailin' again…"
+
+msgid "Restart OpenRGB server"
+msgstr "Restart the OpenRGB server"
+
+msgid ""
+"Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
+"its systemd service); use it when a device stops responding and Reconnect doesn't bring it back. "
+"It won't touch an OpenRGB window."
+msgstr ""
+"Hailin' again be quick an' safe to try first. Restart stops an' relaunches OpenRGB's SDK server "
+"(or its systemd service); use it when a device stops answerin' an' hailin' doesn't bring it back."
+" It won't touch an OpenRGB window."
+
+msgid "Diagnostics"
+msgstr "Ship's surgeon"
+
+msgid "Run diagnostics"
+msgstr "Call the surgeon"
+
+msgid ""
+"Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing “iridia "
+"doctor” prints."
+msgstr ""
+"Checks the bosun, OpenRGB, the zones, DDC an' the wallpaper hunt in one go, same as “iridia "
+"doctor” prints."
+
+msgid "Uninstall"
+msgstr "Jump ship"
+
+msgid "Uninstall Iridia…"
+msgstr "Make Iridia jump ship…"
+
+msgid ""
+"Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
+"to keep your settings. Same as running “iridia uninstall”."
+msgstr ""
+"Stops the bosun an' removes the service, launcher, icons an' program files. Ye choose whether to "
+"keep yer settings. Same as runnin' “iridia uninstall”."
+
+msgid ""
+"Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies on"
+" your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon)."
+msgstr ""
+"Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name an' trusts "
+"yer login PATH. If it won't start, use the full path (run: which iridia-daemon)."
+
+#, python-brace-format
+msgid "Add this to: {file}"
+msgstr "Add this to: {file}"
+
+msgid "Remove XDG autostart"
+msgstr "Remove XDG autostart"
+
+msgid "XDG autostart removed"
+msgstr "XDG autostart removed"
+
+msgid "XDG autostart installed"
+msgstr "XDG autostart installed"
+
+msgid "Daemon"
+msgstr "The bosun"
+
+msgid "Couldn't stop it."
+msgstr "He wouldn't stop."
+
+msgid "Enabled. The daemon now starts at login."
+msgstr "Aye. The bosun now rouses when ye come aboard."
+
+msgid "Install failed:"
+msgstr "Install ran aground:"
+
+msgid "Remove service"
+msgstr "Scuttle the service"
+
+msgid "Stop, disable and delete the systemd service (and the app launcher)? Your settings are kept."
+msgstr "Stop, stand down an' scuttle the systemd service (an' the app launcher)? Yer settings be kept."
+
+msgid "Removed."
+msgstr "Scuttled."
+
+msgid "Remove"
+msgstr "Scuttle"
+
+msgid ""
+"This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
+"other software using it."
+msgstr ""
+"This stops an' relaunches the OpenRGB SDK server (about 4 seconds), which briefly rocks any other"
+" ship tied to it."
+
+msgid "Uninstall Iridia"
+msgstr "Make Iridia jump ship"
+
+msgid ""
+"Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
+"something else changes them."
+msgstr ""
+"Make Iridia jump off this computer? The bosun goes too, so yer lanterns keep their last colors "
+"till somethin' else changes 'em."
+
+#, python-brace-format
+msgid "Couldn't start the uninstaller: {e}"
+msgstr "Couldn't start the uninstaller: {e}"
+
+msgid "Cancel"
+msgstr "Belay that"
+
+msgid "Remove, keep my settings"
+msgstr "Scuttle, but keep me settings"
+
+msgid "Remove everything"
+msgstr "Scuttle everything"
+
+msgid "Daemon stopped"
+msgstr "The bosun be gone"
+
+msgid "by systemd"
+msgstr "by systemd"
+
+msgid "without systemd"
+msgstr "without systemd"
+
+#, python-brace-format
+msgid "Running (pid {pid}, started {by})"
+msgstr "Aboard (pid {pid}, roused {by})"
+
+msgid "Enabled. The daemon starts automatically when you log in."
+msgstr "Aye. The bosun rouses on his own when ye come aboard."
+
+msgid "Installed but not enabled. It won't start at login."
+msgstr "Installed but standin' down. He won't rouse when ye come aboard."
+
+msgid "Not installed. Click “Enable at login” to set it up."
+msgstr "Not installed. Click “Rouse at boarding” to set it up."
+
+#, python-brace-format
+msgid "systemd status: {status}"
+msgstr "systemd says: {status}"
+
+msgid "Colors frozen. Wallpaper changes are ignored."
+msgstr "Anchor dropped. Wallpaper changes be ignored."
+
+msgid "Colors follow the wallpaper again."
+msgstr "Anchor weighed. The colors follow the wallpaper again."
+
+msgid "Daemon restarting…"
+msgstr "Rousin' the bosun…"
+
+msgid "Daemon not running"
+msgstr "Bosun ain't aboard"
+
+msgid "The daemon isn't running"
+msgstr "The bosun ain't aboard"
+
+msgid "Start it from the Service tab."
+msgstr "Rouse him from Below Decks."
+
+msgid "OpenRGB not connected"
+msgstr "OpenRGB ain't answerin'"
+
+#, python-brace-format
+msgid "Can't see: {devices}"
+msgstr "Can't spot: {devices}"
+
+#, python-brace-format
+msgid "Night mode until {time}"
+msgstr "Night watch till {time}"
+
+msgid "Frozen"
+msgstr "Anchored"
+
+msgid "No wallpaper detected yet"
+msgstr "No wallpaper spotted yet"
+
+msgid "Connected"
+msgstr "Hailed"
+
+msgid "Not connected"
+msgstr "Not hailed"
+
+msgid "Available"
+msgstr "Aboard"
+
+msgid "Not available"
+msgstr "Not aboard"
+
+msgid "Off"
+msgstr "Doused"
+
+msgid "Mixed"
+msgstr "A motley crew"
+
+msgid "Frozen (wallpaper changes are ignored)"
+msgstr "Anchored (wallpaper changes be ignored)"
+
+msgid "Following the wallpaper"
+msgstr "Followin' the wallpaper"
+
+#, python-brace-format
+msgid "On until {end}, brightness capped at {cap}%"
+msgstr "On watch till {end}, brightness held to {cap}%"
+
+#, python-brace-format
+msgid "Scheduled {start} to {end} (cap {cap}%)"
+msgstr "Watch from {start} to {end} (held to {cap}%)"
+
+msgid "Off (PC asleep)"
+msgstr "Doused (ship's asleep)"
+
+msgid "Off (turned off by command)"
+msgstr "Doused (by the captain's orders)"
+
+msgid "On"
+msgstr "Lit"
+
+#, python-brace-format
+msgid "{n} strip changed by a keybind (see Keybinds)"
+msgid_plural "{n} strips changed by a keybind (see Keybinds)"
+msgstr[0] "{n} strip changed by signal flags (see Signal Flags)"
+msgstr[1] "{n} strips changed by signal flags (see Signal Flags)"
+
+#, python-brace-format
+msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
+msgstr "Right now: wallpaper found by “{found}”{cached}, colors plundered by “{engine}”."
+
+msgid "nothing yet"
+msgstr "nothin' yet"
+
+msgid " (cached)"
+msgstr " (from the chest)"
+
+msgid "n/a (cached or not yet run)"
+msgstr "nay (from the chest, or not tried yet)"
+
+#, python-brace-format
+msgid "Connected, but not seeing: {devices}"
+msgstr "Hailed, but can't spot: {devices}"
+
+msgid "Connected. All configured devices visible."
+msgstr "Hailed. All the cargo be accounted fer."
+
+msgid "Not connected."
+msgstr "Not hailed."
+
+#, python-brace-format
+msgid "Edit profile: {name}"
+msgstr "Tinkerin' with the profile: {name}"
+
+#, python-brace-format
+msgid "Profile: {name}"
+msgstr "Profile: {name}"
+
+msgid "Reset to defaults"
+msgstr "Back to the old ways"
+
+msgid "Done"
+msgstr "Done, arr"
+
+msgid ""
+"Each row says which hex to send to the strip for a hue. Use Tune to change it while the strip "
+"shows exactly what you pick. Colors between rows are blended. Changes save automatically."
+msgstr ""
+"Each row says which hex to send to the strip fer a hue. Use Tune to change it while the strip "
+"shows exactly what ye pick. Colors between rows get blended. Changes be stashed on their own."
+
+msgid "Saved"
+msgstr "Stashed"
+
+msgid "Hue"
+msgstr "Hue"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Meant"
+msgstr "Meant"
+
+msgid "Sent"
+msgstr "Sent"
+
+msgid "Hex to send"
+msgstr "Hex to send"
+
+msgid "Wraps back to 0"
+msgstr "Sails back round to 0"
+
+msgid "Grey"
+msgstr "Grey"
+
+msgid "No color at all"
+msgstr "No color at all, like fog"
+
+msgid "Tune"
+msgstr "Tune"
+
+msgid "Add a row"
+msgstr "Add a row"
+
+msgid "Remove this row"
+msgstr "Throw this row overboard"
+
+#, python-brace-format
+msgid "Tune {name}"
+msgstr "Tune {name}"
+
+#, python-brace-format
+msgid "hue {n}"
+msgstr "hue {n}"
+
+msgid "Tune grey"
+msgstr "Tune the grey"
+
+msgid "That hue is taken or out of range (1 to 359)."
+msgstr "That hue be taken or off the map (1 to 359)."
+
+msgid "Keep at least two rows."
+msgstr "Keep at least two rows, matey."
+
+msgid "Type a hue from 1 to 359."
+msgstr "Give a hue from 1 to 359."
+
+msgid "That hue already has a row."
+msgstr "That hue already has a row."
+
+msgid "Which hue (degrees, 1 to 359)? It starts with the color the profile gives there now."
+msgstr "Which hue (degrees, 1 to 359)? It starts with the color the profile gives there now."
+
+msgid "Try a color"
+msgstr "Try a color"
+
+msgid ""
+"Move the sliders to check a color. The left swatch is the color you mean, the right one is what "
+"this profile sends."
+msgstr ""
+"Move the sliders to try a color. The left swatch be the color ye mean, the right one be what this"
+" profile sends."
+
+msgid "Saturation"
+msgstr "Saturation"
+
+msgid "Value"
+msgstr "Value"
+
+msgid "Show on LEDs"
+msgstr "Show on the lanterns"
+
+#, python-brace-format
+msgid ""
+"meant  #{want}\n"
+"sent   #{sent}"
+msgstr ""
+"meant  #{want}\n"
+"sent   #{sent}"
+
+msgid "Advanced"
+msgstr "Fer old salts"
+
+msgid "Saturation floor"
+msgstr "Saturation floor"
+
+msgid ""
+"Colors are never sent whiter than this. Raise it if colors look pale, lower it if they look too "
+"strong. Near-greys are not affected."
+msgstr ""
+"Colors never go out paler than this. Raise it if they look washed out like old sails, lower it if"
+" they look too loud. Near-greys be left alone."
+
+msgid "Saturation curve"
+msgstr "Saturation curve"
+
+msgid "How quickly pastel colors fade toward white. Lower is paler sooner."
+msgstr "How quick pastel colors fade to white. Lower be paler sooner."
+
+msgid "Blue to sky blue"
+msgstr "Blue to sky blue"
+
+msgid "Pushes pale blues toward sky blue instead of violet."
+msgstr "Pushes pale blues toward the sky instead o' violet."
+
+msgid "Grey sharpness"
+msgstr "Grey sharpness"
+
+msgid "How close to no color a color must be before the grey takes over."
+msgstr "How close to no color a color must be before the grey takes the helm."
+
+msgid "Swatch"
+msgstr "Swatch"
+
+msgid "Wheel"
+msgstr "Ship's wheel"
+
+msgid "current  →  new"
+msgstr "now  →  next"
+
+msgid "Hex  #"
+msgstr "Hex  #"
+
+msgid "Exact color"
+msgstr "Exact color"
+
+msgid ""
+"The LEDs show this hex as it is: no Palette or Calibrated correction, only brightness. Saved "
+"colors with a dot are exact."
+msgstr ""
+"The lanterns show this hex as it be: no Palette or Calibrated correction, only brightness. Colors"
+" in the chest with a dot be exact."
+
+msgid "Recently used"
+msgstr "Recently plundered"
+
+msgid "Select"
+msgstr "Pick"
+
+msgid "Save color"
+msgstr "Stash in the chest"
+
+msgid "No saved colors yet. “Save color” keeps the current one here and in every color list."
+msgstr ""
+"No colors in the chest yet. “Stash in the chest” keeps the current one here an' in every color "
+"list."
+
+msgid "OK"
+msgstr "Aye"
+
+msgid "Type a name."
+msgstr "Give it a name, matey."
+
+msgid "Open"
+msgstr "Open"
+
+msgid "Save"
+msgstr "Stash"
+
+#, python-brace-format
+msgid "Count LEDs: {name}"
+msgstr "Count the lanterns: {name}"
+
+msgid ""
+"Only one LED is lit. Move it with the slider, the buttons or the arrow keys until it is the last "
+"LED of the strip, then click “This is the last one”."
+msgstr ""
+"Only one lantern be lit. Move it with the slider, the buttons or the arrow keys till it's the "
+"last lantern o' the strip, then click “This be the last one”."
+
+msgid "Strip is longer? Set OpenRGB's size to"
+msgstr "Strip be longer? Set OpenRGB's size to"
+
+msgid "Resize"
+msgstr "Resize"
+
+msgid "This is the last one"
+msgstr "This be the last one"
+
+#, python-brace-format
+msgid "LED {n}"
+msgstr "Lantern {n}"
+
+msgid "The daemon didn't answer."
+msgstr "The bosun didn't answer."
+
+#, python-brace-format
+msgid ""
+"OpenRGB drives {n} LEDs on this zone, so the light can't go further than LED {n}. If your strip "
+"has more, set the size below first."
+msgstr ""
+"OpenRGB drives {n} lanterns on this zone, so the light can't sail past lantern {n}. If yer strip "
+"has more, set the size below first."
+
+msgid ""
+"OpenRGB doesn't have a size for this zone yet, so nothing can light up. Set the size below to the"
+" number of LEDs on your strip (more is fine), click Resize, then count."
+msgstr ""
+"OpenRGB don't know the size o' this zone yet, so nothin' can light up. Set the size below to the "
+"number o' lanterns on yer strip (more be fine), click Resize, then count."
+
+msgid "OpenRGB isn't connected, so the strip can't light up right now."
+msgstr "OpenRGB ain't hailed, so the strip can't light up right now."
+
+msgid "Resize failed"
+msgstr "Resize ran aground"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "All lights off / on"
+msgstr "All lanterns doused / lit"
+
+msgid "Freeze colors / follow the wallpaper"
+msgstr "Drop anchor on colors / follow the wallpaper"
+
+msgid "Night mode on / off"
+msgstr "Night watch on / off"
+
+msgid "Load a setup"
+msgstr "Dig up a chart"
+
+msgid "No modifier"
+msgstr "No modifier"
+
+msgid "All strips"
+msgstr "Every strip"
+
+msgid "sxhkd (X11 window managers)"
+msgstr "sxhkd (fer X11 window managers)"
+
+msgid "~/.config/hypr/hyprland.conf (or a file it sources)"
+msgstr "~/.config/hypr/hyprland.conf (or a file it calls aboard)"
+
+#, python-brace-format
+msgid "~/.config/niri/config.kdl, inside binds { }"
+msgstr "~/.config/niri/config.kdl, inside binds { }"
+
+msgid ""
+"System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
+" press your key:"
+msgstr ""
+"System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
+" press yer key:"
+
+msgid ""
+"Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the command,"
+" then set your key:"
+msgstr ""
+"Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the command,"
+" then set yer key:"
+
+msgid ""
+"Iridia doesn't listen to your keyboard. Your desktop does: you give a key a command, and pressing"
+" it runs that command. Build the command here, then add it to your desktop's config below."
+msgstr ""
+"Iridia don't listen to yer keyboard. Yer desktop does: ye give a key a command, an' pressin' it "
+"runs that command. Build the command here, then add it to yer desktop's orders below."
+
+msgid "Change strips"
+msgstr "Change strips"
+
+msgid "Other actions"
+msgstr "Other orders"
+
+msgid "Strips"
+msgstr "Strips"
+
+msgid "Power"
+msgstr "Lanterns"
+
+msgid "Leave as is"
+msgstr "Leave 'er be"
+
+msgid "Turn on"
+msgstr "Light 'em"
+
+msgid "Turn off"
+msgstr "Douse 'em"
+
+msgid "Back to normal"
+msgstr "As ye were"
+
+msgid "Pick the color"
+msgstr "Pick the color"
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Do"
+msgstr "Order"
+
+msgid "Command"
+msgstr "Command"
+
+msgid "Copy command"
+msgstr "Copy the command"
+
+msgid "Try it"
+msgstr "Give it a go"
+
+msgid "Add it to your desktop"
+msgstr "Add it to yer desktop"
+
+msgid ""
+"Pick your desktop and a key. Paste the line into the file shown, then reload your desktop's "
+"config."
+msgstr ""
+"Pick yer desktop an' a key. Paste the line into the file shown, then make yer desktop reread its "
+"orders."
+
+msgid "Desktop"
+msgstr "Desktop"
+
+msgid "Key"
+msgstr "Key"
+
+msgid ""
+"Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a combination"
+" your desktop doesn't use yet."
+msgstr ""
+"Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a combination"
+" yer desktop don't use yet."
+
+msgid "Copy line"
+msgstr "Copy the line"
+
+msgid "Changed by a keybind right now"
+msgstr "Changed by signal flags right now"
+
+msgid ""
+"Strip keybinds are temporary: nothing is saved, and they end when you press the key again, run "
+"Back to normal, or restart the daemon."
+msgstr ""
+"Strip signals don't last: nothin' be stashed, an' they end when ye press the key again, order As "
+"ye were, or rouse the bosun anew."
+
+msgid "More examples"
+msgstr "More examples"
+
+#, python-brace-format
+msgid ""
+"Short form for reading. In your desktop's config write the full path, {exe}, as the command above"
+" does: desktops often don't know where Iridia is installed."
+msgstr ""
+"Short form fer readin'. In yer desktop's orders write the full path, {exe}, as the command above "
+"does: desktops often don't know where Iridia be anchored."
+
+msgid "the names you can use"
+msgstr "the names ye can use"
+
+msgid "off, again: back to normal"
+msgstr "doused; again: as ye were"
+
+msgid "one color, again: back to normal"
+msgstr "one color; again: as ye were"
+
+msgid "every strip at 20%"
+msgstr "every strip at 20%"
+
+msgid "light a strip that is switched off"
+msgstr "light a strip that be marooned"
+
+msgid "several at once"
+msgstr "several at once"
+
+msgid "several strips (commas)"
+msgstr "several strips (commas)"
+
+msgid "undo every keybind change"
+msgstr "undo every signal"
+
+msgid "always off, never switch back"
+msgstr "always doused, never back"
+
+msgid "everything off / on"
+msgstr "all doused / all lit"
+
+msgid "stop / start following the wallpaper"
+msgstr "stop / start followin' the wallpaper"
+
+msgid "night mode on / off"
+msgstr "night watch on / off"
+
+msgid "load a saved setup (this one is permanent)"
+msgstr "dig up a buried chart (this one sticks)"
+
+msgid ""
+"Names are the ones shown in the window (rename a strip with its pencil button). When two strips "
+"share a name, use Device/Zone, as `zone list` shows."
+msgstr ""
+"Names be the ones shown in the window (rename a strip with its pencil). When two strips share a "
+"name, use Device/Zone, as `zone list` shows."
+
+msgid "Pick at least one thing to change: Turn on or off, a color or a brightness."
+msgstr "Pick at least one thing to change: Light or Douse, a color or a brightness."
+
+msgid "Save a setup first (Settings, Setups and backups)."
+msgstr "Bury a chart first (Ship's Articles, Charts an' buried treasure)."
+
+msgid "Undoes every keybind change on these strips."
+msgstr "Undoes every signal on these strips."
+
+msgid "Turns the strips off; press the key again to bring them back."
+msgstr "Douses the strips; press the key again to bring 'em back."
+
+msgid "turns them on (even when switched off)"
+msgstr "lights 'em (even when marooned)"
+
+msgid "shows one color"
+msgstr "shows one color"
+
+msgid "sets the brightness"
+msgstr "sets the brightness"
+
+#, python-brace-format
+msgid "One press: {actions}. The next press puts everything back."
+msgstr "One press: {actions}. The next press puts everything back as it were."
+
+msgid "Pick several strips to change them together."
+msgstr "Pick several strips to change 'em together."
+
+msgid "Same key turns everything off, then back on."
+msgstr "Same key douses everything, then lights it again."
+
+msgid "Same key freezes the current colors, then follows the wallpaper again."
+msgstr "Same key drops anchor on the colors, then follows the wallpaper again."
+
+msgid "Switches night mode on or off (this one is saved)."
+msgstr "Night watch on or off (this one be remembered)."
+
+msgid "Loads the setup and keeps it (an automatic backup is made first)."
+msgstr "Digs up the chart an' keeps it (yer old one gets buried first)."
+
+msgid "Keybind color"
+msgstr "Signal color"
+
+msgid "That didn't work"
+msgstr "That ran aground"
+
+msgid "Nothing: every strip shows its normal colors."
+msgstr "Nothin': every strip flies its normal colors."
+
+msgid "on"
+msgstr "lit"
+
+msgid "off"
+msgstr "doused"
+
+#, python-brace-format
+msgid "{n}% brightness"
+msgstr "{n}% brightness"
+
+msgid "Everything back to normal"
+msgstr "Everything as ye were"
+
+msgid "Failed"
+msgstr "Ran aground"
+
+msgid "Arrange"
+msgstr "Haul"
+
+msgid "Find LEDs: light one LED on the real strip"
+msgstr "Find lanterns: light one lantern on the real strip"
+
+msgid "Paint"
+msgstr "Paint"
+
+msgid "Erase (back to the zone's own color)"
+msgstr "Swab (back to the zone's own color)"
+
+msgid "Fill"
+msgstr "Flood"
+
+msgid "Gradient"
+msgstr "Gradient"
+
+msgid "Paint color"
+msgstr "Paint color"
+
+msgid "Zoom out"
+msgstr "Spyglass out"
+
+msgid "Zoom in"
+msgstr "Spyglass in"
+
+msgid "Show everything"
+msgstr "Show the whole map"
+
+msgid "Lock layout"
+msgstr "Nail down the map"
+
+msgid "No enabled zones yet. They show up here once the daemon reports them."
+msgstr "No zones aboard yet. They show up once the bosun reports 'em."
+
+#, python-brace-format
+msgid "{n} LED"
+msgid_plural "{n} LEDs"
+msgstr[0] "{n} lantern"
+msgstr[1] "{n} lanterns"
+
+msgid "clone"
+msgstr "stowaway"
+
+msgid "locked"
+msgstr "nailed down"
+
+msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
+msgstr "This strip be nailed down. Pry it loose (side panel or the lock) to move or bend it."
+
+msgid "Gradient: now click the LED where it should end."
+msgstr "Gradient: now click the lantern where it should end."
+
+#, python-brace-format
+msgid ""
+"LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the "
+"strip to move it. Right-click to add a bend there. Pick another tool to go back to normal."
+msgstr ""
+"Lantern {led} of {n} on {strip} be lit on yer strip; the rest be dark. Click or drag along the "
+"strip to move it. Right-click to add a bend there. Pick another tool to go back to normal."
+
+msgid "Layout locked: click a strip to select it, drag the diamonds to move color stops."
+msgstr "Map nailed down: click a strip to pick it, drag the diamonds to move color stops."
+
+msgid ""
+"Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for the"
+" whole strip, outside each corner for a bend (it snaps to 15°, hold Shift for free angles). "
+"Right-click a LED to add a bend there. Scroll to zoom, drag the background to pan."
+msgstr ""
+"Haul a strip to move it. Pick it, then turn a section with its round knob: behind lantern 1 fer "
+"the whole strip, outside each corner fer a bend (it snaps to 15°, hold Shift to steer freely). "
+"Right-click a lantern to add a bend there. Scroll fer the spyglass, drag the sea to sail about."
+
+msgid ""
+"Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, so"
+" you can see where corners and bends are. Right-click it to add a bend there."
+msgstr ""
+"Find lanterns: click a lantern (or drag along a strip) an' only that lantern lights up on yer "
+"real strip, so ye can see where corners an' bends be. Right-click it to add a bend there."
+
+msgid "Gradient: click the first LED, then the last one. Uses both colors."
+msgstr "Gradient: click the first lantern, then the last one. Uses both colors."
+
+msgid "Fill: click a strip to give every LED of it the first color."
+msgstr "Flood: click a strip to give every lantern of it the first color."
+
+msgid ""
+"Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or"
+" on Everything)."
+msgstr ""
+"Swab: click or drag over lanterns to give 'em back the zone's own color (the one set on the zone "
+"or on the Whole Fleet)."
+
+msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
+msgstr "Paint: click or drag over lanterns. Paintin' switches that zone to the Painted pattern."
+
+msgid "Layout locked: click to unlock"
+msgstr "Map nailed down: click to pry it loose"
+
+#, python-brace-format
+msgid "LED {led} of {n}"
+msgstr "Lantern {led} of {n}"
+
+msgid "Add a bend here"
+msgstr "Add a bend here"
+
+msgid "Remove this bend"
+msgstr "Remove this bend"
+
+msgid "Straighten"
+msgstr "Straighten 'er out"
+
+msgid "Flip LED order"
+msgstr "Flip the lantern order"
+
+msgid "Rename…"
+msgstr "Rename…"
+
+msgid "Clone this strip"
+msgstr "Make a stowaway of this strip"
+
+msgid "Hide this strip"
+msgstr "Hide this strip in the hold"
+
+msgid "Delete this clone"
+msgstr "Toss this stowaway overboard"
+
+msgid "Unlock this strip"
+msgstr "Pry this strip loose"
+
+msgid "Lock this strip"
+msgstr "Nail this strip down"
+
+msgid "Identify (light only this zone)"
+msgstr "Identify (light only this zone)"
+
+#, python-brace-format
+msgid "{strip} is hidden. Show it again from the strip list."
+msgstr "{strip} be hidden in the hold. Bring it back from the strip list."
+
+msgid "Undo"
+msgstr "Undo"
+
+msgid "Paint colors"
+msgstr "Paint colors"
+
+msgid ""
+"Click a color for the first paint color, right-click for the second (Gradient only). + saves the "
+"first one."
+msgstr ""
+"Click a color fer the first paint color, right-click fer the second (Gradient only). + stashes "
+"the first one."
+
+msgid "Nothing selected"
+msgstr "Nothin' picked"
+
+msgid ""
+"Click a strip to select it. Each enabled zone has one strip; add clones for strips that share a "
+"wire."
+msgstr ""
+"Click a strip to pick it. Each zone aboard has one strip; add stowaways fer strips that share a "
+"wire."
+
+msgid "Snap to grid"
+msgstr "Snap to the grid"
+
+msgid "Hide a strip to get it out of the way; it keeps its place and colors."
+msgstr "Hide a strip in the hold to get it out o' the way; it keeps its place an' colors."
+
+msgid "Show this strip"
+msgstr "Bring this strip on deck"
+
+#, python-brace-format
+msgid "{zone} on {device}"
+msgstr "{zone} on {device}"
+
+msgid "Rename this strip"
+msgstr "Rename this strip"
+
+msgid "clone (shows the same colors)"
+msgstr "stowaway (shows the same colors)"
+
+msgid "Identify"
+msgstr "Identify"
+
+msgid "Count LEDs"
+msgstr "Count the lanterns"
+
+msgid "Pattern"
+msgstr "Pattern"
+
+msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
+msgstr "Painted: use the Paint, Swab, Flood an' Gradient tools below."
+
+msgid "Shape"
+msgstr "Shape"
+
+msgid "Flip LED order (drawing only)"
+msgstr "Flip the lantern order (on the map only)"
+
+msgid "Turn"
+msgstr "Turn"
+
+msgid "Turn 90° left"
+msgstr "Hard to port 90°"
+
+msgid "Turn 90° right"
+msgstr "Hard to starboard 90°"
+
+msgid "LEDs per metre"
+msgstr "Lanterns per metre"
+
+msgid ""
+"The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is drawn"
+" at its real length."
+msgstr ""
+"The density printed on the strip or its listin': 30, 60, 96 or 144 be common. The strip be drawn "
+"at its real length."
+
+#, python-brace-format
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgstr "Each dot be one pixel of {lpp} lanterns (set on the Cargo deck, Strip type)."
+
+msgid "Bends"
+msgstr "Bends"
+
+msgid "None yet. Right-click a LED, or add one below."
+msgstr "None yet. Right-click a lantern, or add one below."
+
+#, python-brace-format
+msgid "Bend {i}"
+msgstr "Bend {i}"
+
+msgid "at LED"
+msgstr "at lantern"
+
+msgid "direction °"
+msgstr "headin' °"
+
+msgid "Add a bend at LED"
+msgstr "Add a bend at lantern"
+
+msgid ""
+"On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
+"strip, outside the corner for a bend."
+msgstr ""
+"On the map (the Haul tool), turn a section with its round knob: behind lantern 1 fer the whole "
+"strip, outside the corner fer a bend."
+
+msgid "Clone"
+msgstr "Stowaway"
+
+msgid "Hide"
+msgstr "Hide"
+
+msgid "Delete clone"
+msgstr "Toss the stowaway"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color, right-click for the second"
+msgstr "#{hex}: click fer the first color, right-click fer the second"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color"
+msgstr "#{hex}: click fer the first color"
+
+msgid "Save the first color to your saved colors"
+msgstr "Stash the first color in yer chest"
+
+msgid "Saved colors"
+msgstr "Chest o' colors"
+
+#, python-brace-format
+msgid "#{k}  (right-click to delete)"
+msgstr "#{k}  (right-click to make it walk the plank)"
+
+msgid "Save a new color"
+msgstr "Stash a new color"
+
+msgid "Click to use. Right-click a saved color to delete it."
+msgstr "Click to use. Right-click a stashed color to make it walk the plank."
+
+msgid "Click to use, numbers show the order. Right-click a saved color to delete it."
+msgstr "Click to use, numbers show the order. Right-click a stashed color to make it walk the plank."
+
+msgid "Palette"
+msgstr "Palette"
+
+msgid "Calibrated"
+msgstr "Calibrated"
+
+msgid "No correction. The color you pick is sent to the strip as it is."
+msgstr "No correction. The color ye pick goes to the strip as it be."
+
+msgid "Keeps every LED on the 48 safe colors that cheap LED strips show cleanly."
+msgstr "Keeps every lantern on the 48 safe colors that cheap strips show clean."
+
+msgid ""
+"Corrects colors so they look right on your strip. Choose the profile that matches it (edit them "
+"in Settings)."
+msgstr ""
+"Corrects colors so they look shipshape on yer strip. Pick the profile that matches it (tinker "
+"with 'em in Ship's Articles)."
+
+msgid "Zones use different corrections. Pick one to set them all."
+msgstr "The zones be correctin' different ways. Pick one to set 'em all."
+
+msgid "Solid"
+msgstr "Solid"
+
+msgid "Segments"
+msgstr "Segments"
+
+msgid "Center out"
+msgstr "Center out"
+
+msgid "Edges in"
+msgstr "Edges in"
+
+msgid "Alternating"
+msgstr "Alternatin'"
+
+msgid "Painted"
+msgstr "Painted"
+
+msgid "Automatic"
+msgstr "Automatic"
+
+msgid "Addressable 5V (WS2812B, SK6812)"
+msgstr "Addressable 5V (WS2812B, SK6812)"
+
+msgid "Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."
+msgstr "Every lantern has its own chip an' color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."
+
+msgid "Addressable 12V in groups (WS2811, COB)"
+msgstr "Addressable 12V in crews (WS2811, COB)"
+
+msgid ""
+"One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
+"how many LEDs are in a pixel so the Layout tab draws the real length."
+msgstr ""
+"One chip drives a crew o' lanterns, so a crew be one pixel. OpenRGB counts pixels, not lanterns; "
+"set how many lanterns be in a pixel so the Treasure Map draws the real length."
+
+msgid "One color (plain 12V RGB, 4 pins)"
+msgstr "One color (plain 12V RGB, 4 pins)"
+
+msgid ""
+"The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
+"apply, so they're hidden."
+msgstr ""
+"The whole strip flies one color (12V, R, G, B pins). Patterns, paintin' an' color stops don't "
+"apply, so they be hidden."
+
+msgid "RGBW addressable (SK6812 RGBW, experimental)"
+msgstr "RGBW addressable (SK6812 RGBW, experimental)"
+
+msgid ""
+"OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
+"itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
+"sends GRB (like WS2812B); use Color order if colors come out swapped. Count LEDs doesn't work on "
+"these strips: set the LED count by hand."
+msgstr ""
+"OpenRGB sends 3 bytes per lantern, RGBW strips read 4. Iridia packs the white channel into the "
+"data itself, which needs the OpenRGB zone to be a third bigger than the strip. Assumes the header"
+" sends GRB (like WS2812B); use Color order if colors come out swapped. Countin' lanterns don't "
+"work on these strips: set the count by hand."
+
+msgid "RGB (normal)"
+msgstr "RGB (normal)"
+
+msgid "mixed"
+msgstr "motley"
+
+msgid "no correction"
+msgstr "no correction"
+
+msgid "palette"
+msgstr "palette"
+
+msgid "calibrated"
+msgstr "calibrated"
+
+msgid "LEDs"
+msgstr "Lanterns"
+
+msgid "Identify lights only this zone, so you can see which strip it is."
+msgstr "Identify lights only this zone, so ye can see which strip it be."
+
+msgid "Edit layout"
+msgstr "Tinker with the layout"
+
+msgid "Reverse"
+msgstr "Reverse"
+
+msgid "Mirror"
+msgstr "Mirror"
+
+msgid "Follow monitor brightness"
+msgstr "Follow the spyglass brightness"
+
+msgid "Manual"
+msgstr "By hand"
+
+msgid "Range"
+msgstr "Range"
+
+msgid "Invert (bias lighting)"
+msgstr "Invert (bias lightin')"
+
+msgid "Gamma correction"
+msgstr "Gamma correction"
+
+msgid "Strip type and wiring"
+msgstr "Strip type an' riggin'"
+
+msgid "Strip type"
+msgstr "Strip type"
+
+msgid "Color order"
+msgstr "Color order"
+
+msgid "Test colors"
+msgstr "Test the colors"
+
+msgid ""
+"Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far end "
+"(a one-color strip cycles red, green, blue). If the colors are wrong, change the order until they"
+" match."
+msgstr ""
+"Test the colors lights this strip red at the lantern 1 end, green in the middle an' blue at the "
+"far end (a one-color strip cycles red, green, blue). If the colors be wrong, change the order "
+"till they match."
+
+msgid "LEDs per pixel"
+msgstr "Lanterns per pixel"
+
+msgid "Power limit"
+msgstr "Power limit"
+
+msgid "A  (0 = no limit)"
+msgstr "A  (0 = no limit)"
+
+msgid ""
+"Long 5V strips at full white pull a lot of current: the far end turns orange or pink, or the "
+"controller resets. Set your power supply's amps (minus a bit) and Iridia dims only when a color "
+"would go over it. The estimate assumes 60 mA per LED at full white."
+msgstr ""
+"Long 5V strips at full white drink a lot o' current: the far end turns orange or pink, or the "
+"controller goes overboard. Set yer power supply's amps (minus a bit) an' Iridia dims only when a "
+"color would go over. The guess assumes 60 mA per lantern at full white."
+
+msgid "Resize the OpenRGB zone"
+msgstr "Resize the OpenRGB zone"
+
+msgid "Stop test"
+msgstr "End the test"
+
+#, python-brace-format
+msgid "Asked OpenRGB for {need} LEDs on this zone"
+msgstr "Asked OpenRGB fer {need} lanterns on this zone"
+
+#, python-brace-format
+msgid "(looks like: {type})"
+msgstr "(looks like: {type})"
+
+#, python-brace-format
+msgid "Strip: {type}"
+msgstr "Strip: {type}"
+
+#, python-brace-format
+msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
+msgstr "Right now about {now:.1f} A, {full:.1f} A at full white."
+
+#, python-brace-format
+msgid "Dimmed to stay under the limit (would be {amps:.1f} A)."
+msgstr "Dimmed to stay under the limit (would be {amps:.1f} A)."
+
+#, python-brace-format
+msgid "For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark."
+msgstr "Fer {n} RGBW lanterns the OpenRGB zone needs {need}; right now the end o' the strip stays dark."
+
+msgid "Erase"
+msgstr "Swab"
+
+msgid "Clear"
+msgstr "Clear the deck"
+
+msgid "Done editing"
+msgstr "Done tinkerin'"
+
+msgid "Colors in order (click to change):"
+msgstr "Colors in order (click to change):"
+
+msgid "Change this color"
+msgstr "Change this color"
+
+msgid ""
+"OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
+"set the size there."
+msgstr ""
+"OpenRGB don't know how many lanterns this zone has yet, so nothin' lights up. Click Count the "
+"lanterns an' set the size there."
+
+msgid ""
+"This device has no Direct mode, so it shows one color for the whole device (the first one of the "
+"pattern)."
+msgstr ""
+"This device has no Direct mode, so it flies one color fer the whole device (the first one o' the "
+"pattern)."
+
+msgid "Red"
+msgstr "Blood red"
+
+msgid "Red-orange"
+msgstr "Red-orange"
+
+msgid "Orange"
+msgstr "Orange"
+
+msgid "Amber"
+msgstr "Rum amber"
+
+msgid "Yellow"
+msgstr "Doubloon gold"
+
+msgid "Lime"
+msgstr "Lime (fends off scurvy)"
+
+msgid "Green"
+msgstr "Seaweed green"
+
+msgid "Spring green"
+msgstr "Spring green"
+
+msgid "Cyan"
+msgstr "Cyan"
+
+msgid "Teal"
+msgstr "Teal"
+
+msgid "Sky blue"
+msgstr "Sky blue"
+
+msgid "Blue"
+msgstr "Deep sea blue"
+
+msgid "Violet"
+msgstr "Violet"
+
+msgid "Magenta"
+msgstr "Magenta"
+
+msgid "Pink"
+msgstr "Pink"
+
+msgid "Red (wraps around)"
+msgstr "Blood red (round the Horn again)"
+
+msgid "Start OpenRGB's server with Iridia"
+msgstr "Rouse OpenRGB's server along with Iridia"
+
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr "OpenRGB ain't aboard, so there be nothin' to rouse."
+
+msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
+msgstr "Iridia rouses it when ye come aboard (iridia-openrgb.service). It be workin'."
+
+msgid ""
+"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
+"diagnostics to see why."
+msgstr ""
+"Iridia rouses it when ye come aboard (iridia-openrgb.service), but it ain't workin' now. Call the"
+" surgeon to see why."
+
+#, python-brace-format
+msgid "Started by {what}. Iridia leaves that alone."
+msgstr "Roused by {what}. Iridia leaves that be."
+
+msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
+msgstr "No systemd on this ship: the bosun rouses OpenRGB himself when he can't hail it."
+
+msgid "Off. Start OpenRGB's server yourself."
+msgstr "Off. Rouse OpenRGB's server yerself."
+
+msgid ""
+"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
+" can't reach it."
+msgstr ""
+"Not rigged yet. Flip this to rouse it every time ye come aboard. Till then, the bosun rouses it "
+"when he can't hail it."
+
+msgid "OpenRGB"
+msgstr "OpenRGB"
+
+msgctxt "color correction"
+msgid "Off"
+msgstr "Raw"
+

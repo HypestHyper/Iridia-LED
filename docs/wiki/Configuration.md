@@ -14,9 +14,17 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 | `calibration/*.json` | Calibration profiles, one file each (`WS2812B.json`, `Neutral.json`, your own) |
 | `custom_colors.json` | Your saved colors, and which colors are exact |
 | `wallpaper_colors.json` | Extracted colors per wallpaper (a cache) and your color picks per wallpaper and zone |
-| `gui.json` | Window preferences: font, reduce motion, recently used colors |
+| `gui.json` | Window preferences: font, reduce motion, language, recently used colors |
 | `setups/` | Saved setups; automatic backups in `setups/.backups/` |
 | `detection_cache.json` | Which wallpaper tool was found last |
+
+### gui.json: language
+
+`"language"` picks the window's language. Leave it out (or set `""`) for the default, Proper English
+(British spelling). Values: `"en_GB"` (Proper English), `"en"` (American English), `"en_posh"`
+(Posh English), `"en_pirate"` (Pirate) and `"fr_omelette"` (Français). The same choice is in
+Settings, Appearance, Language; it applies when the window restarts. The command line and the log
+always use American spelling.
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
 `$XDG_RUNTIME_DIR/iridia-UID.sock`.
@@ -34,6 +42,8 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `color.frozen` | `false` | Freeze the current colors |
 | `openrgb.host` | `127.0.0.1` | Where the OpenRGB SDK server runs |
 | `openrgb.port` | `null` | Its port; `null` finds it on 6742 to 6744 |
+| `openrgb.start_server` | `true` | Start OpenRGB's server when it isn't reachable on this machine (see [Installation](Installation.md#setting-up-openrgb)) |
+| `openrgb.server_command` | `""` | The command that runs OpenRGB's server; empty finds `openrgb` or the Flatpak |
 | `openrgb.auto_restart_on_missing_device` | `true` | Restart OpenRGB's server when a device goes missing (at most twice per device) |
 | `openrgb.missing_device_restart_threshold_sec` | `45` | How long a device must be missing first |
 | `openrgb.restart_cooldown_sec` | `120` | Minimum time between such restarts |

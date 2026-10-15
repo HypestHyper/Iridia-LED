@@ -18,8 +18,8 @@ engine (see [How it works](How-It-Works.md#color-engines)).
 ## Quick install
 
 ```bash
-git clone https://github.com/OWNER/iridia.git
-cd iridia
+git clone https://github.com/HypestHyper/Iridia-LED.git
+cd Iridia-LED
 bash scripts/install.sh
 ```
 
@@ -90,12 +90,24 @@ your `PATH`.
 
 ## Setting up OpenRGB
 
-Iridia talks to OpenRGB's SDK server, so OpenRGB must be running with it switched on:
+Iridia talks to OpenRGB's SDK server, and starts that server itself, so usually there's nothing to do:
 
-- **With the OpenRGB window:** open the *SDK Server* tab and click *Start Server*. Turn on starting the
-  server automatically in OpenRGB's settings so you don't have to do it again.
-- **Without a window:** run `openrgb --server`, for example from a systemd user service or your
-  compositor's autostart.
+- **With systemd** (most distributions), the installer adds a user service, `iridia-openrgb.service`,
+  that runs `openrgb --server` at every login and restarts it if it crashes. The *Service* tab's
+  *Start OpenRGB's server with Iridia* switch (or `iridia openrgb enable` / `disable`) turns it on and off.
+- **Without systemd**, the daemon runs `openrgb --server` itself when it can't reach a server.
+- **If something else already starts OpenRGB** (its own *start at login* setting, another systemd unit, a
+  line in your compositor's config), Iridia leaves it alone. It also never starts a second OpenRGB while
+  one is running, because two instances fight over the same hardware.
+
+`iridia openrgb status` shows what starts OpenRGB on your machine. Iridia finds OpenRGB as the `openrgb`
+command or as the Flatpak (`org.openrgb.OpenRGB`). For an AppImage, set `openrgb.server_command` to the
+command that runs its server, for example `"~/Apps/OpenRGB.AppImage --server"` with the full path.
+
+To use the OpenRGB window while the server runs, connect the window to it (its *Client* tab,
+`localhost`, port 6742) instead of letting it scan the hardware a second time, or stop the server first
+(`systemctl --user stop iridia-openrgb.service`). If you'd rather manage OpenRGB yourself, run
+`iridia openrgb disable` and turn on *Start Server* in OpenRGB's *SDK Server* tab.
 
 Iridia finds the server on ports 6742 to 6744 by itself. For another host or port, set `openrgb.host` and
 `openrgb.port` (see [Configuration](Configuration.md)).

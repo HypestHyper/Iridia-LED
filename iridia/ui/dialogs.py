@@ -5,6 +5,7 @@ from typing import Callable, List, Optional
 
 from gi.repository import Gio, GLib, Gtk
 
+from iridia.i18n import _
 from iridia.ui.widgets import (Spin, button, card, focus_within, hbox, icon, label, vbox)
 
 PAUSE = None      # set by the app: callable(+1/-1) that pauses UI refreshes while a dialog previews
@@ -29,7 +30,7 @@ class Dialog(Gtk.Window):
         keys = Gtk.EventControllerKey()
         keys.connect("key-pressed", self._key)
         self.add_controller(keys)
-        self.connect("close-request", lambda *_: (self._fire_close(), False)[1])
+        self.connect("close-request", lambda *_a: (self._fire_close(), False)[1])
 
     def _key(self, _c, keyval, _code, _state):
         from gi.repository import Gdk
@@ -63,14 +64,14 @@ def message(parent, title: str, text: str, error: bool = False):
                                                                                   "error-text" if error else "accent")),
                        label(title, ("title",))))
     d.body.append(label(text, ("body", "dim"), wrap=True, chars=56))
-    d.buttons(button("OK", style="filled", cb=d.close))
+    d.buttons(button(_("OK"), style="filled", cb=d.close))
     d.on_enter = d.close
     d.present()
     return d
 
 
-def confirm(parent, title: str, text: str, on_yes: Callable, yes: str = "OK", danger: bool = False,
-            no: str = "Cancel", on_no: Optional[Callable] = None):
+def confirm(parent, title: str, text: str, on_yes: Callable, yes: Optional[str] = None, danger: bool = False,
+            no: Optional[str] = None, on_no: Optional[Callable] = None):
     d = Dialog(parent, title)
     d.body.append(label(title, ("title",)))
     d.body.append(label(text, ("body", "dim"), wrap=True, chars=56))
@@ -83,14 +84,15 @@ def confirm(parent, title: str, text: str, on_yes: Callable, yes: str = "OK", da
         d.close()
         if on_no:
             on_no()
-    d.buttons(button(no, style="text", cb=cancel), button(yes, style="danger" if danger else "filled", cb=ok))
+    d.buttons(button(no or _("Cancel"), style="text", cb=cancel),
+              button(yes or _("OK"), style="danger" if danger else "filled", cb=ok))
     d.on_enter = ok
     d.present()
     return d
 
 
 def ask_text(parent, title: str, prompt: str, initial: str, on_done: Callable[[str], None],
-             check: Optional[Callable[[str], Optional[str]]] = None, ok_label: str = "OK"):
+             check: Optional[Callable[[str], Optional[str]]] = None, ok_label: Optional[str] = None):
     d = Dialog(parent, title)
     d.body.append(label(title, ("title",)))
     d.body.append(label(prompt, ("small", "dim"), wrap=True, chars=52))
@@ -101,14 +103,14 @@ def ask_text(parent, title: str, prompt: str, initial: str, on_done: Callable[[s
 
     def ok():
         t = entry.get_text().strip()
-        msg = check(t) if check else (None if t else "Type a name.")
+        msg = check(t) if check else (None if t else _("Type a name."))
         if msg:
             err.set_label(msg)
             return
         d.close()
         on_done(t)
-    entry.connect("activate", lambda *_: ok())
-    d.buttons(button("Cancel", style="text", cb=d.close), button(ok_label, style="filled", cb=ok))
+    entry.connect("activate", lambda *_a: ok())
+    d.buttons(button(_("Cancel"), style="text", cb=d.close), button(ok_label or _("OK"), style="filled", cb=ok))
     d.present()
     entry.grab_focus()
     return d
@@ -119,7 +121,7 @@ _keep = set()       # FileChooserNative must stay referenced until it answers
 
 def _native(parent, title, action, accept, on_done, initial_name=None, flt=None):
     """GTK 4.6 .. 4.9 fallback for Gtk.FileDialog."""
-    dlg = Gtk.FileChooserNative.new(title, parent, action, accept, "Cancel")
+    dlg = Gtk.FileChooserNative.new(title, parent, action, accept, _("Cancel"))
     dlg.set_modal(True)
     if flt is not None:
         dlg.add_filter(flt)
@@ -143,7 +145,7 @@ def open_file(parent, title: str, on_done: Callable[[str], None], patterns=("*.j
     for p in patterns:
         f.add_pattern(p)
     if not hasattr(Gtk, "FileDialog"):
-        _native(parent, title, Gtk.FileChooserAction.OPEN, "Open", on_done, flt=f)
+        _native(parent, title, Gtk.FileChooserAction.OPEN, _("Open"), on_done, flt=f)
         return
     dlg = Gtk.FileDialog(title=title)
     store = Gio.ListStore.new(Gtk.FileFilter)
@@ -162,7 +164,7 @@ def open_file(parent, title: str, on_done: Callable[[str], None], patterns=("*.j
 
 def save_file(parent, title: str, initial_name: str, on_done: Callable[[str], None]):
     if not hasattr(Gtk, "FileDialog"):
-        _native(parent, title, Gtk.FileChooserAction.SAVE, "Save", on_done, initial_name=initial_name)
+        _native(parent, title, Gtk.FileChooserAction.SAVE, _("Save"), on_done, initial_name=initial_name)
         return
     dlg = Gtk.FileDialog(title=title, initial_name=initial_name)
 
@@ -192,22 +194,22 @@ class CountLedsDialog(Dialog):
     """Light one LED at a time so you can find the last one on the strip."""
 
     def __init__(self, parent, client, device: str, zone: str, current: int, on_done: Callable[[int], None]):
-        super().__init__(parent, f"Count LEDs: {zone or device}", width=520, on_close=self._closing)
+        super().__init__(parent, _("Count LEDs: {name}").format(name=zone or device), width=520, on_close=self._closing)
         self.client, self.device, self.zone, self.on_done = client, device, zone, on_done
         if PAUSE:
             PAUSE(1)
         self._size = None
         b = self.body
-        b.append(label(f"Count LEDs: {zone or device}", ("title",)))
-        b.append(label("Only one LED is lit. Move it with the slider, the buttons or the arrow keys until it is the "
-                       "last LED of the strip, then click “This is the last one”.", ("small", "dim"),
+        b.append(label(_('Count LEDs: {name}').format(name=zone or device), ("title",)))
+        b.append(label(_("Only one LED is lit. Move it with the slider, the buttons or the arrow keys until it is the "
+                       "last LED of the strip, then click “This is the last one”."), ("small", "dim"),
                        wrap=True, chars=60))
         self._num = label("", ("display", "accent"), xalign=0.5)
         b.append(self._num)
         self._adj = Gtk.Adjustment(value=max(1, current), lower=1, upper=max(current, 60), step_increment=1,
                                    page_increment=10)
         self._scale = Gtk.Scale(adjustment=self._adj, draw_value=False, hexpand=True)
-        self._adj.connect("value-changed", lambda *_: self._send())
+        self._adj.connect("value-changed", lambda *_a: self._send())
         b.append(self._scale)
         steps = hbox(6)
         steps.set_halign(Gtk.Align.CENTER)
@@ -217,13 +219,13 @@ class CountLedsDialog(Dialog):
         self._info = label("", ("small", "faint"), wrap=True, chars=60)
         b.append(self._info)
         rs = hbox(8)
-        rs.append(label("Strip is longer? Set OpenRGB's size to", ("small", "dim")))
+        rs.append(label(_("Strip is longer? Set OpenRGB's size to"), ("small", "dim")))
         self._resize = Spin(1, 1000, max(1, current), None)
         rs.append(self._resize)
-        rs.append(button("Resize", style="text", small=True, cb=self._do_resize))
+        rs.append(button(_("Resize"), style="text", small=True, cb=self._do_resize))
         b.append(rs)
-        self.buttons(button("Cancel", style="text", cb=self.close),
-                     button("This is the last one", style="filled", cb=self._done))
+        self.buttons(button(_("Cancel"), style="text", cb=self.close),
+                     button(_("This is the last one"), style="filled", cb=self._done))
         keys = Gtk.EventControllerKey()
         keys.connect("key-pressed", self._arrows)
         self.add_controller(keys)
@@ -249,33 +251,33 @@ class CountLedsDialog(Dialog):
 
     def _send(self):
         n = int(self._adj.get_value())
-        self._num.set_label(f"LED {n}")
+        self._num.set_label(_('LED {n}').format(n=n))
         run_bg(lambda: self.client.led_probe(self.device, self.zone, n - 1), self._got)
 
     def _got(self, r):
         if self._closed:
             return
         if not r.get("ok"):
-            self._info.set_label(r.get("error", "The daemon didn't answer."))
+            self._info.set_label(r.get("error", _("The daemon didn't answer.")))
             return
         size = r.get("zone_size")
         if size and size != self._size:
             self._size = size
             self._adj.set_upper(max(size, 1))
         if size:
-            t = (f"OpenRGB drives {size} LEDs on this zone, so the light can't go further than LED {size}. "
-                 "If your strip has more, set the size below first.")
+            t = _("OpenRGB drives {n} LEDs on this zone, so the light can't go further than LED {n}. "
+                  "If your strip has more, set the size below first.").format(n=size)
         elif size == 0:
-            t = ("OpenRGB doesn't have a size for this zone yet, so nothing can light up. Set the size below to "
-                 "the number of LEDs on your strip (more is fine), click Resize, then count.")
+            t = _("OpenRGB doesn't have a size for this zone yet, so nothing can light up. Set the size below to "
+                  "the number of LEDs on your strip (more is fine), click Resize, then count.")
         else:
-            t = "OpenRGB isn't connected, so the strip can't light up right now."
+            t = _("OpenRGB isn't connected, so the strip can't light up right now.")
         self._info.set_label(t)
 
     def _do_resize(self):
         n = int(self._resize.get_value())
         run_bg(lambda: self.client.resize_zone(self.device, self.zone, n),
-               lambda r: self._got(r) if r.get("ok") else self._info.set_label(r.get("error", "Resize failed")))
+               lambda r: self._got(r) if r.get("ok") else self._info.set_label(r.get("error", _("Resize failed"))))
 
     def _done(self):
         n = int(self._adj.get_value())
@@ -289,8 +291,8 @@ class CountLedsDialog(Dialog):
 
 
 def diagnostics_window(parent, checks: List):
-    d = Dialog(parent, "Diagnostics", width=640, height=560, resizable=True)
-    d.body.append(label("Diagnostics", ("title",)))
+    d = Dialog(parent, _("Diagnostics"), width=640, height=560, resizable=True)
+    d.body.append(label(_("Diagnostics"), ("title",)))
     sc = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)
     box = vbox(10)
     for c in checks:
@@ -308,7 +310,7 @@ def diagnostics_window(parent, checks: List):
         box.append(row)
     sc.set_child(box)
     d.body.append(sc)
-    d.buttons(button("Close", style="filled", cb=d.close))
+    d.buttons(button(_("Close"), style="filled", cb=d.close))
     d.present()
     return d
 

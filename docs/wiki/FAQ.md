@@ -49,3 +49,7 @@ Yes. Set `openrgb.host` and `openrgb.port` in `config.json`.
 **Why is the `iridia` command not found?**
 It lives in `~/.local/share/iridia-venv/bin/`. Add that folder to your `PATH` (see
 [Installation](Installation.md#running-it)) or use the full path.
+
+**What is the window's class or app id, for window rules?**
+`io.github.HypestHyper.Iridia`. For example, to make the window float on Hyprland:
+`windowrule = float, class:^(io\.github\.HypestHyper\.Iridia)$`

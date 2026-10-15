@@ -1,0 +1,1863 @@
+# Translations template for Iridia.
+# Copyright (C) 2026 Iridia Contributors
+# This file is distributed under the same license as the Iridia project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Iridia 1.1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-15 11:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Français\n"
+"Language: fr_omelette\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#, python-brace-format
+msgid "Iridia {version}"
+msgstr "Café"
+
+msgid "Target"
+msgstr "Fromage"
+
+msgid "Sent to strip"
+msgstr "Éclair"
+
+#, python-brace-format
+msgid "#{h} is shown exactly as picked"
+msgstr "J'ai une baguette"
+
+#, python-brace-format
+msgid "#{h} follows color correction again"
+msgstr "Un verre de vin rouge, merci"
+
+#, python-brace-format
+msgid "#{h} is already in your saved colors"
+msgstr "Le chat est sous la table"
+
+#, python-brace-format
+msgid "Saved #{h}"
+msgstr "Champagne"
+
+msgid "Rename"
+msgstr "Pardon ?"
+
+msgid "Couldn't rename"
+msgstr "Ooh la la"
+
+msgid "Rename strip"
+msgstr "Bonjour"
+
+#, python-brace-format
+msgid "A name for {zone} on {device}."
+msgstr "Croissant"
+
+#, python-brace-format
+msgid "A name for {device}."
+msgstr "Crêpe"
+
+msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgstr "Le poisson rouge est en vacances. Ma tante joue de l'accordéon."
+
+msgid "Keep it under 40 characters."
+msgstr "Le béret de mon grand-père"
+
+msgid "Iridia"
+msgstr "Iridia"
+
+msgid "Connecting…"
+msgstr "Baguette"
+
+msgid "Freeze colors"
+msgstr "Camembert"
+
+msgid "Status"
+msgstr "Fromage"
+
+msgid "Devices"
+msgstr "Baguette"
+
+msgid "Layout"
+msgstr "Croissant"
+
+msgid "Keybinds"
+msgstr "Moustache"
+
+msgid "Settings"
+msgstr "Oh là là"
+
+msgid "Service"
+msgstr "Allez !"
+
+msgid "Refresh"
+msgstr "Oui"
+
+msgid "Restart daemon"
+msgstr "Pardon ?"
+
+msgid "Config folder"
+msgstr "Bonne nuit"
+
+msgid "Log folder"
+msgstr "Oui"
+
+msgid "Quit"
+msgstr "Camembert"
+
+#, python-brace-format
+msgid "Couldn't open a file manager. The folder is {path}"
+msgstr "Le poisson rouge est en vacances"
+
+msgid "Waiting for the daemon…"
+msgstr "Mon chien mange du camembert"
+
+msgid "Now playing"
+msgstr "Quiche"
+
+msgid "Wallpaper"
+msgstr "Ooh la la"
+
+msgid "Main color"
+msgstr "Merci"
+
+msgid "Monitor sync (DDC)"
+msgstr "J'ai une baguette"
+
+msgid "Color correction"
+msgstr "Zut !"
+
+msgid "Wallpaper colors"
+msgstr "Déjà vu"
+
+msgid "Night mode"
+msgstr "Escargot"
+
+msgid "Lights"
+msgstr "C'est la vie"
+
+msgid "Extraction backend"
+msgstr "Deux cafés et l'addition"
+
+msgid "Color for this wallpaper"
+msgstr "Ceci n'est pas une pipe"
+
+msgid ""
+"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
+"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
+" follows its own colors."
+msgstr "Il était une fois un croissant. Je voudrais un éclair au chocolat. Je ne sais quoi."
+
+msgid "Color correction preview"
+msgstr "Le train est encore en retard"
+
+msgid "Your saved colors"
+msgstr "Qui a mangé mon fromage ?"
+
+msgid "Custom color…"
+msgstr "Brioche"
+
+msgid "Reset saved colors for this wallpaper"
+msgstr "Il pleut des cordes"
+
+#, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Le fromage qui pue"
+
+#, python-brace-format
+msgid "#{c}  (right-click to delete)"
+msgstr "Voulez-vous du fromage ?"
+
+msgid "None yet. Pick one with “Custom color…” below."
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid "Your zones use different colors (see the Devices tab)"
+msgstr "Omelette du fromage"
+
+#, python-brace-format
+msgid "All zones use #{hex}"
+msgstr "Café"
+
+#, python-brace-format
+msgid "All zones use wallpaper color {n}"
+msgstr "Où sont les toilettes ?"
+
+msgid "Palette is on. Top: the wallpaper color. Bottom: the closest palette color your LEDs show."
+msgstr "Mon aéroglisseur est plein d'anguilles. Qui a mangé mon fromage."
+
+#, python-brace-format
+msgid ""
+"Calibrated ({profile}). Top: the wallpaper color. Bottom: the color sent to the strip so it looks"
+" right."
+msgstr "Ceci n'est pas une pipe. Mon chien mange du camembert."
+
+msgid "Zones use different corrections, so this shows the colors as they are."
+msgstr "Bonjour, je m'appelle Jacques. Un verre de vin rouge, merci."
+
+msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
+msgstr "Ma tante joue de l'accordéon. Il pleut des cordes."
+
+msgid "Color"
+msgstr "Ratatouille"
+
+msgid "Saved colors for this wallpaper were reset."
+msgstr "Il pleut des cordes"
+
+#, python-brace-format
+msgid "Deleted #{h} from your saved colors."
+msgstr "J'aime les escargots au beurre"
+
+msgid "The daemon isn't running."
+msgstr "Où est la bibliothèque ?"
+
+msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgstr "Ma tante joue de l'accordéon. Il pleut des cordes."
+
+msgid "Start daemon"
+msgstr "Zut !"
+
+msgid "No devices configured."
+msgstr "Voulez-vous du fromage ?"
+
+msgid ""
+"Devices appear here once OpenRGB reports them. Start OpenRGB's SDK server (SDK Server tab, Start "
+"Server) and make sure it lists your devices."
+msgstr "La plume de ma tante. Omelette du fromage. Une grenouille dans mon café."
+
+msgid "All devices"
+msgstr "Crêpe"
+
+#, python-brace-format
+msgid "Changes here apply to {n} zone."
+msgid_plural "Changes here apply to all {n} zones at once."
+msgstr[0] "J'ai une baguette"
+msgstr[1] "J'ai une baguette"
+
+msgid "Everything"
+msgstr "Bof"
+
+msgid "Disabled"
+msgstr "Bonsoir"
+
+msgid "Whole device"
+msgstr "Oh là là"
+
+msgid "Night mode and sleep"
+msgstr "Un croissant, s'il vous plaît"
+
+msgid "Dim the LEDs at night, and turn them off while the PC sleeps."
+msgstr "La crêpe est tombée par terre. Je suis une baguette."
+
+msgid "From"
+msgstr "Pardon ?"
+
+msgid "to"
+msgstr "Béret"
+
+msgid "brightness at most"
+msgstr "Un croissant, s'il vous plaît"
+
+msgid "Times are 24 hour, like 23:00. The window can cross midnight."
+msgstr "Une grenouille dans mon café. Je ne sais quoi."
+
+msgid "Turn the LEDs off while the PC sleeps"
+msgstr "Mon chien mange du camembert"
+
+msgid "Setups and backups"
+msgstr "La baguette est trop longue"
+
+msgid ""
+"Save everything (devices, zones, layout, night mode, calibration, your colors for each wallpaper "
+"and your saved colors) under a name, and load it again later."
+msgstr "Bonjour, je m'appelle Jacques. La tour Eiffel est fermée aujourd'hui. Je ne sais quoi."
+
+msgid "Setup"
+msgstr "Moustache"
+
+msgid "No setups yet"
+msgstr "Brioche"
+
+msgid "Save current as…"
+msgstr "Champagne"
+
+msgid "Load"
+msgstr "C'est la vie"
+
+msgid "Export"
+msgstr "Bonjour"
+
+msgid "Import"
+msgstr "Brioche"
+
+msgid "Delete"
+msgstr "Bonjour"
+
+msgid "Automatic backups"
+msgstr "La baguette est trop longue"
+
+msgid "No backups yet"
+msgstr "Pardon ?"
+
+msgid "Restore"
+msgstr "Santé !"
+
+msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
+msgstr "Je ne sais quoi. Qui a mangé mon fromage."
+
+msgid "Color calibration"
+msgstr "Une grenouille dans mon café"
+
+msgid ""
+"Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
+" Calibrated on the Devices tab."
+msgstr "Ceci n'est pas une pipe. La plume de ma tante."
+
+msgid "Profile"
+msgstr "Bonjour"
+
+msgid "Edit"
+msgstr "Déjà vu"
+
+msgid "Add"
+msgstr "Brioche"
+
+msgid "Color extraction"
+msgstr "Zut !"
+
+msgid "How Iridia picks colors from your wallpaper."
+msgstr "Le fromage qui pue"
+
+msgid ""
+"Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, otherwise "
+"Material, otherwise Pillow"
+msgstr "La plume de ma tante. Bonjour, je m'appelle Jacques."
+
+msgid "Material: prominent colors from the image (needs material-color-utilities)"
+msgstr "Le pamplemousse est dans le jardin. Mon oncle est un champignon."
+
+msgid "Pillow: median-cut dominant colors, no extra dependencies"
+msgstr "Les moules sont délicieuses"
+
+msgid "Reset wallpaper detection cache"
+msgstr "Joyeux anniversaire"
+
+msgid "Forget all saved wallpaper colors"
+msgstr "Le chat est sous la table"
+
+msgid ""
+"Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
+"Reset this after changing wallpaper tool or shell."
+msgstr "Voulez-vous du fromage. Mon chien mange du camembert. Je voudrais un éclair au chocolat."
+
+msgid "Appearance"
+msgstr "Moustache"
+
+msgid "Font"
+msgstr "Bisou"
+
+msgid "Google Sans Flex (built in)"
+msgstr "Il était une fois un croissant"
+
+msgid "System font"
+msgstr "Bonsoir"
+
+msgid "Reduce motion"
+msgstr "Bof"
+
+msgid "Turns off shape morphs, sliding panels and the color cross-fade."
+msgstr "J'ai une baguette. Mon chien mange du camembert."
+
+msgid "Logging"
+msgstr "Quiche"
+
+msgid "Write a log file"
+msgstr "Ratatouille"
+
+msgid "Recent log"
+msgstr "Bof"
+
+msgid "The daemon's latest messages. Works even with the log file switched off."
+msgstr "Je voudrais un éclair au chocolat. Je ne sais quoi."
+
+msgid "Lines"
+msgstr "Crêpe"
+
+msgid "Show"
+msgstr "Bisou"
+
+msgid "Copy"
+msgstr "Pardon ?"
+
+msgid "Log copied"
+msgstr "Macaron"
+
+msgid "Press Show to load the latest lines."
+msgstr "Le béret de mon grand-père"
+
+msgid "Saved."
+msgstr "Santé !"
+
+msgid "Couldn't save"
+msgstr "Croissant"
+
+#, python-brace-format
+msgid "Saved “{name}”."
+msgstr "Bonjour"
+
+msgid "Save setup"
+msgstr "Pétanque"
+
+msgid "Name for this setup. Saving under an existing name replaces it."
+msgstr "Le chat est sous la table. Bonjour, je m'appelle Jacques."
+
+msgid "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
+msgstr "Voulez-vous du fromage. Ceci n'est pas une pipe."
+
+msgid "Couldn't load"
+msgstr "Non"
+
+#, python-brace-format
+msgid "Loaded {what}. The previous state is in Automatic backups."
+msgstr "Je ne sais quoi"
+
+msgid "Load setup"
+msgstr "Bonne nuit"
+
+#, python-brace-format
+msgid "Load “{name}”? Your current settings are backed up first."
+msgstr "Où est la bibliothèque ?"
+
+msgid "Restore backup"
+msgstr "C'est la vie"
+
+#, python-brace-format
+msgid "Restore the backup from {date}? Your current settings are backed up first."
+msgstr "J'aime les escargots au beurre. J'ai une baguette."
+
+#, python-brace-format
+msgid "the backup from {date}"
+msgstr "Macaron"
+
+#, python-brace-format
+msgid "Renamed to “{name}”."
+msgstr "Non"
+
+msgid "Rename setup"
+msgstr "Ratatouille"
+
+#, python-brace-format
+msgid "New name for “{old}”."
+msgstr "Fromage"
+
+msgid "Use letters, numbers, spaces, dashes and brackets."
+msgstr "Un verre de vin rouge, merci"
+
+msgid "Delete setup"
+msgstr "Macaron"
+
+#, python-brace-format
+msgid "Delete the setup “{name}”?"
+msgstr "Le béret de mon grand-père"
+
+#, python-brace-format
+msgid "Deleted “{name}”."
+msgstr "Quiche"
+
+msgid "Save a setup first, then export it."
+msgstr "Un verre de vin rouge, merci"
+
+msgid "Export setup"
+msgstr "C'est la vie"
+
+#, python-brace-format
+msgid "Saved {path}"
+msgstr "Sacrebleu !"
+
+msgid "Import setup"
+msgstr "Bonne nuit"
+
+#, python-brace-format
+msgid "Imported as “{name}”. Select it and click Load."
+msgstr "Qui a mangé mon fromage ?"
+
+msgid "Couldn't import"
+msgstr "Sacrebleu !"
+
+#, python-brace-format
+msgid "A profile called “{name}” already exists."
+msgstr "Ma tante joue de l'accordéon"
+
+msgid "Calibration"
+msgstr "Pardon ?"
+
+msgid "Add a profile"
+msgstr "Déjà vu"
+
+#, python-brace-format
+msgid "A new profile that starts as a copy of {base}. Give it a name, for example the strip it is for."
+msgstr "Le chat est sous la table. Mon aéroglisseur est plein d'anguilles."
+
+#, python-brace-format
+msgid "Imported as “{name}”."
+msgstr "Bof"
+
+msgid "Import a calibration profile"
+msgstr "Le poisson rouge est en vacances"
+
+msgid "Export profile"
+msgstr "Hop là"
+
+msgid "WS2812B can't be deleted. Open Edit and use Reset to defaults."
+msgstr "Le poisson rouge est en vacances. Ma tante joue de l'accordéon."
+
+msgid "Delete profile"
+msgstr "Macaron"
+
+#, python-brace-format
+msgid "Delete “{name}”? Zones using it fall back to WS2812B."
+msgstr "Joyeux anniversaire"
+
+msgid "Wallpaper detection will start over."
+msgstr "La crêpe est tombée par terre"
+
+msgid "Forget saved colors"
+msgstr "Le fromage qui pue"
+
+msgid ""
+"Forget the colors you picked for every wallpaper? Zones will follow each wallpaper's own colors "
+"again."
+msgstr "Où est la bibliothèque. Deux cafés et l'addition."
+
+msgid "Saved wallpaper colors forgotten."
+msgstr "Le chat est sous la table"
+
+msgid "Forget"
+msgstr "Baguette"
+
+msgid "The language changes when the window restarts."
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid "Restart"
+msgstr "Déjà vu"
+
+#, python-brace-format
+msgid "Couldn't read the log: {error}"
+msgstr "La plume de ma tante"
+
+#, python-brace-format
+msgid "Daemon not reachable: {error}"
+msgstr "Je ne sais quoi"
+
+msgid "Background daemon"
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid ""
+"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
+"keeps working when this window is closed. This window only changes its settings."
+msgstr "Le chat est sous la table. Une grenouille dans mon café. Les lapins sont dans la cuisine."
+
+msgid "Checking…"
+msgstr "Oui"
+
+msgid "Kill daemon"
+msgstr "Baguette"
+
+msgid ""
+"Killing the daemon stops it completely. Your lights stay on their last colors until you start it "
+"again."
+msgstr "Le pamplemousse est dans le jardin. Le béret de mon grand-père."
+
+msgid "Start the daemon when I log in"
+msgstr "Je ne sais quoi"
+
+msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
+msgstr "Je voudrais un éclair au chocolat. Les lapins sont dans la cuisine."
+
+msgid "systemd service  ·  recommended"
+msgstr "Où sont les toilettes ?"
+
+msgid "Enable at login"
+msgstr "Éclair"
+
+msgid "Disable"
+msgstr "Camembert"
+
+msgid "Remove completely"
+msgstr "Qui a mangé mon fromage ?"
+
+msgid "Other ways"
+msgstr "Sacrebleu !"
+
+msgid ""
+"Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
+"systemd."
+msgstr "Le béret de mon grand-père. La crêpe est tombée par terre."
+
+msgid "Environment"
+msgstr "Fromage"
+
+msgid "Copied"
+msgstr "Bonne nuit"
+
+msgid "Install XDG autostart"
+msgstr "Omelette du fromage"
+
+msgid "OpenRGB connection"
+msgstr "J'ai une baguette"
+
+msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
+msgstr "Qui a mangé mon fromage. J'ai une baguette."
+
+msgid "Reconnect"
+msgstr "Escargot"
+
+msgid "Reconnecting…"
+msgstr "Hop là"
+
+msgid "Restart OpenRGB server"
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid ""
+"Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
+"its systemd service); use it when a device stops responding and Reconnect doesn't bring it back. "
+"It won't touch an OpenRGB window."
+msgstr "Ma tante joue de l'accordéon. Il pleut des cordes. Mon oncle est un champignon."
+
+msgid "Diagnostics"
+msgstr "Bisou"
+
+msgid "Run diagnostics"
+msgstr "Oui"
+
+msgid ""
+"Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing “iridia "
+"doctor” prints."
+msgstr "J'aime les escargots au beurre. La crêpe est tombée par terre."
+
+msgid "Uninstall"
+msgstr "Sacrebleu !"
+
+msgid "Uninstall Iridia…"
+msgstr "J'ai une baguette"
+
+msgid ""
+"Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
+"to keep your settings. Same as running “iridia uninstall”."
+msgstr "Mon oncle est un champignon. Joyeux anniversaire. Ceci n'est pas une pipe."
+
+msgid ""
+"Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies on"
+" your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon)."
+msgstr "Le pamplemousse est dans le jardin. La plume de ma tante. Omelette du fromage."
+
+#, python-brace-format
+msgid "Add this to: {file}"
+msgstr "Camembert"
+
+msgid "Remove XDG autostart"
+msgstr "Ma tante joue de l'accordéon"
+
+msgid "XDG autostart removed"
+msgstr "Une grenouille dans mon café"
+
+msgid "XDG autostart installed"
+msgstr "Un croissant, s'il vous plaît"
+
+msgid "Daemon"
+msgstr "Voilà"
+
+msgid "Couldn't stop it."
+msgstr "Je ne sais quoi"
+
+msgid "Enabled. The daemon now starts at login."
+msgstr "Je voudrais un éclair au chocolat"
+
+msgid "Install failed:"
+msgstr "C'est la vie"
+
+msgid "Remove service"
+msgstr "Quiche"
+
+msgid "Stop, disable and delete the systemd service (and the app launcher)? Your settings are kept."
+msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
+
+msgid "Removed."
+msgstr "Bonsoir"
+
+msgid "Remove"
+msgstr "Baguette"
+
+msgid ""
+"This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
+"other software using it."
+msgstr "Qui a mangé mon fromage. La crêpe est tombée par terre."
+
+msgid "Uninstall Iridia"
+msgstr "Ooh la la"
+
+msgid ""
+"Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
+"something else changes them."
+msgstr "La tour Eiffel est fermée aujourd'hui. Joyeux anniversaire."
+
+#, python-brace-format
+msgid "Couldn't start the uninstaller: {e}"
+msgstr "Mon oncle est un champignon"
+
+msgid "Cancel"
+msgstr "Fromage"
+
+msgid "Remove, keep my settings"
+msgstr "Mon oncle est un champignon"
+
+msgid "Remove everything"
+msgstr "Le chat est sous la table"
+
+msgid "Daemon stopped"
+msgstr "Baguette"
+
+msgid "by systemd"
+msgstr "C'est la vie"
+
+msgid "without systemd"
+msgstr "Fromage"
+
+#, python-brace-format
+msgid "Running (pid {pid}, started {by})"
+msgstr "Le train est encore en retard"
+
+msgid "Enabled. The daemon starts automatically when you log in."
+msgstr "Ma tante joue de l'accordéon"
+
+msgid "Installed but not enabled. It won't start at login."
+msgstr "Je suis une baguette"
+
+msgid "Not installed. Click “Enable at login” to set it up."
+msgstr "Omelette du fromage"
+
+#, python-brace-format
+msgid "systemd status: {status}"
+msgstr "Crêpe"
+
+msgid "Colors frozen. Wallpaper changes are ignored."
+msgstr "Qui a mangé mon fromage ?"
+
+msgid "Colors follow the wallpaper again."
+msgstr "Je suis une baguette"
+
+msgid "Daemon restarting…"
+msgstr "Mon oncle est un champignon"
+
+msgid "Daemon not running"
+msgstr "La crêpe est tombée par terre"
+
+msgid "The daemon isn't running"
+msgstr "Bonjour, je m'appelle Jacques"
+
+msgid "Start it from the Service tab."
+msgstr "Un croissant, s'il vous plaît"
+
+msgid "OpenRGB not connected"
+msgstr "J'aime les escargots au beurre"
+
+#, python-brace-format
+msgid "Can't see: {devices}"
+msgstr "Baguette"
+
+#, python-brace-format
+msgid "Night mode until {time}"
+msgstr "Le fromage qui pue"
+
+msgid "Frozen"
+msgstr "Non"
+
+msgid "No wallpaper detected yet"
+msgstr "J'ai une baguette"
+
+msgid "Connected"
+msgstr "Bonjour"
+
+msgid "Not connected"
+msgstr "Oui"
+
+msgid "Available"
+msgstr "Bof"
+
+msgid "Not available"
+msgstr "Allez !"
+
+msgid "Off"
+msgstr "Pardon ?"
+
+msgid "Mixed"
+msgstr "Bof"
+
+msgid "Frozen (wallpaper changes are ignored)"
+msgstr "Il était une fois un croissant"
+
+msgid "Following the wallpaper"
+msgstr "J'ai une baguette"
+
+#, python-brace-format
+msgid "On until {end}, brightness capped at {cap}%"
+msgstr "Joyeux anniversaire"
+
+#, python-brace-format
+msgid "Scheduled {start} to {end} (cap {cap}%)"
+msgstr "La baguette est trop longue"
+
+msgid "Off (PC asleep)"
+msgstr "Café"
+
+msgid "Off (turned off by command)"
+msgstr "Un croissant, s'il vous plaît"
+
+msgid "On"
+msgstr "Oui"
+
+#, python-brace-format
+msgid "{n} strip changed by a keybind (see Keybinds)"
+msgid_plural "{n} strips changed by a keybind (see Keybinds)"
+msgstr[0] "J'ai une baguette"
+msgstr[1] "J'ai une baguette"
+
+#, python-brace-format
+msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
+msgstr "Le chat est sous la table"
+
+msgid "nothing yet"
+msgstr "Voilà"
+
+msgid " (cached)"
+msgstr "Crêpe"
+
+msgid "n/a (cached or not yet run)"
+msgstr "Une grenouille dans mon café"
+
+#, python-brace-format
+msgid "Connected, but not seeing: {devices}"
+msgstr "Il pleut des cordes"
+
+msgid "Connected. All configured devices visible."
+msgstr "Je suis une baguette"
+
+msgid "Not connected."
+msgstr "Bonjour"
+
+#, python-brace-format
+msgid "Edit profile: {name}"
+msgstr "Oui"
+
+#, python-brace-format
+msgid "Profile: {name}"
+msgstr "Camembert"
+
+msgid "Reset to defaults"
+msgstr "La crêpe est tombée par terre"
+
+msgid "Done"
+msgstr "Béret"
+
+msgid ""
+"Each row says which hex to send to the strip for a hue. Use Tune to change it while the strip "
+"shows exactly what you pick. Colors between rows are blended. Changes save automatically."
+msgstr "Joyeux anniversaire. Le béret de mon grand-père. Le chat est sous la table."
+
+msgid "Saved"
+msgstr "Hop là"
+
+msgid "Hue"
+msgstr "Éclair"
+
+msgid "Name"
+msgstr "Café"
+
+msgid "Meant"
+msgstr "Oh là là"
+
+msgid "Sent"
+msgstr "Zut !"
+
+msgid "Hex to send"
+msgstr "Hop là"
+
+msgid "Wraps back to 0"
+msgstr "Santé !"
+
+msgid "Grey"
+msgstr "Pétanque"
+
+msgid "No color at all"
+msgstr "Merci"
+
+msgid "Tune"
+msgstr "Croissant"
+
+msgid "Add a row"
+msgstr "Champagne"
+
+msgid "Remove this row"
+msgstr "Café"
+
+#, python-brace-format
+msgid "Tune {name}"
+msgstr "Hop là"
+
+#, python-brace-format
+msgid "hue {n}"
+msgstr "Bisou"
+
+msgid "Tune grey"
+msgstr "Bonjour"
+
+msgid "That hue is taken or out of range (1 to 359)."
+msgstr "J'ai une baguette"
+
+msgid "Keep at least two rows."
+msgstr "Les moules sont délicieuses"
+
+msgid "Type a hue from 1 to 359."
+msgstr "Le poisson rouge est en vacances"
+
+msgid "That hue already has a row."
+msgstr "La tour Eiffel est fermée aujourd'hui"
+
+msgid "Which hue (degrees, 1 to 359)? It starts with the color the profile gives there now."
+msgstr "Mon chien mange du camembert. Ma tante joue de l'accordéon."
+
+msgid "Try a color"
+msgstr "Hop là"
+
+msgid ""
+"Move the sliders to check a color. The left swatch is the color you mean, the right one is what "
+"this profile sends."
+msgstr "J'ai une baguette. Le béret de mon grand-père."
+
+msgid "Saturation"
+msgstr "Non"
+
+msgid "Value"
+msgstr "Merci"
+
+msgid "Show on LEDs"
+msgstr "Merci"
+
+#, python-brace-format
+msgid ""
+"meant  #{want}\n"
+"sent   #{sent}"
+msgstr "Ma tante joue de l'accordéon"
+
+msgid "Advanced"
+msgstr "Brioche"
+
+msgid "Saturation floor"
+msgstr "Bonne nuit"
+
+msgid ""
+"Colors are never sent whiter than this. Raise it if colors look pale, lower it if they look too "
+"strong. Near-greys are not affected."
+msgstr "Ceci n'est pas une pipe. La plume de ma tante."
+
+msgid "Saturation curve"
+msgstr "Bonsoir"
+
+msgid "How quickly pastel colors fade toward white. Lower is paler sooner."
+msgstr "Un croissant, s'il vous plaît. Bonjour, je m'appelle Jacques."
+
+msgid "Blue to sky blue"
+msgstr "Bof"
+
+msgid "Pushes pale blues toward sky blue instead of violet."
+msgstr "Où est la bibliothèque ?"
+
+msgid "Grey sharpness"
+msgstr "Escargot"
+
+msgid "How close to no color a color must be before the grey takes over."
+msgstr "Un croissant, s'il vous plaît. Une grenouille dans mon café."
+
+msgid "Swatch"
+msgstr "Oui"
+
+msgid "Wheel"
+msgstr "Bonjour"
+
+msgid "current  →  new"
+msgstr "Ooh la la"
+
+msgid "Hex  #"
+msgstr "Déjà vu"
+
+msgid "Exact color"
+msgstr "Ooh la la"
+
+msgid ""
+"The LEDs show this hex as it is: no Palette or Calibrated correction, only brightness. Saved "
+"colors with a dot are exact."
+msgstr "Le chat est sous la table. Bonjour, je m'appelle Jacques."
+
+msgid "Recently used"
+msgstr "Pardon ?"
+
+msgid "Select"
+msgstr "Ooh la la"
+
+msgid "Save color"
+msgstr "Ooh la la"
+
+msgid "No saved colors yet. “Save color” keeps the current one here and in every color list."
+msgstr "Le pamplemousse est dans le jardin. Le béret de mon grand-père."
+
+msgid "OK"
+msgstr "Bonne nuit"
+
+msgid "Type a name."
+msgstr "Café"
+
+msgid "Open"
+msgstr "Ooh la la"
+
+msgid "Save"
+msgstr "Béret"
+
+#, python-brace-format
+msgid "Count LEDs: {name}"
+msgstr "Éclair"
+
+msgid ""
+"Only one LED is lit. Move it with the slider, the buttons or the arrow keys until it is the last "
+"LED of the strip, then click “This is the last one”."
+msgstr "La baguette est trop longue. Le fromage qui pue. La tour Eiffel est fermée aujourd'hui."
+
+msgid "Strip is longer? Set OpenRGB's size to"
+msgstr "Où sont les toilettes ?"
+
+msgid "Resize"
+msgstr "Zut !"
+
+msgid "This is the last one"
+msgstr "La plume de ma tante"
+
+#, python-brace-format
+msgid "LED {n}"
+msgstr "Zut !"
+
+msgid "The daemon didn't answer."
+msgstr "Je suis une baguette"
+
+#, python-brace-format
+msgid ""
+"OpenRGB drives {n} LEDs on this zone, so the light can't go further than LED {n}. If your strip "
+"has more, set the size below first."
+msgstr "Le pamplemousse est dans le jardin. Ceci n'est pas une pipe."
+
+msgid ""
+"OpenRGB doesn't have a size for this zone yet, so nothing can light up. Set the size below to the"
+" number of LEDs on your strip (more is fine), click Resize, then count."
+msgstr "Un verre de vin rouge, merci. Le poisson rouge est en vacances. Je voudrais un éclair au chocolat."
+
+msgid "OpenRGB isn't connected, so the strip can't light up right now."
+msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
+
+msgid "Resize failed"
+msgstr "Oh là là"
+
+msgid "Close"
+msgstr "Bonne nuit"
+
+msgid "All lights off / on"
+msgstr "Le poisson rouge est en vacances"
+
+msgid "Freeze colors / follow the wallpaper"
+msgstr "Voulez-vous du fromage ?"
+
+msgid "Night mode on / off"
+msgstr "Bonjour, je m'appelle Jacques"
+
+msgid "Load a setup"
+msgstr "Quiche"
+
+msgid "No modifier"
+msgstr "Café"
+
+msgid "All strips"
+msgstr "Pétanque"
+
+msgid "sxhkd (X11 window managers)"
+msgstr "J'aime les escargots au beurre"
+
+msgid "~/.config/hypr/hyprland.conf (or a file it sources)"
+msgstr "Un verre de vin rouge, merci"
+
+#, python-brace-format
+msgid "~/.config/niri/config.kdl, inside binds { }"
+msgstr "Le chat est sous la table"
+
+msgid ""
+"System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
+" press your key:"
+msgstr "Un croissant, s'il vous plaît. Bonjour, je m'appelle Jacques."
+
+msgid ""
+"Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the command,"
+" then set your key:"
+msgstr "Omelette du fromage. Voulez-vous du fromage."
+
+msgid ""
+"Iridia doesn't listen to your keyboard. Your desktop does: you give a key a command, and pressing"
+" it runs that command. Build the command here, then add it to your desktop's config below."
+msgstr "Le train est encore en retard. Ma tante joue de l'accordéon. J'aime les escargots au beurre."
+
+msgid "Change strips"
+msgstr "Crêpe"
+
+msgid "Other actions"
+msgstr "Oh là là"
+
+msgid "Strips"
+msgstr "Moustache"
+
+msgid "Power"
+msgstr "Quiche"
+
+msgid "Leave as is"
+msgstr "Brioche"
+
+msgid "Turn on"
+msgstr "C'est la vie"
+
+msgid "Turn off"
+msgstr "Pardon ?"
+
+msgid "Back to normal"
+msgstr "Bisou"
+
+msgid "Pick the color"
+msgstr "Éclair"
+
+msgid "Brightness"
+msgstr "Bisou"
+
+msgid "Do"
+msgstr "Bof"
+
+msgid "Command"
+msgstr "Bonjour"
+
+msgid "Copy command"
+msgstr "Café"
+
+msgid "Try it"
+msgstr "Champagne"
+
+msgid "Add it to your desktop"
+msgstr "Le poisson rouge est en vacances"
+
+msgid ""
+"Pick your desktop and a key. Paste the line into the file shown, then reload your desktop's "
+"config."
+msgstr "La tour Eiffel est fermée aujourd'hui. Joyeux anniversaire."
+
+msgid "Desktop"
+msgstr "Ooh la la"
+
+msgid "Key"
+msgstr "Sacrebleu !"
+
+msgid ""
+"Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a combination"
+" your desktop doesn't use yet."
+msgstr "Les moules sont délicieuses. Le fromage qui pue."
+
+msgid "Copy line"
+msgstr "Moustache"
+
+msgid "Changed by a keybind right now"
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid ""
+"Strip keybinds are temporary: nothing is saved, and they end when you press the key again, run "
+"Back to normal, or restart the daemon."
+msgstr "La baguette est trop longue. La crêpe est tombée par terre."
+
+msgid "More examples"
+msgstr "Éclair"
+
+#, python-brace-format
+msgid ""
+"Short form for reading. In your desktop's config write the full path, {exe}, as the command above"
+" does: desktops often don't know where Iridia is installed."
+msgstr "Un verre de vin rouge, merci. Le fromage qui pue. Le train est encore en retard."
+
+msgid "the names you can use"
+msgstr "Le fromage qui pue"
+
+msgid "off, again: back to normal"
+msgstr "Il était une fois un croissant"
+
+msgid "one color, again: back to normal"
+msgstr "J'ai une baguette"
+
+msgid "every strip at 20%"
+msgstr "Omelette du fromage"
+
+msgid "light a strip that is switched off"
+msgstr "Il était une fois un croissant"
+
+msgid "several at once"
+msgstr "Camembert"
+
+msgid "several strips (commas)"
+msgstr "Il pleut des cordes"
+
+msgid "undo every keybind change"
+msgstr "Une grenouille dans mon café"
+
+msgid "always off, never switch back"
+msgstr "Je suis une baguette"
+
+msgid "everything off / on"
+msgstr "Les moules sont délicieuses"
+
+msgid "stop / start following the wallpaper"
+msgstr "Omelette du fromage"
+
+msgid "night mode on / off"
+msgstr "Il était une fois un croissant"
+
+msgid "load a saved setup (this one is permanent)"
+msgstr "Le chat est sous la table"
+
+msgid ""
+"Names are the ones shown in the window (rename a strip with its pencil button). When two strips "
+"share a name, use Device/Zone, as `zone list` shows."
+msgstr "Omelette du fromage. Qui a mangé mon fromage. J'ai une baguette."
+
+msgid "Pick at least one thing to change: Turn on or off, a color or a brightness."
+msgstr "Mon oncle est un champignon. Je ne sais quoi."
+
+msgid "Save a setup first (Settings, Setups and backups)."
+msgstr "Un verre de vin rouge, merci"
+
+msgid "Undoes every keybind change on these strips."
+msgstr "La plume de ma tante"
+
+msgid "Turns the strips off; press the key again to bring them back."
+msgstr "La tour Eiffel est fermée aujourd'hui. Je ne sais quoi."
+
+msgid "turns them on (even when switched off)"
+msgstr "Ceci n'est pas une pipe"
+
+msgid "shows one color"
+msgstr "Croissant"
+
+msgid "sets the brightness"
+msgstr "La plume de ma tante"
+
+#, python-brace-format
+msgid "One press: {actions}. The next press puts everything back."
+msgstr "Les lapins sont dans la cuisine"
+
+msgid "Pick several strips to change them together."
+msgstr "Joyeux anniversaire"
+
+msgid "Same key turns everything off, then back on."
+msgstr "Qui a mangé mon fromage ?"
+
+msgid "Same key freezes the current colors, then follows the wallpaper again."
+msgstr "Les moules sont délicieuses. J'ai une baguette."
+
+msgid "Switches night mode on or off (this one is saved)."
+msgstr "Le pamplemousse est dans le jardin"
+
+msgid "Loads the setup and keeps it (an automatic backup is made first)."
+msgstr "Il pleut des cordes. Le béret de mon grand-père."
+
+msgid "Keybind color"
+msgstr "Ratatouille"
+
+msgid "That didn't work"
+msgstr "Ooh la la"
+
+msgid "Nothing: every strip shows its normal colors."
+msgstr "Le train est encore en retard"
+
+msgid "on"
+msgstr "Bisou"
+
+msgid "off"
+msgstr "Santé !"
+
+#, python-brace-format
+msgid "{n}% brightness"
+msgstr "Crêpe"
+
+msgid "Everything back to normal"
+msgstr "Les moules sont délicieuses"
+
+msgid "Failed"
+msgstr "Moustache"
+
+msgid "Arrange"
+msgstr "Déjà vu"
+
+msgid "Find LEDs: light one LED on the real strip"
+msgstr "Omelette du fromage"
+
+msgid "Paint"
+msgstr "Quiche"
+
+msgid "Erase (back to the zone's own color)"
+msgstr "J'ai une baguette"
+
+msgid "Fill"
+msgstr "Santé !"
+
+msgid "Gradient"
+msgstr "Oh là là"
+
+msgid "Paint color"
+msgstr "Santé !"
+
+msgid "Zoom out"
+msgstr "Sacrebleu !"
+
+msgid "Zoom in"
+msgstr "Oui"
+
+msgid "Show everything"
+msgstr "Allez !"
+
+msgid "Lock layout"
+msgstr "Hop là"
+
+msgid "No enabled zones yet. They show up here once the daemon reports them."
+msgstr "Le pamplemousse est dans le jardin. Il était une fois un croissant."
+
+#, python-brace-format
+msgid "{n} LED"
+msgid_plural "{n} LEDs"
+msgstr[0] "Bisou"
+msgstr[1] "Bisou"
+
+msgid "clone"
+msgstr "Bonne nuit"
+
+msgid "locked"
+msgstr "Bisou"
+
+msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
+msgstr "La crêpe est tombée par terre. J'ai une baguette."
+
+msgid "Gradient: now click the LED where it should end."
+msgstr "Je ne sais quoi"
+
+#, python-brace-format
+msgid ""
+"LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the "
+"strip to move it. Right-click to add a bend there. Pick another tool to go back to normal."
+msgstr "La plume de ma tante. Qui a mangé mon fromage. Je suis une baguette."
+
+msgid "Layout locked: click a strip to select it, drag the diamonds to move color stops."
+msgstr "Joyeux anniversaire. Où est la bibliothèque."
+
+msgid ""
+"Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for the"
+" whole strip, outside each corner for a bend (it snaps to 15°, hold Shift for free angles). "
+"Right-click a LED to add a bend there. Scroll to zoom, drag the background to pan."
+msgstr "Ma tante joue de l'accordéon. Il pleut des cordes. La plume de ma tante."
+
+msgid ""
+"Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, so"
+" you can see where corners and bends are. Right-click it to add a bend there."
+msgstr "Le poisson rouge est en vacances. Il pleut des cordes. Ceci n'est pas une pipe."
+
+msgid "Gradient: click the first LED, then the last one. Uses both colors."
+msgstr "Le poisson rouge est en vacances. La baguette est trop longue."
+
+msgid "Fill: click a strip to give every LED of it the first color."
+msgstr "La baguette est trop longue"
+
+msgid ""
+"Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or"
+" on Everything)."
+msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
+
+msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
+msgstr "Mon aéroglisseur est plein d'anguilles. Bonjour, je m'appelle Jacques."
+
+msgid "Layout locked: click to unlock"
+msgstr "Le béret de mon grand-père"
+
+#, python-brace-format
+msgid "LED {led} of {n}"
+msgstr "Pardon ?"
+
+msgid "Add a bend here"
+msgstr "Camembert"
+
+msgid "Remove this bend"
+msgstr "Pétanque"
+
+msgid "Straighten"
+msgstr "Merci"
+
+msgid "Flip LED order"
+msgstr "Santé !"
+
+msgid "Rename…"
+msgstr "Déjà vu"
+
+msgid "Clone this strip"
+msgstr "Crêpe"
+
+msgid "Hide this strip"
+msgstr "Moustache"
+
+msgid "Delete this clone"
+msgstr "Omelette du fromage"
+
+msgid "Unlock this strip"
+msgstr "Ceci n'est pas une pipe"
+
+msgid "Lock this strip"
+msgstr "Sacrebleu !"
+
+msgid "Identify (light only this zone)"
+msgstr "Voulez-vous du fromage ?"
+
+#, python-brace-format
+msgid "{strip} is hidden. Show it again from the strip list."
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid "Undo"
+msgstr "Fromage"
+
+msgid "Paint colors"
+msgstr "Café"
+
+msgid ""
+"Click a color for the first paint color, right-click for the second (Gradient only). + saves the "
+"first one."
+msgstr "Un croissant, s'il vous plaît. Qui a mangé mon fromage."
+
+msgid "Nothing selected"
+msgstr "Oh là là"
+
+msgid ""
+"Click a strip to select it. Each enabled zone has one strip; add clones for strips that share a "
+"wire."
+msgstr "Un verre de vin rouge, merci. Le chat est sous la table."
+
+msgid "Snap to grid"
+msgstr "Éclair"
+
+msgid "Hide a strip to get it out of the way; it keeps its place and colors."
+msgstr "Les lapins sont dans la cuisine. J'aime les escargots au beurre."
+
+msgid "Show this strip"
+msgstr "Bof"
+
+#, python-brace-format
+msgid "{zone} on {device}"
+msgstr "Café"
+
+msgid "Rename this strip"
+msgstr "Il pleut des cordes"
+
+msgid "clone (shows the same colors)"
+msgstr "Où sont les toilettes ?"
+
+msgid "Identify"
+msgstr "Santé !"
+
+msgid "Count LEDs"
+msgstr "Croissant"
+
+msgid "Pattern"
+msgstr "Voilà"
+
+msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
+msgstr "Une grenouille dans mon café. Joyeux anniversaire."
+
+msgid "Shape"
+msgstr "Macaron"
+
+msgid "Flip LED order (drawing only)"
+msgstr "Les lapins sont dans la cuisine"
+
+msgid "Turn"
+msgstr "Fromage"
+
+msgid "Turn 90° left"
+msgstr "Voilà"
+
+msgid "Turn 90° right"
+msgstr "Brioche"
+
+msgid "LEDs per metre"
+msgstr "Sacrebleu !"
+
+msgid ""
+"The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is drawn"
+" at its real length."
+msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
+
+#, python-brace-format
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgstr "Le fromage qui pue. Le train est encore en retard."
+
+msgid "Bends"
+msgstr "Merci"
+
+msgid "None yet. Right-click a LED, or add one below."
+msgstr "La plume de ma tante"
+
+#, python-brace-format
+msgid "Bend {i}"
+msgstr "Croissant"
+
+msgid "at LED"
+msgstr "Crêpe"
+
+msgid "direction °"
+msgstr "Café"
+
+msgid "Add a bend at LED"
+msgstr "Il pleut des cordes"
+
+msgid ""
+"On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
+"strip, outside the corner for a bend."
+msgstr "Un verre de vin rouge, merci. Je suis une baguette."
+
+msgid "Clone"
+msgstr "Voilà"
+
+msgid "Hide"
+msgstr "Merci"
+
+msgid "Delete clone"
+msgstr "C'est la vie"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color, right-click for the second"
+msgstr "Joyeux anniversaire"
+
+#, python-brace-format
+msgid "#{hex}: click for the first color"
+msgstr "La baguette est trop longue"
+
+msgid "Save the first color to your saved colors"
+msgstr "La tour Eiffel est fermée aujourd'hui"
+
+msgid "Saved colors"
+msgstr "Bonjour"
+
+#, python-brace-format
+msgid "#{k}  (right-click to delete)"
+msgstr "Le chat est sous la table"
+
+msgid "Save a new color"
+msgstr "Allez !"
+
+msgid "Click to use. Right-click a saved color to delete it."
+msgstr "J'aime les escargots au beurre"
+
+msgid "Click to use, numbers show the order. Right-click a saved color to delete it."
+msgstr "Je voudrais un éclair au chocolat. Joyeux anniversaire."
+
+msgid "Palette"
+msgstr "Bonsoir"
+
+msgid "Calibrated"
+msgstr "Camembert"
+
+msgid "No correction. The color you pick is sent to the strip as it is."
+msgstr "Mon aéroglisseur est plein d'anguilles. Une grenouille dans mon café."
+
+msgid "Keeps every LED on the 48 safe colors that cheap LED strips show cleanly."
+msgstr "Mon aéroglisseur est plein d'anguilles. Qui a mangé mon fromage."
+
+msgid ""
+"Corrects colors so they look right on your strip. Choose the profile that matches it (edit them "
+"in Settings)."
+msgstr "Un verre de vin rouge, merci. Les moules sont délicieuses."
+
+msgid "Zones use different corrections. Pick one to set them all."
+msgstr "Le pamplemousse est dans le jardin"
+
+msgid "Solid"
+msgstr "Hop là"
+
+msgid "Segments"
+msgstr "Camembert"
+
+msgid "Center out"
+msgstr "Merci"
+
+msgid "Edges in"
+msgstr "Oui"
+
+msgid "Alternating"
+msgstr "Oh là là"
+
+msgid "Painted"
+msgstr "Santé !"
+
+msgid "Automatic"
+msgstr "Bisou"
+
+msgid "Addressable 5V (WS2812B, SK6812)"
+msgstr "Je suis une baguette"
+
+msgid "Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."
+msgstr "Un verre de vin rouge, merci. Je suis une baguette."
+
+msgid "Addressable 12V in groups (WS2811, COB)"
+msgstr "Le fromage qui pue"
+
+msgid ""
+"One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
+"how many LEDs are in a pixel so the Layout tab draws the real length."
+msgstr "J'aime les escargots au beurre. Le chat est sous la table. Deux cafés et l'addition."
+
+msgid "One color (plain 12V RGB, 4 pins)"
+msgstr "Ma tante joue de l'accordéon"
+
+msgid ""
+"The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
+"apply, so they're hidden."
+msgstr "Où est la bibliothèque. Voulez-vous du fromage."
+
+msgid "RGBW addressable (SK6812 RGBW, experimental)"
+msgstr "Il était une fois un croissant"
+
+msgid ""
+"OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
+"itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
+"sends GRB (like WS2812B); use Color order if colors come out swapped. Count LEDs doesn't work on "
+"these strips: set the LED count by hand."
+msgstr "Le béret de mon grand-père. J'ai une baguette. Mon oncle est un champignon."
+
+msgid "RGB (normal)"
+msgstr "Bonne nuit"
+
+msgid "mixed"
+msgstr "Ooh la la"
+
+msgid "no correction"
+msgstr "Crêpe"
+
+msgid "palette"
+msgstr "Santé !"
+
+msgid "calibrated"
+msgstr "Bof"
+
+msgid "LEDs"
+msgstr "Café"
+
+msgid "Identify lights only this zone, so you can see which strip it is."
+msgstr "Le pamplemousse est dans le jardin. La plume de ma tante."
+
+msgid "Edit layout"
+msgstr "Bonsoir"
+
+msgid "Reverse"
+msgstr "Éclair"
+
+msgid "Mirror"
+msgstr "Ratatouille"
+
+msgid "Follow monitor brightness"
+msgstr "La crêpe est tombée par terre"
+
+msgid "Manual"
+msgstr "Café"
+
+msgid "Range"
+msgstr "Oh là là"
+
+msgid "Invert (bias lighting)"
+msgstr "Le pamplemousse est dans le jardin"
+
+msgid "Gamma correction"
+msgstr "Bonsoir"
+
+msgid "Strip type and wiring"
+msgstr "Ceci n'est pas une pipe"
+
+msgid "Strip type"
+msgstr "Pardon ?"
+
+msgid "Color order"
+msgstr "Santé !"
+
+msgid "Test colors"
+msgstr "Moustache"
+
+msgid ""
+"Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far end "
+"(a one-color strip cycles red, green, blue). If the colors are wrong, change the order until they"
+" match."
+msgstr "Le béret de mon grand-père. Le chat est sous la table. Bonjour, je m'appelle Jacques."
+
+msgid "LEDs per pixel"
+msgstr "Camembert"
+
+msgid "Power limit"
+msgstr "Baguette"
+
+msgid "A  (0 = no limit)"
+msgstr "La plume de ma tante"
+
+msgid ""
+"Long 5V strips at full white pull a lot of current: the far end turns orange or pink, or the "
+"controller resets. Set your power supply's amps (minus a bit) and Iridia dims only when a color "
+"would go over it. The estimate assumes 60 mA per LED at full white."
+msgstr "Un verre de vin rouge, merci. Je suis une baguette. Joyeux anniversaire."
+
+msgid "Resize the OpenRGB zone"
+msgstr "Ma tante joue de l'accordéon"
+
+msgid "Stop test"
+msgstr "Bonjour"
+
+#, python-brace-format
+msgid "Asked OpenRGB for {need} LEDs on this zone"
+msgstr "Mon oncle est un champignon"
+
+#, python-brace-format
+msgid "(looks like: {type})"
+msgstr "Fromage"
+
+#, python-brace-format
+msgid "Strip: {type}"
+msgstr "Fromage"
+
+#, python-brace-format
+msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
+msgstr "Mon chien mange du camembert"
+
+#, python-brace-format
+msgid "Dimmed to stay under the limit (would be {amps:.1f} A)."
+msgstr "Voulez-vous du fromage ?"
+
+#, python-brace-format
+msgid "For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark."
+msgstr "Un verre de vin rouge, merci. J'ai une baguette."
+
+msgid "Erase"
+msgstr "Béret"
+
+msgid "Clear"
+msgstr "Bonjour"
+
+msgid "Done editing"
+msgstr "Ratatouille"
+
+msgid "Colors in order (click to change):"
+msgstr "Je ne sais quoi"
+
+msgid "Change this color"
+msgstr "Ceci n'est pas une pipe"
+
+msgid ""
+"OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
+"set the size there."
+msgstr "J'aime les escargots au beurre. Le chat est sous la table."
+
+msgid ""
+"This device has no Direct mode, so it shows one color for the whole device (the first one of the "
+"pattern)."
+msgstr "Je suis une baguette. La tour Eiffel est fermée aujourd'hui."
+
+msgid "Red"
+msgstr "Quiche"
+
+msgid "Red-orange"
+msgstr "Brioche"
+
+msgid "Orange"
+msgstr "Ratatouille"
+
+msgid "Amber"
+msgstr "Voilà"
+
+msgid "Yellow"
+msgstr "Pardon ?"
+
+msgid "Lime"
+msgstr "Voilà"
+
+msgid "Green"
+msgstr "Ratatouille"
+
+msgid "Spring green"
+msgstr "Allez !"
+
+msgid "Cyan"
+msgstr "Allez !"
+
+msgid "Teal"
+msgstr "Escargot"
+
+msgid "Sky blue"
+msgstr "Oh là là"
+
+msgid "Blue"
+msgstr "Baguette"
+
+msgid "Violet"
+msgstr "Oui"
+
+msgid "Magenta"
+msgstr "Quiche"
+
+msgid "Pink"
+msgstr "Café"
+
+msgid "Red (wraps around)"
+msgstr "Où sont les toilettes ?"
+
+msgid "Start OpenRGB's server with Iridia"
+msgstr "Le poisson rouge est en vacances"
+
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr "Le chat est sous la table"
+
+msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
+msgstr "Joyeux anniversaire. Mon chien mange du camembert."
+
+msgid ""
+"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
+"diagnostics to see why."
+msgstr "Omelette du fromage. Voulez-vous du fromage."
+
+#, python-brace-format
+msgid "Started by {what}. Iridia leaves that alone."
+msgstr "Mon aéroglisseur est plein d'anguilles"
+
+msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
+msgstr "Je voudrais un éclair au chocolat. Le pamplemousse est dans le jardin."
+
+msgid "Off. Start OpenRGB's server yourself."
+msgstr "La plume de ma tante"
+
+msgid ""
+"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
+" can't reach it."
+msgstr "La tour Eiffel est fermée aujourd'hui. Le train est encore en retard."
+
+msgid "OpenRGB"
+msgstr "OpenRGB"
+
+msgctxt "color correction"
+msgid "Off"
+msgstr "Nature"
+

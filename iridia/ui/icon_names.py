@@ -9,5 +9,5 @@ expand_more expand_less visibility visibility_off flare lightbulb straighten swa
 power sync tune wallpaper image info help troubleshoot bug_report terminal link timer schedule chevron_left
 chevron_right remove add_circle more_vert bolt auto_awesome contrast invert_colors linear_scale arrow_forward
 arrow_back tag format_list_numbered target highlight autorenew monitor done_all report undo redo unfold_more
-space_dashboard keyboard grid_on article inventory_2 cable texture motion_photos_on
+space_dashboard keyboard language grid_on article inventory_2 cable texture motion_photos_on
 """.split()

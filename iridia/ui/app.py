@@ -13,7 +13,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_foreign("cairo")
 from gi.repository import Gio, GLib, Gtk  # noqa: E402
 
-from iridia import assets, diagnostics, theme  # noqa: E402
+from iridia.i18n import _, ngettext  # noqa: F401
+from iridia import assets, diagnostics, i18n, theme  # noqa: E402
 from iridia.calibration import DEFAULT_NAME, valid_name  # noqa: E402
 from iridia.client import Client  # noqa: E402
 from iridia.config import Config  # noqa: E402
@@ -144,7 +145,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def __init__(self, application):
         super().__init__(application=application)
         from iridia import get_version
-        self.set_title(f"Iridia {get_version()}")
+        self.set_title(_('Iridia {version}').format(version=get_version()))
         self.set_default_size(1040, 860)
         self.add_css_class("iridia")
         self.client = Client()
@@ -171,9 +172,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         for ctl in (Gtk.EventControllerMotion(), Gtk.EventControllerKey()):
             ctl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
             if isinstance(ctl, Gtk.EventControllerMotion):
-                ctl.connect("motion", lambda *_: self.note_activity())
+                ctl.connect("motion", lambda *_a: self.note_activity())
             else:
-                ctl.connect("key-pressed", lambda *_: (self.note_activity(), False)[1])
+                ctl.connect("key-pressed", lambda *_a: (self.note_activity(), False)[1])
             self.add_controller(ctl)
         self.connect("close-request", self._on_close)
         threading.Thread(target=self._poll_loop, daemon=True).start()
@@ -205,7 +206,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         """Colour picker with live LED preview; the saved look comes back when it closes."""
         self.pause(1)
         sender = PreviewSender(raw=raw)
-        extra = ("Target", lambda _h: target) if target else (("Sent to strip", sent_fn) if sent_fn else None)
+        extra = (_("Target"), lambda _h: target) if target else ((_("Sent to strip"), sent_fn) if sent_fn else None)
 
         exact_colors = [str(c).lower() for c in self._status.get("exact_colors", [])]
         h0 = (initial or "").lstrip("#").lower()
@@ -238,8 +239,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._status["exact_colors"] = cur
         widgets.set_exact_colors(cur)
         self.bg(lambda: self.client.set_color_exact(h, on),
-                lambda r: self.toast(f"#{h} is shown exactly as picked" if on else
-                                     f"#{h} follows color correction again") if r.get("ok") else None)
+                lambda r: self.toast(_('#{h} is shown exactly as picked').format(h=h) if on else
+                                     _('#{h} follows color correction again').format(h=h)) if r.get("ok") else None)
 
     # ---- colours you used / saved
     def recent_colors(self):
@@ -259,11 +260,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
         """Keep a colour in your saved colors (the same list the Status and Devices tabs show)."""
         h = h.lstrip("#").lower()
         if h in self._status.get("custom_colors", []):
-            self.toast(f"#{h} is already in your saved colors")
+            self.toast(_('#{h} is already in your saved colors').format(h=h))
             return
         self._status.setdefault("custom_colors", []).append(h)
         QuickColors.refresh_all()
-        self.bg(lambda: self.client.add_custom_color(h), lambda r: self.toast(f"Saved #{h}"))
+        self.bg(lambda: self.client.add_custom_color(h), lambda r: self.toast(_('Saved #{h}').format(h=h)))
 
     def count_leds(self, device, zone, current, on_done):
         dialogs.CountLedsDialog(self, self.client, device, zone, current, on_done)
@@ -273,16 +274,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
         def done(name):
             def finished(r):
                 if not r.get("ok"):
-                    dialogs.message(self, "Rename", r.get("error", "Couldn't rename"), True)
+                    dialogs.message(self, _("Rename"), r.get("error", _("Couldn't rename")), True)
                     return
                 if after:
                     after(name)
                 self._poll_once()
             self.bg(lambda: self.client.set_zone_name(device, zone, name), finished)
-        dialogs.ask_text(self, "Rename strip",
-                         f"A name for {zone or device}{' on ' + device if zone else ''}. It shows on the Devices and "
-                         "Layout tabs. Leave it empty to use the original name.", current or "", done,
-                         check=lambda t: None if len(t) <= 40 else "Keep it under 40 characters.", ok_label="Rename")
+        dialogs.ask_text(self, _("Rename strip"),
+                         (_('A name for {zone} on {device}.').format(zone=zone, device=device) if zone else _('A name for {device}.').format(device=device)) + ' ' + _('It shows on the Devices and Layout tabs. Leave it empty to use the original name.'), current or "", done,
+                         check=lambda t: None if len(t) <= 40 else _("Keep it under 40 characters."), ok_label=_("Rename"))
 
     def toast(self, text, action_label=None, action=None):
         self._snack.show(text, action_label, action)
@@ -297,12 +297,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         logo = Gtk.Image.new_from_file(assets.logo_png_path())
         logo.set_pixel_size(40)
         title.append(logo)
-        title.append(label("Iridia", ("app-title",)))
+        title.append(label(_("Iridia"), ("app-title",)))
         hb.pack_start(title)
         hb.set_title_widget(Gtk.Box())
-        self._chip = Chip("Connecting…")
+        self._chip = Chip(_("Connecting…"))
         hb.pack_end(self._chip)
-        self._freeze_btn = button("Freeze colors", "ac_unit", "tonal small", self._toggle_freeze)
+        self._freeze_btn = button(_("Freeze colors"), "ac_unit", "tonal small", self._toggle_freeze)
         self._freeze_btn.set_valign(Gtk.Align.CENTER)
         hb.pack_end(self._freeze_btn)
         self._spinner = LoadingIndicator(30)
@@ -325,9 +325,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                 transition_duration=180)
         self._tabs = {}
         first = None
-        for key, text, ico in (("status", "Status", "home"), ("devices", "Devices", "developer_board"),
-                               ("layout", "Layout", "polyline"), ("keybinds", "Keybinds", "keyboard"),
-                               ("settings", "Settings", "settings"), ("service", "Service", "build")):
+        for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
+                               ("layout", _("Layout"), "polyline"), ("keybinds", _("Keybinds"), "keyboard"),
+                               ("settings", _("Settings"), "settings"), ("service", _("Service"), "build")):
             b = Gtk.ToggleButton()
             b.set_child(hbox(8, icon(ico), Gtk.Label(label=text)))
             if first is None:
@@ -354,12 +354,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         root.append(self._stack)
 
         bot = hbox(8)
-        bot.append(button("Refresh", "refresh", "tonal", self._do_refresh))
-        bot.append(button("Restart daemon", "restart_alt", "tonal", self._do_restart))
-        bot.append(button("Config folder", "folder_open", "text", lambda: self._xdg_open("~/.config/iridia")))
-        bot.append(button("Log folder", "description", "text", lambda: self._xdg_open("~/.local/share/iridia")))
+        bot.append(button(_("Refresh"), "refresh", "tonal", self._do_refresh))
+        bot.append(button(_("Restart daemon"), "restart_alt", "tonal", self._do_restart))
+        bot.append(button(_("Config folder"), "folder_open", "text", lambda: self._xdg_open("~/.config/iridia")))
+        bot.append(button(_("Log folder"), "description", "text", lambda: self._xdg_open("~/.local/share/iridia")))
         bot.append(Gtk.Box(hexpand=True))
-        bot.append(button("Quit", "power_settings_new", "danger", self.close))
+        bot.append(button(_("Quit"), "power_settings_new", "danger", self.close))
         root.append(bot)
 
         overlay.set_child(root)
@@ -402,7 +402,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         try:
             subprocess.Popen(["xdg-open", path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except OSError:
-            self.toast(f"Couldn't open a file manager. The folder is {path}")
+            self.toast(_("Couldn't open a file manager. The folder is {path}").format(path=path))
 
     # ============================================================ status tab
     def _build_status(self):
@@ -413,7 +413,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._hero_shape = HeroShape()
         hero.append(self._hero_shape)
         hv = vbox(4, hexpand=True)
-        self._hero_title = label("Waiting for the daemon…", ("title",))
+        self._hero_title = label(_("Waiting for the daemon…"), ("title",))
         self._hero_sub = label("", ("small", "dim"), ellipsize=True)
         hv.append(self._hero_title)
         hv.append(self._hero_sub)
@@ -427,15 +427,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
         hero.append(hv)
         p.append(hero)
 
-        p.append(section("Now playing"))
+        p.append(section(_("Now playing")))
         info = card()
         grid = Gtk.Grid(column_spacing=24, row_spacing=8)
         self._rows = {}
-        for i, (key, text, ico) in enumerate([("wallpaper", "Wallpaper", "wallpaper"), ("dominant", "Main color", "palette"),
-                                              ("openrgb", "OpenRGB", "cable"), ("ddc", "Monitor sync (DDC)", "monitor"),
-                                              ("mode", "Color correction", "tune"), ("freeze", "Wallpaper colors", "ac_unit"),
-                                              ("night", "Night mode", "bedtime"), ("lights", "Lights", "lightbulb"),
-                                              ("backend", "Extraction backend", "auto_awesome")]):
+        for i, (key, text, ico) in enumerate([("wallpaper", _("Wallpaper"), "wallpaper"), ("dominant", _("Main color"), "palette"),
+                                              ("openrgb", "OpenRGB", "cable"), ("ddc", _("Monitor sync (DDC)"), "monitor"),
+                                              ("mode", _("Color correction"), "tune"), ("freeze", _("Wallpaper colors"), "ac_unit"),
+                                              ("night", _("Night mode"), "bedtime"), ("lights", _("Lights"), "lightbulb"),
+                                              ("backend", _("Extraction backend"), "auto_awesome")]):
             grid.attach(icon(ico, classes=("dim",)), 0, i, 1, 1)
             grid.attach(label(text, ("body", "dim")), 1, i, 1, 1)
             v = label("-", ("body",), selectable=True, ellipsize=True)
@@ -445,28 +445,28 @@ class IridiaWindow(Gtk.ApplicationWindow):
         info.append(grid)
         p.append(info)
 
-        p.append(section("Color for this wallpaper",
-                         "Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
+        p.append(section(_("Color for this wallpaper"),
+                         _("Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
                          "remembered for this image and come back when you return to it. A wallpaper you haven't "
-                         "picked for follows its own colors."))
+                         "picked for follows its own colors.")))
         c = card()
         self._sw_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=10, column_spacing=6,
                                     halign=Gtk.Align.START)
         c.append(self._sw_flow)
-        self._corr_exp = Gtk.Expander(label="Color correction preview")
+        self._corr_exp = Gtk.Expander(label=_("Color correction preview"))
         self._corr_exp.add_css_class("accent")
         self._corr_box = vbox(6)
         self._corr_exp.set_child(self._corr_box)
         c.append(self._corr_exp)
-        c.append(label("Your saved colors", ("small", "dim")))
+        c.append(label(_("Your saved colors"), ("small", "dim")))
         self._custom_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=12,
                                         column_spacing=6, halign=Gtk.Align.START)
         c.append(self._custom_flow)
         self._choice_lbl = label("", ("body",))
         c.append(self._choice_lbl)
         btns = hbox(8)
-        btns.append(button("Custom color…", "colorize", "filled", self._pick_custom_color))
-        btns.append(button("Reset saved colors for this wallpaper", "history", "tonal",
+        btns.append(button(_("Custom color…"), "colorize", "filled", self._pick_custom_color))
+        btns.append(button(_("Reset saved colors for this wallpaper"), "history", "tonal",
                            lambda: self._set_color_choice(clear=True)))
         c.append(btns)
         p.append(c)
@@ -496,23 +496,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         for i, c in enumerate(colors[:8]):
             self._sw_flow.append(Swatch(c, 52, bool(choice) and choice.get("index") == i,
                                         on_click=lambda i=i: self._set_color_choice(index=i),
-                                        tooltip=f"Wallpaper color {i + 1}  #{c}"))
+                                        tooltip=_('Wallpaper color {n}  #{hex}').format(n=i + 1, hex=c)))
         for c in custom:
             self._custom_flow.append(Swatch(c, 46, bool(choice) and choice.get("hex") == c,
                                             on_click=lambda c=c: self._set_color_choice(hex_color=c),
                                             on_right=lambda c=c: self._delete_custom(c),
-                                            tooltip=f"#{c}  (right-click to delete)"))
+                                            tooltip=_('#{c}  (right-click to delete)').format(c=c)))
         if choice and "hex" in choice and choice["hex"] not in custom:
             self._custom_flow.append(Swatch(choice["hex"], 46, True))
         if not custom and not (choice and "hex" in choice):
-            self._custom_flow.append(label("None yet. Pick one with “Custom color…” below.",
+            self._custom_flow.append(label(_("None yet. Pick one with “Custom color…” below."),
                                            ("small", "faint")))
         if not choice:
-            t = "Your zones use different colors (see the Devices tab)"
+            t = _("Your zones use different colors (see the Devices tab)")
         elif "hex" in choice:
-            t = f"All zones use #{choice['hex']}"
+            t = _("All zones use #{hex}").format(hex=choice['hex'])
         else:
-            t = f"All zones use wallpaper color {choice.get('index', 0) + 1}"
+            t = _("All zones use wallpaper color {n}").format(n=choice.get('index', 0) + 1)
         self._choice_lbl.set_label(t)
 
     def _render_correction(self, corr):
@@ -526,11 +526,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._corr_box.remove(c)
             c = n
         mode = corr.get("mode", "full")
-        note = {"palette": "Palette is on. Top: the wallpaper color. Bottom: the closest palette color your LEDs show.",
-                "calibrated": f"Calibrated ({corr.get('profile', '')}). Top: the wallpaper color. Bottom: the color "
-                              "sent to the strip so it looks right.",
-                "mixed": "Zones use different corrections, so this shows the colors as they are."}.get(
-            mode, "Color correction is off, so the strip gets the wallpaper colors as they are.")
+        note = {"palette": _("Palette is on. Top: the wallpaper color. Bottom: the closest palette color your LEDs show."),
+                "calibrated": _("Calibrated ({profile}). Top: the wallpaper color. Bottom: the color sent to the "
+                                "strip so it looks right.").format(profile=corr.get('profile', '')),
+                "mixed": _("Zones use different corrections, so this shows the colors as they are.")}.get(
+            mode, _("Color correction is off, so the strip gets the wallpaper colors as they are."))
         self._corr_box.append(label(note, ("small", "dim"), wrap=True))
         row = hbox(8)
         for m in corr.get("items", []):
@@ -555,25 +555,25 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         def done(r):
             if not r.get("ok"):
-                dialogs.message(self, "Color", r.get("error", "failed"), error=True)
+                dialogs.message(self, _("Color"), r.get("error", "failed"), error=True)
                 return
             self._status = r["_status"]
             self._update_ui()
             if clear:
-                self.toast("Saved colors for this wallpaper were reset.")
+                self.toast(_("Saved colors for this wallpaper were reset."))
         self.bg(work, done)
 
     def _pick_custom_color(self):
         ch = self._everything_choice(self._status.get("device_configs", {}))
         cols = self._status.get("extracted_colors") or ["ff8800"]
         cur = (ch.get("hex") if ch else None) or cols[0]
-        self.pick_color(cur, "Color for this wallpaper",
+        self.pick_color(cur, _("Color for this wallpaper"),
                         lambda h: h and self._set_color_choice(hex_color=h, save=True))
 
     def _delete_custom(self, h):
         self.bg(lambda: (self.client.remove_custom_color(h), self.client.status())[1],
                 lambda st: (setattr(self, "_status", st), self._update_ui(),
-                            self.toast(f"Deleted #{h} from your saved colors.")))
+                            self.toast(_('Deleted #{h} from your saved colors.').format(h=h))))
 
     # ============================================================ devices tab
     def _build_devices(self):
@@ -598,10 +598,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         li = LoadingIndicator(64)
         li.start()
         b.append(li)
-        b.append(label("The daemon isn't running.", ("title",), xalign=0.5))
-        b.append(label("Your devices show up here once it runs. Start it here or from the Service tab.",
+        b.append(label(_("The daemon isn't running."), ("title",), xalign=0.5))
+        b.append(label(_("Your devices show up here once it runs. Start it here or from the Service tab."),
                        ("small", "dim"), xalign=0.5))
-        st = button("Start daemon", "play_arrow", "filled", self._daemon_start)
+        st = button(_("Start daemon"), "play_arrow", "filled", self._daemon_start)
         st.set_halign(Gtk.Align.CENTER)
         b.append(st)
         self._dev_box.append(b)
@@ -622,25 +622,25 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if not devices:
             b = vbox(6)
             b.set_margin_top(50)
-            b.append(label("No devices configured.", ("title",), xalign=0.5))
-            b.append(label("Devices appear here once OpenRGB reports them. Start OpenRGB's SDK server (SDK Server "
-                           "tab, Start Server) and make sure it lists your devices.", ("small", "dim"), xalign=0.5,
+            b.append(label(_("No devices configured."), ("title",), xalign=0.5))
+            b.append(label(_("Devices appear here once OpenRGB reports them. Start OpenRGB's SDK server (SDK Server "
+                           "tab, Start Server) and make sure it lists your devices."), ("small", "dim"), xalign=0.5,
                            wrap=True))
             self._dev_box.append(b)
             return
         cfgs = self._all_zone_cfgs(devices)
         merged, mixed = merge_zone_cfgs(cfgs)
-        self._dev_box.append(section("All devices", f"Changes here apply to all {len(cfgs)} zone(s) at once.", 10))
+        self._dev_box.append(section(_("All devices"), ngettext('Changes here apply to {n} zone.', 'Changes here apply to all {n} zones at once.', len(cfgs)).format(n=len(cfgs)), 10))
         self._global_card = ZoneCard(self, "*", "*", merged, extracted, custom, GlobalClient(self.client),
-                                     global_mode=True, expanded=expanded.get("*", True), title="Everything")
+                                     global_mode=True, expanded=expanded.get("*", True), title=_("Everything"))
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
         self._dev_box.append(self._global_card)
         for d, dc in devices.items():
-            self._dev_box.append(section(d, None if dc.get("enabled", True) else "Disabled"))
+            self._dev_box.append(section(d, None if dc.get("enabled", True) else _("Disabled")))
             zones = dc.get("zones", {})
             for z, zc in (zones.items() if zones else [("", dc)]):
                 key = f"{d}|{z}"
-                cardw = ZoneCard(self, d, z or "Whole device", zc, extracted, custom, self.client,
+                cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
                                  expanded=expanded.get(key, False))
                 cardw.zone_name = z
                 self._dev_box.append(cardw)
@@ -672,93 +672,93 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _build_settings(self):
         p = self._settings_page
         # night + sleep
-        p.append(section("Night mode and sleep", "Dim the LEDs at night, and turn them off while the PC sleeps.", 10))
+        p.append(section(_("Night mode and sleep"), _("Dim the LEDs at night, and turn them off while the PC sleeps."), 10))
         c = card()
         night = self.config.get("night", {}) or {}
-        row, self._night_sw = switch_row("Night mode", bool(night.get("enabled", False)), lambda v: self._save_night())
+        row, self._night_sw = switch_row(_("Night mode"), bool(night.get("enabled", False)), lambda v: self._save_night())
         c.append(row)
         nr = hbox(10)
         self._night_start = Gtk.Entry(text=night.get("start", "23:00"), width_chars=6, max_width_chars=6,
                                       hexpand=False)
         self._night_end = Gtk.Entry(text=night.get("end", "07:00"), width_chars=6, max_width_chars=6, hexpand=False)
-        for lbl_text, e in (("From", self._night_start), ("to", self._night_end)):
+        for lbl_text, e in ((_("From"), self._night_start), (_("to"), self._night_end)):
             nr.append(label(lbl_text, ("body", "dim")))
             nr.append(e)
-            e.connect("activate", lambda *_: self._save_night())
+            e.connect("activate", lambda *_a: self._save_night())
             fc = Gtk.EventControllerFocus()
-            fc.connect("leave", lambda *_: self._save_night())
+            fc.connect("leave", lambda *_a: self._save_night())
             e.add_controller(fc)
-        nr.append(label("brightness at most", ("body", "dim")))
+        nr.append(label(_("brightness at most"), ("body", "dim")))
         self._night_cap = Spin(0, 100, int(night.get("cap", 20)), lambda v: self._save_night())
         nr.append(self._night_cap)
         nr.append(label("%", ("body", "dim")))
         c.append(nr)
-        self._night_msg = label("Times are 24 hour, like 23:00. The window can cross midnight.", ("small", "faint"))
+        self._night_msg = label(_("Times are 24 hour, like 23:00. The window can cross midnight."), ("small", "faint"))
         c.append(self._night_msg)
-        row, self._sleep_sw = switch_row("Turn the LEDs off while the PC sleeps",
+        row, self._sleep_sw = switch_row(_("Turn the LEDs off while the PC sleeps"),
                                          bool(self.config.get("sleep.lights_off", True)),
                                          lambda v: self.bg(lambda: self.client.set_sleep(v)))
         c.append(row)
         p.append(c)
 
         # setups
-        p.append(section("Setups and backups",
-                         "Save everything (devices, zones, layout, night mode, calibration, your colors for each "
-                         "wallpaper and your saved colors) under a name, and load it again later."))
+        p.append(section(_("Setups and backups"),
+                         _("Save everything (devices, zones, layout, night mode, calibration, your colors for each "
+                         "wallpaper and your saved colors) under a name, and load it again later.")))
         c = card()
         r1 = hbox(10)
-        r1.append(label("Setup", ("body", "dim")))
-        self._setup_dd = Dropdown([], None, placeholder="No setups yet")
+        r1.append(label(_("Setup"), ("body", "dim")))
+        self._setup_dd = Dropdown([], None, placeholder=_("No setups yet"))
         r1.append(self._setup_dd)
         c.append(r1)
         r2 = hbox(6)
-        for text, ico, cb, style in (("Save current as…", "save", self._setup_save, "filled"),
-                                     ("Load", "upload", self._setup_load, "tonal"),
-                                     ("Rename", "edit", self._setup_rename, "tonal"),
-                                     ("Export", "download", self._setup_export, "tonal"),
-                                     ("Import", "upload", self._setup_import, "tonal"),
-                                     ("Delete", "delete", self._setup_delete, "danger")):
+        for text, ico, cb, style in ((_("Save current as…"), "save", self._setup_save, "filled"),
+                                     (_("Load"), "upload", self._setup_load, "tonal"),
+                                     (_("Rename"), "edit", self._setup_rename, "tonal"),
+                                     (_("Export"), "download", self._setup_export, "tonal"),
+                                     (_("Import"), "upload", self._setup_import, "tonal"),
+                                     (_("Delete"), "delete", self._setup_delete, "danger")):
             r2.append(button(text, ico, f"{style} small", cb))
         c.append(r2)
         r3 = hbox(10)
-        r3.append(label("Automatic backups", ("body", "dim")))
-        self._backup_dd = Dropdown([], None, placeholder="No backups yet")
+        r3.append(label(_("Automatic backups"), ("body", "dim")))
+        self._backup_dd = Dropdown([], None, placeholder=_("No backups yet"))
         r3.append(self._backup_dd)
-        r3.append(button("Restore", "settings_backup_restore", "tonal small", self._setup_restore_backup))
+        r3.append(button(_("Restore"), "settings_backup_restore", "tonal small", self._setup_restore_backup))
         c.append(r3)
-        c.append(label("Loading a setup first saves what you have now as an automatic backup, so you can always go "
-                       "back.", ("small", "faint"), wrap=True))
+        c.append(label(_("Loading a setup first saves what you have now as an automatic backup, so you can always go "
+                       "back."), ("small", "faint"), wrap=True))
         p.append(c)
         GLib.timeout_add(1200, lambda: (self._setup_refresh(), False)[1])
 
         # calibration
-        p.append(section("Color calibration", "Profiles that correct colors for your kind of LED strip. Pick one per "
-                                              "zone with Color correction: Calibrated on the Devices tab."))
+        p.append(section(_("Color calibration"), _("Profiles that correct colors for your kind of LED strip. Pick one per "
+                                              "zone with Color correction: Calibrated on the Devices tab.")))
         c = card()
         r = hbox(10)
-        r.append(label("Profile", ("body", "dim")))
+        r.append(label(_("Profile"), ("body", "dim")))
         self._cal_dd = Dropdown(self.profiles().list(), DEFAULT_NAME)
         r.append(self._cal_dd)
         c.append(r)
         r = hbox(6)
-        r.append(button("Edit", "edit", "filled small", self._cal_edit))
-        r.append(button("Add", "add", "tonal small", self._cal_add))
-        r.append(button("Import", "upload", "tonal small", self._cal_import))
-        r.append(button("Export", "download", "tonal small", self._cal_export))
-        r.append(button("Delete", "delete", "danger small", self._cal_delete))
+        r.append(button(_("Edit"), "edit", "filled small", self._cal_edit))
+        r.append(button(_("Add"), "add", "tonal small", self._cal_add))
+        r.append(button(_("Import"), "upload", "tonal small", self._cal_import))
+        r.append(button(_("Export"), "download", "tonal small", self._cal_export))
+        r.append(button(_("Delete"), "delete", "danger small", self._cal_delete))
         c.append(r)
         p.append(c)
 
         # extraction
-        p.append(section("Color extraction", "How Iridia picks colors from your wallpaper."))
+        p.append(section(_("Color extraction"), _("How Iridia picks colors from your wallpaper.")))
         c = card()
         cur = self.config.get("color.backend", "auto")
         cur = "auto" if cur == "caelestia" else cur
         group = None
-        for val, desc in (("auto", "Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, "
-                                   "otherwise Material, otherwise Pillow"),
-                          ("material", "Material: prominent colors from the image (needs material-color-utilities)"),
-                          ("pillow", "Pillow: median-cut dominant colors, no extra dependencies")):
+        for val, desc in (("auto", _("Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, "
+                                     "otherwise Material, otherwise Pillow")),
+                          ("material", _("Material: prominent colors from the image (needs material-color-utilities)")),
+                          ("pillow", _("Pillow: median-cut dominant colors, no extra dependencies"))):
             cb = Gtk.CheckButton(label=desc, active=cur == val)
             if group is None:
                 group = cb
@@ -767,60 +767,70 @@ class IridiaWindow(Gtk.ApplicationWindow):
             cb.connect("toggled", lambda b, v=val: b.get_active() and self._on_backend(v))
             c.append(cb)
         r = hbox(8)
-        r.append(button("Reset wallpaper detection cache", "refresh", "tonal small", self._reset_detection))
-        r.append(button("Forget all saved wallpaper colors", "delete", "tonal small", self._forget_all_picks))
+        r.append(button(_("Reset wallpaper detection cache"), "refresh", "tonal small", self._reset_detection))
+        r.append(button(_("Forget all saved wallpaper colors"), "delete", "tonal small", self._forget_all_picks))
         c.append(r)
-        c.append(label("Once a way of finding your wallpaper works, Iridia remembers it instead of trying every "
-                       "method. Reset this after changing wallpaper tool or shell.", ("small", "faint"), wrap=True))
+        c.append(label(_("Once a way of finding your wallpaper works, Iridia remembers it instead of trying every "
+                       "method. Reset this after changing wallpaper tool or shell."), ("small", "faint"), wrap=True))
         self._extract_live = label("", ("small", "accent"), wrap=True)
         c.append(self._extract_live)
         p.append(c)
 
         # appearance
-        p.append(section("Appearance"))
+        p.append(section(_("Appearance")))
         c = card()
         r = hbox(10)
-        r.append(label("Font", ("body", "dim")))
-        fams = ["Google Sans Flex (built in)", "System font"]
+        r.append(label(_("Font"), ("body", "dim")))
+        fams = [_("Google Sans Flex (built in)"), _("System font")]
         try:
             fams += sorted({f.get_name() for f in self.get_pango_context().list_families()} - {fonts.TEXT_FAMILY,
                                                                                                fonts.ICON_FAMILY})
         except Exception:
             pass
         cur_font = self.prefs.get("font", "")
-        cur_label = "System font" if cur_font == "system" else (cur_font or "Google Sans Flex (built in)")
+        cur_label = _("System font") if cur_font == "system" else (cur_font or _("Google Sans Flex (built in)"))
         r.append(Dropdown(fams, cur_label, self._set_font))
         c.append(r)
-        row, _ = switch_row("Reduce motion", bool(self.prefs.get("reduce_motion", False)), self._set_reduce_motion)
+        r = hbox(10)
+        # Never translated, so this row can be found again from any language.
+        r.append(icon("language", classes=("dim",)))
+        r.append(label("Language", ("body", "dim")))
+        self._langs = list(i18n.available().items())
+        names = dict(self._langs)
+        cur_lang = self.prefs.get("language", "") or i18n.DEFAULT
+        r.append(Dropdown([n for _c, n in self._langs], names.get(cur_lang, names.get(i18n.DEFAULT, "")),
+                          self._set_language))
+        c.append(r)
+        row, _u = switch_row(_("Reduce motion"), bool(self.prefs.get("reduce_motion", False)), self._set_reduce_motion)
         c.append(row)
-        c.append(label("Turns off shape morphs, sliding panels and the color cross-fade.", ("small", "faint")))
+        c.append(label(_("Turns off shape morphs, sliding panels and the color cross-fade."), ("small", "faint")))
         p.append(c)
 
         # logging
-        p.append(section("Logging"))
+        p.append(section(_("Logging")))
         c = card()
-        row, _ = switch_row("Write a log file", bool(self.config.get("logging.enabled", False)), self._toggle_log)
+        row, _u = switch_row(_("Write a log file"), bool(self.config.get("logging.enabled", False)), self._toggle_log)
         c.append(row)
         c.append(label(os.path.expanduser(self.config.get("logging.file_path", "~/.local/share/iridia/iridia.log")),
                        ("small", "dim"), selectable=True))
         p.append(c)
-        p.append(section("Recent log", "The daemon's latest messages. Works even with the log file switched off."))
+        p.append(section(_("Recent log"), _("The daemon's latest messages. Works even with the log file switched off.")))
         c = card()
         r = hbox(8)
-        r.append(label("Lines", ("body", "dim")))
+        r.append(label(_("Lines"), ("body", "dim")))
         self._log_lines = Dropdown(["10", "20", "40", "67"], "20")
         r.append(self._log_lines)
-        r.append(button("Show", "description", "filled small", self._show_log))
-        r.append(button("Copy", "content_copy", "tonal small",
+        r.append(button(_("Show"), "description", "filled small", self._show_log))
+        r.append(button(_("Copy"), "content_copy", "tonal small",
                         lambda: (widgets.copy_text(self, self._log_buf.get_text(self._log_buf.get_start_iter(),
                                                                                 self._log_buf.get_end_iter(), False)),
-                                 self.toast("Log copied"))))
+                                 self.toast(_("Log copied")))))
         c.append(r)
         sc = Gtk.ScrolledWindow(min_content_height=240)
         tv = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR)
         tv.add_css_class("log")
         self._log_buf = tv.get_buffer()
-        self._log_buf.set_text("Press Show to load the latest lines.")
+        self._log_buf.set_text(_("Press Show to load the latest lines."))
         sc.set_child(tv)
         c.append(sc)
         p.append(c)
@@ -830,7 +840,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         req = {"enabled": self._night_sw.get_active(), "start": self._night_start.get_text().strip(),
                "end": self._night_end.get_text().strip(), "cap": int(self._night_cap.get_value())}
         self.bg(lambda: self.client.set_night(**req),
-                lambda r: self._night_msg.set_label("Saved." if r.get("ok") else r.get("error", "Couldn't save")))
+                lambda r: self._night_msg.set_label(_("Saved.") if r.get("ok") else r.get("error", _("Couldn't save"))))
 
     def _setup_refresh(self):
         def done(r):
@@ -848,31 +858,31 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _setup_save(self):
         def done(name):
             self.bg(lambda: self.client.setup("save", name=name),
-                    lambda r: (self.toast(f"Saved “{name}”.") if r.get("ok") else
-                               dialogs.message(self, "Setup", r.get("error", "Couldn't save"), True),
+                    lambda r: (self.toast(_('Saved “{name}”.').format(name=name)) if r.get("ok") else
+                               dialogs.message(self, _("Setup"), r.get("error", _("Couldn't save")), True),
                                self._setup_refresh()))
-        dialogs.ask_text(self, "Save setup", "Name for this setup. Saving under an existing name replaces it.",
+        dialogs.ask_text(self, _("Save setup"), _("Name for this setup. Saving under an existing name replaces it."),
                          self._setup_dd.value() or "", done,
                          lambda t: None if valid_name(t) else
-                         "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters).")
+                         _("Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."))
 
     def _after_setup_loaded(self, r, what):
         if not r.get("ok"):
-            dialogs.message(self, "Setup", r.get("error", "Couldn't load"), True)
+            dialogs.message(self, _("Setup"), r.get("error", _("Couldn't load")), True)
             return
         self.config.reload()
         self._layout_tab.reload()
         self._setup_refresh()
         self._do_refresh()
-        self.toast(f"Loaded {what}. The previous state is in Automatic backups.")
+        self.toast(_('Loaded {what}. The previous state is in Automatic backups.').format(what=what))
 
     def _setup_load(self):
         name = self._setup_dd.value()
         if not name:
             return
-        dialogs.confirm(self, "Load setup", f"Load “{name}”? Your current settings are backed up first.",
+        dialogs.confirm(self, _("Load setup"), _('Load “{name}”? Your current settings are backed up first.').format(name=name),
                         lambda: self.bg(lambda: self.client.setup("load", name=name),
-                                        lambda r: self._after_setup_loaded(r, f"“{name}”")), yes="Load")
+                                        lambda r: self._after_setup_loaded(r, f"“{name}”")), yes=_("Load"))
 
     def _setup_restore_backup(self):
         i = self._backup_dd.get_selected()
@@ -880,11 +890,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if not 0 <= i < len(bl):
             return
         b = bl[i]
-        dialogs.confirm(self, "Restore backup", f"Restore the backup from {b['saved']}? Your current settings are "
-                                                "backed up first.",
+        dialogs.confirm(self, _("Restore backup"), _('Restore the backup from {date}? Your current settings are backed up first.').format(date=b['saved']),
                         lambda: self.bg(lambda: self.client.setup("restore_backup", id=b["id"]),
-                                        lambda r: self._after_setup_loaded(r, f"the backup from {b['saved']}")),
-                        yes="Restore")
+                                        lambda r: self._after_setup_loaded(r, _("the backup from {date}").format(date=b['saved']))),
+                        yes=_("Restore"))
 
     def _setup_rename(self):
         old = self._setup_dd.value()
@@ -895,32 +904,32 @@ class IridiaWindow(Gtk.ApplicationWindow):
             if new == old:
                 return
             self.bg(lambda: self.client.setup("rename", name=old, new=new),
-                    lambda r: (self.toast(r.get("error") or f"Renamed to “{new}”."), self._setup_refresh()))
-        dialogs.ask_text(self, "Rename setup", f"New name for “{old}”.", old, done,
-                         lambda t: None if valid_name(t) else "Use letters, numbers, spaces, dashes and brackets.")
+                    lambda r: (self.toast(r.get("error") or _("Renamed to “{name}”.").format(name=new)), self._setup_refresh()))
+        dialogs.ask_text(self, _("Rename setup"), _('New name for “{old}”.').format(old=old), old, done,
+                         lambda t: None if valid_name(t) else _("Use letters, numbers, spaces, dashes and brackets."))
 
     def _setup_delete(self):
         name = self._setup_dd.value()
         if name:
-            dialogs.confirm(self, "Delete setup", f"Delete the setup “{name}”?",
+            dialogs.confirm(self, _("Delete setup"), _('Delete the setup “{name}”?').format(name=name),
                             lambda: self.bg(lambda: self.client.setup("delete", name=name),
-                                            lambda r: (self.toast(r.get("error") or f"Deleted “{name}”."),
-                                                       self._setup_refresh())), yes="Delete", danger=True)
+                                            lambda r: (self.toast(r.get("error") or _("Deleted “{name}”.").format(name=name)),
+                                                       self._setup_refresh())), yes=_("Delete"), danger=True)
 
     def _setup_export(self):
         name = self._setup_dd.value()
         if not name:
-            self.toast("Save a setup first, then export it.")
+            self.toast(_("Save a setup first, then export it."))
             return
-        dialogs.save_file(self, "Export setup", f"iridia-{name}.json",
+        dialogs.save_file(self, _("Export setup"), f"iridia-{name}.json",
                           lambda path: self.bg(lambda: self.client.setup("export", name=name, dest=path),
-                                               lambda r: self.toast(r.get("error") or f"Saved {path}")))
+                                               lambda r: self.toast(r.get("error") or _("Saved {path}").format(path=path))))
 
     def _setup_import(self):
-        dialogs.open_file(self, "Import setup", lambda path: self.bg(
+        dialogs.open_file(self, _("Import setup"), lambda path: self.bg(
             lambda: self.client.setup("import", src=path),
-            lambda r: (self.toast(f"Imported as “{r.get('name')}”. Select it and click Load."
-                                  if r.get("ok") else r.get("error", "Couldn't import")), self._setup_refresh())))
+            lambda r: (self.toast(_('Imported as “{name}”. Select it and click Load.').format(name=r.get('name'))
+                                  if r.get("ok") else r.get("error", _("Couldn't import"))), self._setup_refresh())))
 
     # calibration
     def _cal_host(self):
@@ -951,73 +960,88 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         def check(t):
             if not valid_name(t):
-                return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
-            return f"A profile called “{t}” already exists." if t in self.profiles().list() else None
+                return _("Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters).")
+            return _("A profile called “{name}” already exists.").format(name=t) if t in self.profiles().list() else None
 
         def done(name):
             err = self.profiles().add(name, base)
             if err:
-                dialogs.message(self, "Calibration", err, True)
+                dialogs.message(self, _("Calibration"), err, True)
                 return
             self._cal_refresh(name)
             self.bg(self.client.reload_calibration)
             self._cal_edit()
-        dialogs.ask_text(self, "Add a profile", f"A new profile that starts as a copy of {base}. Give it a name, for "
-                                                "example the strip it is for.", "", done, check)
+        dialogs.ask_text(self, _("Add a profile"), _('A new profile that starts as a copy of {base}. Give it a name, for example the strip it is for.').format(base=base), "", done, check)
 
     def _cal_import(self):
         def done(path):
             name, err = self.profiles().import_from(path)
             if err:
-                dialogs.message(self, "Calibration", err, True)
+                dialogs.message(self, _("Calibration"), err, True)
                 return
             self._cal_refresh(name)
             self.bg(self.client.reload_calibration)
-            self.toast(f"Imported as “{name}”.")
-        dialogs.open_file(self, "Import a calibration profile", done)
+            self.toast(_('Imported as “{name}”.').format(name=name))
+        dialogs.open_file(self, _("Import a calibration profile"), done)
 
     def _cal_export(self):
         name = self._cal_dd.value() or DEFAULT_NAME
-        dialogs.save_file(self, "Export profile", f"{name}.json",
-                          lambda path: self.toast(self.profiles().export_to(name, path) or f"Saved {path}"))
+        dialogs.save_file(self, _("Export profile"), f"{name}.json",
+                          lambda path: self.toast(self.profiles().export_to(name, path) or _("Saved {path}").format(path=path)))
 
     def _cal_delete(self):
         name = self._cal_dd.value()
         if not name or name == DEFAULT_NAME:
-            self.toast("WS2812B can't be deleted. Open Edit and use Reset to defaults.")
+            self.toast(_("WS2812B can't be deleted. Open Edit and use Reset to defaults."))
             return
 
         def yes():
             err = self.profiles().delete(name)
             if err:
-                dialogs.message(self, "Calibration", err, True)
+                dialogs.message(self, _("Calibration"), err, True)
                 return
             self._cal_refresh(DEFAULT_NAME)
             self.bg(self.client.reload_calibration)
-            self.toast(f"Deleted “{name}”.")
-        dialogs.confirm(self, "Delete profile", f"Delete “{name}”? Zones using it fall back to WS2812B.",
-                        yes, yes="Delete", danger=True)
+            self.toast(_('Deleted “{name}”.').format(name=name))
+        dialogs.confirm(self, _("Delete profile"), _('Delete “{name}”? Zones using it fall back to WS2812B.').format(name=name),
+                        yes, yes=_("Delete"), danger=True)
 
     def _on_backend(self, v):
         self.config.set("color.backend", v)
         self.bg(self.client.refresh)
 
     def _reset_detection(self):
-        self.bg(self.client.reset_detection, lambda r: self.toast("Wallpaper detection will start over."))
+        self.bg(self.client.reset_detection, lambda r: self.toast(_("Wallpaper detection will start over.")))
 
     def _forget_all_picks(self):
-        dialogs.confirm(self, "Forget saved colors", "Forget the colors you picked for every wallpaper? Zones will "
-                                                     "follow each wallpaper's own colors again.",
+        dialogs.confirm(self, _("Forget saved colors"), _("Forget the colors you picked for every wallpaper? Zones will "
+                                                     "follow each wallpaper's own colors again."),
                         lambda: self.bg(lambda: (self.client.forget_all_wallpaper_colors(),
                                                  self.client.clear_wallpaper_color()),
-                                        lambda r: self.toast("Saved wallpaper colors forgotten.")),
-                        yes="Forget", danger=True)
+                                        lambda r: self.toast(_("Saved wallpaper colors forgotten."))),
+                        yes=_("Forget"), danger=True)
 
     def _set_font(self, choice):
-        font = "" if choice.startswith("Google Sans Flex") else ("system" if choice == "System font" else choice)
+        font = "" if choice == _("Google Sans Flex (built in)") else ("system" if choice == _("System font") else choice)
         self.prefs["font"] = font
         save_prefs(self.prefs)
         widgets.STYLE.set_font(font)
+
+    def _set_language(self, name):
+        code = next((c for c, n in self._langs if n == name), i18n.DEFAULT)
+        if code == (self.prefs.get("language", "") or i18n.DEFAULT):
+            return
+        self.prefs["language"] = code
+        save_prefs(self.prefs)
+        self.toast(_("The language changes when the window restarts."), _("Restart"), self._restart_window)
+
+    def _restart_window(self):
+        global RESTART
+        RESTART = True
+        app = self.get_application()
+        self.close()
+        if app is not None:
+            app.quit()
 
     def _set_reduce_motion(self, on):
         self.prefs["reduce_motion"] = on
@@ -1035,46 +1059,46 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         def work():
             r = self.client.get_log(n)
-            return "\n".join(r.get("lines", [])) if r.get("ok") else f"Couldn't read the log: {r.get('error')}"
+            return "\n".join(r.get("lines", [])) if r.get("ok") else _("Couldn't read the log: {error}").format(error=r.get('error'))
         self.bg(work, lambda text: self._log_buf.set_text(text if isinstance(text, str) else
-                                                           f"Daemon not reachable: {text.get('error')}"))
+                                                           _("Daemon not reachable: {error}").format(error=text.get('error'))))
 
     # ============================================================ service tab
     def _build_service(self):
         p = self._service_page
-        p.append(section("Background daemon", "The daemon is the part of Iridia that keeps your lights in sync. It "
+        p.append(section(_("Background daemon"), _("The daemon is the part of Iridia that keeps your lights in sync. It "
                                               "runs in the background and keeps working when this window is closed. "
-                                              "This window only changes its settings.", 10))
+                                              "This window only changes its settings."), 10))
         c = card()
-        self._svc_status = label("Checking…", ("heading",))
+        self._svc_status = label(_("Checking…"), ("heading",))
         c.append(self._svc_status)
         r = hbox(8)
-        r.append(button("Start daemon", "play_arrow", "filled", self._daemon_start))
-        r.append(button("Kill daemon", "stop", "danger", self._daemon_kill))
+        r.append(button(_("Start daemon"), "play_arrow", "filled", self._daemon_start))
+        r.append(button(_("Kill daemon"), "stop", "danger", self._daemon_kill))
         c.append(r)
-        c.append(label("Killing the daemon stops it completely. Your lights stay on their last colors until you start "
-                       "it again.", ("small", "faint"), wrap=True))
+        c.append(label(_("Killing the daemon stops it completely. Your lights stay on their last colors until you start "
+                       "it again."), ("small", "faint"), wrap=True))
         p.append(c)
 
-        p.append(section("Start the daemon when I log in", "Pick one method. If you enable more than one, nothing "
-                                                           "breaks, since only one daemon ever runs."))
+        p.append(section(_("Start the daemon when I log in"), _("Pick one method. If you enable more than one, nothing "
+                                                           "breaks, since only one daemon ever runs.")))
         c = card()
-        c.append(label("systemd service  ·  recommended", ("subheading",)))
-        self._unit_status = label("Checking…", ("small", "dim"), wrap=True)
+        c.append(label(_("systemd service  ·  recommended"), ("subheading",)))
+        self._unit_status = label(_("Checking…"), ("small", "dim"), wrap=True)
         c.append(self._unit_status)
         r = hbox(8)
-        r.append(button("Enable at login", "check", "tonal", self._svc_install))
-        r.append(button("Disable", "close", "tonal", self._svc_disable))
-        r.append(button("Remove completely", "delete", "text", self._svc_remove))
+        r.append(button(_("Enable at login"), "check", "tonal", self._svc_install))
+        r.append(button(_("Disable"), "close", "tonal", self._svc_disable))
+        r.append(button(_("Remove completely"), "delete", "text", self._svc_remove))
         c.append(r)
         c.append(divider())
-        c.append(label("Other ways", ("subheading",)))
-        c.append(label("Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
-                       "systemd.", ("small", "dim"), wrap=True))
+        c.append(label(_("Other ways"), ("subheading",)))
+        c.append(label(_("Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
+                       "systemd."), ("small", "dim"), wrap=True))
         from iridia import autostart
         self._as_snips = [x for x in autostart.snippets() if x["id"] != "systemd"]
         r = hbox(10)
-        r.append(label("Environment", ("body", "dim")))
+        r.append(label(_("Environment"), ("body", "dim")))
         self._as_dd = Dropdown([x["title"] for x in self._as_snips], self._as_snips[0]["title"],
                                lambda v: self._show_autostart())
         r.append(self._as_dd)
@@ -1086,41 +1110,46 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._as_buf = tv.get_buffer()
         c.append(tv)
         r = hbox(8)
-        r.append(button("Copy", "content_copy", "filled small",
-                        lambda: (widgets.copy_text(self, self._as_text), self.toast("Copied"))))
-        self._as_xdg = button("Install XDG autostart", "add", "tonal small", self._toggle_xdg)
+        r.append(button(_("Copy"), "content_copy", "filled small",
+                        lambda: (widgets.copy_text(self, self._as_text), self.toast(_("Copied")))))
+        self._as_xdg = button(_("Install XDG autostart"), "add", "tonal small", self._toggle_xdg)
         r.append(self._as_xdg)
         c.append(r)
         p.append(c)
         self._show_autostart()
 
-        p.append(section("OpenRGB connection", "OpenRGB is a separate program that talks to your LEDs. Iridia needs it "
-                                               "running."))
+        p.append(section(_("OpenRGB connection"), _("OpenRGB is a separate program that talks to your LEDs. Iridia needs it "
+                                               "running.")))
         c = card()
-        self._orgb_status = label("Checking…", ("body",), wrap=True)
+        self._orgb_status = label(_("Checking…"), ("body",), wrap=True)
         c.append(self._orgb_status)
+        row, self._orgb_login_sw = switch_row(_("Start OpenRGB's server with Iridia"), False, self._set_orgb_login)
+        c.append(row)
+        self._orgb_login_lbl = label(_("Checking…"), ("small", "dim"), wrap=True)
+        c.append(self._orgb_login_lbl)
+        c.append(divider())
         r = hbox(8)
-        r.append(button("Reconnect", "sync", "tonal", lambda: self.bg(self.client.reconnect_openrgb,
-                                                                       lambda r: self.toast("Reconnecting…"))))
-        r.append(button("Restart OpenRGB server", "restart_alt", "danger", self._openrgb_restart))
+        r.append(button(_("Reconnect"), "sync", "tonal", lambda: self.bg(self.client.reconnect_openrgb,
+                                                                       lambda r: self.toast(_("Reconnecting…")))))
+        r.append(button(_("Restart OpenRGB server"), "restart_alt", "danger", self._openrgb_restart))
         c.append(r)
-        c.append(label("Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
+        c.append(label(_("Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
                        "its systemd service); use it when a device stops responding and Reconnect doesn't bring it "
-                       "back. It won't touch an OpenRGB window.", ("small", "faint"), wrap=True))
+                       "back. It won't touch an OpenRGB window."), ("small", "faint"), wrap=True))
         p.append(c)
 
-        p.append(section("Diagnostics"))
+        p.append(section(_("Diagnostics")))
         c = card()
-        c.append(button("Run diagnostics", "troubleshoot", "filled", self._run_diagnostics))
-        c.append(label("Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing "
-                       "“iridia doctor” prints.", ("small", "faint"), wrap=True))
+        c.append(button(_("Run diagnostics"), "troubleshoot", "filled", self._run_diagnostics))
+        c.append(label(_("Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing "
+                       "“iridia doctor” prints."), ("small", "faint"), wrap=True))
         p.append(c)
 
-        p.append(section("Uninstall"))
+        p.append(section(_("Uninstall")))
         c = card()
-        c.append(button("Uninstall Iridia…", "delete", "danger", self._uninstall))
-        c.append(label("Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
-                       "to keep your settings. Same as running “iridia uninstall”.", ("small", "faint"),
+        c.append(button(_("Uninstall Iridia…"), "delete", "danger", self._uninstall))
+        c.append(label(_("Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
+                       "to keep your settings. Same as running “iridia uninstall”."), ("small", "faint"),
                        wrap=True))
         p.append(c)
 
@@ -1130,24 +1159,25 @@ class IridiaWindow(Gtk.ApplicationWindow):
         snip = next((x for x in self._as_snips if x["title"] == title), self._as_snips[0])
         warn = ""
         if os.path.sep not in autostart.daemon_command():
-            warn = ("\nCouldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies "
-                    "on your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon).")
-        self._as_file.set_label(f"Add this to: {snip['file']}{warn}")
+            warn = "\n" + _("Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and "
+                             "relies on your login PATH. If it doesn't start, replace it with the full path (run: "
+                             "which iridia-daemon).")
+        self._as_file.set_label(_('Add this to: {file}').format(file=snip['file']) + warn)
         self._as_text = snip["text"]
         self._as_buf.set_text(snip["text"])
         self._as_xdg.set_visible(snip["id"] == "xdg")
         if snip["id"] == "xdg":
-            set_button_text(self._as_xdg, "Remove XDG autostart" if autostart.xdg_installed() else
-                            "Install XDG autostart", "delete" if autostart.xdg_installed() else "add")
+            set_button_text(self._as_xdg, _("Remove XDG autostart") if autostart.xdg_installed() else
+                            _("Install XDG autostart"), "delete" if autostart.xdg_installed() else "add")
 
     def _toggle_xdg(self):
         from iridia import autostart
         if autostart.xdg_installed():
             autostart.xdg_remove()
-            self.toast("XDG autostart removed")
+            self.toast(_("XDG autostart removed"))
         else:
             autostart.xdg_install()
-            self.toast("XDG autostart installed")
+            self.toast(_("XDG autostart installed"))
         self._show_autostart()
 
     def _cli(self, *args, done=None):
@@ -1156,7 +1186,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _daemon_start(self):
         def done(r):
             if getattr(r, "returncode", 1) != 0:
-                dialogs.message(self, "Daemon", (r.stderr or r.stdout or "").strip() if hasattr(r, "stderr") else
+                dialogs.message(self, _("Daemon"), (r.stderr or r.stdout or "").strip() if hasattr(r, "stderr") else
                                 str(r), True)
             GLib.timeout_add(1200, lambda: (self._poll_once(), False)[1])
         self._spinner.start()
@@ -1165,14 +1195,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _daemon_kill(self):
         def done(r):
             if getattr(r, "returncode", 1) != 0:
-                dialogs.message(self, "Daemon", (getattr(r, "stderr", "") or "").strip() or "Couldn't stop it.", True)
+                dialogs.message(self, _("Daemon"), (getattr(r, "stderr", "") or "").strip() or _("Couldn't stop it."), True)
             GLib.timeout_add(800, lambda: (self._poll_once(), False)[1])
         self._cli("daemon", "stop", done=done)
 
     def _svc_install(self):
         self._cli("service", "install", done=lambda r: (
-            self.toast("Enabled. The daemon now starts at login.") if getattr(r, "returncode", 1) == 0 else
-            dialogs.message(self, "Service", f"Install failed:\n{(getattr(r, 'stderr', '') or '').strip()}", True),
+            self.toast(_("Enabled. The daemon now starts at login.")) if getattr(r, "returncode", 1) == 0 else
+            dialogs.message(self, _("Service"), _('Install failed:') + '\n' + (getattr(r, 'stderr', '') or '').strip(), True),
             self._render_service_status_now()))
 
     def _svc_disable(self):
@@ -1180,26 +1210,74 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                        text=True), lambda r: self._render_service_status_now())
 
     def _svc_remove(self):
-        dialogs.confirm(self, "Remove service", "Stop, disable and delete the systemd service (and the app "
-                                                "launcher)? Your settings are kept.",
-                        lambda: self._cli("service", "remove", done=lambda r: (self.toast("Removed."),
+        dialogs.confirm(self, _("Remove service"), _("Stop, disable and delete the systemd service (and the app "
+                                                "launcher)? Your settings are kept."),
+                        lambda: self._cli("service", "remove", done=lambda r: (self.toast(_("Removed.")),
                                                                                self._render_service_status_now())),
-                        yes="Remove", danger=True)
+                        yes=_("Remove"), danger=True)
+
+    def _check_orgb_login(self):
+        from iridia import openrgb_server
+        try:
+            return openrgb_server.status()
+        except Exception as e:
+            return {"error": str(e)}
+
+    def _refresh_orgb_login(self):
+        self.bg(self._check_orgb_login, lambda st: (setattr(self, "_orgb_login", st), self._render_orgb_login()))
+
+    def _render_orgb_login(self):
+        st = getattr(self, "_orgb_login", None)
+        if not st or not hasattr(self, "_orgb_login_sw"):
+            return
+        sw, lbl = self._orgb_login_sw, self._orgb_login_lbl
+        sw.set_sensitive(bool(st.get("command")) or st.get("managed", False))
+        sw.set_value(bool(st.get("start_server")) and (st.get("managed", False) or
+                                                       (not st.get("systemd", True) and bool(st.get("command")))))
+        if st.get("error"):
+            text = st["error"]
+        elif not st.get("command") and not st.get("managed"):
+            text = _("OpenRGB isn't installed, so there is nothing to start.")
+        elif st.get("managed"):
+            text = (_("Iridia starts it when you log in (iridia-openrgb.service). It's running.")
+                    if st.get("active") == "active" else
+                    _("Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
+                      "diagnostics to see why."))
+        elif st.get("others"):
+            text = _("Started by {what}. Iridia leaves that alone.").format(what=", ".join(st["others"]))
+        elif not st.get("systemd", True):
+            text = (_("No systemd here: the daemon starts OpenRGB itself when it can't reach it.")
+                    if st.get("start_server") else _("Off. Start OpenRGB's server yourself."))
+        elif st.get("start_server"):
+            text = _("Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it "
+                     "when it can't reach it.")
+        else:
+            text = _("Off. Start OpenRGB's server yourself.")
+        lbl.set_label(text)
+
+    def _set_orgb_login(self, on):
+        def done(r):
+            out = ((getattr(r, "stdout", "") or "") + (getattr(r, "stderr", "") or "")).strip()
+            if getattr(r, "returncode", 1) != 0:
+                dialogs.message(self, _("OpenRGB"), out or _("That didn't work"), True)
+            self._refresh_orgb_login()
+        self._orgb_login_sw.set_sensitive(False)
+        self._cli("openrgb", "enable" if on else "disable", done=done)
 
     def _openrgb_restart(self):
-        dialogs.confirm(self, "Restart OpenRGB server", "This stops and relaunches the OpenRGB SDK server (about 4 "
-                                                        "seconds), which briefly interrupts any other software using it.",
-                        lambda: self.bg(self.client.restart_openrgb_server), yes="Restart", danger=True)
+        dialogs.confirm(self, _("Restart OpenRGB server"), _("This stops and relaunches the OpenRGB SDK server (about 4 "
+                                                        "seconds), which briefly interrupts any other software using it."),
+                        lambda: self.bg(self.client.restart_openrgb_server), yes=_("Restart"), danger=True)
 
     def _run_diagnostics(self):
         reachable = "_error" not in self._status
         dialogs.diagnostics_window(self, diagnostics.run_checks(self._status if reachable else {}, reachable))
 
     def _uninstall(self):
-        d = dialogs.Dialog(self, "Uninstall Iridia")
-        d.body.append(label("Uninstall Iridia", ("title",)))
-        d.body.append(label("Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors "
-                            "until something else changes them.", ("body", "dim"), wrap=True, chars=56))
+        d = dialogs.Dialog(self, _("Uninstall Iridia"))
+        d.body.append(label(_("Uninstall Iridia"), ("title",)))
+        d.body.append(label(_("Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors "
+                            "until something else changes them."), ("body", "dim"), wrap=True, chars=56))
 
         def go(keep):
             d.close()
@@ -1208,12 +1286,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                  stderr=subprocess.DEVNULL, start_new_session=True)
             except OSError as e:
-                dialogs.message(self, "Uninstall", f"Couldn't start the uninstaller: {e}", True)
+                dialogs.message(self, _("Uninstall"), _("Couldn't start the uninstaller: {e}").format(e=e), True)
                 return
             self.close()
-        d.buttons(button("Cancel", style="text", cb=d.close),
-                  button("Remove, keep my settings", style="tonal", cb=lambda: go(True)),
-                  button("Remove everything", style="danger", cb=lambda: go(False)))
+        d.buttons(button(_("Cancel"), style="text", cb=d.close),
+                  button(_("Remove, keep my settings"), style="tonal", cb=lambda: go(True)),
+                  button(_("Remove everything"), style="danger", cb=lambda: go(False)))
         d.present()
 
     def _check_service_status(self):
@@ -1233,27 +1311,28 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
     def _render_daemon_status(self):
         if "_error" in self._status:
-            self._svc_status.set_label("Daemon stopped")
+            self._svc_status.set_label(_("Daemon stopped"))
             self._svc_status.remove_css_class("ok-text")
             self._svc_status.add_css_class("error-text")
         else:
-            by = "by systemd" if self._status.get("managed_by") == "systemd" else "without systemd"
-            self._svc_status.set_label(f"Running (pid {self._status.get('pid', '?')}, started {by})")
+            by = _("by systemd") if self._status.get("managed_by") == "systemd" else _("without systemd")
+            self._svc_status.set_label(_('Running (pid {pid}, started {by})').format(pid=self._status.get('pid', '?'), by=by))
             self._svc_status.remove_css_class("error-text")
             self._svc_status.add_css_class("ok-text")
+        self._render_orgb_login()
         st = self._status.get("_service_status", "checking…")
-        self._unit_status.set_label({"enabled": "Enabled. The daemon starts automatically when you log in.",
-                                     "disabled": "Installed but not enabled. It won't start at login.",
-                                     "not installed": "Not installed. Click “Enable at login” to set it up."
-                                     }.get(st, f"systemd status: {st}"))
+        self._unit_status.set_label({"enabled": _("Enabled. The daemon starts automatically when you log in."),
+                                     "disabled": _("Installed but not enabled. It won't start at login."),
+                                     "not installed": _("Not installed. Click “Enable at login” to set it up.")
+                                     }.get(st, _("systemd status: {status}").format(status=st)))
 
     # ============================================================ header actions
     def _toggle_freeze(self):
         want = not self._frozen
         self.bg(lambda: (self.client.freeze(want), self.client.status())[1],
                 lambda st: (setattr(self, "_status", st), self._update_ui(),
-                            self.toast("Colors frozen. Wallpaper changes are ignored." if want else
-                                       "Colors follow the wallpaper again.")))
+                            self.toast(_("Colors frozen. Wallpaper changes are ignored.") if want else
+                                       _("Colors follow the wallpaper again."))))
 
     def refresh_soon(self):
         """Ask the daemon for a fresh status now (after a change), instead of waiting for the poll."""
@@ -1263,7 +1342,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self.bg(self.client.refresh, lambda r: self._poll_once())
 
     def _do_restart(self):
-        self.bg(self.client.restart, lambda r: self.toast("Daemon restarting…"))
+        self.bg(self.client.restart, lambda r: self.toast(_("Daemon restarting…")))
 
     # ============================================================ seed / theme
     @staticmethod
@@ -1310,6 +1389,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
             try:
                 resp = self.client.status()
                 if resp.get("ok"):
+                    if self._poll_count % 15 == 0:
+                        self._orgb_login = self._check_orgb_login()
                     if self._poll_count % 5 == 0:
                         resp["_service_status"] = self._check_service_status()
                     else:
@@ -1345,12 +1426,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
             return
         st = self._status
         if "_error" in st:
-            self._chip.set("Daemon not running", "error")
+            self._chip.set(_("Daemon not running"), "error")
             self._spinner.stop()
             self._show_daemon_down()
             self._render_daemon_status()
-            self._hero_title.set_label("The daemon isn't running")
-            self._hero_sub.set_label("Start it from the Service tab.")
+            self._hero_title.set_label(_("The daemon isn't running"))
+            self._hero_sub.set_label(_("Start it from the Service tab."))
             return
         self._spinner.stop()
         if self._down:
@@ -1365,20 +1446,20 @@ class IridiaWindow(Gtk.ApplicationWindow):
         missing = st.get("openrgb_missing_devices", [])
         night = st.get("night") or {}
         if not st.get("openrgb_connected"):
-            self._chip.set("OpenRGB not connected", "error")
+            self._chip.set(_("OpenRGB not connected"), "error")
         elif missing:
-            self._chip.set(f"Can't see: {', '.join(missing)}", "error")
+            self._chip.set(_("Can't see: {devices}").format(devices=', '.join(missing)), "error")
         elif night.get("active"):
-            self._chip.set(f"Night mode until {night.get('end')}", "warn")
+            self._chip.set(_('Night mode until {time}').format(time=night.get('end')), "warn")
         else:
             self._chip.set(f"#{dominant}  ·  {brightness}%", "ok")
         frozen = bool(st.get("frozen"))
         if frozen != self._frozen:
             self._frozen = frozen
-            set_button_text(self._freeze_btn, "Frozen" if frozen else "Freeze colors", "ac_unit")
+            set_button_text(self._freeze_btn, _("Frozen") if frozen else _("Freeze colors"), "ac_unit")
             (self._freeze_btn.add_css_class if frozen else self._freeze_btn.remove_css_class)("toggled")
         # hero
-        wp = os.path.basename(wallpaper) if wallpaper else "No wallpaper detected yet"
+        wp = os.path.basename(wallpaper) if wallpaper else _("No wallpaper detected yet")
         self._hero_title.set_label(f"#{dominant}")
         self._hero_sub.set_label(wp)
         self._hero_wave.set_value((brightness or 0) / 100)
@@ -1390,28 +1471,26 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r = self._rows
         r["wallpaper"].set_label(wp)
         r["dominant"].set_label(f"#{colors[0]}" if colors else "-")
-        r["openrgb"].set_label("Connected" if st.get("openrgb_connected") else "Not connected")
-        r["ddc"].set_label("Available" if st.get("ddc_available") else "Not available")
+        r["openrgb"].set_label(_("Connected") if st.get("openrgb_connected") else _("Not connected"))
+        r["ddc"].set_label(_("Available") if st.get("ddc_available") else _("Not available"))
         modes = {z.get("mode", "full") for z in self._all_zone_cfgs(st.get("device_configs", {}))}
-        r["mode"].set_label(MODE_LABELS.get(next(iter(modes)), "Off") if len(modes) == 1 else "Mixed" if modes else "Off")
-        r["freeze"].set_label("Frozen (wallpaper changes are ignored)" if frozen else "Following the wallpaper")
+        r["mode"].set_label(MODE_LABELS.get(next(iter(modes)), MODE_LABELS["full"]) if len(modes) == 1 else _("Mixed") if modes else MODE_LABELS["full"])
+        r["freeze"].set_label(_("Frozen (wallpaper changes are ignored)") if frozen else _("Following the wallpaper"))
         if not night.get("enabled"):
-            nt = "Off"
+            nt = _("Off")
         elif night.get("active"):
-            nt = f"On until {night.get('end')}, brightness capped at {night.get('cap')}%"
+            nt = _("On until {end}, brightness capped at {cap}%").format(end=night.get('end'), cap=night.get('cap'))
         else:
-            nt = f"Scheduled {night.get('start')} to {night.get('end')} (cap {night.get('cap')}%)"
+            nt = _("Scheduled {start} to {end} (cap {cap}%)").format(start=night.get('start'), end=night.get('end'), cap=night.get('cap'))
         r["night"].set_label(nt)
         nov = len(st.get("overlays") or {})
-        r["lights"].set_label(("Off (PC asleep)" if st.get("asleep") else
-                               "Off (turned off by command)" if st.get("lights_off") else "On")
-                              + (f", {nov} strip{'s' if nov != 1 else ''} changed by a keybind (see Keybinds)"
+        r["lights"].set_label((_("Off (PC asleep)") if st.get("asleep") else
+                               _("Off (turned off by command)") if st.get("lights_off") else _("On"))
+                              + (', ' + ngettext('{n} strip changed by a keybind (see Keybinds)', '{n} strips changed by a keybind (see Keybinds)', nov).format(n=nov)
                                  if nov else ""))
         r["backend"].set_label(st.get("color_backend", "auto"))
         self._extract_live.set_label(
-            f"Right now: wallpaper found via “{st.get('wallpaper_backend') or 'nothing yet'}”"
-            f"{' (cached)' if st.get('wallpaper_backend_cached') else ''}, colors extracted via "
-            f"“{st.get('color_backend_used') or 'n/a (cached or not yet run)'}”.")
+            _('Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”.').format(found=st.get('wallpaper_backend') or _('nothing yet'), cached=_(' (cached)') if st.get('wallpaper_backend_cached') else '', engine=st.get('color_backend_used') or _('n/a (cached or not yet run)')))
         profs = st.get("calibration_profiles")
         if profs:
             ZoneCard.PROFILES = list(profs)
@@ -1441,12 +1520,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._keybinds.update_status(st)
         self._render_daemon_status()
         if st.get("openrgb_connected"):
-            self._orgb_status.set_label(f"Connected, but not seeing: {', '.join(missing)}" if missing else
-                                        "Connected. All configured devices visible.")
+            self._orgb_status.set_label(_('Connected, but not seeing: {devices}').format(devices=', '.join(missing)) if missing else
+                                        _("Connected. All configured devices visible."))
         else:
-            self._orgb_status.set_label("Not connected. " + (st.get("openrgb_last_error") or ""))
+            self._orgb_status.set_label(_("Not connected.") + " " + (st.get("openrgb_last_error") or ""))
 
-    def _on_close(self, *_):
+    def _on_close(self, *_a):
         self._running = False
         return False
 
@@ -1469,12 +1548,19 @@ class IridiaApp(Gtk.Application):
         self.win.present()
 
 
+RESTART = False
+
+
 def main():
     GLib.set_prgname(APP_ID)          # X11 WM_CLASS, so launchers group the window with Iridia
     GLib.set_application_name("Iridia")
     fonts.register()
     app = IridiaApp()
-    return app.run(sys.argv[:1])
+    rc = app.run(sys.argv[:1])
+    if RESTART:
+        # language changed: start a fresh window process (the strings are loaded at start)
+        os.execv(sys.executable, [sys.executable, "-m", "iridia.gui"])
+    return rc
 
 
 if __name__ == "__main__":

@@ -21,6 +21,8 @@ def main():
               "  Alpine:         sudo apk add gtk4.0 py3-gobject3 py3-cairo",
               file=sys.stderr)
         return 1
+    from iridia import i18n
+    i18n.setup()                       # before the window's modules load their strings
     from iridia.ui.app import main as run
     return run()
 

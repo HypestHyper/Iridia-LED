@@ -4,6 +4,7 @@ import time
 
 from gi.repository import GLib, Gtk
 
+from iridia.i18n import _, ngettext, pgettext  # noqa: F401
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator
 from iridia.ui import fonts, serial
@@ -17,16 +18,17 @@ ZONE_FIELDS_DEFAULT = {
     "pattern_params": {}, "calibration_profile": "WS2812B",
 }
 
-MODE_LABELS = {"full": "Off", "palette": "Palette", "calibrated": "Calibrated"}
+MODE_LABELS = {"full": pgettext("color correction", "Off"), "palette": _("Palette"), "calibrated": _("Calibrated")}
 MODE_CAPTIONS = {
-    "full": "No correction. The color you pick is sent to the strip as it is.",
-    "palette": "Keeps every LED on the 48 safe colors that cheap LED strips show cleanly.",
-    "calibrated": "Corrects colors so they look right on your strip. Choose the profile that matches it "
-                  "(edit them in Settings).",
-    "mixed": "Zones use different corrections. Pick one to set them all.",
+    "full": _("No correction. The color you pick is sent to the strip as it is."),
+    "palette": _("Keeps every LED on the 48 safe colors that cheap LED strips show cleanly."),
+    "calibrated": _("Corrects colors so they look right on your strip. Choose the profile that matches it "
+                    "(edit them in Settings)."),
+    "mixed": _("Zones use different corrections. Pick one to set them all."),
 }
-PATTERN_NAMES = {"solid": "Solid", "gradient": "Gradient", "segments": "Segments", "center_out": "Center out",
-                 "edges_in": "Edges in", "alternating": "Alternating", "paint": "Painted"}
+PATTERN_NAMES = {"solid": _("Solid"), "gradient": _("Gradient"), "segments": _("Segments"),
+                 "center_out": _("Center out"), "edges_in": _("Edges in"), "alternating": _("Alternating"),
+                 "paint": _("Painted")}
 PATTERN_KEYS = {v: k for k, v in PATTERN_NAMES.items()}
 
 
@@ -97,24 +99,24 @@ class GlobalClient:
 
 STRIP_TYPES = [
     # (key, name, note)
-    ("auto", "Automatic", ""),
-    ("addressable", "Addressable 5V (WS2812B, SK6812)",
-     "Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."),
-    ("addressable12", "Addressable 12V in groups (WS2811, COB)",
-     "One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
-     "how many LEDs are in a pixel so the Layout tab draws the real length."),
-    ("single", "One color (plain 12V RGB, 4 pins)",
-     "The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
-     "apply, so they're hidden."),
-    ("rgbw", "RGBW addressable (SK6812 RGBW, experimental)",
-     "OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
-     "itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
-     "sends GRB (like WS2812B); use Color order if colors come out swapped. Count LEDs doesn't work on "
-     "these strips: set the LED count by hand."),
+    ("auto", _("Automatic"), ""),
+    ("addressable", _("Addressable 5V (WS2812B, SK6812)"),
+     _("Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital.")),
+    ("addressable12", _("Addressable 12V in groups (WS2811, COB)"),
+     _("One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
+       "how many LEDs are in a pixel so the Layout tab draws the real length.")),
+    ("single", _("One color (plain 12V RGB, 4 pins)"),
+     _("The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
+       "apply, so they're hidden.")),
+    ("rgbw", _("RGBW addressable (SK6812 RGBW, experimental)"),
+     _("OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
+       "itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
+       "sends GRB (like WS2812B); use Color order if colors come out swapped. Count LEDs doesn't work on "
+       "these strips: set the LED count by hand.")),
 ]
-STRIP_NAMES = {k: n for k, n, _ in STRIP_TYPES}
-STRIP_KEYS = {n: k for k, n, _ in STRIP_TYPES}
-ORDERS = [("RGB", "RGB (normal)"), ("RBG", "RBG"), ("GRB", "GRB"), ("GBR", "GBR"), ("BRG", "BRG"), ("BGR", "BGR")]
+STRIP_NAMES = {k: n for k, n, _t in STRIP_TYPES}
+STRIP_KEYS = {n: k for k, n, _t in STRIP_TYPES}
+ORDERS = [("RGB", _("RGB (normal)")), ("RBG", "RBG"), ("GRB", "GRB"), ("GBR", "GBR"), ("BRG", "BRG"), ("BGR", "BGR")]
 
 
 class ZoneCard(Gtk.Box):
@@ -164,14 +166,14 @@ class ZoneCard(Gtk.Box):
         txt.append(self._summary)
         hdr.append(txt)
         if not self.global_mode:
-            hdr.append(button(icon_name="edit", style="text small", cb=self._rename, tooltip="Rename this strip"))
+            hdr.append(button(icon_name="edit", style="text small", cb=self._rename, tooltip=_("Rename this strip")))
         self._chev = icon("expand_less" if expanded else "expand_more", classes=("dim",))
         hdr.append(self._chev)
         click = Gtk.GestureClick()
-        click.connect("released", lambda *_: self._toggle_expand())
+        click.connect("released", lambda *_a: self._toggle_expand())
         txt.add_controller(click)
         click2 = Gtk.GestureClick()
-        click2.connect("released", lambda *_: self._toggle_expand())
+        click2.connect("released", lambda *_a: self._toggle_expand())
         self._chev.add_controller(click2)
         self.append(hdr)
         self._rev = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.SLIDE_DOWN, transition_duration=260,
@@ -204,11 +206,12 @@ class ZoneCard(Gtk.Box):
         self._chev.set_label(fonts.codepoint("expand_less" if on else "expand_more"))
 
     def _refresh_summary(self):
-        pat = "mixed" if "pattern" in self._mixed else PATTERN_NAMES.get(
+        pat = _("mixed") if "pattern" in self._mixed else PATTERN_NAMES.get(
             PatternGenerator.normalize(self.cfg.get("pattern", "solid")), "")
-        mode = "mixed" if "mode" in self._mixed else {"full": "no correction", "palette": "palette",
-                                                       "calibrated": "calibrated"}.get(self.cfg.get("mode", "full"), "")
-        parts = [pat, mode] + ([] if self.global_mode else [f"{self.cfg.get('led_count', 20)} LEDs"])
+        mode = _("mixed") if "mode" in self._mixed else {"full": _("no correction"), "palette": _("palette"),
+                                                          "calibrated": _("calibrated")}.get(self.cfg.get("mode", "full"), "")
+        n_leds = int(self.cfg.get("led_count", 20) or 0)
+        parts = [pat, mode] + ([] if self.global_mode else [ngettext("{n} LED", "{n} LEDs", n_leds).format(n=n_leds)])
         if not self.global_mode and self.cfg.get("display_name"):
             parts.insert(0, self.zone_name or self.device_name)
         self._summary.set_label("  ·  ".join(p for p in parts if p))
@@ -221,12 +224,12 @@ class ZoneCard(Gtk.Box):
         d.append(self._hw_note)
         row = hbox(10)
         if not self.global_mode:
-            row.append(label("LEDs", ("small", "dim")))
+            row.append(label(_("LEDs"), ("small", "dim")))
             self._led_spin = Spin(1, 1000, self.cfg.get("led_count", 20), self._on_led_change)
             row.append(self._led_spin)
         else:
             self._led_spin = None
-        self._pattern_lbl = label("Pattern", ("small", "dim"))
+        self._pattern_lbl = label(_("Pattern"), ("small", "dim"))
         row.append(self._pattern_lbl)
         pats = [PATTERN_NAMES[p] for p in PatternGenerator.PATTERNS if not (self.global_mode and p == "paint")]
         self._pattern = Dropdown(pats, PATTERN_NAMES.get(PatternGenerator.normalize(self.cfg.get("pattern", "solid"))),
@@ -238,11 +241,11 @@ class ZoneCard(Gtk.Box):
 
         if not self.global_mode:
             tools = hbox(6)
-            self._identify_btn = button("Identify", "flare", "tonal small", self._on_identify)
+            self._identify_btn = button(_("Identify"), "flare", "tonal small", self._on_identify)
             tools.append(self._identify_btn)
-            self._count_btn = button("Count LEDs", "straighten", "tonal small", self._on_count)
+            self._count_btn = button(_("Count LEDs"), "straighten", "tonal small", self._on_count)
             tools.append(self._count_btn)
-            tools.append(label("Identify lights only this zone, so you can see which strip it is.", ("tiny", "faint"),
+            tools.append(label(_("Identify lights only this zone, so you can see which strip it is."), ("tiny", "faint"),
                                wrap=True))
             d.append(tools)
 
@@ -253,10 +256,10 @@ class ZoneCard(Gtk.Box):
         self._strip = StripEditor(render=self._render_with_stops, on_stops=self._on_stops, on_paint=self._on_paint)
         d.append(self._strip)
         self._layout_row = hbox(14)
-        self._layout_btn = button("Edit layout", "tune", "text small", self._toggle_layout)
+        self._layout_btn = button(_("Edit layout"), "tune", "text small", self._toggle_layout)
         self._layout_row.append(self._layout_btn)
-        self._rev_row, self._reverse = switch_row("Reverse", bool(self._params.get("reverse")), self._on_reverse)
-        self._mir_row, self._mirror = switch_row("Mirror", bool(self._params.get("mirror")), self._on_mirror)
+        self._rev_row, self._reverse = switch_row(_("Reverse"), bool(self._params.get("reverse")), self._on_reverse)
+        self._mir_row, self._mirror = switch_row(_("Mirror"), bool(self._params.get("mirror")), self._on_mirror)
         self._layout_row.append(self._rev_row)
         self._layout_row.append(self._mir_row)
         d.append(self._layout_row)
@@ -271,31 +274,31 @@ class ZoneCard(Gtk.Box):
         # brightness
         br = card(inner=True)
         br.set_margin_top(6)
-        br.append(label("Brightness", ("subheading",)))
+        br.append(label(_("Brightness"), ("subheading",)))
         r1 = hbox(10)
-        row1, self._sync = switch_row("Follow monitor brightness", self.cfg.get("brightness_sync", True), self._on_sync)
+        row1, self._sync = switch_row(_("Follow monitor brightness"), self.cfg.get("brightness_sync", True), self._on_sync)
         r1.append(row1)
-        r1.append(label("Manual", ("small", "dim"), xalign=1.0))
+        r1.append(label(_("Manual"), ("small", "dim"), xalign=1.0))
         self._manual = Spin(0, 100, self.cfg.get("manual_brightness", 100), self._on_manual)
         r1.append(self._manual)
         br.append(r1)
         r2 = hbox(12)
-        r2.append(label("Range", ("small", "dim")))
+        r2.append(label(_("Range"), ("small", "dim")))
         rng = self.cfg.get("brightness_range", [0, 100])
         self._range = DualRange(rng[0], rng[1], lambda a, b: self._autosave("range", self._on_range, 400))
         r2.append(self._range)
         br.append(r2)
         r3 = hbox(24)
-        row3, self._invert = switch_row("Invert (bias lighting)", self.cfg.get("invert_brightness", False),
+        row3, self._invert = switch_row(_("Invert (bias lighting)"), self.cfg.get("invert_brightness", False),
                                         self._on_invert)
-        self._gamma_row, self._gamma = switch_row("Gamma correction", self.cfg.get("gamma_correction", False),
+        self._gamma_row, self._gamma = switch_row(_("Gamma correction"), self.cfg.get("gamma_correction", False),
                                                   self._on_gamma)
         r3.append(row3)
         r3.append(self._gamma_row)
         br.append(r3)
         r4 = hbox(10)
         r4.set_margin_top(6)
-        r4.append(label("Color correction", ("small", "dim")))
+        r4.append(label(_("Color correction"), ("small", "dim")))
         self._mode_val = self.cfg.get("mode", "full")
         self._mode_group = Group([(m, MODE_LABELS[m]) for m in ("full", "palette", "calibrated")], self._mode_val,
                                  self._on_mode)
@@ -311,13 +314,13 @@ class ZoneCard(Gtk.Box):
 
     # ------------------------------------------------------------ strip type
     def _build_strip_box(self, d):
-        self._strip_exp = Gtk.Expander(label="Strip type and wiring")
+        self._strip_exp = Gtk.Expander(label=_("Strip type and wiring"))
         self._strip_exp.add_css_class("strip-exp")
         box = card(inner=True)
         r = hbox(10)
-        r.append(label("Strip type", ("small", "dim")))
+        r.append(label(_("Strip type"), ("small", "dim")))
         cur = self.cfg.get("strip_type") or "auto"
-        self._stype_dd = Dropdown([n for _k, n, _t in STRIP_TYPES], STRIP_NAMES.get(cur, "Automatic"),
+        self._stype_dd = Dropdown([n for _k, n, _t in STRIP_TYPES], STRIP_NAMES.get(cur, _("Automatic")),
                                   lambda v: self._strip_set(strip_type=STRIP_KEYS.get(v, "auto")))
         r.append(self._stype_dd)
         box.append(r)
@@ -325,43 +328,43 @@ class ZoneCard(Gtk.Box):
         box.append(self._stype_note)
 
         r = hbox(10)
-        r.append(label("Color order", ("small", "dim")))
+        r.append(label(_("Color order"), ("small", "dim")))
         self._order_dd = Dropdown([n for _k, n in ORDERS], dict(ORDERS).get(self.cfg.get("color_order", "RGB")),
                                   lambda v: self._strip_set(color_order=next(k for k, n in ORDERS if n == v)))
         r.append(self._order_dd)
-        self._test_btn = button("Test colors", "palette", "tonal small", self._on_test)
+        self._test_btn = button(_("Test colors"), "palette", "tonal small", self._on_test)
         r.append(self._test_btn)
         box.append(r)
-        box.append(label("Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far "
+        box.append(label(_("Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far "
                          "end (a one-color strip cycles red, green, blue). If the colors are wrong, change the order "
-                         "until they match.", ("tiny", "faint"), wrap=True))
+                         "until they match."), ("tiny", "faint"), wrap=True))
 
         self._lpp_row = hbox(10)
-        self._lpp_row.append(label("LEDs per pixel", ("small", "dim")))
+        self._lpp_row.append(label(_("LEDs per pixel"), ("small", "dim")))
         self._lpp = Spin(1, 20, self.cfg.get("leds_per_pixel", 1), lambda v: self._on_lpp(int(v)))
         self._lpp_row.append(self._lpp)
         box.append(self._lpp_row)
 
         self._power_box = vbox(4)
         r = hbox(10)
-        r.append(label("Power limit", ("small", "dim")))
+        r.append(label(_("Power limit"), ("small", "dim")))
         self._plimit = Spin(0, 100, self.cfg.get("power_limit", 0),
                             lambda v: self._strip_set(power_limit=round(float(v), 1)), step=0.5, digits=1)
         r.append(self._plimit)
-        r.append(label("A  (0 = no limit)", ("small", "dim")))
+        r.append(label(_("A  (0 = no limit)"), ("small", "dim")))
         self._power_box.append(r)
         self._power_lbl = label("", ("tiny", "faint"), wrap=True)
         self._power_box.append(self._power_lbl)
-        self._power_box.append(label("Long 5V strips at full white pull a lot of current: the far end turns orange or "
+        self._power_box.append(label(_("Long 5V strips at full white pull a lot of current: the far end turns orange or "
                                      "pink, or the controller resets. Set your power supply's amps (minus a bit) and "
                                      "Iridia dims only when a color would go over it. The estimate assumes 60 mA per "
-                                     "LED at full white.", ("tiny", "faint"), wrap=True))
+                                     "LED at full white."), ("tiny", "faint"), wrap=True))
         box.append(self._power_box)
 
         self._rgbw_row = hbox(10)
         self._rgbw_lbl = label("", ("small", "accent"), wrap=True)
         self._rgbw_row.append(self._rgbw_lbl)
-        self._rgbw_btn = button("Resize the OpenRGB zone", "straighten", "tonal small", self._rgbw_resize)
+        self._rgbw_btn = button(_("Resize the OpenRGB zone"), "straighten", "tonal small", self._rgbw_resize)
         self._rgbw_row.append(self._rgbw_btn)
         self._rgbw_row.set_visible(False)
         box.append(self._rgbw_row)
@@ -386,7 +389,7 @@ class ZoneCard(Gtk.Box):
 
     def _on_test(self):
         self._testing = not self._testing
-        set_button_text(self._test_btn, "Stop test" if self._testing else "Test colors",
+        set_button_text(self._test_btn, _("Stop test") if self._testing else _("Test colors"),
                         "stop" if self._testing else "palette")
         self._call(lambda: self.client.test_colors(self.device_name, self.zone_name, off=not self._testing))
         if self._testing:
@@ -395,7 +398,7 @@ class ZoneCard(Gtk.Box):
     def _test_timeout(self):
         if self._testing:
             self._testing = False
-            set_button_text(self._test_btn, "Test colors", "palette")
+            set_button_text(self._test_btn, _("Test colors"), "palette")
         return False
 
     def _rgbw_resize(self):
@@ -403,7 +406,7 @@ class ZoneCard(Gtk.Box):
         if not need:
             return
         self._call(lambda: self.client.resize_zone(self.device_name, self.zone_name, need, keep_count=True))
-        self.app.toast(f"Asked OpenRGB for {need} LEDs on this zone")
+        self.app.toast(_('Asked OpenRGB for {need} LEDs on this zone').format(need=need))
 
     def set_strip_info(self, info):
         info = dict(info or {})
@@ -423,25 +426,26 @@ class ZoneCard(Gtk.Box):
         t = self._stype if chosen == "auto" else chosen
         self._stype = t
         single = t == "single"
-        auto_txt = f"  (looks like: {STRIP_NAMES.get(t, t)})" if chosen == "auto" else ""
+        auto_txt = ("  " + _("(looks like: {type})").format(type=STRIP_NAMES.get(t, t))) if chosen == "auto" else ""
         self._stype_note.set_label(next((n for k, _x, n in STRIP_TYPES if k == t), "") + auto_txt)
-        self._strip_exp.set_label(f"Strip: {STRIP_NAMES.get(t, t).split(' (')[0]}"
+        self._strip_exp.set_label(_('Strip: {type}').format(type=STRIP_NAMES.get(t, t).split(' (')[0])
                                   + ("" if self.cfg.get("color_order", "RGB") == "RGB"
                                      else f", {self.cfg.get('color_order')}"))
         self._lpp_row.set_visible(t == "addressable12")
         self._power_box.set_visible(not single)
         info = self._strip_info
         if "amps" in info:
-            txt = f"Right now about {info['amps']:.1f} A, {info.get('full_amps', 0):.1f} A at full white."
+            txt = _("Right now about {now:.1f} A, {full:.1f} A at full white.").format(
+                now=info['amps'], full=info.get('full_amps', 0))
             if info.get("limited"):
-                txt += f" Dimmed to stay under the limit (would be {info.get('wanted_amps', 0):.1f} A)."
+                txt += " " + _("Dimmed to stay under the limit (would be {amps:.1f} A).").format(
+                    amps=info.get('wanted_amps', 0))
             self._power_lbl.set_label(txt)
         self._power_lbl.set_visible("amps" in info)
         need = info.get("needs_size") if t == "rgbw" else None
         self._rgbw_row.set_visible(bool(need))
         if need:
-            self._rgbw_lbl.set_label(f"For {self.cfg.get('led_count', 0)} RGBW LEDs the OpenRGB zone needs {need} "
-                                     "LEDs; right now the end of the strip stays dark.")
+            self._rgbw_lbl.set_label(_('For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark.').format(n=self.cfg.get('led_count', 0), need=need))
         # one-colour strips: no patterns, painting or stops
         for w in (self._pattern_lbl, self._pattern, self._strip, self._count_btn):
             w.set_visible(not single)
@@ -450,17 +454,17 @@ class ZoneCard(Gtk.Box):
 
     def _build_paint_bar(self):
         b = self._paint_bar
-        b.append(label("Paint", ("small", "dim")))
+        b.append(label(_("Paint"), ("small", "dim")))
         self._wells = {}
         for which, init in (("a", "ff8800"), ("b", "3355ff")):
-            sw = Swatch(init, 32, on_click=lambda w=which: self._pick_well(w), tooltip="Paint color")
+            sw = Swatch(init, 32, on_click=lambda w=which: self._pick_well(w), tooltip=_("Paint color"))
             self._wells[which] = sw
             b.append(sw)
-        self._tool_group = Group([("paint", "Paint", "brush"), ("erase", "Erase", "ink_eraser"),
-                                  ("gradient", "Gradient", "gradient")], "paint", self._set_tool)
+        self._tool_group = Group([("paint", _("Paint"), "brush"), ("erase", _("Erase"), "ink_eraser"),
+                                  ("gradient", _("Gradient"), "gradient")], "paint", self._set_tool)
         b.append(self._tool_group)
-        b.append(button("Fill", "format_color_fill", "tonal small", lambda: self._strip.fill_all(self._strip.color_a)))
-        b.append(button("Clear", "delete", "tonal small", lambda: self._strip.fill_all(None)))
+        b.append(button(_("Fill"), "format_color_fill", "tonal small", lambda: self._strip.fill_all(self._strip.color_a)))
+        b.append(button(_("Clear"), "delete", "tonal small", lambda: self._strip.fill_all(None)))
         self._paint_box.append(QuickColors(self.app.saved_colors, self.app.recent_colors,
                                            lambda h: self._set_well("a", h), lambda h: self._set_well("b", h),
                                            lambda: self.app.save_color(self._strip.color_a), size=24, per_line=16))
@@ -520,7 +524,7 @@ class ZoneCard(Gtk.Box):
         self._strip.set_flags(can_rev and bool(self._params.get("reverse")), can_rev and bool(self._params.get("mirror")))
         if not editable:
             self._layout_open = False
-        set_button_text(self._layout_btn, "Done editing" if self._layout_open else "Edit layout",
+        set_button_text(self._layout_btn, _("Done editing") if self._layout_open else _("Edit layout"),
                         "check" if self._layout_open else "tune")
         self._strip.set_layout(self._layout_open and editable, self._stops_for_edit() if editable else [])
         self._rebuild_chips()
@@ -539,7 +543,7 @@ class ZoneCard(Gtk.Box):
         self._chips.set_visible(show)
         if not show:
             return
-        self._chips.append(label("Colors in order (click to change):", ("small", "dim")))
+        self._chips.append(label(_("Colors in order (click to change):"), ("small", "dim")))
         for i, col in enumerate(self._current_colors()):
             self._chips.append(Swatch(col, 28, on_click=lambda i=i: self._edit_slot(i)))
 
@@ -559,7 +563,7 @@ class ZoneCard(Gtk.Box):
                 self._call(self.client.add_custom_color, h)
             self._picker.set_colors(self.extracted, sel, self.custom)
             self._on_colors_change(sel)
-        self.app.pick_color(cols[i], "Change this color", done, sent_fn=self._sent_fn())
+        self.app.pick_color(cols[i], _("Change this color"), done, sent_fn=self._sent_fn())
 
     def _toggle_layout(self):
         self._layout_open = not self._layout_open
@@ -607,7 +611,7 @@ class ZoneCard(Gtk.Box):
         def done(h):
             if h:
                 self._set_well(which, h)
-        self.app.pick_color(cur, "Paint color", done, sent_fn=self._sent_fn())
+        self.app.pick_color(cur, _("Paint color"), done, sent_fn=self._sent_fn())
 
     # ------------------------------------------------------------ actions
     def _call(self, fn, *args):
@@ -687,7 +691,7 @@ class ZoneCard(Gtk.Box):
                 sel.append(h)
             self._picker.set_colors(self.extracted, sel, self.custom)
             self._on_colors_change(sel)
-        self.app.pick_color(cols[0] if cols else "ff8800", "Save a new color", done, sent_fn=self._sent_fn())
+        self.app.pick_color(cols[0] if cols else "ff8800", _("Save a new color"), done, sent_fn=self._sent_fn())
 
     def _remove_custom(self, h):
         self.custom = [c for c in self.custom if c != h]
@@ -714,7 +718,7 @@ class ZoneCard(Gtk.Box):
 
     def _on_identify(self):
         self._identifying = not self._identifying
-        set_button_text(self._identify_btn, "Done" if self._identifying else "Identify",
+        set_button_text(self._identify_btn, _("Done") if self._identifying else _("Identify"),
                         "check" if self._identifying else "flare")
         if self._identifying:
             self._identify_btn.add_css_class("toggled")
@@ -734,11 +738,11 @@ class ZoneCard(Gtk.Box):
     def set_hw(self, real_size, single_color):
         """What OpenRGB says about this zone: no size yet, or one colour for the whole device."""
         if real_size == 0:
-            t = ("OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click "
-                 "Count LEDs and set the size there.")
+            t = _("OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click "
+                  "Count LEDs and set the size there.")
         elif single_color:
-            t = ("This device has no Direct mode, so it shows one color for the whole device "
-                 "(the first one of the pattern).")
+            t = _("This device has no Direct mode, so it shows one color for the whole device "
+                  "(the first one of the pattern).")
         else:
             t = ""
         if t != self._hw_note.get_label():

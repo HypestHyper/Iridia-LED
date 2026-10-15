@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version 1.0.0" src="https://img.shields.io/badge/version-1.0.0-7c5cff">
+  <img alt="Version 1.1.0" src="https://img.shields.io/badge/version-1.1.0-7c5cff">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
@@ -38,9 +38,10 @@ wallpaper detection, color extraction and sending colors to OpenRGB; the window 
 change its settings. Each OpenRGB zone can be configured separately (pattern, colors, brightness, color
 correction). Patterns are static; nothing is animated.
 
-> **Note:** Iridia was hallucinated with AI tools. It has been tested mainly on CachyOS with Hyprland,
-> and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
-> strip types and desktops are supported in the code but have not seen real-world testing.
+> **Note:** Iridia was written mostly with AI tools. It has been tested mainly on CachyOS with Hyprland,
+> an ASUS B550 motherboard and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
+> strip types and desktops are supported in the code but have seen less real-world testing. Bug reports
+> are welcome.
 
 ## Features
 
@@ -81,7 +82,15 @@ correction). Patterns are static; nothing is animated.
 - `iridia zone` commands for keyboard shortcuts (on/off, color, brightness; running the same command
   again reverts it). The window shows the config line for several compositors and desktops.
 - Setups: save and load the whole configuration under a name, with automatic backups.
+- Starts OpenRGB's server at login when nothing else does.
 - `iridia doctor` for diagnostics, and a log viewer in the window.
+
+**Languages**
+
+The window uses Proper English (British spelling) by default. Settings, Appearance, Language also
+has American English and three joke languages: Posh English (Victorian), Pirate, and Français, which
+is random French phrases with no relation to what the buttons do. The command line, the log and
+`iridia doctor` use American spelling.
 
 ## Install
 
@@ -89,7 +98,7 @@ correction). Patterns are static; nothing is animated.
 
 | | |
 | --- | --- |
-| **OpenRGB** with its SDK server running | talks to your hardware ([openrgb.org](https://openrgb.org/)) |
+| **OpenRGB** | talks to your hardware ([openrgb.org](https://openrgb.org/)); Iridia starts its server |
 | **Python 3.8+** with `venv` | Iridia installs into its own virtual environment |
 | **GTK 4.6+, PyGObject, pycairo** | for the window (the daemon runs without them) |
 | **ddcutil** *(optional)* | to follow your monitor's brightness |
@@ -97,8 +106,8 @@ correction). Patterns are static; nothing is animated.
 ### Quick install
 
 ```bash
-git clone https://github.com/OWNER/iridia.git
-cd iridia
+git clone https://github.com/HypestHyper/Iridia-LED.git
+cd Iridia-LED
 bash scripts/install.sh
 ```
 
@@ -126,8 +135,8 @@ Then run `bash scripts/install.sh --no-deps`. If your release has no OpenRGB pac
 
 ### Before the first run
 
-1. **Start OpenRGB's SDK server:** in OpenRGB's *SDK Server* tab click *Start Server* (and set it to
-   start automatically), or run `openrgb --server`. Your devices should show up in OpenRGB itself.
+1. **OpenRGB:** install it and check that your devices show up in it. Iridia starts OpenRGB's server
+   for you (see [Setting up OpenRGB](docs/wiki/Installation.md#setting-up-openrgb)).
 2. **For monitor brightness** (optional): `sudo usermod -aG i2c $USER`, log out and in, and check that
    `ddcutil detect` finds your monitor.
 

@@ -12,6 +12,7 @@ from typing import List, Optional
 
 from gi.repository import Gtk
 
+from iridia.i18n import _
 from iridia.layout import split_key
 from iridia.ui import widgets
 from iridia.ui.dialogs import run_bg
@@ -20,14 +21,16 @@ from iridia.ui.widgets import (Dropdown, Group, Spin, Swatch, Toggle, button, ca
 
 OTHER = [
     # (label, kind)
-    ("All lights off / on", "lights"),
-    ("Freeze colors / follow the wallpaper", "freeze"),
-    ("Night mode on / off", "night"),
-    ("Load a setup", "setup"),
+    (_("All lights off / on"), "lights"),
+    (_("Freeze colors / follow the wallpaper"), "freeze"),
+    (_("Night mode on / off"), "night"),
+    (_("Load a setup"), "setup"),
 ]
-MODS = ["Super", "Super + Shift", "Super + Ctrl", "Super + Alt", "Ctrl + Alt", "Alt", "No modifier"]
+NO_MOD = _("No modifier")
+ALL_STRIPS = _("All strips")
+MODS = ["Super", "Super + Shift", "Super + Ctrl", "Super + Alt", "Ctrl + Alt", "Alt", NO_MOD]
 DESKTOPS = ["Hyprland (hyprland.conf)", "Hyprland (hyprland.lua)", "Sway", "i3", "niri", "river",
-            "KDE Plasma", "GNOME", "sxhkd (X11 window managers)"]
+            "KDE Plasma", "GNOME", _("sxhkd (X11 window managers)")]
 
 
 def iridia_path() -> str:
@@ -42,7 +45,7 @@ def bind_line(desktop: str, mods: List[str], key: str, args: List[str]) -> tuple
     cmd = " ".join(shlex.quote(a) for a in [exe] + args)
     key = key.strip() or "F9"
     if desktop.startswith("Hyprland (hyprland.conf)"):
-        return ("~/.config/hypr/hyprland.conf (or a file it sources)",
+        return (_("~/.config/hypr/hyprland.conf (or a file it sources)"),
                 f"bind = {' '.join(m.upper() for m in mods)}, {key}, exec, {cmd}")
     if desktop.startswith("Hyprland (hyprland.lua)"):
         combo = " + ".join([m.upper() for m in mods] + [key])
@@ -56,17 +59,17 @@ def bind_line(desktop: str, mods: List[str], key: str, args: List[str]) -> tuple
                 f"bindsym {'+'.join([sway_mods[m] for m in mods] + [key])} exec --no-startup-id {cmd}")
     if desktop == "niri":
         q = " ".join('"' + a.replace("\\", "\\\\").replace('"', '\\"') + '"' for a in [exe] + args)
-        return "~/.config/niri/config.kdl, inside binds { }", f"{'+'.join(mods + [key])} {{ spawn {q}; }}"
+        return _("~/.config/niri/config.kdl, inside binds { }"), f"{'+'.join(mods + [key])} {{ spawn {q}; }}"
     if desktop == "river":
         return ("~/.config/river/init",
                 f"riverctl map normal {'+'.join(mods) or 'None'} {key} spawn "
                 + (f'"{cmd}"' if not any(ch in cmd for ch in '"$`\\') else shlex.quote(cmd)))
     if desktop == "KDE Plasma":
-        return ("System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the "
-                "command, then press your key:", cmd)
+        return (_("System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the "
+                  "command, then press your key:"), cmd)
     if desktop == "GNOME":
-        return ("Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the "
-                "command, then set your key:", cmd)
+        return (_("Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the "
+                  "command, then set your key:"), cmd)
     sx = {"Super": "super", "Shift": "shift", "Ctrl": "ctrl", "Alt": "alt"}
     return "~/.config/sxhkd/sxhkdrc", " + ".join([sx[m] for m in mods] + [key]) + "\n    " + cmd
 
@@ -96,36 +99,36 @@ class KeybindsPage:
     # ---------------------------------------------------------------- UI
     def _build(self):
         p = self.p
-        p.append(section("Keybinds", "Iridia doesn't listen to your keyboard. Your desktop does: you give a key a "
+        p.append(section(_("Keybinds"), _("Iridia doesn't listen to your keyboard. Your desktop does: you give a key a "
                                      "command, and pressing it runs that command. Build the command here, then "
-                                     "add it to your desktop's config below."))
+                                     "add it to your desktop's config below.")))
         c = card()
-        self._mode_group = Group([("strips", "Change strips", "polyline"), ("other", "Other actions", "bolt")],
+        self._mode_group = Group([("strips", _("Change strips"), "polyline"), ("other", _("Other actions"), "bolt")],
                                  "strips", self._set_mode)
         self._mode_group.set_halign(Gtk.Align.START)
         c.append(self._mode_group)
 
         # ---- strips: any mix of on/off, a color and a brightness, for one or more strips
         self._strips_box = vbox(10)
-        self._strips_box.append(label("Strips", ("small", "dim")))
+        self._strips_box.append(label(_("Strips"), ("small", "dim")))
         self._chip_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=6,
                                       min_children_per_line=2, column_spacing=6, row_spacing=6,
                                       halign=Gtk.Align.FILL)
         self._strips_box.append(self._chip_flow)
         r = hbox(10)
-        r.append(label("Power", ("body", "dim")))
-        self._power = Group([("keep", "Leave as is"), ("on", "Turn on"), ("off", "Turn off"),
-                             ("normal", "Back to normal")], "keep", self._set_power)
+        r.append(label(_("Power"), ("body", "dim")))
+        self._power = Group([("keep", _("Leave as is")), ("on", _("Turn on")), ("off", _("Turn off")),
+                             ("normal", _("Back to normal"))], "keep", self._set_power)
         r.append(self._power)
         self._strips_box.append(r)
         self._color_on = Toggle(True, lambda v: self._render())
-        self._swatch = Swatch(self.color, 32, on_click=self._pick, tooltip="Pick the color")
+        self._swatch = Swatch(self.color, 32, on_click=self._pick, tooltip=_("Pick the color"))
         self._hex = label(f"#{self.color}", ("body", "mono"))
-        self._color_row = hbox(10, self._color_on, label("Color", ("body",)), self._swatch, self._hex)
+        self._color_row = hbox(10, self._color_on, label(_("Color"), ("body",)), self._swatch, self._hex)
         self._strips_box.append(self._color_row)
         self._bright_on = Toggle(False, lambda v: self._render())
         self._bright = Spin(0, 100, 40, lambda v: self._render())
-        self._bright_row = hbox(10, self._bright_on, label("Brightness", ("body",)), self._bright,
+        self._bright_row = hbox(10, self._bright_on, label(_("Brightness"), ("body",)), self._bright,
                                 label("%", ("body", "dim")))
         self._strips_box.append(self._bright_row)
         c.append(self._strips_box)
@@ -133,90 +136,88 @@ class KeybindsPage:
         # ---- everything else
         self._other_box = vbox(10)
         r = hbox(10)
-        r.append(label("Do", ("body", "dim")))
+        r.append(label(_("Do"), ("body", "dim")))
         self._other = Dropdown([o[0] for o in OTHER], OTHER[0][0], lambda v: self._render())
         r.append(self._other)
-        self._setup_dd = Dropdown([], None, lambda v: self._render(), placeholder="No setups yet")
-        self._setup_row = hbox(10, label("Setup", ("body", "dim")), self._setup_dd)
+        self._setup_dd = Dropdown([], None, lambda v: self._render(), placeholder=_("No setups yet"))
+        self._setup_row = hbox(10, label(_("Setup"), ("body", "dim")), self._setup_dd)
         r.append(self._setup_row)
         self._other_box.append(r)
         c.append(self._other_box)
 
         c.append(divider())
-        c.append(label("Command", ("small", "dim")))
+        c.append(label(_("Command"), ("small", "dim")))
         self._cmd = label("", ("body", "mono"), wrap=True, selectable=True)
         c.append(self._cmd)
         self._note = label("", ("small", "faint"), wrap=True)
         c.append(self._note)
         r = hbox(8)
-        r.append(button("Copy command", "content_copy", "filled small", lambda: self._copy(self._cmd_text)))
-        r.append(button("Try it", "play_arrow", "tonal small", self._try))
+        r.append(button(_("Copy command"), "content_copy", "filled small", lambda: self._copy(self._cmd_text)))
+        r.append(button(_("Try it"), "play_arrow", "tonal small", self._try))
         c.append(r)
         p.append(c)
 
-        p.append(section("Add it to your desktop", "Pick your desktop and a key. Paste the line into the file shown, "
-                                                   "then reload your desktop's config."))
+        p.append(section(_("Add it to your desktop"), _("Pick your desktop and a key. Paste the line into the file shown, "
+                                                   "then reload your desktop's config.")))
         c = card()
         r = hbox(10)
-        r.append(label("Desktop", ("body", "dim")))
+        r.append(label(_("Desktop"), ("body", "dim")))
         self._desk = Dropdown(DESKTOPS, self._guess_desktop(), lambda v: self._render())
         r.append(self._desk)
         c.append(r)
         r = hbox(10)
-        r.append(label("Key", ("body", "dim")))
+        r.append(label(_("Key"), ("body", "dim")))
         self._mods = Dropdown(MODS, "Super + Shift", lambda v: self._render())
         r.append(self._mods)
         r.append(label("+", ("body", "dim")))
         self._key = Gtk.Entry(text="F9", width_chars=8, max_width_chars=12, valign=Gtk.Align.CENTER,
                               hexpand=False)
-        self._key.connect("changed", lambda *_: self._render())
+        self._key.connect("changed", lambda *_a: self._render())
         r.append(self._key)
         c.append(r)
-        c.append(label("Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a "
-                       "combination your desktop doesn't use yet.", ("tiny", "faint"), wrap=True))
+        c.append(label(_("Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a "
+                       "combination your desktop doesn't use yet."), ("tiny", "faint"), wrap=True))
         self._where = label("", ("small", "dim"), wrap=True, selectable=True)
         c.append(self._where)
         tv = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.CHAR)
         tv.add_css_class("log")
         self._line_buf = tv.get_buffer()
         c.append(tv)
-        b = button("Copy line", "content_copy", "filled small", lambda: self._copy(self._line_text))
+        b = button(_("Copy line"), "content_copy", "filled small", lambda: self._copy(self._line_text))
         b.set_halign(Gtk.Align.START)
         c.append(b)
         p.append(c)
 
-        p.append(section("Changed by a keybind right now", "Strip keybinds are temporary: nothing is saved, and they "
+        p.append(section(_("Changed by a keybind right now"), _("Strip keybinds are temporary: nothing is saved, and they "
                                                           "end when you press the key again, run Back to normal, or "
-                                                          "restart the daemon."))
+                                                          "restart the daemon.")))
         self._active = card()
         p.append(self._active)
 
         exe = iridia_path()
-        p.append(section("More examples", "Short form for reading. In your desktop's config write the full path, "
-                                          f"{exe}, as the command above does: desktops often don't know where "
-                                          "Iridia is installed."))
+        p.append(section(_("More examples"), _("Short form for reading. In your desktop's config write the full path, {exe}, as the command above does: desktops often don't know where Iridia is installed.").format(exe=exe)))
         c = card()
         tv = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.CHAR)
         tv.add_css_class("log")
-        exe = "iridia"
-        tv.get_buffer().set_text("\n".join([
-            f"{exe} zone list                       # the names you can use",
-            f"{exe} zone 'Desk back' off            # off, again: back to normal",
-            f"{exe} zone 'Desk back' color ff0000   # one color, again: back to normal",
-            f"{exe} zone all bright 20              # every strip at 20%",
-            f"{exe} zone 'Desk back' on             # light a strip that is switched off",
-            f"{exe} zone 'Desk back' on color ff0000 bright 40   # several at once",
-            f"{exe} zone 'Desk back,Monitor' color 00ff88       # several strips (commas)",
-            f"{exe} zone all normal                 # undo every keybind change",
-            f"{exe} zone 'Desk back' off --set      # always off, never switch back",
-            f"{exe} lights toggle                   # everything off / on",
-            f"{exe} freeze toggle                   # stop / start following the wallpaper",
-            f"{exe} night toggle                    # night mode on / off",
-            f"{exe} setup load Gaming               # load a saved setup (this one is permanent)",
-        ]))
+        examples = [
+            ("zone list", _("the names you can use")),
+            ("zone 'Desk back' off", _("off, again: back to normal")),
+            ("zone 'Desk back' color ff0000", _("one color, again: back to normal")),
+            ("zone all bright 20", _("every strip at 20%")),
+            ("zone 'Desk back' on", _("light a strip that is switched off")),
+            ("zone 'Desk back' on color ff0000 bright 40", _("several at once")),
+            ("zone 'Desk back,Monitor' color 00ff88", _("several strips (commas)")),
+            ("zone all normal", _("undo every keybind change")),
+            ("zone 'Desk back' off --set", _("always off, never switch back")),
+            ("lights toggle", _("everything off / on")),
+            ("freeze toggle", _("stop / start following the wallpaper")),
+            ("night toggle", _("night mode on / off")),
+            ("setup load Gaming", _("load a saved setup (this one is permanent)")),
+        ]
+        tv.get_buffer().set_text("\n".join(f"iridia {c:<46} # {t}" for c, t in examples))
         c.append(tv)
-        c.append(label("Names are the ones shown in the window (rename a strip with its pencil button). When two "
-                       "strips share a name, use Device/Zone, as `zone list` shows.", ("tiny", "faint"), wrap=True))
+        c.append(label(_("Names are the ones shown in the window (rename a strip with its pencil button). When two "
+                       "strips share a name, use Device/Zone, as `zone list` shows."), ("tiny", "faint"), wrap=True))
         p.append(c)
         self._render()
 
@@ -244,20 +245,20 @@ class KeybindsPage:
         if self._chip_quiet:
             return
         self._chip_quiet = True
-        if name == "All strips" and self._chips[name].get_active():
+        if name == ALL_STRIPS and self._chips[name].get_active():
             for n, b in self._chips.items():
                 if n != name:
                     b.set_active(False)
-        elif name != "All strips" and self._chips[name].get_active() and "All strips" in self._chips:
-            self._chips["All strips"].set_active(False)
-        if not any(b.get_active() for b in self._chips.values()) and "All strips" in self._chips:
-            self._chips["All strips"].set_active(True)
+        elif name != ALL_STRIPS and self._chips[name].get_active() and ALL_STRIPS in self._chips:
+            self._chips[ALL_STRIPS].set_active(False)
+        if not any(b.get_active() for b in self._chips.values()) and ALL_STRIPS in self._chips:
+            self._chips[ALL_STRIPS].set_active(True)
         self._chip_quiet = False
         self._render()
 
     def _target(self) -> str:
         chosen = [n for n, b in self._chips.items() if b.get_active()]
-        if not chosen or "All strips" in chosen:
+        if not chosen or ALL_STRIPS in chosen:
             return "all"
         by = dict(self._targets)
         return ",".join(by.get(n, n) for n in chosen)
@@ -298,29 +299,30 @@ class KeybindsPage:
         if args:
             self._cmd.set_label(self._cmd_text)
         elif strips:
-            self._cmd.set_label("Pick at least one thing to change: Turn on or off, a color or a brightness.")
+            self._cmd.set_label(_("Pick at least one thing to change: Turn on or off, a color or a brightness."))
         else:
-            self._cmd.set_label("Save a setup first (Settings, Setups and backups).")
+            self._cmd.set_label(_("Save a setup first (Settings, Setups and backups)."))
         if strips:
             if self.power == "normal":
-                note = "Undoes every keybind change on these strips."
+                note = _("Undoes every keybind change on these strips.")
             elif self.power == "off":
-                note = "Turns the strips off; press the key again to bring them back."
+                note = _("Turns the strips off; press the key again to bring them back.")
             else:
-                bits = (["turns them on (even when switched off)"] if self.power == "on" else []) + \
-                       (["shows one color"] if self._color_on.get_active() else []) + \
-                       (["sets the brightness"] if self._bright_on.get_active() else [])
-                note = ("One press " + ", ".join(bits) + "; the next press puts everything back.") if bits else ""
-            self._note.set_label(note + " Pick several strips to change them together.")
+                bits = ([_("turns them on (even when switched off)")] if self.power == "on" else []) + \
+                       ([_("shows one color")] if self._color_on.get_active() else []) + \
+                       ([_("sets the brightness")] if self._bright_on.get_active() else [])
+                note = _("One press: {actions}. The next press puts everything back.").format(
+                    actions=", ".join(bits)) if bits else ""
+            self._note.set_label((note + " " if note else "") + _("Pick several strips to change them together."))
         else:
             self._note.set_label({
-                "lights": "Same key turns everything off, then back on.",
-                "freeze": "Same key freezes the current colors, then follows the wallpaper again.",
-                "night": "Switches night mode on or off (this one is saved).",
-                "setup": "Loads the setup and keeps it (an automatic backup is made first).",
+                "lights": _("Same key turns everything off, then back on."),
+                "freeze": _("Same key freezes the current colors, then follows the wallpaper again."),
+                "night": _("Switches night mode on or off (this one is saved)."),
+                "setup": _("Loads the setup and keeps it (an automatic backup is made first)."),
             }[kind])
-        mods_v = self._mods.value() or "No modifier"
-        mods = [] if mods_v == "No modifier" else [m.strip() for m in mods_v.split("+")]
+        mods_v = self._mods.value() or NO_MOD
+        mods = [] if mods_v == NO_MOD else [m.strip() for m in mods_v.split("+")]
         if args:
             where, line = bind_line(self._desk.value() or DESKTOPS[0], mods, self._key.get_text(), args)
         else:
@@ -337,12 +339,12 @@ class KeybindsPage:
                 self._hex.set_label(f"#{h}")
                 self._color_on.set_value(True)
                 self._render()
-        self.app.pick_color(self.color, "Keybind color", done)
+        self.app.pick_color(self.color, _("Keybind color"), done)
 
     def _copy(self, text):
         if text:
             widgets.copy_text(self.p, text)
-            self.app.toast("Copied")
+            self.app.toast(_("Copied"))
 
     def _try(self):
         args = self._args()
@@ -360,10 +362,10 @@ class KeybindsPage:
 
         def done(r):
             if r.get("ok"):
-                self.app.toast(r.get("message") or "Done")
+                self.app.toast(r.get("message") or _("Done"))
                 self.app.refresh_soon()
             else:
-                self.app.toast(r.get("error") or "That didn't work")
+                self.app.toast(r.get("error") or _("That didn't work"))
         run_bg(fn, done)
 
     # ------------------------------------------------------------ status
@@ -377,7 +379,7 @@ class KeybindsPage:
         counts = {}
         for _d, _z, n in zones:
             counts[n.lower()] = counts.get(n.lower(), 0) + 1
-        targets = [("All strips", "all")]
+        targets = [(ALL_STRIPS, "all")]
         for d, z, n in zones:
             unique = counts[n.lower()] == 1 and "," not in n
             targets.append((n if counts[n.lower()] == 1 else f"{n} ({d})", n if unique else _target_for(d, z)))
@@ -385,7 +387,7 @@ class KeybindsPage:
         if sig != self._target_sig:
             self._target_sig = sig
             self._targets = targets
-            chosen = {n for n, b in self._chips.items() if b.get_active()} or {"All strips"}
+            chosen = {n for n, b in self._chips.items() if b.get_active()} or {ALL_STRIPS}
             widgets.clear(self._chip_flow)
             self._chips = {}
             for shown, _t in targets:
@@ -399,7 +401,7 @@ class KeybindsPage:
                 self._chips[shown] = b
                 self._chip_flow.append(b)
             if not any(b.get_active() for b in self._chips.values()):
-                self._chips["All strips"].set_active(True)
+                self._chips[ALL_STRIPS].set_active(True)
             self._render()
         ov = st.get("overlays") or {}
         names = {f"{d}|{z}": n for d, z, n in zones}
@@ -418,26 +420,27 @@ class KeybindsPage:
     def _render_active(self, ov: dict, names: dict):
         widgets.clear(self._active)
         if not ov:
-            self._active.append(label("Nothing: every strip shows its normal colors.", ("small", "dim")))
+            self._active.append(label(_("Nothing: every strip shows its normal colors."), ("small", "dim")))
             return
         for key, o in sorted(ov.items(), key=lambda kv: names.get(kv[0], kv[0]).lower()):
             d, z = split_key(key)
-            bits = ([o["power"]] if o.get("power") else []) + ([f"#{o['hex']}"] if o.get("hex") else []) + \
-                   ([f"{o['bright']}% brightness"] if o.get("bright") is not None else [])
+            bits = ([{"on": _("on"), "off": _("off")}.get(o["power"], o["power"])] if o.get("power") else []) + \
+                   ([f"#{o['hex']}"] if o.get("hex") else []) + \
+                   ([_("{n}% brightness").format(n=o['bright'])] if o.get("bright") is not None else [])
             row = hbox(10)
             if o.get("hex"):
                 row.append(Swatch(o["hex"], 22))
             row.append(label(f"{names.get(key, z or d)}: {', '.join(bits) or '?'}", ("body",), ellipsize=True))
             row.append(Gtk.Box(hexpand=True))
-            row.append(button("Back to normal", "undo", "text small", lambda key=key: self._normal(None, key)))
+            row.append(button(_("Back to normal"), "undo", "text small", lambda key=key: self._normal(None, key)))
             self._active.append(row)
         self._active.append(divider())
-        self._active.append(button("Everything back to normal", "restart_alt", "tonal small",
+        self._active.append(button(_("Everything back to normal"), "restart_alt", "tonal small",
                                    lambda: self._normal("all", None)))
 
     def _normal(self, target, key):
         if key:
             target = [_target_for(*split_key(key))]
         run_bg(lambda: self.app.client.zone_action(target, ["normal"]),
-               lambda r: (self.app.toast(r.get("message") if r.get("ok") else r.get("error", "Failed")),
+               lambda r: (self.app.toast(r.get("message") if r.get("ok") else r.get("error", _("Failed"))),
                           self.app.refresh_soon()))

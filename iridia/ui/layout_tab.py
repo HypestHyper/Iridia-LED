@@ -13,6 +13,7 @@ from typing import Dict, List, Optional
 
 from gi.repository import Gdk, GLib, Gtk
 
+from iridia.i18n import _, ngettext  # noqa: F401
 from iridia import theme
 from iridia.colors import resolve_colors
 from iridia.layout import (Layout, fraction_to_stop, led_at_path, path_at_led, path_points, point_along, project,
@@ -24,9 +25,9 @@ from iridia.ui.widgets import (Dropdown, Group, QuickColors, Spin, Swatch, Swatc
 from iridia.ui.zonecard import PATTERN_KEYS, PATTERN_NAMES
 
 GRID = 20.0
-TOOLS = (("arrange", "Arrange", "open_with"), ("find", "Find LEDs: light one LED on the real strip", "target"),
-         ("paint", "Paint", "brush"), ("erase", "Erase (back to the zone's own color)", "ink_eraser"),
-         ("fill", "Fill", "format_color_fill"), ("gradient", "Gradient", "gradient"))
+TOOLS = (("arrange", _("Arrange"), "open_with"), ("find", _("Find LEDs: light one LED on the real strip"), "target"),
+         ("paint", _("Paint"), "brush"), ("erase", _("Erase (back to the zone's own color)"), "ink_eraser"),
+         ("fill", _("Fill"), "format_color_fill"), ("gradient", _("Gradient"), "gradient"))
 
 
 PAINT_TOOLS = ("paint", "fill", "gradient")
@@ -89,16 +90,16 @@ class LayoutTab(Gtk.Box):
         self._wells = {}
         for which in ("a", "b"):
             sw = Swatch(self.color_a if which == "a" else self.color_b, 34,
-                        on_click=lambda w=which: self._pick_well(w), tooltip="Paint color")
+                        on_click=lambda w=which: self._pick_well(w), tooltip=_("Paint color"))
             sw.set_margin_start(4)
             self._wells[which] = sw
             bar.append(sw)
         bar.append(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL, margin_start=4, margin_end=4))
-        bar.append(button(icon_name="zoom_out", style="text small", cb=lambda: self._zoom_by(0.8), tooltip="Zoom out"))
-        bar.append(button(icon_name="zoom_in", style="text small", cb=lambda: self._zoom_by(1.25), tooltip="Zoom in"))
-        bar.append(button(icon_name="fit_screen", style="text small", cb=self._fit, tooltip="Show everything"))
+        bar.append(button(icon_name="zoom_out", style="text small", cb=lambda: self._zoom_by(0.8), tooltip=_("Zoom out")))
+        bar.append(button(icon_name="zoom_in", style="text small", cb=lambda: self._zoom_by(1.25), tooltip=_("Zoom in")))
+        bar.append(button(icon_name="fit_screen", style="text small", cb=self._fit, tooltip=_("Show everything")))
         self._lock_btn = button(icon_name="lock_open", style="tonal small", cb=self._toggle_lock,
-                                tooltip="Lock layout")
+                                tooltip=_("Lock layout"))
         bar.append(self._lock_btn)
         overlay.add_overlay(bar)
         main.append(overlay)
@@ -123,7 +124,7 @@ class LayoutTab(Gtk.Box):
         pan = Gtk.GestureDrag(button=2)
         pan.connect("drag-begin", lambda g, x, y: self._pan_start(x, y))
         pan.connect("drag-update", lambda g, ox, oy: self._pan_move(ox, oy))
-        pan.connect("drag-end", lambda *_: self._schedule_save())
+        pan.connect("drag-end", lambda *_a: self._schedule_save())
         self.cv.add_controller(pan)
         ctx = Gtk.GestureClick(button=3)
         ctx.connect("pressed", lambda g, n, x, y: self._context(x, y))
@@ -258,7 +259,7 @@ class LayoutTab(Gtk.Box):
         if sel and sel in strips:
             self._draw_strip(cr, sel)
         if not strips:
-            self._text(cr, w / 2, h / 2, "No enabled zones yet. They show up here once the daemon reports them.",
+            self._text(cr, w / 2, h / 2, _("No enabled zones yet. They show up here once the daemon reports them."),
                        "ON_SURFACE_VARIANT", 14, center=True)
 
     def _text(self, cr, x, y, t, role, size, center=False, bold=False):
@@ -318,7 +319,7 @@ class LayoutTab(Gtk.Box):
             cr.set_line_width(3)
             cr.arc(x, y, r + 7, 0, 2 * math.pi)
             cr.stroke()
-            self._text(cr, x, y + r + 22, f"LED {found[2] + 1}", "PRIMARY", 13, center=True, bold=True)
+            self._text(cr, x, y + r + 22, _('LED {n}').format(n=found[2] + 1), "PRIMARY", 13, center=True, bold=True)
         fx, fy = spts[path_at_led(s, n, 0)]
         if sel or z >= 0.35:            # far out, the end numbers only clutter
             self._text(cr, fx, fy - r - 6, "1", "ON_SURFACE_VARIANT", 11, center=True)
@@ -328,8 +329,8 @@ class LayoutTab(Gtk.Box):
         name = self._name(key)
         if len(name) > 36 and not sel:
             name = name[:34].rstrip() + "…"
-        text = f"{name}  ·  {n} LEDs" + ("  ·  clone" if s["clone"] else "") + \
-               ("  ·  locked" if s["locked"] else "")
+        text = f"{name}  ·  " + ngettext("{n} LED", "{n} LEDs", n).format(n=n) + \
+            (f"  ·  {_('clone')}" if s["clone"] else "") + (f"  ·  {_('locked')}" if s["locked"] else "")
         x0, y0 = spts[0]
         a = math.radians(s["segments"][0]["angle"] - 90)
         tx, ty = x0 + math.cos(a) * (tape_w + 12), y0 + math.sin(a) * (tape_w + 12)
@@ -356,8 +357,8 @@ class LayoutTab(Gtk.Box):
     def _draw_handles(self, cr, s, n, spts):
         segs = s["segments"]
         if self.tool == "arrange" and self._strip_locked(s):
-            self._text(cr, 16, 26, "This strip is locked. Unlock it (side panel or the lock button) to move or "
-                       "bend it.", "ON_SURFACE_VARIANT", 12)
+            self._text(cr, 16, 26, _("This strip is locked. Unlock it (side panel or the lock button) to move or "
+                       "bend it."), "ON_SURFACE_VARIANT", 12)
         elif self.tool == "arrange":
             # One turn knob per section, on the outside of its corner (behind LED 1 for the first
             # section). Turning it turns the section and everything after it around the corner LED.
@@ -568,7 +569,7 @@ class LayoutTab(Gtk.Box):
         elif kind == "stop":
             cfg = self._cfg.get(s["zone"]) or {}
             pts = [self.w2s(px_, py_) for px_, py_ in path_points(s, n)]
-            f, _ = project(pts, x, y)
+            f, _u = project(pts, x, y)
             led = (n - 1 - f) if s["flip"] else f
             params = dict(cfg.get("pattern_params") or {})
             pat = PatternGenerator.normalize(cfg.get("pattern", "solid"))
@@ -673,7 +674,7 @@ class LayoutTab(Gtk.Box):
             if self._grad_anchor is None or self._grad_anchor[0] != s["id"]:
                 self._grad_anchor = (s["id"], i)
                 paint[i] = self.color_a
-                self._hint.set_label("Gradient: now click the LED where it should end.")
+                self._hint.set_label(_("Gradient: now click the LED where it should end."))
             else:
                 a, b = sorted((self._grad_anchor[1], i))
                 ca, cb = ((self.color_a, self.color_b) if self._grad_anchor[1] <= i else (self.color_b, self.color_a))
@@ -719,7 +720,7 @@ class LayoutTab(Gtk.Box):
         def done(h):
             if h:
                 self._set_well(which, h)
-        self.app.pick_color(cur, "Paint color", done)
+        self.app.pick_color(cur, _("Paint color"), done)
 
     # ========================================================== tools / lock
     # ========================================================== find LEDs
@@ -733,9 +734,7 @@ class LayoutTab(Gtk.Box):
         self._found = found
         d, z = split_key(s["zone"])
         self._send(self.app.client.led_probe, d, z, i)
-        self._hint.set_label(f"LED {i + 1} of {n} on {self._name(s['zone'])} is lit on your strip; the rest are "
-                             "dark. Click or drag along the strip to move it. Right-click to add a bend there. "
-                             "Pick another tool to go back to normal.")
+        self._hint.set_label(_('LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the strip to move it. Right-click to add a bend there. Pick another tool to go back to normal.').format(led=i + 1, n=n, strip=self._name(s['zone'])))
         self.cv.queue_draw()
 
     def _stop_find(self):
@@ -758,23 +757,24 @@ class LayoutTab(Gtk.Box):
 
     def _show_hint(self):
         if self.tool == "arrange":
-            t = ("Layout locked: click a strip to select it, drag the diamonds to move color stops."
+            t = (_("Layout locked: click a strip to select it, drag the diamonds to move color stops.")
                  if self.layout.locked else
-                 "Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for "
-                 "the whole strip, outside each corner for a bend (it snaps to 15°, "
-                 "hold Shift for free angles). Right-click a LED to add a bend there. Scroll to zoom, drag the "
-                 "background to pan.")
+                 _("Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for "
+                   "the whole strip, outside each corner for a bend (it snaps to 15°, "
+                   "hold Shift for free angles). Right-click a LED to add a bend there. Scroll to zoom, drag the "
+                   "background to pan."))
         elif self.tool == "find":
-            t = ("Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, "
-                 "so you can see where corners and bends are. Right-click it to add a bend there.")
+            t = _("Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, "
+                  "so you can see where corners and bends are. Right-click it to add a bend there.")
         elif self.tool == "gradient":
-            t = "Gradient: click the first LED, then the last one. Uses both colors."
+            t = _("Gradient: click the first LED, then the last one. Uses both colors.")
         elif self.tool == "fill":
-            t = "Fill: click a strip to give every LED of it the first color."
+            t = _("Fill: click a strip to give every LED of it the first color.")
         elif self.tool == "erase":
-            t = "Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or on Everything)."
+            t = _("Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone "
+                  "or on Everything).")
         else:
-            t = f"{self.tool.capitalize()}: click or drag over LEDs. Painting switches that zone to the Painted pattern."
+            t = _("Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern.")
         self._hint.set_label(t)
 
     def _toggle_lock(self):
@@ -786,7 +786,7 @@ class LayoutTab(Gtk.Box):
     def _apply_lock_ui(self):
         locked = self.layout.locked
         self._lock_btn.set_child(icon("lock" if locked else "lock_open", fill=locked))
-        self._lock_btn.set_tooltip_text("Layout locked: click to unlock" if locked else "Lock layout")
+        self._lock_btn.set_tooltip_text(_("Layout locked: click to unlock") if locked else _("Lock layout"))
         (self._lock_btn.add_css_class if locked else self._lock_btn.remove_css_class)("toggled")
         self._show_hint()
 
@@ -809,7 +809,7 @@ class LayoutTab(Gtk.Box):
         box = vbox(0)
         locked = self._strip_locked(s)
         led = led_at_path(s, n, k) + 1
-        box.append(label(f"LED {led} of {n}", ("small", "faint")))
+        box.append(label(_('LED {led} of {n}').format(led=led, n=n), ("small", "faint")))
         segi = next((i for i, g in enumerate(s["segments"]) if i > 0 and abs(g["start"] - k) <= 1), None)
 
         def item(text, ico, cb, enabled=True):
@@ -818,18 +818,19 @@ class LayoutTab(Gtk.Box):
             b.set_halign(Gtk.Align.FILL)
             b.get_child().set_halign(Gtk.Align.START)
             box.append(b)
-        item("Add a bend here", "polyline", lambda: self._do(self.layout.add_bend, s, k), not locked)
-        item("Remove this bend", "remove", lambda: self._do(self.layout.remove_bend, s, segi), bool(segi) and not locked)
-        item("Straighten", "linear_scale", lambda: self._do(self.layout.reset_shape, s), not locked)
-        item("Flip LED order" + ("  ✓" if s["flip"] else ""), "swap_horiz", lambda: self._flip(s), not locked)
-        item("Rename\u2026", "edit", lambda: self._rename(s["zone"]))
-        item("Clone this strip", "content_copy", lambda: self._clone(s))
-        item("Hide this strip", "visibility_off", lambda: self._set_hidden(s, True))
+        item(_("Add a bend here"), "polyline", lambda: self._do(self.layout.add_bend, s, k), not locked)
+        item(_("Remove this bend"), "remove", lambda: self._do(self.layout.remove_bend, s, segi),
+             bool(segi) and not locked)
+        item(_("Straighten"), "linear_scale", lambda: self._do(self.layout.reset_shape, s), not locked)
+        item(_("Flip LED order") + ("  ✓" if s["flip"] else ""), "swap_horiz", lambda: self._flip(s), not locked)
+        item(_("Rename\u2026"), "edit", lambda: self._rename(s["zone"]))
+        item(_("Clone this strip"), "content_copy", lambda: self._clone(s))
+        item(_("Hide this strip"), "visibility_off", lambda: self._set_hidden(s, True))
         if s["clone"]:
-            item("Delete this clone", "delete", lambda: self._delete(s))
-        item("Unlock this strip" if s["locked"] else "Lock this strip", "lock_open" if s["locked"] else "lock",
+            item(_("Delete this clone"), "delete", lambda: self._delete(s))
+        item(_("Unlock this strip") if s["locked"] else _("Lock this strip"), "lock_open" if s["locked"] else "lock",
              lambda: self._lock_strip(s))
-        item("Identify (light only this zone)", "flare", lambda: self._identify(s))
+        item(_("Identify (light only this zone)"), "flare", lambda: self._identify(s))
         pop.set_child(box)
         pop.connect("closed", lambda p: GLib.idle_add(lambda: (p.unparent(), False)[1]))
         pop.popup()
@@ -848,8 +849,8 @@ class LayoutTab(Gtk.Box):
         self.cv.queue_draw()
         self._build_panel()
         if hidden:
-            self.app.toast(f"{self._name(s['zone'])} is hidden. Show it again from the strip list.",
-                           "Undo", lambda: self._set_hidden(s, False))
+            self.app.toast(_('{strip} is hidden. Show it again from the strip list.').format(strip=self._name(s['zone'])),
+                           _("Undo"), lambda: self._set_hidden(s, False))
 
     def _select(self, s):
         if s.get("hidden"):
@@ -897,35 +898,35 @@ class LayoutTab(Gtk.Box):
         s = self.layout.get(self._sel) if self._sel else None
         self._pv = {}
         if self.tool in PAINT_TOOLS:
-            p.append(label("Paint colors", ("subheading",)))
+            p.append(label(_("Paint colors"), ("subheading",)))
             p.append(QuickColors(self.app.saved_colors, self.app.recent_colors,
                                  lambda h: self._set_well("a", h), lambda h: self._set_well("b", h),
                                  lambda: self.app.save_color(self.color_a), size=28, per_line=8))
-            p.append(label("Click a color for the first paint color, right-click for the second (Gradient only). "
-                           "+ saves the first one.", ("tiny", "faint"), wrap=True))
+            p.append(label(_("Click a color for the first paint color, right-click for the second (Gradient only). "
+                           "+ saves the first one."), ("tiny", "faint"), wrap=True))
             p.append(divider())
         if s is None:
-            p.append(label("Nothing selected", ("heading",)))
-            p.append(label("Click a strip to select it. Each enabled zone has one strip; add clones for strips that "
-                           "share a wire.", ("small", "dim"), wrap=True))
-            row = hbox(12, Toggle(self._snap, lambda v: setattr(self, "_snap", v)), label("Snap to grid", ("body",)))
+            p.append(label(_("Nothing selected"), ("heading",)))
+            p.append(label(_("Click a strip to select it. Each enabled zone has one strip; add clones for strips that "
+                           "share a wire."), ("small", "dim"), wrap=True))
+            row = hbox(12, Toggle(self._snap, lambda v: setattr(self, "_snap", v)), label(_("Snap to grid"), ("body",)))
             row.set_margin_top(10)
             p.append(row)
             p.append(divider())
-            p.append(label("Strips", ("subheading",)))
-            p.append(label("Hide a strip to get it out of the way; it keeps its place and colors.", ("tiny", "faint"),
+            p.append(label(_("Strips"), ("subheading",)))
+            p.append(label(_("Hide a strip to get it out of the way; it keeps its place and colors."), ("tiny", "faint"),
                            wrap=True))
             for st in [x for x in self.layout.strips if x["zone"] in self._enabled]:
                 hidden = bool(st.get("hidden"))
                 r_ = hbox(6)
                 eye = button(icon_name="visibility_off" if hidden else "visibility", style="text small",
                              cb=lambda st=st, h=hidden: self._set_hidden(st, not h),
-                             tooltip="Show this strip" if hidden else "Hide this strip")
+                             tooltip=_("Show this strip") if hidden else _("Hide this strip"))
                 r_.append(eye)
-                name = self._name(st["zone"]) + ("  \u00b7  clone" if st["clone"] else "")
+                name = self._name(st["zone"]) + (f"  \u00b7  {_('clone')}" if st["clone"] else "")
                 nb = Gtk.Button(label=name, hexpand=True)
                 d_, z_ = split_key(st["zone"])
-                nb.set_tooltip_text(f"{z_} on {d_}" if z_ else d_)
+                nb.set_tooltip_text(_('{zone} on {device}').format(zone=z_, device=d_) if z_ else d_)
                 nb.add_css_class("text")
                 nb.add_css_class("small")
                 nb.get_child().set_xalign(0)
@@ -944,25 +945,26 @@ class LayoutTab(Gtk.Box):
         head.append(label(self._name(key), ("heading",), wrap=True))
         head.append(Gtk.Box(hexpand=True))
         head.append(button(icon_name="edit", style="text small", cb=lambda: self._rename(key),
-                           tooltip="Rename this strip"))
+                           tooltip=_("Rename this strip")))
         p.append(head)
         orig = z or d
-        sub = (f"{orig} on {d}" if z else "Whole device") if self._name(key) != orig else (d if z else "Whole device")
+        sub = (_("{zone} on {device}").format(zone=orig, device=d) if z else _("Whole device")) \
+            if self._name(key) != orig else (d if z else _("Whole device"))
         if s["clone"]:
-            sub += "  ·  clone (shows the same colors)"
+            sub += "  ·  " + _("clone (shows the same colors)")
         p.append(label(sub, ("small", "dim"), wrap=True))
-        self._pv["count"] = label(f"{n} LEDs", ("body",))
+        self._pv["count"] = label(ngettext("{n} LED", "{n} LEDs", n).format(n=n), ("body",))
         p.append(self._pv["count"])
         row = hbox(6)
-        row.append(button("Identify", "flare", "tonal small", lambda: self._identify(s)))
-        row.append(button("Count LEDs", "straighten", "tonal small",
+        row.append(button(_("Identify"), "flare", "tonal small", lambda: self._identify(s)))
+        row.append(button(_("Count LEDs"), "straighten", "tonal small",
                           lambda: self.app.count_leds(d, z, n, lambda c: self._send(self.app.client.set_zone_led_count,
                                                                                      d, z, c))))
         p.append(row)
 
         cfg = self._cfg.get(key) or {}
         pat = PatternGenerator.normalize(cfg.get("pattern", "solid"))
-        p.append(label("Pattern", ("small", "dim")))
+        p.append(label(_("Pattern"), ("small", "dim")))
         dd = Dropdown([PATTERN_NAMES[x] for x in PatternGenerator.PATTERNS], PATTERN_NAMES.get(pat),
                       lambda v: self._set_pattern(key, PATTERN_KEYS.get(v, "solid")))
         dd.set_halign(Gtk.Align.START)
@@ -975,20 +977,20 @@ class LayoutTab(Gtk.Box):
                                   max_select=1 if pat == "solid" else 8)
             p.append(picker)
         else:
-            p.append(label("Painted: use the Paint, Erase, Fill and Gradient tools below.", ("tiny", "faint"),
+            p.append(label(_("Painted: use the Paint, Erase, Fill and Gradient tools below."), ("tiny", "faint"),
                            wrap=True))
 
         p.append(divider())
         locked = self._strip_locked(s)
-        p.append(label("Shape", ("subheading",)))
-        p.append(hbox(12, Toggle(s["flip"], lambda v: self._flip(s)), label("Flip LED order (drawing only)",
+        p.append(label(_("Shape"), ("subheading",)))
+        p.append(hbox(12, Toggle(s["flip"], lambda v: self._flip(s)), label(_("Flip LED order (drawing only)"),
                                                                             ("small",))))
-        p.append(hbox(12, Toggle(s["locked"], lambda v: self._lock_strip(s)), label("Lock this strip", ("small",))))
+        p.append(hbox(12, Toggle(s["locked"], lambda v: self._lock_strip(s)), label(_("Lock this strip"), ("small",))))
 
         segs = s["segments"]
         turn = hbox(6)
-        turn.append(label("Turn", ("small", "dim")))
-        for ico, delta, tip in (("rotate_left", -90, "Turn 90\u00b0 left"), ("rotate_right", 90, "Turn 90\u00b0 right")):
+        turn.append(label(_("Turn"), ("small", "dim")))
+        for ico, delta, tip in (("rotate_left", -90, _("Turn 90\u00b0 left")), ("rotate_right", 90, _("Turn 90\u00b0 right"))):
             b_ = button(icon_name=ico, style="tonal small", cb=lambda d_=delta: self._turn_all(s, d_), tooltip=tip)
             b_.set_sensitive(not locked)
             turn.append(b_)
@@ -1000,32 +1002,32 @@ class LayoutTab(Gtk.Box):
 
         dens = hbox(6)
         lpp = self._lpp(key)
-        dens.append(label("LEDs per metre", ("small", "dim")))
+        dens.append(label(_("LEDs per metre"), ("small", "dim")))
         sp = Spin(5, 300, round(1000 * lpp / segs[0]["spacing"]), lambda v: self._density(s, v, None))
         sp.set_sensitive(not locked)
         dens.append(sp)
         p.append(dens)
-        p.append(label("The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is "
-                       "drawn at its real length."
-                       + (f" Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)." if lpp > 1
+        p.append(label(_("The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is "
+                       "drawn at its real length.")
+                       + (" " + _('Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type).').format(lpp=lpp) if lpp > 1
                           else ""), ("tiny", "faint"), wrap=True))
 
-        p.append(label("Bends", ("small", "dim")))
+        p.append(label(_("Bends"), ("small", "dim")))
         if len(segs) == 1:
-            p.append(label("None yet. Right-click a LED, or add one below.", ("tiny", "faint"), wrap=True))
+            p.append(label(_("None yet. Right-click a LED, or add one below."), ("tiny", "faint"), wrap=True))
         for i, seg in enumerate(segs[1:], start=1):
             g = Gtk.Grid(column_spacing=8, row_spacing=4)
-            g.attach(label(f"Bend {i}", ("small",)), 0, 0, 1, 1)
+            g.attach(label(_('Bend {i}').format(i=i), ("small",)), 0, 0, 1, 1)
             rm = button(icon_name="close", style="text small", cb=lambda i=i: self._do(self.layout.remove_bend, s, i),
-                        tooltip="Remove this bend")
+                        tooltip=_("Remove this bend"))
             rm.set_sensitive(not locked)
             rm.set_halign(Gtk.Align.END)
             g.attach(rm, 1, 0, 1, 1)
-            g.attach(label("at LED", ("tiny", "faint")), 0, 1, 1, 1)
+            g.attach(label(_("at LED"), ("tiny", "faint")), 0, 1, 1, 1)
             st = Spin(2, max(2, n), seg["start"] + 1, lambda v, i=i: self._move_bend(s, i, int(v) - 1))
             st.set_sensitive(not locked)
             g.attach(st, 1, 1, 1, 1)
-            g.attach(label("direction \u00b0", ("tiny", "faint")), 0, 2, 1, 1)
+            g.attach(label(_("direction \u00b0"), ("tiny", "faint")), 0, 2, 1, 1)
             an = Spin(0, 359, round(seg["angle"]) % 360, lambda v, i=i: self._set_angle(s, i, v), step=15)
             an.set_sensitive(not locked)
             g.attach(an, 1, 2, 1, 1)
@@ -1033,28 +1035,28 @@ class LayoutTab(Gtk.Box):
         add = hbox(6)
         nb = Spin(2, max(2, n), max(2, n // 2), None)
         nb.set_sensitive(not locked)
-        add.append(button("Add a bend at LED", "add", "tonal small",
+        add.append(button(_("Add a bend at LED"), "add", "tonal small",
                           lambda: self._do(self.layout.add_bend, s, int(nb.get_value()) - 1)))
         add.append(nb)
         add.set_sensitive(not locked and n > 2)
         p.append(add)
-        p.append(label("On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole strip, "
-                       "outside the corner for a bend.", ("tiny", "faint"),
+        p.append(label(_("On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole strip, "
+                       "outside the corner for a bend."), ("tiny", "faint"),
                        wrap=True))
 
         row2 = hbox(6)
         row2.set_margin_top(6)
-        row2.append(button("Clone", "content_copy", "tonal small", lambda: self._clone(s)))
-        row2.append(button("Hide", "visibility_off", "tonal small", lambda: self._set_hidden(s, True)))
+        row2.append(button(_("Clone"), "content_copy", "tonal small", lambda: self._clone(s)))
+        row2.append(button(_("Hide"), "visibility_off", "tonal small", lambda: self._set_hidden(s, True)))
         if s["clone"]:
-            row2.append(button("Delete clone", "delete", "danger small", lambda: self._delete(s)))
+            row2.append(button(_("Delete clone"), "delete", "danger small", lambda: self._delete(s)))
         p.append(row2)
 
     def _refresh_panel_values(self):
         s = self.layout.get(self._sel) if self._sel else None
         if s is None or "count" not in getattr(self, "_pv", {}):
             return
-        self._pv["count"].set_label(f"{self._count(s['zone'])} LEDs")
+        self._pv["count"].set_label(ngettext('{n} LED', '{n} LEDs', self._count(s['zone'])).format(n=self._count(s['zone'])))
         cfg = self._cfg.get(s["zone"]) or {}
         if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")):
             self._build_panel()

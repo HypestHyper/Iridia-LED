@@ -34,7 +34,10 @@ option.
 | Command | What it does |
 | --- | --- |
 | `iridia openrgb reconnect` | Drop the connection and connect again |
-| `iridia openrgb restart` | Restart OpenRGB's server (a systemd `openrgb-server.service` or a headless `openrgb --server`) |
+| `iridia openrgb restart` | Restart OpenRGB's server (`iridia-openrgb.service`, `openrgb-server.service`, or a headless `openrgb --server`) |
+| `iridia openrgb enable` | Start OpenRGB's server at every login (`iridia-openrgb.service`) |
+| `iridia openrgb disable` | Stop doing that; the daemon won't start OpenRGB either |
+| `iridia openrgb status` | Show what starts OpenRGB on this machine |
 
 ## Wallpaper and colors
 

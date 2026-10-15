@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iridia"
-version = "1.0.0"
+version = "1.1.0"
 description = "Sync your RGB lighting with your wallpaper on Linux, through OpenRGB"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -28,9 +28,9 @@ dependencies = [
 # (scripts/install.sh installs them and creates the venv with --system-site-packages).
 
 [project.urls]
-Homepage = "https://github.com/OWNER/iridia"
-Documentation = "https://github.com/OWNER/iridia/blob/main/docs/wiki/Home.md"
-Issues = "https://github.com/OWNER/iridia/issues"
+Homepage = "https://github.com/HypestHyper/Iridia-LED"
+Documentation = "https://github.com/HypestHyper/Iridia-LED/blob/main/docs/wiki/Home.md"
+Issues = "https://github.com/HypestHyper/Iridia-LED/issues"
 
 [project.optional-dependencies]
 material = ["material-color-utilities>=0.1.0"]
@@ -45,4 +45,4 @@ where = ["."]
 include = ["iridia*"]
 
 [tool.setuptools.package-data]
-iridia = ["data/*.svg", "data/*.png", "data/fonts/*"]
+iridia = ["data/*.svg", "data/*.png", "data/fonts/*", "data/locale/*/LC_MESSAGES/*.mo"]

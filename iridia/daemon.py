@@ -22,6 +22,7 @@ from iridia.calibration import Profiles, valid_name
 from iridia.palette import Palette
 from iridia.patterns import PatternGenerator
 from iridia.openrgb_ctl import OpenRGBController, zones_of
+from iridia import openrgb_server
 from iridia.ddc import DDCController
 from iridia.ipc import IPCServer
 
@@ -217,6 +218,7 @@ class Daemon:
         self._force_refresh = False
         self._last_sent: Dict[str, str] = {}
         self._start_time = time.time()
+        self._orgb_starter = openrgb_server.Starter()
         self._last_logged_connected = None
         self._device_missing_since: Dict[str, float] = {}
         self._zone_errors: Dict[tuple, str] = {}
@@ -482,6 +484,8 @@ class Daemon:
         retry = self.config.get("timing.openrgb_retry_interval_sec", 5.0)
         connected = self.openrgb.ensure_connected(retry_interval=retry)
         self._log_connection_state(connected)
+        if not connected:
+            self._maybe_start_openrgb()
         if connected:
             enum_interval = self.config.get("timing.device_enumeration_interval_sec", 10.0)
             self.openrgb.maybe_enumerate(interval=enum_interval)
@@ -656,6 +660,25 @@ class Daemon:
         self._last_auto_restart = now
         self._device_missing_since = {}
         self._restart_openrgb_async()
+
+    def _maybe_start_openrgb(self):
+        """No OpenRGB server reachable on this machine: start one (see openrgb_server.py).
+        Runs off the tick thread, since systemctl can take a moment."""
+        if getattr(self, "_orgb_starting", False):
+            return
+        host = self.config.get("openrgb.host", "127.0.0.1")
+        enabled = self.config.get("openrgb.start_server", True) is not False
+        custom = self.config.get("openrgb.server_command", "") or ""
+
+        def run():
+            try:
+                self._orgb_starter.maybe_start(host, enabled, custom if isinstance(custom, str) else "")
+            except Exception as e:
+                self.logger.warning(f"Starting OpenRGB failed: {type(e).__name__}: {e}")
+            finally:
+                self._orgb_starting = False
+        self._orgb_starting = True
+        threading.Thread(target=run, daemon=True, name="openrgb-start").start()
 
     def _restart_openrgb_async(self):
         """Restarting OpenRGB can take a few seconds (process kill +
@@ -1719,6 +1742,8 @@ class Daemon:
             "ddc_available": self.ddc.is_available(),
             "ddc_last_error": self.ddc.last_error,
             "openrgb_connected": self.openrgb.client is not None,
+            "openrgb_host": self.openrgb.host,
+            "openrgb_autostart": self._orgb_starter.last_action,
             "openrgb_connected_since": self.openrgb.connected_since,
             "openrgb_last_error": self.openrgb.last_error,
             "openrgb_missing_devices": missing,

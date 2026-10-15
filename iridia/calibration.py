@@ -65,9 +65,15 @@ _HEX = re.compile(r"^[0-9a-f]{6}$")
 _NAME_OK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.()\-]{0,39}$")
 
 # Friendly names for the usual anchor hues (used by the editor)
-HUE_NAMES = {0: "Red", 15: "Red-orange", 30: "Orange", 45: "Amber", 60: "Yellow", 90: "Lime", 120: "Green",
-             150: "Spring green", 180: "Cyan", 195: "Teal", 210: "Sky blue", 240: "Blue", 270: "Violet",
-             300: "Magenta", 330: "Pink", 360: "Red (wraps around)"}
+def N_(text):
+    """Marks a string for translation without translating it here (the window translates it)."""
+    return text
+
+
+HUE_NAMES = {0: N_("Red"), 15: N_("Red-orange"), 30: N_("Orange"), 45: N_("Amber"), 60: N_("Yellow"),
+             90: N_("Lime"), 120: N_("Green"), 150: N_("Spring green"), 180: N_("Cyan"), 195: N_("Teal"),
+             210: N_("Sky blue"), 240: N_("Blue"), 270: N_("Violet"), 300: N_("Magenta"), 330: N_("Pink"),
+             360: N_("Red (wraps around)")}
 
 
 def _rgb(h: str) -> List[int]:

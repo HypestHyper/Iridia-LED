@@ -96,9 +96,9 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
                 if "library is missing" in err else None)
         checks.append(Check(
             "OpenRGB connection", False, err, hint or
-            "Is OpenRGB's SDK server actually running? ('openrgb --server', or its systemd "
-            "service if you use one, check with: systemctl --user status openrgb-server.service). "
-            "Then try Reconnect from the Service tab (or: iridia openrgb reconnect)."
+            "Is OpenRGB's SDK server running? See the \"OpenRGB at login\" line below. "
+            "To have Iridia start it at every login: iridia openrgb enable (or the Service tab). "
+            "If you use the OpenRGB window instead, turn on its SDK server (SDK Server tab, Start Server)."
         ))
 
     if status.get("ddc_available"):
@@ -137,15 +137,45 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
         writable = os.access(cfg_path, os.W_OK) if os.path.exists(cfg_path) else os.access(os.path.dirname(cfg_path), os.W_OK)
         checks.append(Check("Config file writable", writable, cfg_path))
 
-    svc = systemd_unit_status("iridia-daemon.service")
-    if svc is not None:
-        checks.append(Check("iridia-daemon.service", svc == "active" or None, svc))
+    from iridia import openrgb_server
+    en, svc = openrgb_server.unit_state("iridia-daemon.service")
+    if svc and en != "not-found":
+        checks.append(Check("iridia-daemon.service", svc == "active" or None, f"{svc}, {en}"))
 
-    openrgb_svc = systemd_unit_status("openrgb-server.service")
-    if openrgb_svc is not None:
-        checks.append(Check("openrgb-server.service", openrgb_svc == "active" or None, openrgb_svc))
-
+    checks.append(openrgb_login_check(status))
     return checks
+
+
+def openrgb_login_check(status: dict) -> Check:
+    """Who starts OpenRGB's server when you log in."""
+    from iridia import openrgb_server as osrv
+    label = "OpenRGB at login"
+    host = status.get("openrgb_host") or "127.0.0.1"
+    if not osrv.is_local(host):
+        return Check(label, None, f"OpenRGB runs on another machine ({host}); start it there")
+    st = osrv.status()
+    connected = bool(status.get("openrgb_connected"))
+    if st["managed"]:
+        detail = f"started by Iridia ({osrv.UNIT_NAME}): {st['active'] or '?'}, {st['enabled']}"
+        if st["active"] == "active" or connected:
+            return Check(label, True, detail)
+        return Check(label, False, detail,
+                     f"See why: systemctl --user status {osrv.UNIT_NAME}  and  journalctl --user -u {osrv.UNIT_NAME}")
+    if st["others"]:
+        return Check(label, True if connected else None, "started by " + ", ".join(st["others"]))
+    if not st["command"]:
+        return Check(label, False, "OpenRGB isn't installed (no openrgb command, no Flatpak)",
+                     "Install OpenRGB from your distribution, or set openrgb.server_command in config.json "
+                     "to the command that runs its server (for an AppImage).")
+    if not st["start_server"]:
+        return Check(label, False, "nothing starts it (openrgb.start_server is off)",
+                     "Run: iridia openrgb enable  (or start OpenRGB's server yourself)")
+    if not st["systemd"]:
+        return Check(label, True if connected else None,
+                     "no systemd here: the daemon starts 'openrgb --server' itself when it can't reach it")
+    return Check(label, False, "nothing is set to start it",
+                 "Run: iridia openrgb enable  (or Service tab, OpenRGB, Start OpenRGB at login). "
+                 "The daemon also starts it by itself when it can't reach it.")
 
 
 def format_text(checks: List[Check]) -> str:

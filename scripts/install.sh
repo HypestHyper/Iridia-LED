@@ -105,8 +105,8 @@ if ! python3 -c "$GTK_CHECK" >/dev/null 2>&1; then
 fi
 if ! command -v openrgb &> /dev/null; then
     echo "NOTE: 'openrgb' is not installed (Iridia can't drive LEDs without it)."
-    echo "      If your distribution doesn't package it, get the AppImage or package from https://openrgb.org"
-    echo "      and run it with its SDK server on (openrgb --server)."
+    echo "      If your distribution doesn't package it, get it from https://openrgb.org. Iridia starts its"
+    echo "      server (openrgb --server) by itself once it's installed."
 fi
 if ! command -v ddcutil &> /dev/null; then
     echo "NOTE: 'ddcutil' is not installed (optional: monitor-brightness-synced LEDs)."

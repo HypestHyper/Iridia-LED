@@ -22,7 +22,7 @@ fi
 echo "Iridia's virtualenv wasn't found; removing the known files directly..."
 systemctl --user stop "$SERVICE_NAME" 2>/dev/null || true
 systemctl --user disable "$SERVICE_NAME" 2>/dev/null || true
-rm -f "$SERVICE_DIR/$SERVICE_NAME" "$APPS_DIR/iridia.desktop" "$APPS_DIR/io.github.iridia.Iridia.desktop" "$HOME/.config/autostart/iridia-daemon.desktop"
+rm -f "$SERVICE_DIR/$SERVICE_NAME" "$APPS_DIR/iridia.desktop" "$APPS_DIR/io.github.iridia.Iridia.desktop" "$APPS_DIR/io.github.HypestHyper.Iridia.desktop" "$HOME/.config/autostart/iridia-daemon.desktop"
 find "$HOME/.local/share/icons/hicolor" -name 'iridia*' -delete 2>/dev/null
 systemctl --user daemon-reload 2>/dev/null || true
 command -v update-desktop-database >/dev/null && update-desktop-database "$APPS_DIR" 2>/dev/null

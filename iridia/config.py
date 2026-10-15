@@ -22,6 +22,8 @@ DEFAULT_CONFIG = {
     "openrgb": {
         "host": "127.0.0.1",
         "port": None,
+        "start_server": True,
+        "server_command": "",
         "auto_restart_on_missing_device": True,
         "missing_device_restart_threshold_sec": 45.0,
         "restart_cooldown_sec": 120.0

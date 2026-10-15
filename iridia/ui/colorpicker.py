@@ -12,6 +12,7 @@ from typing import Callable, List, Optional
 import cairo
 from gi.repository import Gdk, Gtk
 
+from iridia.i18n import _
 from iridia.colors import normalize_hex
 from iridia.ui.dialogs import Dialog
 from iridia.ui.widgets import (Group, Swatch, Toggle, button, hbox, label, rgb, rounded_rect, themed, vbox)
@@ -118,7 +119,7 @@ class ColorPicker(Dialog):
         head.append(label(title, ("title",)))
         sp = Gtk.Box(hexpand=True)
         head.append(sp)
-        head.append(Group([("swatch", "Swatch", "texture"), ("wheel", "Wheel", "palette")], "swatch", self._set_mode))
+        head.append(Group([("swatch", _("Swatch"), "texture"), ("wheel", _("Wheel"), "palette")], "swatch", self._set_mode))
         self.body.append(head)
 
         main = hbox(22)
@@ -147,7 +148,7 @@ class ColorPicker(Dialog):
         self._new.set_draw_func(lambda a, cr, w, h: self._fill(cr, w, h, self._hex(), right=not extra))
         pv.append(self._old)
         pv.append(self._new)
-        caption = "current  →  new"
+        caption = _("current  →  new")
         if extra:
             self._ext = Gtk.DrawingArea(content_width=64, content_height=44, margin_start=10)
             self._ext.set_draw_func(lambda a, cr, w, h: self._fill(cr, w, h, self._extra_hex(), left=True, right=True))
@@ -158,7 +159,7 @@ class ColorPicker(Dialog):
         self._ext_lbl = label("", ("mono", "dim"))
         side.append(self._ext_lbl)
         hx = hbox(6)
-        hx.append(label("Hex  #", ("body", "dim")))
+        hx.append(label(_("Hex  #"), ("body", "dim")))
         self._hex_entry = Gtk.Entry(max_length=7, width_chars=8)
         self._hex_entry.connect("changed", self._on_hex)
         hx.append(self._hex_entry)
@@ -177,11 +178,11 @@ class ColorPicker(Dialog):
         self._exact_sw = None
         if exact is not None:
             self._exact_sw = Toggle(self.exact, self._set_exact)
-            row = hbox(10, self._exact_sw, label("Exact color", ("body",)))
+            row = hbox(10, self._exact_sw, label(_("Exact color"), ("body",)))
             row.set_margin_top(10)
             left.append(row)
-            note = label("The LEDs show this hex as it is: no Palette or Calibrated correction, only brightness. "
-                         "Saved colors with a dot are exact.", ("tiny", "faint"), wrap=True)
+            note = label(_("The LEDs show this hex as it is: no Palette or Calibrated correction, only brightness. "
+                         "Saved colors with a dot are exact."), ("tiny", "faint"), wrap=True)
             note.set_max_width_chars(34)
             left.append(note)
         main.append(side)
@@ -194,16 +195,16 @@ class ColorPicker(Dialog):
         self._render_saved()
         recent = [c for c in (recent or []) if normalize_hex(c)]
         if recent:
-            self.body.append(label("Recently used", ("small", "dim")))
+            self.body.append(label(_("Recently used"), ("small", "dim")))
             flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=16, column_spacing=4,
                                halign=Gtk.Align.START)
             flow.set_min_children_per_line(min(16, len(recent)))
             for c in recent[:16]:
                 flow.append(Swatch(c, 30, on_click=lambda c=c: self._pick_listed(c), tooltip=f"#{c}"))
             self.body.append(flow)
-        btns = [button("Cancel", style="text", cb=self.close), button("Select", style="filled", cb=self._ok)]
+        btns = [button(_("Cancel"), style="text", cb=self.close), button(_("Select"), style="filled", cb=self._ok)]
         if on_save:
-            btns.insert(0, button("Save color", "add", "tonal", self._save_current))
+            btns.insert(0, button(_("Save color"), "add", "tonal", self._save_current))
         self.buttons(*btns)
         self.on_enter = self._ok
         self._refresh()
@@ -218,10 +219,10 @@ class ColorPicker(Dialog):
             c = n
         if not self._saved:
             if self._on_save:
-                self._saved_box.append(label("No saved colors yet. \u201cSave color\u201d keeps the current one here and "
-                                             "in every color list.", ("tiny", "faint"), wrap=True))
+                self._saved_box.append(label(_("No saved colors yet. \u201cSave color\u201d keeps the current one here and "
+                                             "in every color list."), ("tiny", "faint"), wrap=True))
             return
-        self._saved_box.append(label("Your saved colors", ("small", "dim")))
+        self._saved_box.append(label(_("Your saved colors"), ("small", "dim")))
         flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=16, column_spacing=4,
                            halign=Gtk.Align.START)
         flow.set_min_children_per_line(min(16, len(self._saved)))

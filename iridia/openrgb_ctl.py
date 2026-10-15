@@ -379,26 +379,28 @@ class OpenRGBController:
         import subprocess
         self.disconnect()
 
-        try:
-            r = subprocess.run(
-                ["systemctl", "--user", "restart", "openrgb-server.service"],
-                capture_output=True, text=True, timeout=10,
-            )
-            if r.returncode == 0:
-                logger.info("Restarted openrgb-server.service via systemd")
-                time.sleep(3.0)
-                return True
-            logger.debug(f"openrgb-server.service restart unavailable: {r.stderr.strip()}")
-        except Exception as e:
-            logger.debug(f"systemd restart attempt failed: {type(e).__name__}: {e}")
+        for unit in ("iridia-openrgb.service", "openrgb-server.service"):
+            try:
+                r = subprocess.run(["systemctl", "--user", "cat", unit], capture_output=True, text=True, timeout=5)
+                if r.returncode != 0:
+                    continue
+                r = subprocess.run(["systemctl", "--user", "restart", unit],
+                                   capture_output=True, text=True, timeout=15)
+                if r.returncode == 0:
+                    logger.info(f"Restarted {unit} via systemd")
+                    time.sleep(3.0)
+                    return True
+                logger.debug(f"{unit} restart failed: {r.stderr.strip()}")
+            except Exception as e:
+                logger.debug(f"systemd restart of {unit} failed: {type(e).__name__}: {e}")
 
         try:
             found = subprocess.run(["pgrep", "-f", "openrgb.*--server"],
                                    capture_output=True, text=True, timeout=3)
             if not found.stdout.strip():
                 msg = ("No headless 'openrgb --server' process found to restart, and no "
-                       "openrgb-server.service is set up. If OpenRGB is running as a "
-                       "GUI app, use its own Rescan Devices, or restart it manually.")
+                       "systemd unit for it is set up (run: iridia openrgb enable). If OpenRGB "
+                       "is running as a GUI app, use its own Rescan Devices, or restart it manually.")
                 logger.warning(msg)
                 self._record_error(msg)
                 return False

@@ -1,10 +1,14 @@
 # Iridia wiki
 
-Iridia syncs your RGB lighting with your wallpaper on Linux. It reads the colors of your current
-wallpaper, sends them to your LEDs through [OpenRGB](https://openrgb.org/), and makes the LEDs follow
-your monitor's brightness. A small background daemon does the work; a GTK 4 window lets you set it up.
+Iridia sets the colors of RGB devices on Linux from the current wallpaper, through
+[OpenRGB](https://openrgb.org/), and can make LED brightness follow the monitor's brightness. A
+background daemon does the work; a GTK 4 window and a command line tool change its settings.
 
 This wiki explains everything Iridia can do and how it works.
+
+Iridia was written mostly with AI tools and has been tested mainly on CachyOS with Hyprland and WS2812B
+strips. Other setups are supported in the code but have seen less real-world testing; please report
+what doesn't work.
 
 ## Start here
 

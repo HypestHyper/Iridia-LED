@@ -124,8 +124,8 @@ bash install.sh
 
 The installer finds what's missing and offers to install it with your package manager (pacman, apt,
 dnf, zypper, xbps or apk), installs Iridia into `~/.local/share/iridia-venv`, links the `iridia` and
-`iridia-gui` commands into `~/.local/bin`, adds the app to your launcher and starts it. It asks two
-things:
+`iridia-gui` commands into `~/.local/bin`, sets up I2C access for monitor brightness, adds the app to
+your launcher and starts it. It asks two things:
 
 - **How OpenRGB's server is started:** by the Iridia daemon (the default, works with or without
   systemd), by a systemd service, or by you. Flag: `--openrgb=daemon|systemd|off`.
@@ -161,7 +161,8 @@ Then run `bash install.sh --no-deps`. If your release has no OpenRGB package, ge
 1. **OpenRGB:** install it and check that your devices show up in it. Iridia starts OpenRGB's server
    for you; the installer asks how (see [Setting up OpenRGB](docs/wiki/Installation.md#setting-up-openrgb)).
    If OpenRGB also starts itself at login, keep only one of the two.
-2. **For monitor brightness** (optional): `sudo usermod -aG i2c $USER`, log out and in, and check that
+2. **For monitor brightness** (optional): the installer sets up I2C access for ddcutil (the `i2c` group,
+   its udev rule and the `i2c-dev` module). Log out and in once afterwards, then check that
    `ddcutil detect` finds your monitor.
 
 Then open **Iridia** from your app launcher. The [installation guide](docs/wiki/Installation.md)
@@ -205,13 +206,7 @@ The [wiki](docs/wiki/Home.md) explains everything Iridia can do and how it works
 | [Configuration](docs/wiki/Configuration.md) | The settings files |
 | [How it works](docs/wiki/How-It-Works.md) | The daemon, the color pipeline, resilience |
 | [Troubleshooting](docs/wiki/Troubleshooting.md) and [FAQ](docs/wiki/FAQ.md) | When something isn't right |
-| [Development](docs/wiki/Development.md) | Project layout, IPC protocol, contributing |
-
-## Contributing
-
-Bug reports and pull requests are welcome. For a bug, please include the output of `iridia doctor` and
-`iridia log -n 100`, your distribution and desktop, and your devices as `iridia status` lists them. See
-[Development](docs/wiki/Development.md) to run Iridia from source.
+| [Development](docs/wiki/Development.md) | Project layout, running from source, the IPC protocol |
 
 ## License
 

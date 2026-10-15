@@ -163,12 +163,24 @@ If a device doesn't show up in OpenRGB itself, Iridia can't see it either; see t
 
 ## Setting up monitor brightness (optional)
 
-ddcutil reads your monitor's brightness over DDC/CI. It usually needs access to the I2C devices:
+ddcutil reads your monitor's brightness over DDC/CI, which needs read and write access to the I2C
+devices. When ddcutil is installed, the installer sets that up (it asks first; `--yes` doesn't ask,
+`--no-deps` leaves it alone), doing only what your system doesn't have yet:
+
+- creates the `i2c` group and adds you to it,
+- adds a udev rule giving that group the I2C devices (`/etc/udev/rules.d/45-iridia-i2c.rules`), unless
+  one already does,
+- loads the `i2c-dev` module now and at every boot (`/etc/modules-load.d/i2c-dev.conf`).
+
+Log out and back in once so the new group applies, then check:
 
 ```bash
-sudo usermod -aG i2c $USER     # then log out and back in
 ddcutil detect                 # should list your monitor
 ```
+
+By hand, the same is: `sudo groupadd --system i2c`, `sudo usermod -aG i2c $USER`, the udev rule
+`KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"`, and `sudo modprobe i2c-dev`. Uninstalling Iridia
+leaves these in place (other tools use them too).
 
 DDC/CI must also be enabled in your monitor's own menu on some models. If no monitor answers, Iridia
 just uses the brightness you set by hand.

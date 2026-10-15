@@ -46,4 +46,4 @@ what doesn't work.
 | [How it works](How-It-Works.md) | The daemon, the color pipeline, wallpaper detection, resilience |
 | [Troubleshooting](Troubleshooting.md) | What to check when something doesn't work |
 | [FAQ](FAQ.md) | Short answers to common questions |
-| [Development](Development.md) | Project layout, running from source, the IPC protocol, contributing |
+| [Development](Development.md) | Project layout, running from source, the IPC protocol |

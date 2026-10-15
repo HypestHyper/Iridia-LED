@@ -28,6 +28,7 @@ what doesn't work.
 | Page | What's in it |
 | --- | --- |
 | [Devices, patterns and colors](Devices-and-Patterns.md) | Zones, the Everything card, patterns, wallpaper colors, saved colors, painting, brightness |
+| [Animations](Animations.md) | Animated effects, follow the layout, frame rate, controller effects |
 | [Layout](Layout.md) | Drawing your strips where they really are: moving, bending, painting, finding LEDs |
 | [Strip types](Strip-Types.md) | WS2812B, WS2811, plain 12V RGB, RGBW, color order and power limits |
 | [Color correction](Color-Correction.md) | Off, Palette and Calibrated modes, exact colors, calibration profiles |

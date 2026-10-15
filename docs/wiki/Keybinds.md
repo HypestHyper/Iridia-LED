@@ -26,6 +26,8 @@ iridia zone "Desk back,Monitor" color 00ff88          # several strips
 iridia zone all bright 20                             # every strip
 iridia zone all normal                                # undo every keybind change
 iridia zone "Desk back" off --set                     # always off, never switch back
+iridia zone "Desk back" effect breathing --speed 3    # an effect; run again: back to normal
+iridia zone all effect static                         # still colors; run again: animations back
 ```
 
 Short forms work too: `iridia zone "Desk back" on ff0000 40%`.
@@ -36,9 +38,12 @@ Short forms work too: `iridia zone "Desk back" on ff0000 40%`.
 | `off` | Dark |
 | `color HEX` | One color on the whole strip (exact colors stay exact; others follow the zone's correction) |
 | `bright N` | Brightness N% instead of the zone's own |
+| `effect NAME` | An animated effect: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `color_cycle`, or `static` for the static pattern. Settings follow as `--speed`, `--min`, `--max` or `--param KEY=VALUE` |
 | `normal` | Back to normal (alone) |
 
-`off` can't be combined with a color or brightness, and `normal` can't be combined with anything.
+`off` can't be combined with a color or brightness, and `normal` can't be combined with anything. An
+effect can't be combined with `off` or a color; with `bright` it runs at that brightness. Add `--save` to
+make an effect the strip's own setting instead of a temporary change.
 `color` and `bright` don't light a strip that is switched off; add `on` for that.
 
 Other commands that work well on keys:
@@ -47,6 +52,7 @@ Other commands that work well on keys:
 iridia lights toggle        # everything off / on
 iridia freeze toggle        # stop / start following the wallpaper
 iridia night toggle         # night mode on / off (this one is saved)
+iridia animations toggle    # pause / resume every animation
 iridia setup load Gaming    # load a saved setup (this one is permanent)
 ```
 

@@ -29,7 +29,9 @@ summary, and an arrow to open the details. Names are shared with the Layout and 
 | **Alternating** | LED by LED: color 1, color 2, color 1... | |
 | **Painted** | Every LED its own color, painted by hand | |
 
-All patterns are static. The strip preview under the pattern shows exactly what your LEDs will show.
+Switch **Pattern** to *Animated* for an animated effect instead (Breathing, Comet, Fill, Embers,
+Rainbow, Rainbow vomit, Color cycle); see [Animations](Animations.md). The strip preview under the
+pattern shows exactly what your LEDs will show, animated or not.
 Click **Edit layout** to drag the color stops along the preview (or drag the diamonds on the Layout
 tab). **Reverse** flips the pattern end for end; **Mirror** draws it on the first half and mirrors it
 onto the second, for a symmetric look.
@@ -98,6 +100,11 @@ Night mode can cap the brightness on top of this; see [Night mode, sleep and fre
 - **LEDs** sets how many LEDs Iridia sends to. Normally the count OpenRGB reports.
 - **Color correction** chooses Off, Palette or Calibrated (see [Color correction](Color-Correction.md)).
 - **Strip type and wiring** (see [Strip types](Strip-Types.md)).
+
+## Controller effects
+
+With **Settings, Animations, Controller effects** on, each device gets a **Controller effect** card: the
+device runs one of its own effects instead of Iridia's colors. See [Animations](Animations.md#controller-effects).
 
 ## Devices that show one color
 

@@ -63,6 +63,13 @@ While a paint tool is active, the side panel shows **Paint colors**: your saved 
 used recently. Click one for the first paint color, right-click for the second (only Gradient uses the
 second), and **+** saves the first paint color.
 
+## Animations on the layout
+
+Animated zones move on the drawing while the tab is open (up to 30 frames a second, nothing when the
+window or tab isn't showing). Effects with **Follow the layout** on run through the room using where the
+LEDs are drawn here, across every strip that follows the layout, in the direction set on the zone's
+card. See [Animations](Animations.md#follow-the-layout).
+
 ## Color stops
 
 Select a strip with a Gradient, Segments, Center out or Edges in pattern and drag the diamonds along it

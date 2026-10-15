@@ -13,7 +13,9 @@ Whatever OpenRGB supports: ARGB headers, RGB controllers, RAM, keyboards, mice, 
 No. The daemon does the work; the window only changes settings.
 
 **Does it animate?**
-No, on purpose. Patterns are static: OpenRGB over USB can't deliver smooth animation, and a static setup
+Yes, since 1.2.0: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, per zone, also
+through the room following the layout. Static patterns are still the default. See
+[Animations](Animations.md). Before 1.2.0 Iridia was static only: a static setup
 costs next to nothing in CPU. Colors change when the wallpaper, brightness or your settings change.
 
 **How much CPU does it use?**

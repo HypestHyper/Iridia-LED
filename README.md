@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version 1.1.1" src="https://img.shields.io/badge/version-1.1.1-7c5cff">
+  <img alt="Version 1.2.0" src="https://img.shields.io/badge/version-1.2.0-7c5cff">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
@@ -36,7 +36,7 @@ brightness over DDC/CI.
 It consists of a background daemon, a command line tool and a GTK 4 settings window. The daemon handles
 wallpaper detection, color extraction and sending colors to OpenRGB; the window and the command line only
 change its settings. Each OpenRGB zone can be configured separately (pattern, colors, brightness, color
-correction). Patterns are static; nothing is animated.
+correction). Patterns are static by default; animated effects are there when you want them.
 
 > **Note:** This project was written almost entirely by an AI assistant, with direction and testing by the author. It has been tested mainly on CachyOS with Hyprland,
 > and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
@@ -62,6 +62,9 @@ correction). Patterns are static; nothing is animated.
 - Patterns: solid, gradient, segments, center out, edges in, alternating, and painted LED by LED.
 - Strip preview with adjustable color stops; reverse and mirror.
 - Saved colors, recently used colors, and colors marked as exact (sent without correction).
+- Animated effects: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, using the
+  zone's colors, also running through the room along the Layout. Optional: the controllers' own
+  effects ([Animations](docs/wiki/Animations.md)).
 - An *Everything* card that changes all zones at once.
 
 **Layout**
@@ -185,6 +188,7 @@ The [wiki](docs/wiki/Home.md) explains everything Iridia can do and how it works
 | [Installation](docs/wiki/Installation.md) | Requirements, distributions, OpenRGB and DDC setup, updating |
 | [Getting started](docs/wiki/Getting-Started.md) | The first run and a tour of the window |
 | [Devices, patterns and colors](docs/wiki/Devices-and-Patterns.md) | Zones, patterns, colors, painting, brightness |
+| [Animations](docs/wiki/Animations.md) | Animated effects, follow the layout, controller effects |
 | [Layout](docs/wiki/Layout.md) | Drawing and painting your strips |
 | [Strip types](docs/wiki/Strip-Types.md) | WS2812B, WS2811, 12V RGB, RGBW, color order, power limit |
 | [Color correction](docs/wiki/Color-Correction.md) | Palette, calibration profiles, exact colors |

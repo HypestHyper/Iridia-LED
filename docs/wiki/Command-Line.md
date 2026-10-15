@@ -43,6 +43,22 @@ option.
 | `iridia openrgb hide-autostart [FILE]` | Turn off OpenRGB's own entry in `~/.config/autostart` by adding `Hidden=true` (the file stays) |
 | `iridia openrgb status` | The method, the command, whether Iridia started the running OpenRGB, and what else starts it |
 
+## Animations
+
+| Command | What it does |
+| --- | --- |
+| `iridia zone TARGET effect NAME [--speed N] [--min N] [--max N] [--param KEY=VALUE]` | Run an effect on strips (temporary; again: back) |
+| `iridia zone TARGET effect NAME --save` | Make it the strips' own setting (`effect static --save` goes back) |
+| `iridia animations pause / resume / toggle` | Pause every animation until resumed |
+| `iridia animations status` | Which zones animate, the frame rate, frames per second each device got |
+| `iridia hardware on / off` | Offer the controllers' own effects, or not |
+| `iridia hardware list` | Every device's own effects and their settings |
+| `iridia hardware set DEVICE EFFECT [--speed N] [--brightness N] [--direction D] [--colors HEX,HEX]` | Run one |
+| `iridia hardware clear DEVICE` | Follow Iridia again |
+
+Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `color_cycle`. See
+[Animations](Animations.md) for their settings.
+
 ## Wallpaper and colors
 
 | Command | What it does |

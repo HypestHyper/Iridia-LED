@@ -23,6 +23,8 @@ iridia/
   wallpaper.py       wallpaper detection backends
   colors.py          color extraction engines
   patterns.py        the static patterns (pure functions)
+  animations.py      the animated effects (pure functions of time)
+  animator.py        the animation thread: pacing per device, sending frames
   calibration.py     calibration profiles
   palette.py         the 48 color palette
   ddc.py             monitor brightness through ddcutil
@@ -48,9 +50,11 @@ iridia/
     calibration_editor.py
     widgets.py         Material 3 Expressive building blocks
     style.py           CSS generated from the color scheme
+    effects.py         effect and controller-effect controls, live previews
     dialogs.py, fonts.py, serial.py, icon_names.py
   data/              icons, bundled fonts, compiled translations (locale/)
 scripts/
+  bench_animations.py  CPU cost of animations (6 x 80 LEDs at 30 fps)
   build_fonts.py     rebuilds the bundled font subsets
   build_locales.py   extracts strings and compiles the translations
 po/                  translation sources (iridia.pot and one .po per language)

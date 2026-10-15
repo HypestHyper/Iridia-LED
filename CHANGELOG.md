@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.2.0
+
+**Animations.** Iridia is no longer static only. Static patterns stay as they were, and stay the default.
+
+- Seven effects per zone: Breathing, Comet, Fill, Embers, Rainbow, Rainbow vomit and Color cycle. They use
+  the zone's colors (wallpaper, saved or exact colors; the rainbows ignore them), and brightness, night
+  mode, color correction, color order, RGBW and the power limit apply to every frame.
+- On the Devices tab, Pattern switches between Static and Animated; each effect shows its settings with
+  their values, changes apply live, and the strip preview animates. The Everything card sets an effect on
+  every zone and keeps zones with the same effect in step (Sync).
+- Follow the layout: an effect runs through the room across every strip that follows it, using where the
+  LEDs are on the Layout tab, in the direction set with a dial. The Layout tab animates live while open.
+- Settings, Animations: run animations (off shows each animated zone's first color), frame rate (15, 30,
+  60), pause or slow animations during night mode.
+- Breathing's minimum and maximum are relative to the zone's brightness. When the monitor's brightness
+  changes, LEDs glide to it over about 0.3 s, for static patterns too.
+- Lights off, sleep, Identify, Count LEDs, Test colors, color previews and keybind colors pause the
+  animation on that zone, and it resumes afterwards.
+- `iridia zone TARGET effect NAME [--speed N --min N --max N --param KEY=VALUE] [--save]`,
+  `iridia zone TARGET effect static`, `iridia animations pause|resume|toggle|status`; `iridia status`
+  shows each zone's effect. The Keybinds tab has "Effect" for strips and "Pause / resume animations".
+- Performance: one animation thread, only while something animates (static setups stay as idle as
+  before). Each device is paced on its own: frames are skipped, never queued, and a device that can't
+  keep up gets a lower rate (logged once). One packet per device when all its zones animate; unchanged
+  frames aren't sent. Frames are packed straight into SDK packets. `scripts/bench_animations.py` measures
+  the cost.
+- Iridia now puts each device in Direct mode once per connection even when OpenRGB already reports it,
+  since another client or a hardware effect can change it without OpenRGB noticing.
+
+**Controller effects.** Off by default: Settings, Animations, Controller effects. Then every device can run
+one of its own effects (whatever OpenRGB lists for it, on any device), with its speed, brightness,
+direction and colors where it has them, from a card on the Devices tab or `iridia hardware
+list|on|off|set|clear`. Choosing Follow Iridia puts the device back in Direct mode.
+
 ## 1.1.1
 
 **OpenRGB at boot.** On some machines the LEDs showed random colors after a reboot: 1.1.0's

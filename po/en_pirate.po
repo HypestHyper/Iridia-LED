@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 19:41+0000\n"
+"POT-Creation-Date: 2026-10-15 20:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -1910,6 +1910,10 @@ msgstr "Count the lanterns"
 
 msgid "Pattern"
 msgstr "Pattern"
+
+#, python-brace-format
+msgid "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
+msgstr "Dancin': {effect}. Pick a pattern here, or slap on paint, an' she holds still again."
 
 msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
 msgstr "Painted: use the Paint, Swab, Flood an' Gradient tools below."

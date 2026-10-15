@@ -331,6 +331,17 @@ def test_set_all_effect_and_status(d):
     assert _jobs(d) == {}
 
 
+def test_picking_a_static_pattern_stops_the_effect(d):
+    _animate(d, effect="embers")
+    _animate(d, device="Hub v1.0", zone="A", effect="comet")
+    _animate(d, device="Hub v1.0", zone="B", effect="comet")
+    assert _cmd(d, "set_zone_pattern", device="Strip", zone="", pattern="solid")["ok"]   # Layout tab, painting
+    assert d.config.get(("devices", "Strip", "animation")) is None
+    assert set(_jobs(d)) == {"Hub v1.0|A", "Hub v1.0|B"}
+    assert _cmd(d, "set_all", field="pattern", value="gradient")["ok"]                  # the Everything card
+    assert _jobs(d) == {}
+
+
 def test_animated_zone_is_left_to_the_animator_until_something_pauses_it(d):
     _animate(d, effect="color_cycle")
     jobs = _jobs(d)

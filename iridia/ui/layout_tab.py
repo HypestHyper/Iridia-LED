@@ -196,21 +196,20 @@ class LayoutTab(Gtk.Box):
         return out
 
     def _ensure_anim(self):
-        """Redraw at up to 30 fps while an animated zone is on screen; nothing otherwise."""
-        want = self._visible and self.get_mapped() and bool(self._animated())
-        job = getattr(self, "_anim_job", None)
-        if want and job is None:
-            self._anim_job = GLib.timeout_add(33, self._anim_tick)
-        elif not want and job is not None:
-            GLib.source_remove(job)
-            self._anim_job = None
+        """Redraw on the window's preview clock while an animated zone is on screen; nothing otherwise."""
+        if self._visible and self.get_mapped() and self._animated() and not fx.ticking(self):
+            self._anim_last = None
+            fx.tick(self, self._anim_tick)
 
     def _anim_tick(self):
-        if not (self._visible and self.get_mapped()) or not self._animated():
-            self._anim_job = None
+        anim = self._animated() if self._visible and self.get_mapped() else {}
+        if not anim:
             return False
         if self._drag is None:
-            self.cv.queue_draw()
+            frames = tuple(tuple(self.zone_colors(k)) for k in sorted(anim))
+            if frames != getattr(self, "_anim_last", None):     # unchanged frame: no repaint
+                self._anim_last = frames
+                self.cv.queue_draw()
         return True
 
     def _layout_frame(self, key: str, anim: dict, colors: List[str], base: List[str], n: int) -> List[str]:
@@ -780,7 +779,7 @@ class LayoutTab(Gtk.Box):
             current = self.zone_colors(key, overrides=False)
             params = dict(cfg.get("pattern_params") or {})
             params.update(paint=current, reverse=False, mirror=False)
-            self._set_local(key, pattern="paint", pattern_params=params)
+            self._set_local(key, pattern="paint", pattern_params=params, animation=None)
             self._send(self.app.client.set_zone_pattern, d, z, "paint")
             self._send(self.app.client.set_zone_pattern_params, d, z,
                        {"paint": current, "reverse": False, "mirror": False})
@@ -1117,6 +1116,11 @@ class LayoutTab(Gtk.Box):
         dd.set_halign(Gtk.Align.START)
         p.append(dd)
         self._pv["pattern"] = pat
+        anim = cfg.get("animation")
+        self._pv["anim"] = bool(anim)
+        if anim:
+            p.append(label(_("Animated: {effect}. Picking a pattern here, or painting, makes it static again.").format(
+                effect=fx.EFFECT_NAMES.get(anim.get("effect"), anim.get("effect"))), ("tiny", "accent"), wrap=True))
         if pat != "paint":
             picker = SwatchPicker(list(self.status.get("extracted_colors") or []), list(cfg.get("pattern_colors", [0])),
                                   lambda entries, k=key: self._set_colors(k, entries),
@@ -1242,7 +1246,8 @@ class LayoutTab(Gtk.Box):
                 w.set_quiet(round(self.layout.gap(s, int(key_[3:]))))   # a dragged piece stretches its wire
         self._pv["count"].set_label(ngettext('{n} LED', '{n} LEDs', self._count(s['zone'])).format(n=self._count(s['zone'])))
         cfg = self._cfg.get(s["zone"]) or {}
-        if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")):
+        if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")) \
+                or self._pv.get("anim") != bool(cfg.get("animation")):
             self._build_panel()
 
     def _lpp(self, key) -> int:
@@ -1342,7 +1347,7 @@ class LayoutTab(Gtk.Box):
 
     def _set_pattern(self, key, pattern):
         d, z = split_key(key)
-        self._set_local(key, pattern=pattern)
+        self._set_local(key, pattern=pattern, animation=None)
         self._send(self.app.client.set_zone_pattern, d, z, pattern)
         self.cv.queue_draw()
         GLib.idle_add(lambda: (self._build_panel(), False)[1])

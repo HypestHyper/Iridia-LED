@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 19:41+0000\n"
+"POT-Creation-Date: 2026-10-15 20:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,7 +50,7 @@ msgstr ""
 msgid "Saved #{h}"
 msgstr ""
 
-#: iridia/ui/app.py:277 iridia/ui/app.py:285 iridia/ui/app.py:783 iridia/ui/layout_tab.py:1326
+#: iridia/ui/app.py:277 iridia/ui/app.py:285 iridia/ui/app.py:783 iridia/ui/layout_tab.py:1331
 msgid "Rename"
 msgstr ""
 
@@ -76,7 +76,7 @@ msgstr ""
 msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
 msgstr ""
 
-#: iridia/ui/app.py:285 iridia/ui/layout_tab.py:1325
+#: iridia/ui/app.py:285 iridia/ui/layout_tab.py:1330
 msgid "Keep it under 40 characters."
 msgstr ""
 
@@ -309,7 +309,7 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#: iridia/ui/app.py:643 iridia/ui/layout_tab.py:1098 iridia/ui/layout_tab.py:1099
+#: iridia/ui/app.py:643 iridia/ui/layout_tab.py:1097 iridia/ui/layout_tab.py:1098
 msgid "Whole device"
 msgstr ""
 
@@ -1266,7 +1266,7 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
-#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:386 iridia/ui/zonecard.py:817
+#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:386 iridia/ui/zonecard.py:819
 msgid "Done"
 msgstr ""
 
@@ -1506,7 +1506,7 @@ msgstr ""
 msgid "This is the last one"
 msgstr ""
 
-#: iridia/ui/dialogs.py:254 iridia/ui/layout_tab.py:418
+#: iridia/ui/dialogs.py:254 iridia/ui/layout_tab.py:417
 #, python-brace-format
 msgid "LED {n}"
 msgstr ""
@@ -1834,7 +1834,7 @@ msgstr ""
 msgid "Other actions"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:114 iridia/ui/layout_tab.py:1063
+#: iridia/ui/keybinds_tab.py:114 iridia/ui/layout_tab.py:1062
 msgid "Strips"
 msgstr ""
 
@@ -2115,7 +2115,7 @@ msgstr ""
 msgid "Gradient"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:97 iridia/ui/layout_tab.py:844 iridia/ui/zonecard.py:489
+#: iridia/ui/layout_tab.py:97 iridia/ui/layout_tab.py:843 iridia/ui/zonecard.py:489
 #: iridia/ui/zonecard.py:649
 msgid "Paint color"
 msgstr ""
@@ -2132,15 +2132,15 @@ msgstr ""
 msgid "Show everything"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:108 iridia/ui/layout_tab.py:923
+#: iridia/ui/layout_tab.py:108 iridia/ui/layout_tab.py:922
 msgid "Lock layout"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:330
+#: iridia/ui/layout_tab.py:329
 msgid "No enabled zones yet. They show up here once the daemon reports them."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:432 iridia/ui/layout_tab.py:1103 iridia/ui/layout_tab.py:1243
+#: iridia/ui/layout_tab.py:431 iridia/ui/layout_tab.py:1102 iridia/ui/layout_tab.py:1247
 #: iridia/ui/zonecard.py:239
 #, python-brace-format
 msgid "{n} LED"
@@ -2148,320 +2148,325 @@ msgid_plural "{n} LEDs"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/layout_tab.py:433 iridia/ui/layout_tab.py:1073
+#: iridia/ui/layout_tab.py:432 iridia/ui/layout_tab.py:1072
 msgid "clone"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:434
+#: iridia/ui/layout_tab.py:433
 msgid "locked"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:461
+#: iridia/ui/layout_tab.py:460
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:798
+#: iridia/ui/layout_tab.py:797
 msgid "Gradient: now click the LED where it should end."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:858
+#: iridia/ui/layout_tab.py:857
 #, python-brace-format
 msgid ""
 "LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the "
 "strip to move it. Right-click to add a bend there. Pick another tool to go back to normal."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:881
+#: iridia/ui/layout_tab.py:880
 msgid "Layout locked: click a strip to select it, drag the diamonds to move color stops."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:883
+#: iridia/ui/layout_tab.py:882
 msgid ""
 "Drag a strip to move it. Select it, then turn a section with its round knob: behind LED 1 for the"
 " whole strip, outside each corner for a bend (it snaps to 15°, hold Shift for free angles). "
 "Right-click a LED to add a bend there. Scroll to zoom, drag the background to pan."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:888
+#: iridia/ui/layout_tab.py:887
 msgid ""
 "Find LEDs: click a LED (or drag along a strip) and only that LED lights up on your real strip, so"
 " you can see where corners and bends are. Right-click it to add a bend there."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:891
+#: iridia/ui/layout_tab.py:890
 msgid "Gradient: click the first LED, then the last one. Uses both colors."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:893
+#: iridia/ui/layout_tab.py:892
 msgid "Fill: click a strip to give every LED of it the first color."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:895
+#: iridia/ui/layout_tab.py:894
 msgid ""
 "Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or"
 " on Everything)."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:898
+#: iridia/ui/layout_tab.py:897
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:916
+#: iridia/ui/layout_tab.py:915
 msgid "Hide strip names and LED numbers"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:917
+#: iridia/ui/layout_tab.py:916
 msgid "Show strip names and LED numbers"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:923
+#: iridia/ui/layout_tab.py:922
 msgid "Layout locked: click to unlock"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:946
+#: iridia/ui/layout_tab.py:945
 #, python-brace-format
 msgid "LED {led} of {n}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:956
+#: iridia/ui/layout_tab.py:955
 msgid "Add a bend here"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:957 iridia/ui/layout_tab.py:1186
+#: iridia/ui/layout_tab.py:956 iridia/ui/layout_tab.py:1190
 msgid "Remove this bend"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:959
+#: iridia/ui/layout_tab.py:958
 msgid "Cut here (joined with a wire)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:964 iridia/ui/layout_tab.py:1183
+#: iridia/ui/layout_tab.py:963 iridia/ui/layout_tab.py:1187
 msgid "Join again (remove the cut)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:968
+#: iridia/ui/layout_tab.py:967
 msgid "Show this section"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:968
+#: iridia/ui/layout_tab.py:967
 msgid "Hide this section"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:971
+#: iridia/ui/layout_tab.py:970
 msgid "Straighten"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:972
+#: iridia/ui/layout_tab.py:971
 msgid "Flip LED order"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:973
+#: iridia/ui/layout_tab.py:972
 msgid "Rename…"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:974
+#: iridia/ui/layout_tab.py:973
 msgid "Clone this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:975 iridia/ui/layout_tab.py:1071
+#: iridia/ui/layout_tab.py:974 iridia/ui/layout_tab.py:1070
 msgid "Hide this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:977
+#: iridia/ui/layout_tab.py:976
 msgid "Delete this clone"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:978
+#: iridia/ui/layout_tab.py:977
 msgid "Unlock this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:978 iridia/ui/layout_tab.py:1135
+#: iridia/ui/layout_tab.py:977 iridia/ui/layout_tab.py:1139
 msgid "Lock this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:980
+#: iridia/ui/layout_tab.py:979
 msgid "Identify (light only this zone)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:999
+#: iridia/ui/layout_tab.py:998
 #, python-brace-format
 msgid "{strip} is hidden. Show it again from the strip list."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1000
+#: iridia/ui/layout_tab.py:999
 msgid "Undo"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1048
+#: iridia/ui/layout_tab.py:1047
 msgid "Paint colors"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1052
+#: iridia/ui/layout_tab.py:1051
 msgid ""
 "Click a color for the first paint color, right-click for the second (Gradient only). + saves the "
 "first one."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1056
+#: iridia/ui/layout_tab.py:1055
 msgid "Nothing selected"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1057
+#: iridia/ui/layout_tab.py:1056
 msgid ""
 "Click a strip to select it. Each enabled zone has one strip; add clones for strips that share a "
 "wire."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1059
+#: iridia/ui/layout_tab.py:1058
 msgid "Snap to grid"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1064
+#: iridia/ui/layout_tab.py:1063
 msgid "Hide a strip to get it out of the way; it keeps its place and colors."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1071
+#: iridia/ui/layout_tab.py:1070
 msgid "Show this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1076 iridia/ui/layout_tab.py:1098
+#: iridia/ui/layout_tab.py:1075 iridia/ui/layout_tab.py:1097
 #, python-brace-format
 msgid "{zone} on {device}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1095 iridia/ui/zonecard.py:177
+#: iridia/ui/layout_tab.py:1094 iridia/ui/zonecard.py:177
 msgid "Rename this strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1101
+#: iridia/ui/layout_tab.py:1100
 #, python-brace-format
 msgid "clone of {strip} (shows the same colors)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1106 iridia/ui/zonecard.py:273 iridia/ui/zonecard.py:817
+#: iridia/ui/layout_tab.py:1105 iridia/ui/zonecard.py:273 iridia/ui/zonecard.py:819
 msgid "Identify"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1107 iridia/ui/zonecard.py:275
+#: iridia/ui/layout_tab.py:1106 iridia/ui/zonecard.py:275
 msgid "Count LEDs"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1114 iridia/ui/zonecard.py:257
+#: iridia/ui/layout_tab.py:1113 iridia/ui/zonecard.py:257
 msgid "Pattern"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1127
+#: iridia/ui/layout_tab.py:1122
+#, python-brace-format
+msgid "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
+msgstr ""
+
+#: iridia/ui/layout_tab.py:1131
 msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1132
+#: iridia/ui/layout_tab.py:1136
 msgid "Shape"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1133
+#: iridia/ui/layout_tab.py:1137
 msgid "Flip LED order (drawing only)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1139
+#: iridia/ui/layout_tab.py:1143
 msgid "Turn"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1140
+#: iridia/ui/layout_tab.py:1144
 msgid "Turn 90° left"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1140
+#: iridia/ui/layout_tab.py:1144
 msgid "Turn 90° right"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1152
+#: iridia/ui/layout_tab.py:1156
 msgid "LEDs per metre"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1157
+#: iridia/ui/layout_tab.py:1161
 msgid ""
 "The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is drawn"
 " at its real length."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1159
+#: iridia/ui/layout_tab.py:1163
 #, python-brace-format
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1169
+#: iridia/ui/layout_tab.py:1173
 #, python-brace-format
 msgid "Hide LEDs {a} to {b}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1171
+#: iridia/ui/layout_tab.py:1175
 msgid "Bends and cuts"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1173
+#: iridia/ui/layout_tab.py:1177
 msgid "None yet. Right-click a LED, or add one below."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1179
+#: iridia/ui/layout_tab.py:1183
 #, python-brace-format
 msgid "Cut {i}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1179
+#: iridia/ui/layout_tab.py:1183
 #, python-brace-format
 msgid "Bend {i}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1190
+#: iridia/ui/layout_tab.py:1194
 msgid "at LED"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1194
+#: iridia/ui/layout_tab.py:1198
 msgid "direction °"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1199
+#: iridia/ui/layout_tab.py:1203
 msgid "wire gap (mm)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1209
+#: iridia/ui/layout_tab.py:1213
 msgid "Add a bend at LED"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1216
+#: iridia/ui/layout_tab.py:1220
 msgid "Add a cut at LED"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1221
+#: iridia/ui/layout_tab.py:1225
 msgid ""
 "A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
 " a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
 "out of the drawing but still light up."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1224
+#: iridia/ui/layout_tab.py:1228
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
 "strip, outside the corner for a bend."
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1230
+#: iridia/ui/layout_tab.py:1234
 msgid "Clone"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1231
+#: iridia/ui/layout_tab.py:1235
 msgid "Hide"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1233
+#: iridia/ui/layout_tab.py:1237
 msgid "Delete clone"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1321
+#: iridia/ui/layout_tab.py:1326
 msgid "Rename clone"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1322
+#: iridia/ui/layout_tab.py:1327
 #, python-brace-format
 msgid ""
 "A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
@@ -2491,7 +2496,7 @@ msgstr ""
 msgid "#{k}  (right-click to delete)"
 msgstr ""
 
-#: iridia/ui/widgets.py:696 iridia/ui/zonecard.py:790
+#: iridia/ui/widgets.py:696 iridia/ui/zonecard.py:792
 msgid "Save a new color"
 msgstr ""
 
@@ -2766,13 +2771,13 @@ msgstr ""
 msgid "Change this color"
 msgstr ""
 
-#: iridia/ui/zonecard.py:837
+#: iridia/ui/zonecard.py:839
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
 "set the size there."
 msgstr ""
 
-#: iridia/ui/zonecard.py:840
+#: iridia/ui/zonecard.py:842
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."

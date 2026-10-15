@@ -20,6 +20,10 @@
   anywhere or set the wire gap, Join again removes it),
   hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
   names and LED numbers, and no more B1, B2... tags on the bend knobs.
+- Picking a static pattern anywhere (the Layout tab, painting, the Everything card, the command line)
+  stops the zone's effect. Changes reach the LEDs right away instead of at the daemon's next
+  half-second tick, and animated previews in the window share one 20 fps clock and skip unchanged
+  frames, so the window does less work.
 - Sliders and number boxes don't react to the mouse wheel (it scrolls the page), so scrolling past
   them never changes a setting.
 - Breathing's minimum and maximum are relative to the zone's brightness. When the monitor's brightness

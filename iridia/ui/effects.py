@@ -313,6 +313,39 @@ class EffectControls(Gtk.Box):
         return False
 
 
+PREVIEW_MS = 50                # animated previews in the window: 20 frames a second
+_tickers: Dict[object, Callable[[], bool]] = {}
+_tick_job = None
+
+
+def tick(owner, fn: Callable[[], bool]):
+    """Call fn on the window's one preview clock until it returns False. Every preview (zone cards,
+    the Layout tab) shares it, so the window repaints once per tick instead of once per preview."""
+    global _tick_job
+    _tickers[owner] = fn
+    if _tick_job is None:
+        _tick_job = GLib.timeout_add(PREVIEW_MS, _run_ticks)
+
+
+def _run_ticks():
+    global _tick_job
+    for owner, fn in list(_tickers.items()):
+        try:
+            keep = fn()
+        except Exception:               # noqa: BLE001  (one broken preview mustn't stop the others)
+            keep = False
+        if not keep and _tickers.get(owner) is fn:
+            del _tickers[owner]
+    if not _tickers:
+        _tick_job = None
+        return False
+    return True
+
+
+def ticking(owner) -> bool:
+    return owner in _tickers
+
+
 def anim_clock(status: dict) -> float:
     """The daemon's animation clock now (it ticks on between status polls)."""
     a = status.get("animations") or {}

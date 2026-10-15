@@ -152,7 +152,7 @@ class ZoneCard(Gtk.Box):
         self._strip_info = {}
         self._anim = animations.clean(zone_cfg.get("animation"))
         self._last_effect = self._anim["effect"] if self._anim else "breathing"
-        self._preview_job = None
+        self._preview_last = None
         self._build_header(expanded)
         self._build_details()
         self._refresh_summary()
@@ -710,7 +710,6 @@ class ZoneCard(Gtk.Box):
 
     def _tick_preview(self):
         if not self._preview_wanted():
-            self._preview_job = None
             return False
         count = self._count()
         params = dict(self._params)
@@ -720,12 +719,15 @@ class ZoneCard(Gtk.Box):
         key = f"{self.device_name}|{self.zone_name}"
         frame = fx.preview(self.app._status if isinstance(self.app._status, dict) else {}, key, self._anim,
                            self._current_colors(), base, count, positions=pos)
-        self._strip.set_state(count, frame, "solid")
+        if frame != self._preview_last or self._strip.led_count != count:
+            self._preview_last = frame          # slow effects often show the same frame: no repaint
+            self._strip.set_state(count, frame, "solid")
         return True
 
     def _ensure_preview(self):
-        if self._preview_wanted() and self._preview_job is None:
-            self._preview_job = GLib.timeout_add(33, self._tick_preview)
+        if self._preview_wanted() and not fx.ticking(self):
+            self._preview_last = None
+            fx.tick(self, self._tick_preview)
 
     def _on_pattern_change(self, name):
         if self._anim is not None:

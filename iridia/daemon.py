@@ -2040,6 +2040,9 @@ class Daemon:
         except ZoneNotFound as e:
             # A typo in a keybind or a zone OpenRGB renamed: tell the caller, not the error log.
             return {"ok": False, "error": str(e)}
+        finally:
+            if req.get("cmd") not in ("status", "ping"):
+                self._wake.set()            # show a change now, not at the next half-second tick
 
     def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd", "")
@@ -2317,6 +2320,8 @@ class Daemon:
         if name not in self.config.devices:
             return {"ok": False, "error": f"device '{name}' not found"}
         self.config.set(("devices", name, "pattern"), pattern)
+        if self.config.get(("devices", name, "animation")) is not None:
+            self.config.set(("devices", name, "animation"), None)     # a static pattern means static
         self._needs_update = True
         return {"ok": True}
 
@@ -2439,6 +2444,9 @@ class Daemon:
         if pattern not in PatternGenerator.PATTERNS:
             return {"ok": False, "error": f"unknown pattern {pattern!r}"}
         self.config.set(self._zone_config_path(dev, zone, "pattern"), pattern)
+        # Picking a static pattern (or painting) means static: an effect would keep hiding it.
+        if self.config.get(self._zone_config_path(dev, zone, "animation")) is not None:
+            self.config.set(self._zone_config_path(dev, zone, "animation"), None)
         # Stop positions mean different things per pattern; start fresh.
         cur = dict(self._zone_cfg(dev, zone).get("pattern_params") or {})
         if cur.pop("stops", None) is not None:
@@ -2634,6 +2642,8 @@ class Daemon:
             picks[self._zone_key(dev, zname)] = value
             if field == "pattern" and isinstance(target.get("pattern_params"), dict):
                 target["pattern_params"].pop("stops", None)
+            if field == "pattern":
+                target.pop("animation", None)          # a static pattern means static
             n += 1
         if field == "pattern_colors":
             self._remember_zone_colors(picks)

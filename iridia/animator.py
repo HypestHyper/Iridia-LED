@@ -29,7 +29,7 @@ class Job:
     zone is paused (identify, a keybind, lights off...), when the daemon's normal path owns it."""
 
     def __init__(self, key: str, device: str, zone: str, real_n: int,
-                 frame: Callable[[float], Optional[List[RGB]]], describe: str = ""):
+                 frame: Callable[[float], Optional[List[RGB]]], describe: Optional[str] = ""):
         self.key, self.device, self.zone, self.real_n = key, device, zone, real_n
         self.frame = frame
         self.describe = describe
@@ -79,14 +79,14 @@ class Animator:
 
     def keys(self) -> set:
         with self._lock:
-            return {j.key for _w, jobs in self._jobs.values() for j in jobs}
+            return {j.key for _w, jobs in self._jobs.values() for j in jobs if j.describe is not None}
 
     def set_jobs(self, jobs: Dict[str, Tuple[bool, List[Job]]], fps: int, rate: float = 1.0):
         """Replace the work. jobs: device -> (send the whole device in one packet, its zones)."""
         fps = fps if fps in RATES else 30
         with self._lock:
-            old = {j.key: j.describe for _w, js in self._jobs.values() for j in js}
-            new = {j.key: j.describe for _w, js in jobs.values() for j in js}
+            old = {j.key: j.describe for _w, js in self._jobs.values() for j in js if j.describe is not None}
+            new = {j.key: j.describe for _w, js in jobs.values() for j in js if j.describe is not None}
             self._jobs = jobs
             if fps != self.fps:
                 self._devs = {}

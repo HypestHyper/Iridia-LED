@@ -85,16 +85,15 @@ the daemon is exactly as idle as before.
 - Each device is paced on its own. If sending a frame takes longer than the frame interval, the next frame
   simply comes later (frames are never queued), and a device that keeps being slow gets a lower rate (60,
   30, then 15 fps). The log says so once.
-- After each frame Iridia waits until OpenRGB has applied it. OpenRGB doesn't confirm colour updates
-  and keeps a queue per controller, so Iridia asks for the device's details, which OpenRGB answers
-  only after everything queued before. A controller slower than the frame rate so gets fewer frames
-  instead of a queue: a change, like going back to a static pattern, shows at once and not a minute
-  later.
-- When every zone of a device animates, one packet updates the whole device; zones whose frame didn't
-  change aren't sent.
+- Every frame goes to OpenRGB as one update for the whole device, with the zones that don't animate
+  showing their static colors. OpenRGB queues zone-by-zone updates and works through them at the
+  controller's pace, so a controller slower than the frame rate would fall behind by minutes; updates
+  for the whole device are merged instead (only the latest is written). A change, like going back to
+  a static pattern, so shows at once. Frames that didn't change aren't sent.
 - Color correction uses lookup tables, rebuilt only when the colors or settings change.
-- With file logging at `debug`, the log shows when an effect starts, stops or changes on a zone, and the
-  frames per second each device actually got, once a minute.
+- The log (`iridia log`) shows when an effect starts, stops or changes on a zone. `iridia animations
+  status` shows the frames per second each device actually gets and how long a frame takes, and warns
+  when the daemon still runs older code than what's installed.
 
 To measure the cost on your PC: `python3 scripts/bench_animations.py` (in the Iridia folder) runs 6 zones
 of 80 LEDs at 30 fps for 10 seconds and prints the CPU it used. Options: `--fps`, `--effect`, `--mode`

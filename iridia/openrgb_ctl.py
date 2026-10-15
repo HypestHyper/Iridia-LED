@@ -33,7 +33,6 @@ logger = logging.getLogger("iridia")
 _PER_LED, _MODE_SPECIFIC = 1, 2
 # SDK packet ids for colour updates
 _UPDATE_LEDS, _UPDATE_ZONE_LEDS = 1050, 1051
-_REQUEST_DATA, _DEVICE_LIST_UPDATED = 1, 100
 
 
 def _locked(fn):
@@ -53,16 +52,6 @@ def _pack_rgb(colors: Sequence[Tuple[int, int, int]]) -> bytes:
     buf[0::4] = bytes(c[0] for c in colors)
     buf[1::4] = bytes(c[1] for c in colors)
     buf[2::4] = bytes(c[2] for c in colors)
-    return bytes(buf)
-
-
-def _recv_exact(sock, n: int) -> bytes:
-    buf = bytearray()
-    while len(buf) < n:
-        chunk = sock.recv(n - len(buf))
-        if not chunk:
-            raise ConnectionError("the SDK server closed the connection")
-        buf += chunk
     return bytes(buf)
 
 
@@ -389,6 +378,18 @@ class OpenRGBController:
                            "single_color": self._color_kind.get(name) == "single"})
         return result
 
+    def zone_rgb(self, device_name: str, zone_name: str) -> List[Tuple[int, int, int]]:
+        """The colours OpenRGB last reported for a zone (for zones Iridia hasn't sent to yet)."""
+        dev = self.devices.get(device_name)
+        z = dict(zones_of(dev)).get(zone_name) if dev is not None else None
+        out = []
+        for c in list(getattr(z, "colors", None) or []):
+            try:
+                out.append((int(c.red), int(c.green), int(c.blue)))
+            except (AttributeError, TypeError, ValueError):
+                out.append((0, 0, 0))
+        return out
+
     # ---------------------------------------------------------- animation frames
     @_locked
     def send_frames(self, device_name: str, frames: Dict[str, Sequence[Tuple[int, int, int]]]) -> Optional[bool]:
@@ -408,7 +409,7 @@ class OpenRGBController:
                 first = next((f[0] for f in frames.values() if f), (0, 0, 0))
                 from openrgb.utils import RGBColor
                 dev.set_color(RGBColor(*first), fast=True)
-                return self._caught_up(dev)
+                return True
             if "" in frames:
                 n = len(getattr(dev, "leds", None) or [])
                 if n == 0:
@@ -417,7 +418,7 @@ class OpenRGBController:
                 body = struct.pack("H", n) + _pack_rgb(cols)
                 comms.send_header(dev.id, _UPDATE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
-                return self._caught_up(dev)
+                return True
             zones = dict(zones_of(dev))
             for zn, cols in frames.items():
                 z = zones.get(zn)
@@ -427,7 +428,7 @@ class OpenRGBController:
                 body = struct.pack("iH", z.id, n) + _pack_rgb(_fit_rgb(cols, n))
                 comms.send_header(dev.id, _UPDATE_ZONE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
-            return self._caught_up(dev)
+            return True
         except ConnectionError as e:
             self._lost(f"Connection lost while sending to '{device_name}': {e}")
             return False
@@ -436,39 +437,6 @@ class OpenRGBController:
             self._warn_once(f"OpenRGB {msg}")
             self._record_error(msg)
             return False
-
-    def _caught_up(self, dev) -> bool:
-        """Wait until OpenRGB has applied every packet sent to this device so far.
-
-        Colour packets get no answer, and current OpenRGB puts them in a queue per controller that
-        its own thread works through: a controller slower than the frame rate would let frames pile
-        up there, and a change (back to a static pattern) would show a minute late. A request for
-        the device's data goes into the same queue, so its answer comes once the queue is empty:
-        the frame then takes as long as the controller really needs, and the animation thread
-        lowers the rate by itself. The answer is read and dropped, not parsed."""
-        comms = getattr(dev, "comms", None)
-        sock = getattr(comms, "sock", None)
-        if sock is None or not hasattr(comms, "lock"):
-            return True
-        comms.send_header(dev.id, _REQUEST_DATA, 4)           # keeps comms.lock until we've read
-        try:
-            comms.send_data(struct.pack("I", 0), False)
-            while True:
-                _magic, dev_id, pid, size = struct.unpack("4sIII", _recv_exact(sock, 16))
-                if _magic != b"ORGB":
-                    raise ConnectionError("unexpected data from the SDK server")
-                _recv_exact(sock, size)
-                if pid == _REQUEST_DATA and dev_id == dev.id:
-                    return True
-                if pid == _DEVICE_LIST_UPDATED:
-                    self._last_enum = 0.0                       # look at the devices again soon
-        except (OSError, struct.error) as e:
-            raise ConnectionError(f"no answer from the SDK server: {e}") from e
-        finally:
-            try:
-                comms.lock.release()
-            except RuntimeError:
-                pass
 
     @_locked
     def resize_zone(self, device_name: str, zone_name: str, size: int) -> Optional[str]:

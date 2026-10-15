@@ -508,9 +508,11 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
         _run(d, 1.5)
         kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
-        whole = sum(1 for k in kinds if k == ["1050", "0"])        # every zone of the controller animates
-        zone = sum(1 for k in kinds if k == ["1051", "1"])         # the RAM stick, by zone
-        assert whole >= 20 and zone >= 20, (whole, zone)
+        whole = sum(1 for k in kinds if k == ["1050", "0"])        # one packet per device and frame
+        ram = sum(1 for k in kinds if k == ["1050", "1"])
+        assert whole >= 20 and ram >= 20, (whole, ram)
+        first = kinds.index(["1050", "0"])
+        assert not any(k[0] == "1051" for k in kinds[first:])      # never zone by zone (OpenRGB queues those)
         assert ["1101", "0"] in kinds                               # Direct mode was set first
     finally:
         d._animator.stop()
@@ -519,9 +521,9 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
 
 
 def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
-    """OpenRGB doesn't answer colour packets and (current versions) queues them per controller, so a
-    controller slower than the frame rate used to let frames pile up: a change (back to static)
-    showed up a minute late. Iridia now waits for each device's queue to empty after each frame."""
+    """OpenRGB 1.0 queues zone updates per controller and answers everything else at once, so a
+    controller slower than the frame rate let frames pile up: going back to static showed up a
+    minute late. Whole-device updates are merged instead, so animations only send those."""
     packets = tmp_path / "packets.log"
     monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
     monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
@@ -534,7 +536,11 @@ def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
                 break
             time.sleep(0.05)
         d.handle_command({"cmd": "animations", "fps": 60})
-        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
+        # only one of the controller's two channels animates: it still goes as whole-device updates
+        assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake ARGB Controller",
+                                 "zone": "Channel 1", "animation": {"effect": "rainbow"}})["ok"]
+        assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake RAM", "zone": "Stick",
+                                 "animation": {"effect": "rainbow"}})["ok"]
         _run(d, 3.0)
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": None})["ok"]
         stopped = time.time()

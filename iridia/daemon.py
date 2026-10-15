@@ -249,6 +249,7 @@ class Daemon:
         self._animator = Animator(self.openrgb.send_frames)
         self._anim_keys: set = set()      # zones the animator sends (unless paused for a moment)
         self._anim_jobs: Dict[str, tuple] = {}    # key -> (signature, Job)
+        self._static_rgb: Dict[str, list] = {}    # key -> what the static path shows on that zone
         self._anim_hold = False           # `iridia animations pause`: until resumed (not saved)
         self._run_seed = int.from_bytes(os.urandom(2), "little")
         self._glide: Dict[str, tuple] = {}        # key -> (from %, to %, start) for brightness glides
@@ -1684,6 +1685,8 @@ class Daemon:
                 final_colors = [self._scale_brightness(c, brightness) for c in final_colors]
 
         final_colors = self._finish(key, device_name, zone_name, zcfg, final_colors)
+        # an animated zone's neighbours are sent with its frames (one packet per device)
+        self._static_rgb[key] = [animations.hex_to_rgb(c) for c in final_colors]
         color_hash = "".join(final_colors)
         if self._last_sent.get(key) == color_hash:
             return
@@ -1816,9 +1819,17 @@ class Daemon:
             out = {}
             for dev, jobs in jobs_by_dev.items():
                 order = real.get(dev, [])
+                whole = bool(order) and all(j.zone for j in jobs)
+                if whole:
+                    # Always one packet for the whole device: OpenRGB queues zone updates one by
+                    # one, and a controller slower than the frame rate then falls behind by
+                    # minutes; whole-device updates are merged (only the latest is written). The
+                    # zones that don't animate go along with what the static path shows on them.
+                    have = {j.zone for j in jobs}
+                    for zn in order:
+                        if zn not in have:
+                            jobs.append(self._static_job(dev, zn))
                 jobs.sort(key=lambda j: order.index(j.zone) if j.zone in order else 999)
-                # one packet for the whole device when every zone it has animates
-                whole = len(order) > 1 and sorted(j.zone for j in jobs) == sorted(order)
                 out[dev] = (whole, jobs)
             jobs_by_dev = out
         for k in list(self._anim_jobs):
@@ -1832,6 +1843,17 @@ class Daemon:
         self._anim_keys = keys
         rate = 0.5 if (self._night_active and s["night_slow"]) else 1.0
         self._animator.set_jobs(jobs_by_dev, s["fps"], rate)
+
+    def _static_job(self, dev: str, zn: str) -> Job:
+        """A zone that doesn't animate on a device that does: its static colours, so the whole
+        device can go in one packet."""
+        key = self._zone_key(dev, zn)
+        n = self._real_zone_size(dev, zn) or 0
+
+        def frame(clock: float):
+            cols = self._static_rgb.get(key)
+            return cols if cols is not None else self.openrgb.zone_rgb(dev, zn)
+        return Job(key, dev, zn, n, frame, None)
 
     def _make_job(self, dev: str, zn: str, key: str, zc: dict, anim: dict, pts, extent) -> Job:
         n = zc["led_count"]

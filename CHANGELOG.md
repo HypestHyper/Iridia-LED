@@ -20,9 +20,13 @@
   anywhere or set the wire gap, Join again removes it),
   hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
   names and LED numbers, and no more B1, B2... tags on the bend knobs.
-- A controller slower than the frame rate no longer builds up a queue of frames inside OpenRGB (a
-  change, like going back to static, could show up a minute later): after each frame Iridia waits for
-  OpenRGB to apply it, and sends small packets without TCP's delay.
+- Animations always send one update per device and frame, with the zones that don't animate in their
+  static colors. OpenRGB queues zone-by-zone updates, and a controller slower than the frame rate fell
+  behind by minutes (going back to static showed up a minute or more later); whole-device updates are
+  merged, so they can't pile up. Small packets go out without TCP's delay.
+- `iridia animations status` shows each device's frame rate and frame time and warns when the daemon
+  runs older code than what's installed; the log notes every effect change. The installer links
+  `iridia` and `iridia-gui` into `~/.local/bin`.
 - Picking a static pattern anywhere (the Layout tab, painting, the Everything card, the command line)
   stops the zone's effect. Changes reach the LEDs right away instead of at the daemon's next
   half-second tick, and animated previews in the window share one 20 fps clock and skip unchanged
@@ -38,8 +42,8 @@
   shows each zone's effect. The Keybinds tab has "Effect" for strips and "Pause / resume animations".
 - Performance: one animation thread, only while something animates (static setups stay as idle as
   before). Each device is paced on its own: frames are skipped, never queued, and a device that can't
-  keep up gets a lower rate (logged once). One packet per device when all its zones animate; unchanged
-  frames aren't sent. Frames are packed straight into SDK packets. `scripts/bench_animations.py` measures
+  keep up gets a lower rate (logged once). One packet per device and frame; unchanged frames aren't
+  sent. Frames are packed straight into SDK packets. `scripts/bench_animations.py` measures
   the cost.
 - Iridia now puts each device in Direct mode once per connection even when OpenRGB already reports it,
   since another client or the controller's own effect can change it without OpenRGB noticing.

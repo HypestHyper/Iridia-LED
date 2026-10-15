@@ -44,6 +44,10 @@ class _Dev:
         self.slow_since: Optional[float] = None  # frames have taken longer than the interval since then
         self.frames = 0                          # frames sent since the last fps report
         self.reported = time.monotonic()
+        self.win_start = time.monotonic()        # the 5 second window for timing
+        self.win_frames = 0
+        self.win_took = 0.0
+        self.win_max = 0.0
 
 
 class Animator:
@@ -62,6 +66,7 @@ class Animator:
         self._clock = 0.0
         self._last_tick: Optional[float] = None
         self.measured: Dict[str, float] = {}     # device -> frames per second over the last minute
+        self.timing: Dict[str, dict] = {}        # device -> {fps, ms per frame, slowest ms} over the last 5 s
 
     # ------------------------------------------------------------ state
     @property
@@ -89,12 +94,15 @@ class Animator:
             for d in list(self._devs):
                 if d not in jobs:
                     del self._devs[d]
+            for d in list(self.timing):
+                if d not in jobs:
+                    del self.timing[d]
         for k in sorted(set(old) | set(new)):
             if old.get(k) != new.get(k):
                 if k not in new:
-                    logger.debug(f"Animation stopped on {k}")
+                    logger.info(f"Animation stopped on {k}")
                 else:
-                    logger.debug(f"Animation on {k}: {new[k]}")
+                    logger.info(f"Animation on {k}: {new[k]}")
         if jobs and not self.running():
             self._stop.clear()
             self._last_tick = None
@@ -174,6 +182,15 @@ class Animator:
         took = time.monotonic() - start
         if sent:
             st.frames += 1
+            st.win_frames += 1
+            st.win_took += took
+            st.win_max = max(st.win_max, took)
+        if start - st.win_start >= 5:
+            span = start - st.win_start
+            self.timing[dev] = {"fps": round(st.win_frames / span, 1), "target": st.fps,
+                                "ms": round(1000 * st.win_took / max(1, st.win_frames), 1),
+                                "max_ms": round(1000 * st.win_max, 1)}
+            st.win_start, st.win_frames, st.win_took, st.win_max = start, 0, 0.0, 0.0
         if sent is False:
             st.last, st.last_whole = {}, None     # the connection dropped: resend everything later
         # pacing: the next frame is due one interval after this one started, or right after a slow

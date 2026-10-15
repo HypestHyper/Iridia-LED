@@ -268,7 +268,9 @@ class Daemon:
 
     def run(self):
         self.running = True
-        self.logger.info("Iridia daemon starting")
+        from iridia import code_fingerprint, get_version
+        self._code = code_fingerprint()
+        self.logger.info(f"Iridia daemon starting (version {get_version()}, code {self._code})")
         self.logger.info(f"Socket: {self._socket_path}")
         self.logger.info(f"Log file: {self.config.get('logging.file_path')} (enabled={self.config.get('logging.enabled')})")
 
@@ -1345,6 +1347,7 @@ class Daemon:
         path = self._zone_config_path(dev, zone, "animation")
         merged = self._merge_animation(self.config.get(path), anim, given)
         self.config.set(path, merged)
+        self.logger.info(f"Effect on {self._zone_key(dev, zone)}: {merged['effect'] if merged else 'static'}")
         self._needs_update = True
         return {"ok": True, "animation": merged}
 
@@ -2301,7 +2304,9 @@ class Daemon:
             "managed_by": "systemd" if os.environ.get("INVOCATION_ID") else "other",
             "animations": dict(self._anim_settings(), paused=self._anim_hold, running=self._animator.running(),
                                zones=sorted(self._anim_keys), clock=self._animator.clock, rate=self._animator.rate,
-                               time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed),
+                               time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed,
+                               timing=dict(self._animator.timing)),
+            "code": getattr(self, "_code", ""),
         }
 
     def _cmd_set_device(self, req: Dict[str, Any]) -> Dict[str, Any]:

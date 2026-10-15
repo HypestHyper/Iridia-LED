@@ -511,8 +511,12 @@ def cmd_animations(args):
               f"{a.get('fps')} fps, {'running' if a.get('running') else 'idle'}")
         for k in a.get("zones", []):
             print(f"  {k.replace('|', '/').rstrip('/')}")
-        for dev, fps in (a.get("measured") or {}).items():
-            print(f"  {dev}: {fps} frames per second (last minute)")
+        for dev, t in (a.get("timing") or {}).items():
+            print(f"  {dev}: {t['fps']} frames per second (target {t['target']}), {t['ms']} ms per frame, "
+                  f"slowest {t['max_ms']} ms (last 5 s)")
+        from iridia import code_fingerprint
+        if st.get("code") and st["code"] != code_fingerprint():
+            print("The daemon runs older code than what's installed: restart it (iridia restart).")
         return 0
     return _report({"cmd": "animations", "action": args.action},
                    lambda r: "Animations paused." if r.get("paused") else "Animations running.")

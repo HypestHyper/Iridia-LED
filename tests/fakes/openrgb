@@ -10,9 +10,12 @@ FAKE_OPENRGB_MODE (default "zero"):
 FAKE_OPENRGB_LOG: a file each start is appended to ("PID ARG ARG...").
 FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE TIME").
 FAKE_OPENRGB_UPDATE_DELAY: seconds each colour packet takes, like a slow controller (default 0).
+  Like current OpenRGB, colour, mode and device-data packets then go into a queue per controller,
+  worked through by that controller's own thread; the controller count is answered at once.
 """
 import copy
 import os
+import queue
 import signal
 import socket
 import struct
@@ -106,35 +109,71 @@ def note(ptype, dev, size):
             f.write(f"{ptype} {dev} {size} {time.time():.3f}\n")
 
 
+def device_data(conn, dev, data, send_lock):
+    # answer in the protocol version the client asks for, like OpenRGB does
+    asked = min(struct.unpack("I", data[:4])[0] if len(data) >= 4 else VERSION, VERSION)
+    d = copy.deepcopy(DEVICES[dev])
+    if asked < 3:                       # brightness came with protocol 3
+        for m in d.modes:
+            m.brightness = m.brightness_min = m.brightness_max = None
+    body = d.pack(asked)
+    with send_lock:
+        conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, 1, len(body)) + body)
+
+
+def apply(conn, dev, ptype, size, data, send_lock):
+    """What a controller does with a packet (on its own thread when there's a delay)."""
+    if ptype == 1:
+        device_data(conn, dev, data, send_lock)
+        return
+    if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
+        DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
+    if UPDATE_DELAY and ptype in (1050, 1051, 1052):
+        time.sleep(UPDATE_DELAY)            # a slow controller
+    note(ptype, dev, size)
+
+
 def serve(conn):
+    send_lock = threading.Lock()
+    queues = {}
+
+    def worker(q):
+        while True:
+            item = q.get()
+            if item is None:
+                return
+            try:
+                apply(conn, *item, send_lock)
+            except OSError:
+                return
+
     try:
         while True:
             _o, _r, _g, _b, dev, ptype, size = struct.unpack("ccccIII", recv_exact(conn, 16))
             data = recv_exact(conn, size) if size else b""
             if ptype == 40:                 # protocol version (1: no profiles; 3 with devices)
-                reply(conn, 40, struct.pack("I", VERSION))
-            elif ptype == 0:                # controller count
-                reply(conn, 0, struct.pack("I", len(DEVICES)))
-            elif ptype == 1 and dev < len(DEVICES):
-                # answer in the protocol version the client asks for, like OpenRGB does
-                asked = min(struct.unpack("I", data[:4])[0] if len(data) >= 4 else VERSION, VERSION)
-                d = copy.deepcopy(DEVICES[dev])
-                if asked < 3:                       # brightness came with protocol 3
-                    for m in d.modes:
-                        m.brightness = m.brightness_min = m.brightness_max = None
-                body = d.pack(asked)
-                conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, 1, len(body)) + body)
+                with send_lock:
+                    reply(conn, 40, struct.pack("I", VERSION))
+            elif ptype == 0:                # controller count: answered at once, never queued
+                with send_lock:
+                    reply(conn, 0, struct.pack("I", len(DEVICES)))
             elif ptype == 150:              # profile list: none
-                reply(conn, 150, struct.pack("IH", 6, 0))
-            elif ptype in (1000, 1050, 1051, 1052, 1100, 1101):
-                if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
-                    DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
-                if UPDATE_DELAY and ptype in (1050, 1051, 1052):
-                    time.sleep(UPDATE_DELAY)        # applied one at a time, like OpenRGB on a slow bus
-                note(ptype, dev, size)
+                with send_lock:
+                    reply(conn, 150, struct.pack("IH", 6, 0))
+            elif ptype in (1, 1000, 1050, 1051, 1052, 1100, 1101) and (ptype != 1 or dev < len(DEVICES)):
+                if UPDATE_DELAY:            # current OpenRGB: one queue and thread per controller
+                    q = queues.get(dev)
+                    if q is None:
+                        q = queues[dev] = queue.Queue()
+                        threading.Thread(target=worker, args=(q,), daemon=True).start()
+                    q.put((dev, ptype, size, data))
+                else:
+                    apply(conn, dev, ptype, size, data, send_lock)
     except (ConnectionError, OSError, struct.error):
         pass
     finally:
+        for q in queues.values():
+            q.put(None)
         conn.close()
 
 

@@ -519,9 +519,9 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
 
 
 def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
-    """OpenRGB doesn't answer colour packets, so a controller slower than the frame rate used to let
-    frames pile up in the connection: a change (back to static) showed up a minute late. Iridia
-    now waits for OpenRGB to catch up after each frame."""
+    """OpenRGB doesn't answer colour packets and (current versions) queues them per controller, so a
+    controller slower than the frame rate used to let frames pile up: a change (back to static)
+    showed up a minute late. Iridia now waits for each device's queue to empty after each frame."""
     packets = tmp_path / "packets.log"
     monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
     monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))

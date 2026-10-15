@@ -85,10 +85,11 @@ the daemon is exactly as idle as before.
 - Each device is paced on its own. If sending a frame takes longer than the frame interval, the next frame
   simply comes later (frames are never queued), and a device that keeps being slow gets a lower rate (60,
   30, then 15 fps). The log says so once.
-- After each frame Iridia waits until OpenRGB has taken it (OpenRGB doesn't confirm colour updates,
-  so it asks a quick question that's only answered after them). A controller slower than the frame
-  rate so gets fewer frames instead of a queue: a change, like going back to a static pattern, shows
-  at once and not seconds or minutes later.
+- After each frame Iridia waits until OpenRGB has applied it. OpenRGB doesn't confirm colour updates
+  and keeps a queue per controller, so Iridia asks for the device's details, which OpenRGB answers
+  only after everything queued before. A controller slower than the frame rate so gets fewer frames
+  instead of a queue: a change, like going back to a static pattern, shows at once and not a minute
+  later.
 - When every zone of a device animates, one packet updates the whole device; zones whose frame didn't
   change aren't sent.
 - Color correction uses lookup tables, rebuilt only when the colors or settings change.

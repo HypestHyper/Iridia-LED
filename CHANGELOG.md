@@ -21,8 +21,8 @@
   hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
   names and LED numbers, and no more B1, B2... tags on the bend knobs.
 - A controller slower than the frame rate no longer builds up a queue of frames inside OpenRGB (a
-  change, like going back to static, could show up a minute late): Iridia waits for OpenRGB to take
-  each frame, and sends small packets without TCP's delay.
+  change, like going back to static, could show up a minute later): after each frame Iridia waits for
+  OpenRGB to apply it, and sends small packets without TCP's delay.
 - Picking a static pattern anywhere (the Layout tab, painting, the Everything card, the command line)
   stops the zone's effect. Changes reach the LEDs right away instead of at the daemon's next
   half-second tick, and animated previews in the window share one 20 fps clock and skip unchanged

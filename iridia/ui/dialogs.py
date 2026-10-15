@@ -186,7 +186,7 @@ def run_bg(fn, done: Optional[Callable] = None):
         except Exception as e:      # noqa: BLE001 - surfaced to the caller as a dict
             r = {"ok": False, "error": str(e)}
         if done:
-            GLib.idle_add(lambda: (done(r), False)[1])
+            GLib.idle_add(lambda: (done(r), False)[1], priority=GLib.PRIORITY_DEFAULT)
     threading.Thread(target=work, daemon=True).start()
 
 

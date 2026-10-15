@@ -324,7 +324,8 @@ def tick(owner, fn: Callable[[], bool]):
     global _tick_job
     _tickers[owner] = fn
     if _tick_job is None:
-        _tick_job = GLib.timeout_add(PREVIEW_MS, _run_ticks)
+        # below everything else, so animated previews never hold back status updates or clicks
+        _tick_job = GLib.timeout_add(PREVIEW_MS, _run_ticks, priority=GLib.PRIORITY_LOW)
 
 
 def _run_ticks():

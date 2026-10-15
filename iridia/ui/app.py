@@ -1508,7 +1508,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     st = {"_error": resp.get("error", "daemon not running")}
             except Exception:
                 st = {"_error": "daemon not running"}
-            GLib.idle_add(self._apply_status, st)
+            # above the animated previews, so a busy window still shows the daemon's state at once
+            GLib.idle_add(self._apply_status, st, priority=GLib.PRIORITY_DEFAULT)
             time.sleep(2)
 
     def _apply_status(self, st):

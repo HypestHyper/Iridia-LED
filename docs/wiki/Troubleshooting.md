@@ -98,6 +98,20 @@ compositor's autostart instead (see [Start at login](Start-at-Login.md)) and dis
 Sleep detection needs systemd-logind (or elogind) and `gdbus` or `dbus-monitor`. It works however the
 daemon was started. Check `iridia log` for a line about sleep detection.
 
+## Animations lag behind, or keep going after a change
+
+With OpenRGB 1.0, Iridia sends animation frames over a second connection and waits for OpenRGB to
+write each one, so a slow controller gets fewer frames instead of falling behind. The log says so:
+`iridia log | grep -i frame` shows "Animation frames go over their own OpenRGB connection", and a
+controller that can't keep up gets a line like "can't keep up with 60 fps ..., using 30".
+
+- `iridia animations status` shows the frames per second each device really gets and how long a frame
+  takes. If it warns that the daemon runs older code than what's installed, run `iridia restart`.
+- If the log says OpenRGB doesn't speak SDK protocol 6, OpenRGB is older than 1.0. Frames then go over
+  the main connection; updating OpenRGB is the fix if a slow controller still lags.
+- A lower frame rate (Settings, Animations) helps slow controllers too: a Razer Chroma ARGB controller
+  with 480 LEDs needs about 19 ms per frame, so 30 is its limit.
+
 ## Reporting a bug
 
 Please include the output of `iridia doctor` and `iridia log -n 100`, your distribution and desktop, and

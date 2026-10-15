@@ -64,12 +64,17 @@ correction). Patterns are static by default; animated effects are there when you
 - Saved colors, recently used colors, and colors marked as exact (sent without correction).
 - Animated effects: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, using the
   zone's colors, also running through the room along the Layout ([Animations](docs/wiki/Animations.md)).
+  With OpenRGB 1.0 each frame waits until the controller has shown the one before, so a slow
+  controller never falls behind.
 - An *Everything* card that changes all zones at once.
 
 **Layout**
 
 - A 2D drawing of the strips with their current colors, one dot per LED, scaled by LEDs per metre.
-- Strips can be moved, bent, turned, flipped, cloned and hidden; LEDs can be painted on the drawing.
+- Strips can be moved, bent, turned, flipped, cloned (with their own names) and hidden; LEDs can be
+  painted on the drawing.
+- Cuts for strips joined again with a wire (drag the piece after a cut anywhere), and parts of a strip
+  can be left out of the drawing. Strip names and LED numbers can be hidden.
 - *Find LEDs* lights a single LED on the physical strip, to locate corners.
 
 **Brightness and time**
@@ -104,7 +109,7 @@ Appearance, Language. The command line, the log and `iridia doctor` use American
 
 | | |
 | --- | --- |
-| **OpenRGB** | talks to your hardware ([openrgb.org](https://openrgb.org/)); Iridia starts its server, with or without systemd |
+| **OpenRGB** 0.9+ (1.0 recommended) | talks to your hardware ([openrgb.org](https://openrgb.org/)); Iridia starts its server, with or without systemd |
 | **Python 3.8+** with `venv` | Iridia installs into its own virtual environment |
 | **GTK 4.6+, PyGObject, pycairo** | for the window (the daemon runs without them) |
 | **ddcutil** *(optional)* | to follow your monitor's brightness |
@@ -118,8 +123,9 @@ bash install.sh
 ```
 
 The installer finds what's missing and offers to install it with your package manager (pacman, apt,
-dnf, zypper, xbps or apk), installs Iridia into `~/.local/share/iridia-venv`, adds the app to your
-launcher and starts it. It asks two things:
+dnf, zypper, xbps or apk), installs Iridia into `~/.local/share/iridia-venv`, links the `iridia` and
+`iridia-gui` commands into `~/.local/bin`, adds the app to your launcher and starts it. It asks two
+things:
 
 - **How OpenRGB's server is started:** by the Iridia daemon (the default, works with or without
   systemd), by a systemd service, or by you. Flag: `--openrgb=daemon|systemd|off`.

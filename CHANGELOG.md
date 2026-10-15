@@ -6,34 +6,16 @@
 
 - Seven effects per zone: Breathing, Comet, Fill, Embers, Rainbow, Rainbow vomit and Color cycle. They use
   the zone's colors (wallpaper, saved or exact colors; the rainbows ignore them), and brightness, night
-  mode, color correction, color order, RGBW and the power limit apply to every frame.
+  mode, color correction, color order, RGBW and the power limit apply to every frame. Embers drift
+  through the picked colors, or glow in fire colors. Colors blend as light does.
 - On the Devices tab, Pattern switches between Static and Animated; each effect shows its settings with
   their values, changes apply live, and the strip preview animates. The Everything card sets an effect on
-  every zone and keeps zones with the same effect in step (Sync).
+  every zone and keeps zones with the same effect in step (Sync). Picking a static pattern anywhere
+  (the Layout tab, painting, the Everything card, the command line) stops the effect.
 - Follow the layout: an effect runs through the room across every strip that follows it, using where the
   LEDs are on the Layout tab, in the direction set with a dial. The Layout tab animates live while open.
 - Settings, Animations: run animations (off shows each animated zone's first color), frame rate (15, 30,
   60), pause or slow animations during night mode.
-- Embers glow in the zone's picked colors, each point drifting slowly through them, or in fire colors.
-  Colors blend as light does, Breathing moves evenly for the eye, and Comet heads glide between LEDs.
-- Layout: cuts for a strip joined again with a wire (drawn as a dashed line; drag the piece after a cut
-  anywhere or set the wire gap, Join again removes it),
-  hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
-  names and LED numbers, and no more B1, B2... tags on the bend knobs.
-- Animations no longer fall behind on slow controllers (going back to static could show up a minute or
-  more later). OpenRGB 1.0 writes every colour update in turn at the controller's pace and only tells
-  SDK protocol 6 clients when one is done, so frames now go over a second, protocol 6 connection, one
-  whole-device update at a time, each sent once the one before is written. A slow controller gets
-  fewer frames instead of a queue. With OpenRGB before 1.0, frames use the main connection as before.
-- `iridia animations status` shows each device's frame rate and frame time and warns when the daemon
-  runs older code than what's installed; the log notes every effect change. The installer links
-  `iridia` and `iridia-gui` into `~/.local/bin`.
-- Picking a static pattern anywhere (the Layout tab, painting, the Everything card, the command line)
-  stops the zone's effect. Changes reach the LEDs right away instead of at the daemon's next
-  half-second tick, and animated previews in the window share one 20 fps clock and skip unchanged
-  frames, so the window does less work.
-- Sliders and number boxes don't react to the mouse wheel (it scrolls the page), so scrolling past
-  them never changes a setting.
 - Breathing's minimum and maximum are relative to the zone's brightness. When the monitor's brightness
   changes, LEDs glide to it over about 0.3 s, for static patterns too.
 - Lights off, sleep, Identify, Count LEDs, Test colors, color previews and keybind colors pause the
@@ -41,13 +23,35 @@
 - `iridia zone TARGET effect NAME [--speed N --min N --max N --param KEY=VALUE] [--save]`,
   `iridia zone TARGET effect static`, `iridia animations pause|resume|toggle|status`; `iridia status`
   shows each zone's effect. The Keybinds tab has "Effect" for strips and "Pause / resume animations".
-- Performance: one animation thread, only while something animates (static setups stay as idle as
-  before). Each device is paced on its own: frames are skipped, never queued, and a device that can't
-  keep up gets a lower rate (logged once). One packet per device and frame; unchanged frames aren't
-  sent. Frames are packed straight into SDK packets. `scripts/bench_animations.py` measures
-  the cost.
-- Iridia now puts each device in Direct mode once per connection even when OpenRGB already reports it,
+
+**Keeping up with the hardware.** OpenRGB 1.0 writes every colour update in turn at the controller's
+pace and only tells SDK protocol 6 clients when one is done. Iridia sends animation frames over a second,
+protocol 6 connection, one whole-device update at a time, each once the one before is written: a slow
+controller gets fewer frames (the rate drops by itself, and the log says so) instead of a queue, so a
+change shows at once. With OpenRGB before 1.0, frames go over the main connection.
+
+- One animation thread, only while something animates (static setups stay as idle as before). Each
+  device is paced on its own; unchanged frames aren't sent; frames are packed straight into SDK packets.
+- `iridia animations status` shows each device's frames per second and frame time, and warns when the
+  daemon still runs older code than what's installed. The log notes every effect change.
+  `scripts/bench_animations.py` measures the CPU cost.
+- Changes reach the LEDs right away instead of at the daemon's next half-second tick.
+- Iridia puts each device in Direct mode once per connection even when OpenRGB already reports it,
   since another client or the controller's own effect can change it without OpenRGB noticing.
+
+**Layout**
+
+- Cuts for a strip that was cut and joined again with a wire: the wire is drawn dashed, the piece after
+  a cut can be dragged anywhere (or its wire length set), and Join again removes the cut.
+- Parts of a strip can be left out of the drawing. Clones can have their own names. A toolbar button
+  hides strip names and LED numbers, and the bend knobs no longer carry B1, B2... tags.
+
+**Window and install**
+
+- Sliders and number boxes don't react to the mouse wheel (it scrolls the page), so scrolling past
+  them never changes a setting.
+- The installer links `iridia` and `iridia-gui` into `~/.local/bin` and says how to add that folder to
+  the `PATH` when it's missing (fish included).
 
 ## 1.1.1
 

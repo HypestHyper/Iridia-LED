@@ -60,8 +60,9 @@ for a remote host; start OpenRGB there.
 [setup](Setups-and-Backups.md).
 
 **Why is the `iridia` command not found?**
-It lives in `~/.local/share/iridia-venv/bin/`. Add that folder to your `PATH` (see
-[Installation](Installation.md#running-it)) or use the full path.
+The installer links it into `~/.local/bin`, which some shells (fish, for one) don't have on their
+`PATH` yet. See [Installation](Installation.md#running-it), or use the full path
+`~/.local/share/iridia-venv/bin/iridia`.
 
 **What is the window's class or app id, for window rules?**
 `io.github.HypestHyper.Iridia`. For example, to make the window float on Hyprland:

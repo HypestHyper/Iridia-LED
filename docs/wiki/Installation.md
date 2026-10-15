@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | Linux | everything | Any desktop or compositor, Wayland or X11 |
 | Python 3.8 or newer, with `venv` | everything | The installer creates its own virtual environment |
-| [OpenRGB](https://openrgb.org/) with its SDK server running | talking to the LEDs | 0.9 or newer recommended |
+| [OpenRGB](https://openrgb.org/) with its SDK server running | talking to the LEDs | 0.9 or newer; 1.0 recommended for animations |
 | GTK 4.6 or newer, PyGObject, pycairo | the window | From your distribution; the daemon and the command line work without them |
 | [ddcutil](https://www.ddcutil.com/) | following monitor brightness | Optional |
 | `gdbus` (part of GLib) | LEDs off while the PC sleeps | Installed almost everywhere |
@@ -190,14 +190,15 @@ Open **Iridia** from your app launcher, or run:
 ~/.local/share/iridia-venv/bin/iridia-gui
 ```
 
-To use the `iridia` command from anywhere, add the folder to your `PATH`, for example in
-`~/.bashrc` or `~/.zshrc`:
+The installer links `iridia` and `iridia-gui` into `~/.local/bin` (it never replaces a file there that
+isn't Iridia's). If your shell says `iridia` isn't found, that folder isn't on your `PATH` yet; the
+installer says so too. Add it once:
 
 ```bash
-export PATH="$HOME/.local/share/iridia-venv/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc    # or ~/.zshrc
 ```
 
-or for fish: `fish_add_path ~/.local/share/iridia-venv/bin`.
+or for fish: `fish_add_path ~/.local/bin`.
 
 ## Updating
 

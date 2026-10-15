@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0
+## 1.2.1
 
 **Iridia's own OpenRGB client.** With OpenRGB 1.0, Iridia now talks to OpenRGB entirely with SDK
 protocol 6, through its own client, instead of openrgb-python plus a second connection for animation

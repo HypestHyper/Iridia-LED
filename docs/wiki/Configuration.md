@@ -53,7 +53,6 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `animations.enabled` | `true` | Run animated effects (off: animated zones show their first color) |
 | `animations.fps` | `30` | Frames per second: 15, 30 or 60 |
 | `animations.night_pause`, `animations.night_slow` | `false`, `false` | Pause or slow (half speed) animations in night mode |
-| `hardware_effects.enabled` | `false` | Offer the controllers' own effects (see [Animations](Animations.md#controller-effects)) |
 | `logging.enabled` | `false` | Write a log file. A daemon started outside systemd (where there's no journal) turns it on the first time, unless you've set it yourself |
 | `logging.file_path` | `~/.local/share/iridia/iridia.log` | Where |
 | `logging.level` | `info` | `debug`, `info`, `warning` or `error` |
@@ -113,10 +112,6 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
 | `leds_per_pixel` | For 12V grouped strips (drawing only) |
 | `power_limit` | Amps, `0` for none |
 | `animation` | An animated effect, or missing/`null` for the static pattern: `{"effect": "breathing", "speed": 4, "min": 10, "max": 100, ...}`. Every effect's settings are listed in [Animations](Animations.md); values out of range are clamped, unknown ones ignored |
-
-Device keys: `hardware_effect` is the device's own effect while controller effects are on:
-`{"mode": "Spectrum Cycle", "speed": 2, "brightness": 100, "direction": 0, "colors": ["ff0000"]}` (only
-`mode` is required).
 | `ma_per_led` | Current per LED at full white for the power estimate (default 60) |
 
 New devices are added automatically the first time OpenRGB reports them. Zones OpenRGB reports with no

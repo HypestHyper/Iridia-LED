@@ -619,7 +619,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
             expanded["*"] = self._global_card.expanded
         self._clear(self._dev_box)
         self._zone_cards, self._global_card = {}, None
-        self._hw_cards = {}
         if not devices:
             b = vbox(6)
             b.set_margin_top(50)
@@ -638,13 +637,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._dev_box.append(self._global_card)
         for d, dc in devices.items():
             self._dev_box.append(section(d, None if dc.get("enabled", True) else _("Disabled")))
-            if self._status.get("hardware_effects"):
-                from iridia.ui.effects import HardwareEffectCard
-                hw = HardwareEffectCard(self, d, lambda eff, d=d: self.bg(
-                    lambda: self.client.set_device_hardware_effect(d, eff),
-                    lambda r: (self.toast(r.get("error")) if not r.get("ok") else None, self.refresh_soon())))
-                self._hw_cards[d] = hw
-                self._dev_box.append(hw)
             zones = dc.get("zones", {})
             for z, zc in (zones.items() if zones else [("", dc)]):
                 key = f"{d}|{z}"
@@ -684,7 +676,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._fps.set_active(str(a.get("fps", 30)))
         self._anim_night_pause.set_value(bool(a.get("night_pause", False)))
         self._anim_night_slow.set_value(bool(a.get("night_slow", False)))
-        self._hw_sw.set_value(bool(st.get("hardware_effects", False)))
 
     def _build_animation_settings(self, p):
         p.append(section(_("Animations"), _("Animated effects are picked per zone on the Devices tab.")))
@@ -710,15 +701,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
         row, self._anim_night_slow = switch_row(_("Slow animations during night mode"), bool(a.get("night_slow", False)),
                                                 lambda v: self.bg(lambda: self.client.animations(night_slow=v)))
         c.append(row)
-        c.append(divider())
-        row, self._hw_sw = switch_row(_("Controller effects"), bool(self.config.get("hardware_effects.enabled", False)),
-                                      lambda v: self.bg(lambda: self.client.set_hardware_effects(v),
-                                                        lambda r: self.refresh_soon()))
-        c.append(row)
-        c.append(label(_("Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
-                         "Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow "
-                         "the wallpaper, your colors or the layout. Pick them per device on the Devices tab."),
-                       ("small", "faint"), wrap=True))
         p.append(c)
 
     # ============================================================ settings tab
@@ -1630,19 +1612,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._last_swatch_key = sk
             self._render_swatches(colors, choice, custom)
         self._render_correction(st.get("correction") or {})
-        keys = (self._device_keys(devices), bool(st.get("hardware_effects")))
+        keys = self._device_keys(devices)
         if keys != self._last_device_keys:
             self._last_device_keys = keys
             self._rebuild_devices(devices, colors, custom)
         else:
             self._sync_devices(devices, colors, custom)
         self._apply_hw(st.get("devices") or [])
-        real = {x.get("name"): x for x in st.get("devices") or []}
-        for d, card_w in getattr(self, "_hw_cards", {}).items():
-            card_w.update((real.get(d) or {}).get("hardware_modes") or [], (devices.get(d) or {}).get("hardware_effect"))
-        for key, zc_card in self._zone_cards.items():
-            spec = (devices.get(key.split("|", 1)[0]) or {}).get("hardware_effect")
-            zc_card.set_controller_effect(spec.get("mode") if spec and st.get("hardware_effects") else None)
         self._sync_animation_settings(st)
         for k, info in (st.get("strip_info") or {}).items():
             c = self._zone_cards.get(k)

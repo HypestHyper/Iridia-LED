@@ -50,7 +50,7 @@ def main():
     class Ctl:
         """Builds every packet like the real controller, but sends nothing."""
         def __init__(self, *a, **k):
-            self.host, self.client, self.devices, self._hw_applied = "127.0.0.1", object(), {}, {}
+            self.host, self.client, self.devices = "127.0.0.1", object(), {}
             self.connected_since = self.last_error = self.no_devices_since = None
 
         def list_devices(self):

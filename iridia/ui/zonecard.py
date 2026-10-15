@@ -841,18 +841,6 @@ class ZoneCard(Gtk.Box):
                   "(the first one of the pattern).")
         else:
             t = ""
-        self._hw_base_note = t
-        self._show_hw_note()
-
-    def set_controller_effect(self, name):
-        """The device runs one of its own effects (or None when it follows Iridia)."""
-        self._controller_effect = name
-        self._show_hw_note()
-
-    def _show_hw_note(self):
-        name = getattr(self, "_controller_effect", None)
-        t = (_("This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
-               "settings again.").format(name=name) if name else getattr(self, "_hw_base_note", ""))
         if t != self._hw_note.get_label():
             self._hw_note.set_label(t)
             self._hw_note.set_visible(bool(t))

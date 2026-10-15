@@ -101,11 +101,6 @@ Night mode can cap the brightness on top of this; see [Night mode, sleep and fre
 - **Color correction** chooses Off, Palette or Calibrated (see [Color correction](Color-Correction.md)).
 - **Strip type and wiring** (see [Strip types](Strip-Types.md)).
 
-## Controller effects
-
-With **Settings, Animations, Controller effects** on, each device gets a **Controller effect** card: the
-device runs one of its own effects instead of Iridia's colors. See [Animations](Animations.md#controller-effects).
-
 ## Devices that show one color
 
 Some devices have no *Direct* mode in OpenRGB and can only show one color for the whole device. Iridia

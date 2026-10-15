@@ -51,10 +51,6 @@ option.
 | `iridia zone TARGET effect NAME --save` | Make it the strips' own setting (`effect static --save` goes back) |
 | `iridia animations pause / resume / toggle` | Pause every animation until resumed |
 | `iridia animations status` | Which zones animate, the frame rate, frames per second each device got |
-| `iridia hardware on / off` | Offer the controllers' own effects, or not |
-| `iridia hardware list` | Every device's own effects and their settings |
-| `iridia hardware set DEVICE EFFECT [--speed N] [--brightness N] [--direction D] [--colors HEX,HEX]` | Run one |
-| `iridia hardware clear DEVICE` | Follow Iridia again |
 
 Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `color_cycle`. See
 [Animations](Animations.md) for their settings.

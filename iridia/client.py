@@ -174,12 +174,6 @@ class Client:
         """action="pause"/"resume"/"toggle", or settings: enabled, fps, night_pause, night_slow."""
         return self._ipc.send(dict(kw, cmd="animations"))
 
-    def set_hardware_effects(self, enabled: bool) -> dict:
-        return self._ipc.send({"cmd": "set_hardware_effects", "enabled": enabled})
-
-    def set_device_hardware_effect(self, device: str, effect) -> dict:
-        return self._ipc.send({"cmd": "set_device_hardware_effect", "device": device, "effect": effect})
-
     def set_all(self, field: str, value) -> dict:
         return self._ipc.send({"cmd": "set_all", "field": field, "value": value})
 

@@ -63,8 +63,7 @@ correction). Patterns are static by default; animated effects are there when you
 - Strip preview with adjustable color stops; reverse and mirror.
 - Saved colors, recently used colors, and colors marked as exact (sent without correction).
 - Animated effects: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, using the
-  zone's colors, also running through the room along the Layout. Optional: the controllers' own
-  effects ([Animations](docs/wiki/Animations.md)).
+  zone's colors, also running through the room along the Layout ([Animations](docs/wiki/Animations.md)).
 - An *Everything* card that changes all zones at once.
 
 **Layout**
@@ -188,7 +187,7 @@ The [wiki](docs/wiki/Home.md) explains everything Iridia can do and how it works
 | [Installation](docs/wiki/Installation.md) | Requirements, distributions, OpenRGB and DDC setup, updating |
 | [Getting started](docs/wiki/Getting-Started.md) | The first run and a tour of the window |
 | [Devices, patterns and colors](docs/wiki/Devices-and-Patterns.md) | Zones, patterns, colors, painting, brightness |
-| [Animations](docs/wiki/Animations.md) | Animated effects, follow the layout, controller effects |
+| [Animations](docs/wiki/Animations.md) | Animated effects, follow the layout, frame rate |
 | [Layout](docs/wiki/Layout.md) | Drawing and painting your strips |
 | [Strip types](docs/wiki/Strip-Types.md) | WS2812B, WS2811, 12V RGB, RGBW, color order, power limit |
 | [Color correction](docs/wiki/Color-Correction.md) | Palette, calibration profiles, exact colors |

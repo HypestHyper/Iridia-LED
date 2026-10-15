@@ -24,22 +24,14 @@ class FakeOpenRGB:
         self.sent = []                # (device, colors, zones_config)
 
         self.frames = []              # (device, {zone: [(r, g, b), ...]}) from the animation thread
-        self._hw_applied = {}
         self.real = {}                # device -> [zone names]: what list_devices() reports
 
     def list_devices(self):
-        return [{"name": d, "zones": [{"name": z, "led_count": 0} for z in zs],
-                 "hardware_modes": [{"name": "Rainbow", "speed": [1, 3, 2]}]} for d, zs in self.real.items()]
+        return [{"name": d, "zones": [{"name": z, "led_count": 0} for z in zs]} for d, zs in self.real.items()]
 
     def send_frames(self, device, frames):
         self.frames.append((device, {z: list(f) for z, f in frames.items()}))
         return True
-
-    def apply_hardware_mode(self, device, spec):
-        self._hw_applied[device] = repr(spec)
-
-    def hardware_mode_released(self, device):
-        self._hw_applied.pop(device, None)
 
     def send(self, device_name, colors, zones_config=None):
         self.sent.append((device_name, list(colors), zones_config))
@@ -392,26 +384,6 @@ def test_animated_frames_get_the_same_correction_as_static(d, mode):
     _animate(d, effect="color_cycle")                       # one color: a still frame
     frame = _jobs(d)["Strip|"].frame(5.0)
     assert ["%02x%02x%02x" % c for c in frame] == static
-
-
-def test_controller_effect_takes_the_device_off_iridia(d):
-    d.openrgb.real = {"Strip": [], "Hub v1.0": ["A", "B"]}
-    assert _cmd(d, "set_device_hardware_effect", device="Strip", effect={"mode": "Rainbow", "speed": 2})["ok"]
-    d._apply_hardware_effects()
-    assert "Strip" not in d.openrgb._hw_applied             # off until switched on in Settings
-    _cmd(d, "set_hardware_effects", enabled=True)
-    d.openrgb.devices = {"Strip": object()}
-    d._apply_hardware_effects()
-    assert "Strip" in d.openrgb._hw_applied
-    d._update_all_devices()
-    assert d.openrgb.last("Strip") is None                  # it runs its own effect
-    _cmd(d, "lights", on=False)
-    d._update_all_devices()
-    assert d.openrgb.last("Strip") == ["000000"] * 4        # lights off still darkens it
-    _cmd(d, "lights", on=True)
-    _cmd(d, "set_device_hardware_effect", device="Strip", effect=None)
-    d._apply_hardware_effects()
-    assert "Strip" not in d.openrgb._hw_applied
 
 
 def test_brightness_glides_instead_of_jumping(d):

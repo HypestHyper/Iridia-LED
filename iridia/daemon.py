@@ -530,8 +530,6 @@ class Daemon:
         self._detect_wallpaper()
         self._read_brightness()
 
-        if connected:
-            self._apply_hardware_effects()
         self._refresh_animations(connected)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
@@ -1379,32 +1377,6 @@ class Daemon:
         self._needs_update = True
         return {"ok": True, "settings": self._anim_settings()}
 
-    def _cmd_set_device_hardware_effect(self, req: dict) -> dict:
-        """Run one of the device's own effects ({"mode": name, "speed", "brightness", "direction",
-        "colors": [hex]}) or follow Iridia again (null)."""
-        dev = req.get("device")
-        if dev not in self.config.devices:
-            return {"ok": False, "error": f"device '{dev}' not found"}
-        eff = req.get("effect")
-        if eff is None or eff == {}:
-            self.config.set(("devices", dev, "hardware_effect"), None)
-            return {"ok": True}
-        if not isinstance(eff, dict) or not isinstance(eff.get("mode"), str):
-            return {"ok": False, "error": "effect must be an object with a mode name"}
-        real = next((d for d in self.openrgb.list_devices() if d["name"] == dev), None)
-        if real is not None and eff["mode"] not in [m["name"] for m in real.get("hardware_modes", [])]:
-            return {"ok": False, "error": f"'{dev}' has no effect called {eff['mode']!r}"}
-        clean = {"mode": eff["mode"]}
-        for k in ("speed", "brightness", "direction"):
-            if isinstance(eff.get(k), (int, float)) and not isinstance(eff.get(k), bool):
-                clean[k] = int(eff[k])
-        if isinstance(eff.get("colors"), list):
-            clean["colors"] = [h for h in (normalize_hex(c) for c in eff["colors"][:16]) if h]
-        self.config.set(("devices", dev, "hardware_effect"), clean)
-        if not self.config.get("hardware_effects.enabled", False):
-            return {"ok": True, "note": "saved; switch on controller effects in Settings to use it"}
-        return {"ok": True}
-
     def _cmd_set_zone_strip(self, req: dict) -> dict:
         dev, zone = req.get("device"), req.get("zone") or ""
         if not self._zone_exists(dev, zone):
@@ -1607,8 +1579,6 @@ class Daemon:
     def _update_device(self, name: str, dev_cfg: Dict[str, Any], t: float = 0.0):
         if not isinstance(dev_cfg, dict):
             return
-        if self._hardware_effect(name, dev_cfg) and not (self._lights_off or self._asleep):
-            return                          # it runs its own effect
         dev_off = not dev_cfg.get("enabled", True)
         zones = dev_cfg.get("zones")
         targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
@@ -1809,8 +1779,6 @@ class Daemon:
             for dev, dev_cfg in self.config.devices.items():
                 if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True) or dev not in real:
                     continue
-                if self._hardware_effect(dev, dev_cfg):
-                    continue
                 zones = dev_cfg.get("zones")
                 targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
                            if isinstance(zones, dict) and zones else [("", dev_cfg)])
@@ -1996,27 +1964,6 @@ class Daemon:
             colors = [animations.hex_to_rgb(h) for h in pack_rgbw([animations.rgb_to_hex(c) for c in colors])]
         return colors
 
-    # ------------------------------------------------------- controller effects
-    def _hardware_effect(self, device: str, dev_cfg: Optional[dict] = None) -> Optional[dict]:
-        """The device's own effect, when hardware effects are switched on and one is picked."""
-        if not self.config.get("hardware_effects.enabled", False):
-            return None
-        cfg = dev_cfg if dev_cfg is not None else self.config.devices.get(device, {})
-        spec = cfg.get("hardware_effect") if isinstance(cfg, dict) else None
-        return spec if isinstance(spec, dict) and isinstance(spec.get("mode"), str) and spec["mode"] else None
-
-    def _apply_hardware_effects(self):
-        for dev in list(self.openrgb.devices):
-            spec = self._hardware_effect(dev)
-            if spec and not self._lights_off and not self._asleep:
-                err = self.openrgb.apply_hardware_mode(dev, spec)
-                if err:
-                    self._say_once(f"hw:{dev}", f"Controller effect: {err}")
-            elif dev in self.openrgb._hw_applied:
-                self.openrgb.hardware_mode_released(dev)
-                self._last_sent = {k: v for k, v in self._last_sent.items() if not k.startswith(dev + "|")}
-                self._needs_update = True
-
     def _real_zone_size(self, device: str, zone: str) -> Optional[int]:
         """LED count OpenRGB reports for a zone (what can actually be addressed)."""
         dev = self.openrgb.devices.get(device) if self.openrgb.devices else None
@@ -2186,14 +2133,6 @@ class Daemon:
             return self._cmd_set_zone_animation(req)
         if cmd == "animations":
             return self._cmd_animations(req)
-        if cmd == "set_hardware_effects":
-            on = bool(req.get("enabled", False))
-            self.config.set("hardware_effects.enabled", on)
-            self.logger.info(f"Controller effects {'offered' if on else 'switched off'}")
-            self._needs_update = True
-            return {"ok": True}
-        if cmd == "set_device_hardware_effect":
-            return self._cmd_set_device_hardware_effect(req)
         if cmd == "test_colors":
             return self._cmd_test_colors(req)
         if cmd == "zone_action":
@@ -2360,7 +2299,6 @@ class Daemon:
             "animations": dict(self._anim_settings(), paused=self._anim_hold, running=self._animator.running(),
                                zones=sorted(self._anim_keys), clock=self._animator.clock, rate=self._animator.rate,
                                time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed),
-            "hardware_effects": bool(self.config.get("hardware_effects.enabled", False)),
         }
 
     def _cmd_set_device(self, req: Dict[str, Any]) -> Dict[str, Any]:

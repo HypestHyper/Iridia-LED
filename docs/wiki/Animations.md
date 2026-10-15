@@ -73,26 +73,6 @@ that only changes brightness keeps the animation running at that brightness.
 When the monitor's brightness changes, LEDs glide to the new brightness over about 0.3 seconds instead
 of jumping, for static patterns too.
 
-## Controller effects
-
-Many controllers have effects of their own (Breathing, Spectrum Cycle, Wave...). They run on the
-controller, so they're always smooth, but they can't use per-LED colors, the wallpaper or the layout.
-They're off until you switch on **Settings, Animations, Controller effects**. Then every device gets a
-**Controller effect** card on the Devices tab, listing the effects OpenRGB reports for it, with the
-settings each one has (speed, brightness, direction, colors). Pick **Follow Iridia** to go back; the
-device is put back in Direct mode.
-
-```bash
-iridia hardware on                                   # offer them
-iridia hardware list                                 # every device's own effects
-iridia hardware set "Razer Chroma ARGB" "Spectrum Cycle" --speed 2
-iridia hardware clear "Razer Chroma ARGB"            # follow Iridia again
-iridia hardware off
-```
-
-OpenRGB only reports a brightness setting for these effects to clients using a newer protocol; Iridia
-shows what OpenRGB reports.
-
 ## Performance
 
 Animations run on their own thread, which only exists while a zone animates. With only static patterns

@@ -56,9 +56,6 @@ DEFAULT_CONFIG = {
         "night_pause": False,       # night mode: stop animations
         "night_slow": False         # night mode: run them at half speed
     },
-    "hardware_effects": {
-        "enabled": False            # offer the controllers' own effects (they don't follow the wallpaper)
-    },
     "devices": {},
     "custom_colors": [],
     "profiles": {
@@ -168,6 +165,7 @@ class Config:
                 elif isinstance(dv, str) and not isinstance(v, str):
                     logger.warning(f"Config: {sec}.{key} should be text, using {dv!r}")
                     d[sec][key] = dv
+        d.pop("hardware_effects", None)     # left by 1.2.0 test builds (controller effects were dropped)
         devs = d.get("devices")
         clean = {}
         for name, cfg in (devs.items() if isinstance(devs, dict) else []):
@@ -182,6 +180,7 @@ class Config:
                 for zn in [z for z, zc in zones.items() if not isinstance(zc, dict)]:
                     logger.warning(f"Config: zone {zn!r} of {name!r} isn't an object, ignoring it")
                     zones.pop(zn)
+            cfg.pop("hardware_effect", None)
             clean[name] = cfg
         d["devices"] = clean
         if d["animations"].get("fps") not in (15, 30, 60):

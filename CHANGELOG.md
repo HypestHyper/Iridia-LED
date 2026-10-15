@@ -27,12 +27,7 @@
   frames aren't sent. Frames are packed straight into SDK packets. `scripts/bench_animations.py` measures
   the cost.
 - Iridia now puts each device in Direct mode once per connection even when OpenRGB already reports it,
-  since another client or a hardware effect can change it without OpenRGB noticing.
-
-**Controller effects.** Off by default: Settings, Animations, Controller effects. Then every device can run
-one of its own effects (whatever OpenRGB lists for it, on any device), with its speed, brightness,
-direction and colors where it has them, from a card on the Devices tab or `iridia hardware
-list|on|off|set|clear`. Choosing Follow Iridia puts the device back in Direct mode.
+  since another client or the controller's own effect can change it without OpenRGB noticing.
 
 ## 1.1.1
 

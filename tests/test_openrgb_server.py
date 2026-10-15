@@ -492,8 +492,8 @@ def test_a_server_stopped_by_a_method_change_is_not_a_crash(env):
 
 
 def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
-    """The whole path: the daemon starts a fake OpenRGB with devices, finds their zones and their own
-    effects, and streams animation frames to it as SDK packets."""
+    """The whole path: the daemon starts a fake OpenRGB with devices, finds their zones, and streams
+    animation frames to it as SDK packets."""
     packets = tmp_path / "packets.log"
     monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
     monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
@@ -505,10 +505,6 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
                 break
             time.sleep(0.05)
         assert set(d.openrgb.devices) == {"Fake ARGB Controller", "Fake RAM"}
-        st = d.handle_command({"cmd": "status"})
-        modes = {x["name"]: [m["name"] for m in x["hardware_modes"]] for x in st["devices"]}
-        assert modes["Fake ARGB Controller"] == ["Static", "Breathing", "Spectrum Cycle", "Wave"]
-        assert modes["Fake RAM"] == ["Rainbow"]
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
         _run(d, 1.5)
         kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
@@ -516,15 +512,6 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
         zone = sum(1 for k in kinds if k == ["1051", "1"])         # the RAM stick, by zone
         assert whole >= 20 and zone >= 20, (whole, zone)
         assert ["1101", "0"] in kinds                               # Direct mode was set first
-        # its own effect: frames stop for that device
-        d.config.set("hardware_effects.enabled", True)
-        assert d.handle_command({"cmd": "set_device_hardware_effect", "device": "Fake ARGB Controller",
-                                 "effect": {"mode": "Wave", "speed": 3, "direction": 1}})["ok"]
-        _run(d, 0.5)
-        packets.write_text("")
-        _run(d, 0.5)
-        kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
-        assert ["1050", "0"] not in kinds and ["1051", "1"] in kinds
     finally:
         d._animator.stop()
         d.ipc.stop()

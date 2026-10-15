@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 17:10+0000\n"
+"POT-Creation-Date: 2026-10-15 19:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -1702,6 +1702,12 @@ msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Mon aéroglisseur est plein d'anguilles. Bonjour, je m'appelle Jacques."
 
+msgid "Hide strip names and LED numbers"
+msgstr "Cacher les étiquettes du fromage"
+
+msgid "Show strip names and LED numbers"
+msgstr "Montrer les étiquettes du fromage"
+
 msgid "Layout locked: click to unlock"
 msgstr "Le béret de mon grand-père"
 
@@ -1714,6 +1720,15 @@ msgstr "Camembert"
 
 msgid "Remove this bend"
 msgstr "Pétanque"
+
+msgid "Cut here (joined with a wire)"
+msgstr "Couper ici (avec une ficelle)"
+
+msgid "Show this section"
+msgstr "Montrer ce morceau de baguette"
+
+msgid "Hide this section"
+msgstr "Cacher ce morceau de baguette"
 
 msgid "Straighten"
 msgstr "Merci"
@@ -1781,8 +1796,9 @@ msgstr "Café"
 msgid "Rename this strip"
 msgstr "Il pleut des cordes"
 
-msgid "clone (shows the same colors)"
-msgstr "Où sont les toilettes ?"
+#, python-brace-format
+msgid "clone of {strip} (shows the same colors)"
+msgstr "jumeau de {strip} (même pull)"
 
 msgid "Identify"
 msgstr "Santé !"
@@ -1823,8 +1839,12 @@ msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr "Le fromage qui pue. Le train est encore en retard."
 
-msgid "Bends"
-msgstr "Merci"
+#, python-brace-format
+msgid "Hide LEDs {a} to {b}"
+msgstr "Cacher les LED {a} à {b}"
+
+msgid "Bends and cuts"
+msgstr "Virages et coupures"
 
 msgid "None yet. Right-click a LED, or add one below."
 msgstr "La plume de ma tante"
@@ -1839,8 +1859,21 @@ msgstr "Crêpe"
 msgid "direction °"
 msgstr "Café"
 
+msgid "wire gap (mm)"
+msgstr "longueur de ficelle (mm)"
+
 msgid "Add a bend at LED"
 msgstr "Il pleut des cordes"
+
+msgid "Add a cut at LED"
+msgstr "Ajouter une coupure à la LED"
+
+msgid ""
+"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
+"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
+msgstr ""
+"Une coupure, c'est quand le ruban a été coupé puis recollé avec un fil, comme le vélo de tonton. "
+"Les LED cachées ne sont pas dessinées mais brillent quand même."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
@@ -1855,6 +1888,17 @@ msgstr "Merci"
 
 msgid "Delete clone"
 msgstr "C'est la vie"
+
+msgid "Rename clone"
+msgstr "Rebaptiser le jumeau"
+
+#, python-brace-format
+msgid ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
+msgstr ""
+"Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
+"garder le nom du ruban."
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

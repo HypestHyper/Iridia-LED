@@ -44,3 +44,45 @@ def test_zone_count():
     assert zone_count(devs, zone_key("Strip", "A")) == 30
     assert zone_count(devs, zone_key("Strip", "B")) is None
     assert zone_count(devs, zone_key("Missing", "A")) is None
+
+
+def test_a_wire_gap_moves_the_rest_of_the_strip():
+    from iridia.layout import Layout, gap_starts
+    s = {"x": 0.0, "y": 0.0, "segments": [{"start": 0, "angle": 0, "spacing": 10.0}]}
+    assert Layout.add_cut(s, 3, 50.0)
+    pts = path_points(s, 5)
+    assert pts[2] == (20.0, 0.0) and pts[3] == (80.0, 0.0) and pts[4] == (90.0, 0.0)
+    assert gap_starts(s, 5) == [3]
+    Layout.reset_shape(s)                                   # straighten keeps the cut
+    assert path_points(s, 5)[3] == (80.0, 0.0)
+    Layout.set_gap(s, 1, 0)
+    assert path_points(s, 5)[3] == (30.0, 0.0) and gap_starts(s, 5) == []
+
+
+def test_hidden_sections_and_clean():
+    from iridia.layout import Layout, hidden_path
+    s = Layout._clean({"zone": "A|", "segments": [{"start": 0, "gap": 30, "hide": True},
+                                                 {"start": 4, "angle": 90, "gap": "x"}]})
+    assert "gap" not in s["segments"][0]                    # nothing before LED 1
+    assert hidden_path(s, 6) == [True] * 4 + [False] * 2
+    Layout.add_bend(s, 2)                                    # splitting a hidden part keeps it hidden
+    assert hidden_path(s, 6) == [True] * 4 + [False] * 2
+    Layout.set_section_hidden(s, 0, False)
+    assert hidden_path(s, 6) == [False, False, True, True, False, False]
+
+
+def test_clones_get_their_own_name(tmp_path):
+    from iridia.layout import Layout
+    lay = Layout(str(tmp_path / "layout.json"))
+    lay.ensure_zones(["Dev|Z"])
+    src = lay.strips[0]
+    c = lay.clone(src["id"])
+    assert "name" not in c
+    c["name"] = "Shelf left"
+    c2 = lay.clone(c["id"])
+    assert "name" not in c2                                 # not copied from the strip it came from
+    lay.labels = False
+    lay.save()
+    again = Layout(str(tmp_path / "layout.json"))
+    assert again.get(c["id"])["name"] == "Shelf left" and again.labels is False
+    assert "name" not in Layout._clean(dict(src, name="x"))  # only clones are named on their own

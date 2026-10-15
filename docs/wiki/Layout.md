@@ -11,7 +11,8 @@ LED 1, where the data wire enters, is marked with a small **1**; the last LED sh
 ## The toolbar
 
 The floating toolbar at the bottom holds the tools (hover for their names), the two paint colors, zoom,
-*Fit* (show everything) and the layout lock.
+*Fit* (show everything), **#** (show or hide strip names and LED numbers on the canvas) and the layout
+lock.
 
 | Tool | What it does |
 | --- | --- |
@@ -31,11 +32,19 @@ Mouse wheel zooms, dragging the empty background pans.
   LED and choose *Add a bend here*, or use *Add a bend at LED* in the side panel. Every bend is ringed
   on the canvas, whatever tool you use.
 - **Turning:** select a strip with Arrange and each section gets a round knob: behind LED 1 for the
-  whole strip, and on the outside of each corner for a bend (labelled B1, B2...). Turn a knob to turn
+  whole strip, and on the outside of each corner for a bend. Turn a knob to turn
   that section and everything after it around the corner. It snaps to 15 degrees; hold **Shift** for
   any angle.
 - **The side panel** has 90 degree turn buttons, the start direction, and for each bend the LED it's at
   and its exact direction, with a button to remove it. *Straighten* (right-click) removes every bend.
+- **Cuts:** for a strip that was cut and joined again with a wire, right-click the first LED after the
+  wire and choose *Cut here (joined with a wire)*, or use *Add a cut at LED* in the side panel. The LEDs
+  after the cut start further on, after a **wire gap** you set in millimetres; the wire is drawn as a
+  dashed line. A cut is a section like a bend, so it can also change direction.
+- **Hiding part of a strip:** each section has *Hide LEDs a to b* in the side panel (or right-click,
+  *Hide this section*). Add bends where the part begins and ends first. Hidden LEDs are left out of the
+  drawing and can't be painted, but still light up on the real strip. *Straighten* keeps cuts and
+  hidden sections.
 - **Flip LED order** is for a strip whose data enters at the other end: the drawing flips, nothing
   changes on the hardware.
 
@@ -79,6 +88,7 @@ to move where colors change. It's the same as *Edit layout* on the Devices tab.
 
 - **Clone** (right-click) is for two strips on one wire that show the same thing. The clone shows the
   zone's colors and can be placed, bent and flipped on its own; nothing extra is sent to the hardware.
+  Rename a clone to give it its own name (it only shows on the Layout tab).
 - **Hide** a strip (right-click, or the panel) to get it out of the way; it keeps its place and colors.
   With nothing selected, the side panel lists every strip with an eye button to show or hide it.
 - **Lock this strip** (panel or right-click) or the **layout lock** in the toolbar stop strips from

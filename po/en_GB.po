@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 17:10+0000\n"
+"POT-Creation-Date: 2026-10-15 19:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -1795,6 +1795,12 @@ msgstr ""
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 
+msgid "Hide strip names and LED numbers"
+msgstr "Hide strip names and LED numbers"
+
+msgid "Show strip names and LED numbers"
+msgstr "Show strip names and LED numbers"
+
 msgid "Layout locked: click to unlock"
 msgstr "Layout locked: click to unlock"
 
@@ -1807,6 +1813,15 @@ msgstr "Add a bend here"
 
 msgid "Remove this bend"
 msgstr "Remove this bend"
+
+msgid "Cut here (joined with a wire)"
+msgstr "Cut here (joined with a wire)"
+
+msgid "Show this section"
+msgstr "Show this section"
+
+msgid "Hide this section"
+msgstr "Hide this section"
 
 msgid "Straighten"
 msgstr "Straighten"
@@ -1878,8 +1893,9 @@ msgstr "{zone} on {device}"
 msgid "Rename this strip"
 msgstr "Rename this strip"
 
-msgid "clone (shows the same colors)"
-msgstr "clone (shows the same colours)"
+#, python-brace-format
+msgid "clone of {strip} (shows the same colors)"
+msgstr "clone of {strip} (shows the same colours)"
 
 msgid "Identify"
 msgstr "Identify"
@@ -1922,8 +1938,12 @@ msgstr ""
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 
-msgid "Bends"
-msgstr "Bends"
+#, python-brace-format
+msgid "Hide LEDs {a} to {b}"
+msgstr "Hide LEDs {a} to {b}"
+
+msgid "Bends and cuts"
+msgstr "Bends and cuts"
 
 msgid "None yet. Right-click a LED, or add one below."
 msgstr "None yet. Right-click a LED, or add one below."
@@ -1938,8 +1958,21 @@ msgstr "at LED"
 msgid "direction °"
 msgstr "direction °"
 
+msgid "wire gap (mm)"
+msgstr "wire gap (mm)"
+
 msgid "Add a bend at LED"
 msgstr "Add a bend at LED"
+
+msgid "Add a cut at LED"
+msgstr "Add a cut at LED"
+
+msgid ""
+"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
+"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
+msgstr ""
+"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
+"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
@@ -1956,6 +1989,17 @@ msgstr "Hide"
 
 msgid "Delete clone"
 msgstr "Delete clone"
+
+msgid "Rename clone"
+msgstr "Rename clone"
+
+#, python-brace-format
+msgid ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
+msgstr ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

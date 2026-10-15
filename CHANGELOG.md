@@ -16,6 +16,9 @@
   60), pause or slow animations during night mode.
 - Embers glow in the zone's picked colors, each point drifting slowly through them, or in fire colors.
   Colors blend as light does, Breathing moves evenly for the eye, and Comet heads glide between LEDs.
+- Layout: cuts for a strip joined again with a wire (a wire gap you set, drawn as a dashed line),
+  hiding part of a strip from the drawing, clones with their own names, a toolbar button to hide strip
+  names and LED numbers, and no more B1, B2... tags on the bend knobs.
 - Sliders and number boxes don't react to the mouse wheel (it scrolls the page), so scrolling past
   them never changes a setting.
 - Breathing's minimum and maximum are relative to the zone's brightness. When the monitor's brightness

@@ -393,6 +393,13 @@ def cmd_uninstall(args):
             print("Removed the XDG autostart entry.")
     except Exception:
         pass
+    for cmd in ("iridia", "iridia-gui"):          # the links install.sh put on the PATH
+        link = os.path.expanduser(f"~/.local/bin/{cmd}")
+        try:
+            if os.path.islink(link) and "iridia-venv" in os.readlink(link):
+                os.remove(link)
+        except OSError:
+            pass
     if purge:
         for d in ("~/.config/iridia", "~/.cache/iridia", "~/.local/share/iridia"):
             shutil.rmtree(os.path.expanduser(d), ignore_errors=True)

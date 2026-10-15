@@ -31,6 +31,10 @@ if [ -f "$PIDF" ]; then
 fi
 rm -f "$SERVICE_DIR/$SERVICE_NAME" "$SERVICE_DIR/iridia-openrgb.service" "$APPS_DIR/iridia.desktop" "$APPS_DIR/io.github.iridia.Iridia.desktop" "$APPS_DIR/io.github.HypestHyper.Iridia.desktop" "$HOME/.config/autostart/iridia-daemon.desktop"
 find "$HOME/.local/share/icons/hicolor" -name 'iridia*' -delete 2>/dev/null
+for cmd in iridia iridia-gui; do
+    L="$HOME/.local/bin/$cmd"
+    [ -L "$L" ] && readlink "$L" | grep -q "iridia-venv" && rm -f "$L"
+done
 systemctl --user daemon-reload 2>/dev/null || true
 command -v update-desktop-database >/dev/null && update-desktop-database "$APPS_DIR" 2>/dev/null
 if [ "$KEEP" = 0 ]; then

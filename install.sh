@@ -199,6 +199,24 @@ SVC_ARGS=(--autostart "$AUTOSTART")
 [ -n "$OPENRGB_METHOD" ] && SVC_ARGS+=(--openrgb "$OPENRGB_METHOD")
 "$VENV_DIR/bin/iridia" service install "${SVC_ARGS[@]}"
 
+# `iridia` and `iridia-gui` on the PATH: links in ~/.local/bin (never over a file that isn't ours)
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
+for cmd in iridia iridia-gui; do
+    target="$BIN_DIR/$cmd"
+    if [ ! -e "$target" ] || { [ -L "$target" ] && readlink "$target" | grep -q "iridia-venv"; }; then
+        ln -sfn "$VENV_DIR/bin/$cmd" "$target"
+    fi
+done
+case ":$PATH:" in
+    *":$BIN_DIR:"*) ;;
+    *) echo ""
+       echo "NOTE: $BIN_DIR isn't on your PATH, so the 'iridia' command won't be found. Add it:"
+       echo "  fish:      fish_add_path ~/.local/bin"
+       echo "  bash/zsh:  echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc   (or ~/.zshrc)"
+       echo "" ;;
+esac
+
 echo "Starting the daemon..."
 "$VENV_DIR/bin/iridia" daemon start || true
 

@@ -40,8 +40,7 @@ correction). Patterns are static; nothing is animated.
 
 > **Note:** Iridia was written mostly with AI tools. It has been tested mainly on CachyOS with Hyprland,
 > an ASUS B550 motherboard and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
-> strip types and desktops are supported in the code but have seen less real-world testing. Bug reports
-> are welcome.
+> strip types and desktops are supported in the code but have seen less real-world testing.
 
 ## Features
 

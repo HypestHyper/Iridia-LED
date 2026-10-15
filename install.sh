@@ -172,10 +172,13 @@ if command -v ddcutil >/dev/null 2>&1 && [ -n "$I2C_USER" ] && [ "$SKIP_DEPS" -e
                     fi
                 fi
                 if [ "${I2C_RULE:-0}" = 1 ]; then
-                    echo 'KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"' \
-                        | "${SUDO[@]}" tee /etc/udev/rules.d/45-iridia-i2c.rules >/dev/null \
-                        && { "${SUDO[@]}" udevadm control --reload-rules 2>/dev/null; \
-                             "${SUDO[@]}" udevadm trigger --subsystem-match=i2c-dev 2>/dev/null; } || true
+                    if echo 'KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"' \
+                            | "${SUDO[@]}" tee /etc/udev/rules.d/45-iridia-i2c.rules >/dev/null; then
+                        "${SUDO[@]}" udevadm control --reload-rules 2>/dev/null || true
+                        "${SUDO[@]}" udevadm trigger --subsystem-match=i2c-dev 2>/dev/null || true
+                    else
+                        echo "WARNING: couldn't write the udev rule for the i2c group."
+                    fi
                 fi
                 if [ "${I2C_MOD:-0}" = 1 ]; then
                     echo i2c-dev | "${SUDO[@]}" tee /etc/modules-load.d/i2c-dev.conf >/dev/null || true

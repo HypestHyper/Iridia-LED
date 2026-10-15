@@ -21,6 +21,7 @@ rather than guessed:
 
 import functools
 import logging
+import socket
 import struct
 import threading
 import time
@@ -178,6 +179,12 @@ class OpenRGBController:
         try:
             from openrgb import OpenRGBClient
             self.client = OpenRGBClient(self.host, self.port, "iridia", 0)
+            try:
+                # small packets go out at once: without this, TCP holds a frame back up to 40 ms
+                # while it waits for the answer to the one before
+                self.client.comms.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except (AttributeError, OSError):
+                pass
             self.connected_since = time.time()
             self._asserted.clear()               # (re)connected: put devices in Direct mode again
             self._enumerate()
@@ -390,7 +397,7 @@ class OpenRGBController:
                 first = next((f[0] for f in frames.values() if f), (0, 0, 0))
                 from openrgb.utils import RGBColor
                 dev.set_color(RGBColor(*first), fast=True)
-                return True
+                return self._caught_up(comms)
             if "" in frames:
                 n = len(getattr(dev, "leds", None) or [])
                 if n == 0:
@@ -399,7 +406,7 @@ class OpenRGBController:
                 body = struct.pack("H", n) + _pack_rgb(cols)
                 comms.send_header(dev.id, _UPDATE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
-                return True
+                return self._caught_up(comms)
             zones = dict(zones_of(dev))
             for zn, cols in frames.items():
                 z = zones.get(zn)
@@ -409,7 +416,7 @@ class OpenRGBController:
                 body = struct.pack("iH", z.id, n) + _pack_rgb(_fit_rgb(cols, n))
                 comms.send_header(dev.id, _UPDATE_ZONE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
-            return True
+            return self._caught_up(comms)
         except ConnectionError as e:
             self._lost(f"Connection lost while sending to '{device_name}': {e}")
             return False
@@ -418,6 +425,18 @@ class OpenRGBController:
             self._warn_once(f"OpenRGB {msg}")
             self._record_error(msg)
             return False
+
+    @staticmethod
+    def _caught_up(comms) -> bool:
+        """Wait until OpenRGB has taken every packet sent so far. Colour packets get no answer, so a
+        controller slower than the frame rate would otherwise let frames pile up in the connection
+        (a change would show seconds or minutes late). A controller count request is answered only
+        after everything before it, so the frame takes as long as the controller really needs and
+        the animation thread lowers the rate by itself."""
+        ask = getattr(comms, "requestDeviceNum", None)
+        if ask is not None:
+            ask()
+        return True
 
     @_locked
     def resize_zone(self, device_name: str, zone_name: str, size: int) -> Optional[str]:

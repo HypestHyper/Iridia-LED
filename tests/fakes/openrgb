@@ -8,7 +8,8 @@ FAKE_OPENRGB_MODE (default "zero"):
   alive   stays running without listening (an OpenRGB window with its SDK server off)
   crash   exits right away with code 3
 FAKE_OPENRGB_LOG: a file each start is appended to ("PID ARG ARG...").
-FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE").
+FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE TIME").
+FAKE_OPENRGB_UPDATE_DELAY: seconds each colour packet takes, like a slow controller (default 0).
 """
 import copy
 import os
@@ -96,12 +97,13 @@ if mode == "devices":
     ]
     VERSION = 3
 PACKETS = os.environ.get("FAKE_OPENRGB_PACKETS")
+UPDATE_DELAY = float(os.environ.get("FAKE_OPENRGB_UPDATE_DELAY") or 0)
 
 
 def note(ptype, dev, size):
     if PACKETS:
         with open(PACKETS, "a") as f:
-            f.write(f"{ptype} {dev} {size}\n")
+            f.write(f"{ptype} {dev} {size} {time.time():.3f}\n")
 
 
 def serve(conn):
@@ -127,6 +129,8 @@ def serve(conn):
             elif ptype in (1000, 1050, 1051, 1052, 1100, 1101):
                 if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
                     DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
+                if UPDATE_DELAY and ptype in (1050, 1051, 1052):
+                    time.sleep(UPDATE_DELAY)        # applied one at a time, like OpenRGB on a slow bus
                 note(ptype, dev, size)
     except (ConnectionError, OSError, struct.error):
         pass

@@ -516,3 +516,32 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
         d._animator.stop()
         d.ipc.stop()
 
+
+
+def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
+    """OpenRGB doesn't answer colour packets, so a controller slower than the frame rate used to let
+    frames pile up in the connection: a change (back to static) showed up a minute late. Iridia
+    now waits for OpenRGB to catch up after each frame."""
+    packets = tmp_path / "packets.log"
+    monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
+    monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
+    monkeypatch.setenv("FAKE_OPENRGB_UPDATE_DELAY", "0.05")        # 20 colour packets a second at most
+    d = _daemon(env, monkeypatch)
+    try:
+        for _ in range(100):
+            d._tick()
+            if d.openrgb.devices:
+                break
+            time.sleep(0.05)
+        d.handle_command({"cmd": "animations", "fps": 60})
+        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
+        _run(d, 3.0)
+        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": None})["ok"]
+        stopped = time.time()
+        _run(d, 1.5)
+        d._animator.stop()
+        times = [float(ln.split()[3]) for ln in packets.read_text().splitlines() if ln.split()[0] in ("1050", "1051")]
+        assert times and max(times) - stopped < 0.6, max(times) - stopped   # caught up at once
+    finally:
+        d._animator.stop()
+        d.ipc.stop()

@@ -64,7 +64,9 @@ def env(tmp_path, monkeypatch):
         d.mkdir(parents=True)
     run.chmod(0o700)
     os.symlink(FAKES / "openrgb", bin_ / "openrgb")
-    os.symlink(sys.executable, bin_ / "python3")
+    # a wrapper, not a symlink: a symlinked venv Python forgets the venv (and the openrgb library)
+    (bin_ / "python3").write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')
+    (bin_ / "python3").chmod(0o755)
     starts, calls = tmp_path / "starts.log", tmp_path / "systemctl.log"
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(run))
@@ -487,3 +489,43 @@ def test_a_server_stopped_by_a_method_change_is_not_a_crash(env):
     clock.t += 100
     sup.tick("daemon", "127.0.0.1", False, "", env.port)    # back to daemon: starts right away
     assert wait_for(lambda: len(env.starts()) == 2) and sup.failures == 0
+
+
+def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
+    """The whole path: the daemon starts a fake OpenRGB with devices, finds their zones and their own
+    effects, and streams animation frames to it as SDK packets."""
+    packets = tmp_path / "packets.log"
+    monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
+    monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
+    d = _daemon(env, monkeypatch)
+    try:
+        for _ in range(100):
+            d._tick()
+            if d.openrgb.devices:
+                break
+            time.sleep(0.05)
+        assert set(d.openrgb.devices) == {"Fake ARGB Controller", "Fake RAM"}
+        st = d.handle_command({"cmd": "status"})
+        modes = {x["name"]: [m["name"] for m in x["hardware_modes"]] for x in st["devices"]}
+        assert modes["Fake ARGB Controller"] == ["Static", "Breathing", "Spectrum Cycle", "Wave"]
+        assert modes["Fake RAM"] == ["Rainbow"]
+        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
+        _run(d, 1.5)
+        kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
+        whole = sum(1 for k in kinds if k == ["1050", "0"])        # every zone of the controller animates
+        zone = sum(1 for k in kinds if k == ["1051", "1"])         # the RAM stick, by zone
+        assert whole >= 20 and zone >= 20, (whole, zone)
+        assert ["1101", "0"] in kinds                               # Direct mode was set first
+        # its own effect: frames stop for that device
+        d.config.set("hardware_effects.enabled", True)
+        assert d.handle_command({"cmd": "set_device_hardware_effect", "device": "Fake ARGB Controller",
+                                 "effect": {"mode": "Wave", "speed": 3, "direction": 1}})["ok"]
+        _run(d, 0.5)
+        packets.write_text("")
+        _run(d, 0.5)
+        kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
+        assert ["1050", "0"] not in kinds and ["1051", "1"] in kinds
+    finally:
+        d._animator.stop()
+        d.ipc.stop()
+

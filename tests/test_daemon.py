@@ -23,8 +23,23 @@ class FakeOpenRGB:
         self.devices = {}
         self.sent = []                # (device, colors, zones_config)
 
+        self.frames = []              # (device, {zone: [(r, g, b), ...]}) from the animation thread
+        self._hw_applied = {}
+        self.real = {}                # device -> [zone names]: what list_devices() reports
+
     def list_devices(self):
-        return []
+        return [{"name": d, "zones": [{"name": z, "led_count": 0} for z in zs],
+                 "hardware_modes": [{"name": "Rainbow", "speed": [1, 3, 2]}]} for d, zs in self.real.items()]
+
+    def send_frames(self, device, frames):
+        self.frames.append((device, {z: list(f) for z, f in frames.items()}))
+        return True
+
+    def apply_hardware_mode(self, device, spec):
+        self._hw_applied[device] = repr(spec)
+
+    def hardware_mode_released(self, device):
+        self._hw_applied.pop(device, None)
 
     def send(self, device_name, colors, zones_config=None):
         self.sent.append((device_name, list(colors), zones_config))
@@ -286,3 +301,128 @@ def test_pack_rgbw():
         r, g, b = int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)
         stream += [g, r, b]
     assert stream[:8] == [0, 0, 0, 255, 0, 255, 0, 0]
+
+
+# --------------------------------------------------------------- animations
+
+def _animate(d, device="Strip", zone="", **anim):
+    r = _cmd(d, "set_zone_animation", device=device, zone=zone, animation=anim)
+    assert r["ok"], r
+    return r["animation"]
+
+
+def _jobs(d):
+    d.openrgb.real = {"Strip": [], "Hub v1.0": ["A", "B"]}
+    d._refresh_animations(True)
+    d._animator.stop()                  # tests drive frames by hand
+    return {j.key: j for _w, js in d._animator._jobs.values() for j in js}
+
+
+def test_set_zone_animation_validates_and_keeps_settings(d):
+    a = _animate(d, effect="breathing", speed=999, min=80, max=20)
+    assert a["speed"] == 30.0 and (a["min"], a["max"]) == (20, 80)
+    a = _animate(d, effect="breathing", easing="sharp")     # same effect: other settings kept
+    assert a["easing"] == "sharp" and a["speed"] == 30.0
+    a = _animate(d, effect="comet")                          # new effect: its own defaults
+    assert a["effect"] == "comet" and a["speed"] == 30.0 and "easing" not in a
+    assert not _cmd(d, "set_zone_animation", device="Strip", zone="", animation={"effect": "disco"})["ok"]
+    assert _cmd(d, "set_zone_animation", device="Strip", zone="", animation="static")["animation"] is None
+    assert d.config.get(("devices", "Strip", "animation")) is None
+
+
+def test_set_all_effect_and_status(d):
+    assert _cmd(d, "set_all", field="animation", value={"effect": "rainbow", "width": 50}) == {"ok": True, "zones": 3}
+    st = _cmd(d, "status")
+    assert st["device_configs"]["Hub v1.0"]["zones"]["B"]["animation"]["width"] == 50
+    assert set(_jobs(d)) == {"Strip|", "Hub v1.0|A", "Hub v1.0|B"}
+    assert _cmd(d, "set_all", field="animation", value=None)["ok"]
+    assert _jobs(d) == {}
+
+
+def test_animated_zone_is_left_to_the_animator_until_something_pauses_it(d):
+    _animate(d, effect="color_cycle")
+    jobs = _jobs(d)
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") is None                  # the static path leaves it alone
+    assert jobs["Strip|"].frame(0.0) is not None
+    _cmd(d, "identify", device="Strip", zone="", seconds=30)
+    assert jobs["Strip|"].frame(0.0) is None                # paused: the static path shows identify
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ffffff"] * 4
+
+
+def test_paused_or_switched_off_animations_show_the_first_color(d):
+    _animate(d, effect="rainbow")
+    _jobs(d)
+    assert _cmd(d, "animations", action="pause") == {"ok": True, "paused": True}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    _cmd(d, "animations", action="resume")
+    assert _cmd(d, "animations", enabled=False)["settings"]["enabled"] is False
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    assert not _cmd(d, "animations", fps=25)["ok"]
+    assert _cmd(d, "animations", fps=60)["settings"]["fps"] == 60
+
+
+def test_keybind_effect_toggles_and_can_be_saved(d):
+    r = _cmd(d, "zone_action", target="Strip", actions=["effect", "breathing", "speed=3", "min=20"])
+    assert r["ok"] and d._overlays["Strip|"]["effect"]["speed"] == 3.0
+    assert "Strip|" in _jobs(d)
+    _cmd(d, "zone_action", target="Strip", actions=["effect", "breathing", "speed=3", "min=20"])
+    assert "Strip|" not in d._overlays                      # same key again: back to normal
+    assert not _cmd(d, "zone_action", target="Strip", actions=["effect", "disco"])["ok"]
+    assert not _cmd(d, "zone_action", target="Strip", actions=["effect", "comet", "color", "ff0000"])["ok"]
+    r = _cmd(d, "zone_action", target="all", actions=["effect", "comet"], save=True)
+    assert r["ok"] and d.config.get(("devices", "Hub v1.0", "zones", "A", "animation"))["effect"] == "comet"
+    _cmd(d, "zone_action", target="Strip", actions=["effect", "static"], save=True)
+    assert d.config.get(("devices", "Strip", "animation")) is None
+
+
+@pytest.mark.parametrize("mode", ["full", "palette", "calibrated"])
+def test_animated_frames_get_the_same_correction_as_static(d, mode):
+    """A still frame from the animator must equal what the static path sends for the same colors."""
+    d.config.set(("devices", "Strip", "mode"), mode)
+    d.config.set(("devices", "Strip", "manual_brightness"), 40)
+    d.config.set(("devices", "Strip", "pattern_colors"), ["e0a030"])
+    d.config.set(("devices", "Strip", "gamma_correction"), mode == "full")
+    d._update_all_devices()
+    static = d.openrgb.last("Strip")
+    _animate(d, effect="color_cycle")                       # one color: a still frame
+    frame = _jobs(d)["Strip|"].frame(5.0)
+    assert ["%02x%02x%02x" % c for c in frame] == static
+
+
+def test_controller_effect_takes_the_device_off_iridia(d):
+    d.openrgb.real = {"Strip": [], "Hub v1.0": ["A", "B"]}
+    assert _cmd(d, "set_device_hardware_effect", device="Strip", effect={"mode": "Rainbow", "speed": 2})["ok"]
+    d._apply_hardware_effects()
+    assert "Strip" not in d.openrgb._hw_applied             # off until switched on in Settings
+    _cmd(d, "set_hardware_effects", enabled=True)
+    d.openrgb.devices = {"Strip": object()}
+    d._apply_hardware_effects()
+    assert "Strip" in d.openrgb._hw_applied
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") is None                  # it runs its own effect
+    _cmd(d, "lights", on=False)
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4        # lights off still darkens it
+    _cmd(d, "lights", on=True)
+    _cmd(d, "set_device_hardware_effect", device="Strip", effect=None)
+    d._apply_hardware_effects()
+    assert "Strip" not in d.openrgb._hw_applied
+
+
+def test_brightness_glides_instead_of_jumping(d):
+    zc = clean_zone_cfg(d.config.get(("devices", "Strip")))
+    assert d._brightness_now("Strip|", zc) == 100
+    zc["manual_brightness"] = 0
+    first = d._brightness_now("Strip|", zc)
+    assert first == 100 and d._glide_active                # starts gliding from where it was
+    import time as _t
+    _t.sleep(d.GLIDE_SEC / 2)
+    mid = d._brightness_now("Strip|", zc)
+    assert 10 < mid < 90
+    _t.sleep(d.GLIDE_SEC)
+    assert d._brightness_now("Strip|", zc) == 0

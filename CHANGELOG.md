@@ -1,13 +1,5 @@
 # Changelog
 
-## 1.2.1
-
-- The installer sets up I2C access for monitor brightness when ddcutil is installed, doing only what's
-  missing: the `i2c` group (created if needed) with you in it, a udev rule giving that group the I2C
-  devices, and the `i2c-dev` module now and at every boot. It asks first (`--yes` doesn't,
-  `--no-deps` leaves it alone) and reminds you to log out and in once.
-- The README and Troubleshooting no longer ask for bug reports.
-
 ## 1.2.0
 
 **Animations.** Iridia is no longer static only. Static patterns stay as they were, and stay the default.
@@ -60,6 +52,10 @@ change shows at once. With OpenRGB before 1.0, frames go over the main connectio
   them never changes a setting.
 - The installer links `iridia` and `iridia-gui` into `~/.local/bin` and says how to add that folder to
   the `PATH` when it's missing (fish included).
+- When ddcutil is installed, the installer sets up I2C access for monitor brightness, doing only what's
+  missing: the `i2c` group (created if needed) with you in it, a udev rule giving that group the I2C
+  devices, and the `i2c-dev` module now and at every boot. It asks first (`--yes` doesn't, `--no-deps`
+  leaves it alone) and reminds you to log out and in once.
 
 ## 1.1.1
 

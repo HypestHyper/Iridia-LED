@@ -20,11 +20,9 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 
 ### gui.json: language
 
-`"language"` picks the window's language. Leave it out (or set `""`) for the default, Proper English
-(British spelling). Values: `"en_GB"` (Proper English), `"en"` (American English), `"en_posh"`
-(Posh English), `"en_pirate"` (Pirate) and `"fr_omelette"` (Français). The same choice is in
-Settings, Appearance, Language; it applies when the window restarts. The command line and the log
-always use American spelling.
+`"language"` picks the window's language. Leave it out (or set `""`) for the default, British spelling
+(`"en_GB"`); `"en"` gives American English. The same choice is in Settings, Appearance, Language; it
+applies when the window restarts. The command line and the log always use American spelling.
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
 `$XDG_RUNTIME_DIR/iridia-UID.sock`.

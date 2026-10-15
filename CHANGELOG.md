@@ -9,9 +9,8 @@
   Flatpak; `openrgb.server_command` for an AppImage.
 - `iridia doctor` says what starts OpenRGB at login; it no longer shows a unit that doesn't exist as
   "inactive".
-- The window uses British spelling (Proper English) by default.
-- Languages, in Settings, Appearance, Language: Proper English, American English, and the joke
-  languages Posh English, Pirate and Français. Switching restarts the window.
+- The window uses British spelling by default. American English can be picked in Settings,
+  Appearance, Language; switching restarts the window.
 - The command line, the log and `iridia doctor` keep American spelling.
 - The app id is now `io.github.HypestHyper.Iridia` (the window class for window rules). The old
   launcher is removed when the service is installed again.

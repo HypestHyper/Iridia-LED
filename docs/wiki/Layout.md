@@ -4,6 +4,8 @@ The **Layout** tab draws every enabled zone as a strip, one dot per LED, in the 
 now. Draw your strips where they really are (behind the desk, around the monitor, along the shelf) and
 you get a live picture of your room you can paint on.
 
+<img alt="The Layout tab" src="../screenshots/layout.png" width="420">
+
 LED 1, where the data wire enters, is marked with a small **1**; the last LED shows its number too.
 
 ## The toolbar

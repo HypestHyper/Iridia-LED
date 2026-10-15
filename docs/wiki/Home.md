@@ -10,6 +10,12 @@ Iridia was written mostly with AI tools and has been tested mainly on CachyOS wi
 strips. Other setups are supported in the code but have seen less real-world testing; please report
 what doesn't work.
 
+<p align="center">
+  <img alt="Status tab" src="../screenshots/status.png" width="32%">
+  <img alt="Devices tab" src="../screenshots/devices.png" width="32%">
+  <img alt="Layout tab" src="../screenshots/layout.png" width="32%">
+</p>
+
 ## Start here
 
 | Page | What's in it |

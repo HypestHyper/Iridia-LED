@@ -11,6 +11,8 @@ Open **Iridia** from your app launcher. The chip in the header says whether Open
 
 ## A tour of the window
 
+<img alt="The Status tab" src="../screenshots/status.png" width="420">
+
 | Tab | What it's for |
 | --- | --- |
 | **Status** | The current wallpaper and its colors. Click a color to put it on every LED, or *Custom color…* for any color. *Now playing* sums up what Iridia is doing. |

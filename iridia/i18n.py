@@ -16,7 +16,7 @@ LOCALE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "l
 PREFS_PATH = os.path.expanduser("~/.config/iridia/gui.json")
 
 # code -> name shown in the Language menu (never translated, so you can always find your way back).
-# The joke codes don't match any real locale, so they are only used when picked.
+# Codes that don't match a real locale are only used when picked.
 LANGUAGES = {
     "en_GB": "Proper English",
     "en": "English (American)",

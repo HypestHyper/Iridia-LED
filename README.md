@@ -42,6 +42,12 @@ correction). Patterns are static; nothing is animated.
 > and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
 > strip types and desktops are supported in the code but have seen less real-world testing.
 
+<p align="center">
+  <img alt="Status tab" src="docs/screenshots/status.png" width="32%">
+  <img alt="Devices tab" src="docs/screenshots/devices.png" width="32%">
+  <img alt="Layout tab" src="docs/screenshots/layout.png" width="32%">
+</p>
+
 ## Features
 
 **Wallpaper**
@@ -86,10 +92,8 @@ correction). Patterns are static; nothing is animated.
 
 **Languages**
 
-The window uses Proper English (British spelling) by default. Settings, Appearance, Language also
-has American English and three joke languages: Posh English (Victorian), Pirate, and Français, which
-is random French phrases with no relation to what the buttons do. The command line, the log and
-`iridia doctor` use American spelling.
+The window uses British spelling by default. American English can be picked in Settings,
+Appearance, Language. The command line, the log and `iridia doctor` use American spelling.
 
 ## Install
 

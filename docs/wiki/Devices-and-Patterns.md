@@ -2,6 +2,8 @@
 
 Everything here is on the **Devices** tab.
 
+<img alt="The Devices tab" src="../screenshots/devices.png" width="420">
+
 ## Zones and the Everything card
 
 OpenRGB splits devices into zones: a motherboard has one zone per header, a controller one per channel,

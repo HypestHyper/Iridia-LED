@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 19:30+0000\n"
+"POT-Creation-Date: 2026-10-15 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -1819,6 +1819,9 @@ msgstr "Remove this bend"
 msgid "Cut here (joined with a wire)"
 msgstr "Cut here (spliced with a wire)"
 
+msgid "Join again (remove the cut)"
+msgstr "Splice it back (remove the cut)"
+
 msgid "Show this section"
 msgstr "Bring this stretch up from the hold"
 
@@ -1951,6 +1954,10 @@ msgid "None yet. Right-click a LED, or add one below."
 msgstr "None yet. Right-click a lantern, or add one below."
 
 #, python-brace-format
+msgid "Cut {i}"
+msgstr "Splice {i}"
+
+#, python-brace-format
 msgid "Bend {i}"
 msgstr "Bend {i}"
 
@@ -1970,11 +1977,13 @@ msgid "Add a cut at LED"
 msgstr "Add a splice at lantern"
 
 msgid ""
-"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
-"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
 msgstr ""
-"A splice is where the strip were cut an' joined again with a wire: the lanterns after it start "
-"further on, past the gap. Hidden lanterns be left off the chart but still shine."
+"A splice is where the strip were cut an' joined again with a wire. With Arrange, haul the piece "
+"after a splice wherever ye like (the rope stretches), or set the gap here. Hidden lanterns be "
+"left off the chart but still shine."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "

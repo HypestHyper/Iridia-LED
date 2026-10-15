@@ -38,9 +38,11 @@ Mouse wheel zooms, dragging the empty background pans.
 - **The side panel** has 90 degree turn buttons, the start direction, and for each bend the LED it's at
   and its exact direction, with a button to remove it. *Straighten* (right-click) removes every bend.
 - **Cuts:** for a strip that was cut and joined again with a wire, right-click the first LED after the
-  wire and choose *Cut here (joined with a wire)*, or use *Add a cut at LED* in the side panel. The LEDs
-  after the cut start further on, after a **wire gap** you set in millimetres; the wire is drawn as a
-  dashed line. A cut is a section like a bend, so it can also change direction.
+  wire and choose *Cut here (joined with a wire)*, or use *Add a cut at LED* in the side panel. The wire
+  is drawn as a dashed line. With Arrange, **drag the piece after a cut** to put it anywhere (the wire
+  stretches), and turn it in place with its own knob, behind its first LED. Or set the **wire gap** in
+  millimetres in the side panel. To undo a cut, right-click next to it and choose *Join again (remove
+  the cut)*, or use the link button on the cut in the side panel.
 - **Hiding part of a strip:** each section has *Hide LEDs a to b* in the side panel (or right-click,
   *Hide this section*). Add bends where the part begins and ends first. Hidden LEDs are left out of the
   drawing and can't be painted, but still light up on the real strip. *Straighten* keeps cuts and

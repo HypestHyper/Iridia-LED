@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 19:30+0000\n"
+"POT-Creation-Date: 2026-10-15 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -1837,6 +1837,9 @@ msgstr "Remove this bend"
 msgid "Cut here (joined with a wire)"
 msgstr "Cut here (rejoined with a wire)"
 
+msgid "Join again (remove the cut)"
+msgstr "Rejoin (remove the cut)"
+
 msgid "Show this section"
 msgstr "Reveal this section"
 
@@ -1969,6 +1972,10 @@ msgid "None yet. Right-click a LED, or add one below."
 msgstr "None as yet. Right-click a lamp, or add one below."
 
 #, python-brace-format
+msgid "Cut {i}"
+msgstr "Cut {i}"
+
+#, python-brace-format
 msgid "Bend {i}"
 msgstr "Bend {i}"
 
@@ -1988,11 +1995,13 @@ msgid "Add a cut at LED"
 msgstr "Add a cut at lamp"
 
 msgid ""
-"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
-"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
 msgstr ""
-"A cut is where the strip was severed and rejoined with a wire: the lamps after it begin further "
-"along, beyond the wire gap. Concealed lamps are omitted from the drawing but shine nonetheless."
+"A cut is where the strip was severed and rejoined with a wire. With Arrange, drag the piece after"
+" a cut wherever one pleases (the wire stretches), or set the wire gap here. Concealed lamps are "
+"omitted from the drawing but shine nonetheless."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "

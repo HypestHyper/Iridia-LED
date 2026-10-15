@@ -16,7 +16,7 @@ from gi.repository import Gdk, GLib, Gtk
 from iridia.i18n import _, ngettext  # noqa: F401
 from iridia import theme
 from iridia.colors import resolve_colors
-from iridia.layout import (Layout, fraction_to_stop, gap_starts, hidden_path, led_at_path, path_at_led, path_points,
+from iridia.layout import (Layout, cut_before, fraction_to_stop, gap_starts, hidden_path, led_at_path, path_at_led, path_points,
                            point_along, project,
                            split_key, stop_to_fraction, zone_count)
 from iridia.patterns import PatternGenerator
@@ -401,7 +401,7 @@ class LayoutTab(Gtk.Box):
         # Bend points: always visible, on every strip, in every tool.
         for bi, seg in enumerate(s["segments"][1:], 1):
             c = seg["start"] - 1
-            if 0 <= c < len(spts) - 1 and not seg.get("gap") and not seg.get("hide") \
+            if 0 <= c < len(spts) - 1 and not seg.get("jump") and not seg.get("hide") \
                     and not s["segments"][bi - 1].get("hide"):
                 bx, by = spts[c]
                 cr.set_source_rgb(*rgb("PRIMARY" if sel else "OUTLINE"))
@@ -525,7 +525,10 @@ class LayoutTab(Gtk.Box):
 
     @staticmethod
     def _pivot(spts, seg, i):
-        """The point a section turns around: LED 1 for the first section, the corner LED for bends."""
+        """The point a section turns around: LED 1 for the first section, the corner LED for bends,
+        the piece's own first LED after a cut."""
+        if i and seg.get("jump"):
+            return spts[max(0, min(len(spts) - 1, seg["start"]))]
         return spts[0 if i == 0 else max(0, min(len(spts) - 1, seg["start"] - 1))]
 
     @staticmethod
@@ -535,7 +538,7 @@ class LayoutTab(Gtk.Box):
         First section: straight behind LED 1. Bends: on the outside of the corner, so it never
         sits on the strip itself (a straight 'bend' gets it beside the strip)."""
         a1 = math.radians(segs[i]["angle"])
-        if i == 0:
+        if i == 0 or segs[i].get("jump"):
             return 180.0
         a0 = math.radians(segs[i - 1]["angle"])
         sx, sy = -math.cos(a0) + math.cos(a1), -math.sin(a0) + math.sin(a1)
@@ -618,7 +621,12 @@ class LayoutTab(Gtk.Box):
         if self.tool == "arrange":
             if not self._strip_locked(s):
                 wx, wy = self.s2w(x, y)
-                self._drag = {"kind": "move", "sid": s["id"], "off": (s["x"] - wx, s["y"] - wy)}
+                ci = cut_before(s, k)
+                if ci:                      # the piece after a cut moves on its own
+                    j = s["segments"][ci]["jump"]
+                    self._drag = {"kind": "piece", "sid": s["id"], "i": ci, "jump": list(j), "at": (wx, wy)}
+                else:
+                    self._drag = {"kind": "move", "sid": s["id"], "off": (s["x"] - wx, s["y"] - wy)}
             else:
                 self._drag = None
         elif self.tool == "find":
@@ -652,6 +660,18 @@ class LayoutTab(Gtk.Box):
             if self._snap:
                 nx, ny = round(nx / (GRID / 2)) * (GRID / 2), round(ny / (GRID / 2)) * (GRID / 2)
             s["x"], s["y"] = nx, ny
+        elif kind == "piece":
+            wx, wy = self.s2w(x, y)
+            jx, jy = dr["jump"][0] + wx - dr["at"][0], dr["jump"][1] + wy - dr["at"][1]
+            if self._snap and not (state & Gdk.ModifierType.SHIFT_MASK):
+                # snap the piece's first LED to the grid, like moving a strip
+                pts = path_points(s, n)
+                k0 = s["segments"][dr["i"]]["start"]
+                if 0 < k0 < len(pts):
+                    bx, by = pts[k0 - 1]
+                    h = GRID / 2
+                    jx, jy = round((bx + jx) / h) * h - bx, round((by + jy) / h) * h - by
+            self.layout.move_cut(s, dr["i"], (jx, jy))
         elif kind == "turn":
             i = dr["i"]
             if i >= len(s["segments"]) or n <= 0:
@@ -695,7 +715,7 @@ class LayoutTab(Gtk.Box):
         dr, self._drag = self._drag, None
         if not dr:
             return
-        if dr["kind"] in ("move", "turn", "pan"):
+        if dr["kind"] in ("move", "turn", "pan", "piece"):
             self._schedule_save()
             self._refresh_panel_values()
         elif dr["kind"] == "stop" and dr.get("stops"):
@@ -924,7 +944,8 @@ class LayoutTab(Gtk.Box):
         locked = self._strip_locked(s)
         led = led_at_path(s, n, k) + 1
         box.append(label(_('LED {led} of {n}').format(led=led, n=n), ("small", "faint")))
-        segi = next((i for i, g in enumerate(s["segments"]) if i > 0 and abs(g["start"] - k) <= 1), None)
+        segi = next((i for i, g in enumerate(s["segments"]) if i > 0 and not g.get("jump") and abs(g["start"] - k) <= 1),
+                    None)
 
         def item(text, ico, cb, enabled=True):
             b = button(text, ico, "text small", lambda: (pop.popdown(), cb()))
@@ -937,6 +958,11 @@ class LayoutTab(Gtk.Box):
              bool(segi) and not locked)
         item(_("Cut here (joined with a wire)"), "cable", lambda: self._do(self.layout.add_cut, s, k),
              not locked and k > 0)
+        cut_i = next((i for i, g in enumerate(s["segments"]) if i > 0 and g.get("jump") and g["start"] in (k, k + 1)),
+                     None)
+        if cut_i is not None:
+            item(_("Join again (remove the cut)"), "link", lambda: self._do(self.layout.remove_cut, s, cut_i),
+                 not locked)
         si = self.layout.segment_index(s, k)
         hidden_sec = bool(s["segments"][si].get("hide"))
         item(_("Show this section") if hidden_sec else _("Hide this section"),
@@ -1149,9 +1175,15 @@ class LayoutTab(Gtk.Box):
             p.append(hide_row(0))
         for i, seg in enumerate(segs[1:], start=1):
             g = Gtk.Grid(column_spacing=8, row_spacing=4)
-            g.attach(label(_('Bend {i}').format(i=i), ("small",)), 0, 0, 1, 1)
-            rm = button(icon_name="close", style="text small", cb=lambda i=i: self._do(self.layout.remove_bend, s, i),
-                        tooltip=_("Remove this bend"))
+            is_cut = bool(seg.get("jump"))
+            g.attach(label((_('Cut {i}') if is_cut else _('Bend {i}')).format(i=i), ("small",)), 0, 0, 1, 1)
+            if is_cut:
+                rm = button(icon_name="link", style="text small",
+                            cb=lambda i=i: self._do(self.layout.remove_cut, s, i),
+                            tooltip=_("Join again (remove the cut)"))
+            else:
+                rm = button(icon_name="close", style="text small",
+                            cb=lambda i=i: self._do(self.layout.remove_bend, s, i), tooltip=_("Remove this bend"))
             rm.set_sensitive(not locked)
             rm.set_halign(Gtk.Align.END)
             g.attach(rm, 1, 0, 1, 1)
@@ -1163,10 +1195,12 @@ class LayoutTab(Gtk.Box):
             an = Spin(0, 359, round(seg["angle"]) % 360, lambda v, i=i: self._set_angle(s, i, v), step=15)
             an.set_sensitive(not locked)
             g.attach(an, 1, 2, 1, 1)
-            g.attach(label(_("wire gap (mm)"), ("tiny", "faint")), 0, 3, 1, 1)
-            gp = Spin(0, 5000, round(seg.get("gap", 0)), lambda v, i=i: self._set_gap(s, i, v), step=10)
-            gp.set_sensitive(not locked)
-            g.attach(gp, 1, 3, 1, 1)
+            if is_cut:
+                g.attach(label(_("wire gap (mm)"), ("tiny", "faint")), 0, 3, 1, 1)
+                gp = Spin(0, 5000, round(self.layout.gap(s, i)), lambda v, i=i: self._set_gap(s, i, v), step=10)
+                gp.set_sensitive(not locked)
+                g.attach(gp, 1, 3, 1, 1)
+                self._pv[f"gap{i}"] = gp
             p.append(g)
             p.append(hide_row(i))
         add = hbox(6)
@@ -1184,9 +1218,9 @@ class LayoutTab(Gtk.Box):
         cut.append(cb_)
         cut.set_sensitive(not locked and n > 2)
         p.append(cut)
-        p.append(label(_("A cut is where the strip was cut and joined again with a wire: the LEDs after it start "
-                         "further on, after the wire gap. Hidden LEDs are left out of the drawing but still light "
-                         "up."), ("tiny", "faint"), wrap=True))
+        p.append(label(_("A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece "
+                         "after a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs "
+                         "are left out of the drawing but still light up."), ("tiny", "faint"), wrap=True))
         p.append(label(_("On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole strip, "
                        "outside the corner for a bend."), ("tiny", "faint"),
                        wrap=True))
@@ -1203,6 +1237,9 @@ class LayoutTab(Gtk.Box):
         s = self.layout.get(self._sel) if self._sel else None
         if s is None or "count" not in getattr(self, "_pv", {}):
             return
+        for key_, w in self._pv.items():
+            if key_.startswith("gap") and int(key_[3:]) < len(s["segments"]):
+                w.set_quiet(round(self.layout.gap(s, int(key_[3:]))))   # a dragged piece stretches its wire
         self._pv["count"].set_label(ngettext('{n} LED', '{n} LEDs', self._count(s['zone'])).format(n=self._count(s['zone'])))
         cfg = self._cfg.get(s["zone"]) or {}
         if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")):

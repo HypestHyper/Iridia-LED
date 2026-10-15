@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 19:30+0000\n"
+"POT-Creation-Date: 2026-10-15 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -1724,6 +1724,9 @@ msgstr "Pétanque"
 msgid "Cut here (joined with a wire)"
 msgstr "Couper ici (avec une ficelle)"
 
+msgid "Join again (remove the cut)"
+msgstr "Recoller (enlever la coupure)"
+
 msgid "Show this section"
 msgstr "Montrer ce morceau de baguette"
 
@@ -1850,6 +1853,10 @@ msgid "None yet. Right-click a LED, or add one below."
 msgstr "La plume de ma tante"
 
 #, python-brace-format
+msgid "Cut {i}"
+msgstr "Coupure {i}"
+
+#, python-brace-format
 msgid "Bend {i}"
 msgstr "Croissant"
 
@@ -1869,11 +1876,13 @@ msgid "Add a cut at LED"
 msgstr "Ajouter une coupure à la LED"
 
 msgid ""
-"A cut is where the strip was cut and joined again with a wire: the LEDs after it start further "
-"on, after the wire gap. Hidden LEDs are left out of the drawing but still light up."
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
 msgstr ""
-"Une coupure, c'est quand le ruban a été coupé puis recollé avec un fil, comme le vélo de tonton. "
-"Les LED cachées ne sont pas dessinées mais brillent quand même."
+"Une coupure, c'est quand le ruban a été coupé puis recollé avec un fil. Avec Arranger, traînez le"
+" morceau après la coupure où vous voulez (le fil s'étire comme un camembert), ou réglez la "
+"longueur ici. Les LED cachées ne sont pas dessinées mais brillent quand même."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "

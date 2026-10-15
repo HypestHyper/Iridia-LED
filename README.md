@@ -38,10 +38,9 @@ wallpaper detection, color extraction and sending colors to OpenRGB; the window 
 change its settings. Each OpenRGB zone can be configured separately (pattern, colors, brightness, color
 correction). Patterns are static; nothing is animated.
 
-> **Note:** Iridia was written mostly with AI tools. It has been tested mainly on CachyOS with Hyprland,
-> an ASUS B550 motherboard and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
-> strip types and desktops are supported in the code but have seen less real-world testing. Bug reports
-> are welcome.
+> **Note:** This project was written almost entirely by an AI assistant, with direction and testing by the author. It has been tested mainly on CachyOS with Hyprland,
+> and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
+> strip types and desktops are supported in the code but have seen less real-world testing.
 
 ## Features
 

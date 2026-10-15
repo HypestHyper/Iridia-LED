@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# English (United Kingdom) translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 20:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -252,6 +252,33 @@ msgstr "Disabled"
 
 msgid "Whole device"
 msgstr "Whole device"
+
+msgid "Animations"
+msgstr "Animations"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Animated effects are picked per zone on the Devices tab."
+
+msgid "Run animations"
+msgstr "Run animations"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Off: animated zones show their first colour, still."
+
+msgid "Frame rate"
+msgstr "Frame rate"
+
+msgid "frames per second"
+msgstr "frames per second"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+
+msgid "Pause animations during night mode"
+msgstr "Pause animations during night mode"
+
+msgid "Slow animations during night mode"
+msgstr "Slow animations during night mode"
 
 msgid "Appearance"
 msgstr "Appearance"
@@ -1230,6 +1257,183 @@ msgstr "Resize failed"
 msgid "Close"
 msgstr "Close"
 
+msgid "Breathing"
+msgstr "Breathing"
+
+msgid "Comet"
+msgstr "Comet"
+
+msgid "Fill"
+msgstr "Fill"
+
+msgid "Embers"
+msgstr "Embers"
+
+msgid "Rainbow"
+msgstr "Rainbow"
+
+msgid "Color cycle"
+msgstr "Colour cycle"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Bright heads with a fading tail run along the strip."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "The strip fills up with its pattern, then empties."
+
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Points glow up and die down like embers, drifting through the colours picked below. Fire uses "
+"fire colours instead."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "A moving rainbow. Ignores the zone's colours."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "The loud one: a fast, uneven rainbow with random sparkles."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "The whole zone fades from one colour to the next."
+
+msgid "Brightness range"
+msgstr "Brightness range"
+
+msgid "Easing"
+msgstr "Easing"
+
+msgid "Next color at each breath"
+msgstr "Next colour at each breath"
+
+msgid "Tail length"
+msgstr "Tail length"
+
+msgid "LEDs"
+msgstr "LEDs"
+
+msgid "Heads"
+msgstr "Heads"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "Spacing (0 spreads them evenly)"
+
+msgid "Bounce back and forth"
+msgstr "Bounce back and forth"
+
+msgid "Reverse direction"
+msgstr "Reverse direction"
+
+msgid "Background"
+msgstr "Background"
+
+msgid "Pause when full and empty"
+msgstr "Pause when full and empty"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Fill from"
+
+msgid "Empty"
+msgstr "Empty"
+
+msgid "Density"
+msgstr "Density"
+
+msgid "Softness"
+msgstr "Softness"
+
+msgid "Flicker"
+msgstr "Flicker"
+
+msgid "Colors"
+msgstr "Colours"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "Width (LEDs per rainbow)"
+
+msgid "Chaos"
+msgstr "Chaos"
+
+msgid "Hold each color"
+msgstr "Hold each colour"
+
+msgid "Follow the layout"
+msgstr "Follow the layout"
+
+msgid "Direction"
+msgstr "Direction"
+
+msgid "Keep zones with this effect in step"
+msgstr "Keep zones with this effect in step"
+
+msgid "Seconds per breath"
+msgstr "Seconds per breath"
+
+msgid "Speed"
+msgstr "Speed"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Fade time"
+
+msgid "Sine"
+msgstr "Sine"
+
+msgid "Smooth"
+msgstr "Smooth"
+
+msgid "Sharp"
+msgstr "Sharp"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Second color"
+msgstr "Second colour"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "End"
+msgstr "End"
+
+msgid "Center"
+msgstr "Centre"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Same way"
+msgstr "Same way"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Fire"
+msgstr "Fire"
+
+msgid "Picked colors"
+msgstr "Picked colours"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+
 msgid "All lights off / on"
 msgstr "All lights off / on"
 
@@ -1238,6 +1442,9 @@ msgstr "Freeze colours / follow the wallpaper"
 
 msgid "Night mode on / off"
 msgstr "Night mode on / off"
+
+msgid "Pause / resume animations"
+msgstr "Pause / resume animations"
 
 msgid "Load a setup"
 msgstr "Load a setup"
@@ -1305,6 +1512,12 @@ msgstr "Pick the colour"
 
 msgid "Brightness"
 msgstr "Brightness"
+
+msgid "Static pattern"
+msgstr "Static pattern"
+
+msgid "Effect"
+msgstr "Effect"
 
 msgid "Do"
 msgstr "Do"
@@ -1401,6 +1614,15 @@ msgstr "stop / start following the wallpaper"
 msgid "night mode on / off"
 msgstr "night mode on / off"
 
+msgid "an effect, again: back to normal"
+msgstr "an effect, again: back to normal"
+
+msgid "still colors until you press it again"
+msgstr "still colours until you press it again"
+
+msgid "pause / resume every animation"
+msgstr "pause / resume every animation"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "load a saved setup (this one is permanent)"
 
@@ -1426,6 +1648,9 @@ msgstr "Turns the strips off; press the key again to bring them back."
 msgid "turns them on (even when switched off)"
 msgstr "turns them on (even when switched off)"
 
+msgid "runs an effect"
+msgstr "runs an effect"
+
 msgid "shows one color"
 msgstr "shows one colour"
 
@@ -1447,6 +1672,9 @@ msgstr "Same key freezes the current colours, then follows the wallpaper again."
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Switches night mode on or off (this one is saved)."
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "Same key pauses every animated effect, then lets them run again."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Loads the setup and keeps it (an automatic backup is made first)."
@@ -1484,9 +1712,6 @@ msgstr "Paint"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "Erase (back to the zone's own colour)"
-
-msgid "Fill"
-msgstr "Fill"
 
 msgid "Gradient"
 msgstr "Gradient"
@@ -1570,6 +1795,12 @@ msgstr ""
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 
+msgid "Hide strip names and LED numbers"
+msgstr "Hide strip names and LED numbers"
+
+msgid "Show strip names and LED numbers"
+msgstr "Show strip names and LED numbers"
+
 msgid "Layout locked: click to unlock"
 msgstr "Layout locked: click to unlock"
 
@@ -1582,6 +1813,18 @@ msgstr "Add a bend here"
 
 msgid "Remove this bend"
 msgstr "Remove this bend"
+
+msgid "Cut here (joined with a wire)"
+msgstr "Cut here (joined with a wire)"
+
+msgid "Join again (remove the cut)"
+msgstr "Join again (remove the cut)"
+
+msgid "Show this section"
+msgstr "Show this section"
+
+msgid "Hide this section"
+msgstr "Hide this section"
 
 msgid "Straighten"
 msgstr "Straighten"
@@ -1653,8 +1896,9 @@ msgstr "{zone} on {device}"
 msgid "Rename this strip"
 msgstr "Rename this strip"
 
-msgid "clone (shows the same colors)"
-msgstr "clone (shows the same colours)"
+#, python-brace-format
+msgid "clone of {strip} (shows the same colors)"
+msgstr "clone of {strip} (shows the same colours)"
 
 msgid "Identify"
 msgstr "Identify"
@@ -1664,6 +1908,10 @@ msgstr "Count LEDs"
 
 msgid "Pattern"
 msgstr "Pattern"
+
+#, python-brace-format
+msgid "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
+msgstr "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
 
 msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
 msgstr "Painted: use the Paint, Erase, Fill and Gradient tools below."
@@ -1697,11 +1945,19 @@ msgstr ""
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 
-msgid "Bends"
-msgstr "Bends"
+#, python-brace-format
+msgid "Hide LEDs {a} to {b}"
+msgstr "Hide LEDs {a} to {b}"
+
+msgid "Bends and cuts"
+msgstr "Bends and cuts"
 
 msgid "None yet. Right-click a LED, or add one below."
 msgstr "None yet. Right-click a LED, or add one below."
+
+#, python-brace-format
+msgid "Cut {i}"
+msgstr "Cut {i}"
 
 #, python-brace-format
 msgid "Bend {i}"
@@ -1713,8 +1969,23 @@ msgstr "at LED"
 msgid "direction °"
 msgstr "direction °"
 
+msgid "wire gap (mm)"
+msgstr "wire gap (mm)"
+
 msgid "Add a bend at LED"
 msgstr "Add a bend at LED"
+
+msgid "Add a cut at LED"
+msgstr "Add a cut at LED"
+
+msgid ""
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
+msgstr ""
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
@@ -1731,6 +2002,17 @@ msgstr "Hide"
 
 msgid "Delete clone"
 msgstr "Delete clone"
+
+msgid "Rename clone"
+msgstr "Rename clone"
+
+#, python-brace-format
+msgid ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
+msgstr ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
@@ -1861,8 +2143,11 @@ msgstr "palette"
 msgid "calibrated"
 msgstr "calibrated"
 
-msgid "LEDs"
-msgstr "LEDs"
+msgid "Static"
+msgstr "Static"
+
+msgid "Animated"
+msgstr "Animated"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Identify lights only this zone, so you can see which strip it is."

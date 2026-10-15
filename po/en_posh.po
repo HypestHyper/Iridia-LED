@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# English translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 20:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -256,6 +256,35 @@ msgstr "Indisposed"
 
 msgid "Whole device"
 msgstr "The entire device"
+
+msgid "Animations"
+msgstr "Animated Spectacles"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Animated spectacles are chosen zone by zone, upon the Devices tab."
+
+msgid "Run animations"
+msgstr "Permit the spectacles"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Off: the animated zones shall hold their first colour, quite still."
+
+msgid "Frame rate"
+msgstr "Pictures per second"
+
+msgid "frames per second"
+msgstr "pictures each second"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr ""
+"Thirty appears most graceful upon most strips. A device unable to keep pace is granted a gentler "
+"rate of its own accord."
+
+msgid "Pause animations during night mode"
+msgstr "Suspend the spectacles at night"
+
+msgid "Slow animations during night mode"
+msgstr "Slow the spectacles at night"
 
 msgid "Appearance"
 msgstr "Comportment"
@@ -1247,6 +1276,183 @@ msgstr "The resizing failed"
 msgid "Close"
 msgstr "Close"
 
+msgid "Breathing"
+msgstr "Respiration"
+
+msgid "Comet"
+msgstr "Comet"
+
+msgid "Fill"
+msgstr "Fill"
+
+msgid "Embers"
+msgstr "Hearth embers"
+
+msgid "Rainbow"
+msgstr "Rainbow"
+
+msgid "Color cycle"
+msgstr "Procession of colours"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr ""
+"Fades gently between two levels of brightness. A minimum above naught keeps the dark end graceful"
+" upon strips that stumble when dim."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Bright heads with fading tails promenade along the strip."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "The strip fills with its pattern, then politely empties."
+
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Points glow and fade like embers in the drawing-room hearth, drifting through the colours chosen "
+"below. Fire uses proper fire colours instead."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "A travelling rainbow. It disregards the zone's colours."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "The vulgar one: a hasty, uneven rainbow strewn with sparkles. One is shocked."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "The entire zone proceeds from one colour to the next."
+
+msgid "Brightness range"
+msgstr "Range of radiance"
+
+msgid "Easing"
+msgstr "Manner of easing"
+
+msgid "Next color at each breath"
+msgstr "The next colour with every breath"
+
+msgid "Tail length"
+msgstr "Length of tail"
+
+msgid "LEDs"
+msgstr "Lamps"
+
+msgid "Heads"
+msgstr "Heads"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "Spacing (naught spaces them evenly)"
+
+msgid "Bounce back and forth"
+msgstr "To and fro"
+
+msgid "Reverse direction"
+msgstr "The opposite direction"
+
+msgid "Background"
+msgstr "Backdrop"
+
+msgid "Pause when full and empty"
+msgstr "A pause when full and empty"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Fill from"
+
+msgid "Empty"
+msgstr "Emptying"
+
+msgid "Density"
+msgstr "Density"
+
+msgid "Softness"
+msgstr "Softness"
+
+msgid "Flicker"
+msgstr "Flicker"
+
+msgid "Colors"
+msgstr "Colours"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "Breadth (LEDs per rainbow)"
+
+msgid "Chaos"
+msgstr "Pandemonium"
+
+msgid "Hold each color"
+msgstr "Hold each colour"
+
+msgid "Follow the layout"
+msgstr "Follow the arrangement"
+
+msgid "Direction"
+msgstr "Direction"
+
+msgid "Keep zones with this effect in step"
+msgstr "Keep zones with this spectacle in step"
+
+msgid "Seconds per breath"
+msgstr "Seconds per breath"
+
+msgid "Speed"
+msgstr "Pace"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Time to fade"
+
+msgid "Sine"
+msgstr "Sine"
+
+msgid "Smooth"
+msgstr "Smooth"
+
+msgid "Sharp"
+msgstr "Sharp"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Second color"
+msgstr "Second colour"
+
+msgid "Start"
+msgstr "Beginning"
+
+msgid "End"
+msgstr "End"
+
+msgid "Center"
+msgstr "Centre"
+
+msgid "Back"
+msgstr "Back again"
+
+msgid "Same way"
+msgstr "The same way"
+
+msgid "Reset"
+msgstr "Begin anew"
+
+msgid "Fire"
+msgstr "Hearth fire"
+
+msgid "Picked colors"
+msgstr "Chosen colours"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr ""
+"Following the arrangement conducts the spectacle through the room, across every strip that "
+"follows it, according to where the LEDs sit upon the Layout tab."
+
 msgid "All lights off / on"
 msgstr "All lamps out / alight"
 
@@ -1255,6 +1461,9 @@ msgstr "Preserve the colours / follow the wallpaper"
 
 msgid "Night mode on / off"
 msgstr "Nocturnal mode on / off"
+
+msgid "Pause / resume animations"
+msgstr "Suspend / resume the spectacles"
 
 msgid "Load a setup"
 msgstr "Recall an arrangement"
@@ -1323,6 +1532,12 @@ msgstr "Choose the colour"
 
 msgid "Brightness"
 msgstr "Brightness"
+
+msgid "Static pattern"
+msgstr "A still pattern"
+
+msgid "Effect"
+msgstr "Spectacle"
 
 msgid "Do"
 msgstr "Undertake"
@@ -1419,6 +1634,15 @@ msgstr "cease / resume following the wallpaper"
 msgid "night mode on / off"
 msgstr "nocturnal mode on / off"
 
+msgid "an effect, again: back to normal"
+msgstr "a spectacle; again: as before"
+
+msgid "still colors until you press it again"
+msgstr "still colours until pressed once more"
+
+msgid "pause / resume every animation"
+msgstr "suspend / resume every spectacle"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "recall a preserved arrangement (this one endures)"
 
@@ -1444,6 +1668,9 @@ msgstr "Extinguishes the strips; press the key again to restore them."
 msgid "turns them on (even when switched off)"
 msgstr "kindles them (even when indisposed)"
 
+msgid "runs an effect"
+msgstr "performs a spectacle"
+
 msgid "shows one color"
 msgstr "shows a single colour"
 
@@ -1465,6 +1692,9 @@ msgstr "The same key preserves the present colours, then follows the wallpaper a
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Engages or disengages nocturnal mode (this one is remembered)."
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "The same key suspends every spectacle, then permits them once more."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Recalls the arrangement and keeps it (with safekeeping beforehand)."
@@ -1502,9 +1732,6 @@ msgstr "Paint"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "Efface (restore the zone's own colour)"
-
-msgid "Fill"
-msgstr "Fill"
 
 msgid "Gradient"
 msgstr "Gradient"
@@ -1588,6 +1815,12 @@ msgstr ""
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Paint: click or drag across lamps. Painting obliges that zone to adopt the Painted pattern."
 
+msgid "Hide strip names and LED numbers"
+msgstr "Conceal strip names and lamp numbers"
+
+msgid "Show strip names and LED numbers"
+msgstr "Reveal strip names and lamp numbers"
+
 msgid "Layout locked: click to unlock"
 msgstr "Floor plan secured: click to release"
 
@@ -1600,6 +1833,18 @@ msgstr "Add a bend here"
 
 msgid "Remove this bend"
 msgstr "Remove this bend"
+
+msgid "Cut here (joined with a wire)"
+msgstr "Cut here (rejoined with a wire)"
+
+msgid "Join again (remove the cut)"
+msgstr "Rejoin (remove the cut)"
+
+msgid "Show this section"
+msgstr "Reveal this section"
+
+msgid "Hide this section"
+msgstr "Conceal this section"
 
 msgid "Straighten"
 msgstr "Straighten"
@@ -1671,8 +1916,9 @@ msgstr "{zone} upon {device}"
 msgid "Rename this strip"
 msgstr "Rechristen this strip"
 
-msgid "clone (shows the same colors)"
-msgstr "twin (shows the very same colours)"
+#, python-brace-format
+msgid "clone of {strip} (shows the same colors)"
+msgstr "twin of {strip} (wears the same colours)"
 
 msgid "Identify"
 msgstr "Identify"
@@ -1682,6 +1928,10 @@ msgstr "Count the lamps"
 
 msgid "Pattern"
 msgstr "Pattern"
+
+#, python-brace-format
+msgid "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
+msgstr "Animated: {effect}. Choosing a pattern here, or painting, shall make it still once more."
 
 msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
 msgstr "Painted: employ the Paint, Efface, Fill and Gradient instruments below."
@@ -1715,11 +1965,19 @@ msgstr ""
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr "Each dot is one pixel of {lpp} lamps (set upon the Apparatus page, Strip type)."
 
-msgid "Bends"
-msgstr "Bends"
+#, python-brace-format
+msgid "Hide LEDs {a} to {b}"
+msgstr "Conceal lamps {a} to {b}"
+
+msgid "Bends and cuts"
+msgstr "Bends and cuts"
 
 msgid "None yet. Right-click a LED, or add one below."
 msgstr "None as yet. Right-click a lamp, or add one below."
+
+#, python-brace-format
+msgid "Cut {i}"
+msgstr "Cut {i}"
 
 #, python-brace-format
 msgid "Bend {i}"
@@ -1731,8 +1989,23 @@ msgstr "at lamp"
 msgid "direction °"
 msgstr "bearing °"
 
+msgid "wire gap (mm)"
+msgstr "wire gap (mm)"
+
 msgid "Add a bend at LED"
 msgstr "Add a bend at lamp"
+
+msgid "Add a cut at LED"
+msgstr "Add a cut at lamp"
+
+msgid ""
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
+msgstr ""
+"A cut is where the strip was severed and rejoined with a wire. With Arrange, drag the piece after"
+" a cut wherever one pleases (the wire stretches), or set the wire gap here. Concealed lamps are "
+"omitted from the drawing but shine nonetheless."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
@@ -1749,6 +2022,17 @@ msgstr "Conceal"
 
 msgid "Delete clone"
 msgstr "Dispose of the twin"
+
+msgid "Rename clone"
+msgstr "Rechristen the twin"
+
+#, python-brace-format
+msgid ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
+msgstr ""
+"A name for this twin of {strip}. It appears only on the Layout tab. Leave it empty to use the "
+"strip's own name."
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
@@ -1881,8 +2165,11 @@ msgstr "palette"
 msgid "calibrated"
 msgstr "calibrated"
 
-msgid "LEDs"
-msgstr "Lamps"
+msgid "Static"
+msgstr "Still"
+
+msgid "Animated"
+msgstr "Animated"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Identify illuminates this zone alone, so you may see which strip it is."

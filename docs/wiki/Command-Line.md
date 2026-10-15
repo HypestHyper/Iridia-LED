@@ -1,8 +1,8 @@
 # Command line
 
-Everything the window does can also be done with the `iridia` command. It lives in
-`~/.local/share/iridia-venv/bin/`; add that folder to your `PATH` to type just `iridia` (see
-[Installation](Installation.md#running-it)). `iridia --help` and `iridia COMMAND --help` list every
+Everything the window does can also be done with the `iridia` command. The installer links it into
+`~/.local/bin` (the real one is in `~/.local/share/iridia-venv/bin/`); if your shell can't find it, see
+[Installation](Installation.md#running-it). `iridia --help` and `iridia COMMAND --help` list every
 option.
 
 ## Status and health
@@ -42,6 +42,18 @@ option.
 | `iridia openrgb enable`, `disable` | The same as `start-method daemon` and `start-method off` |
 | `iridia openrgb hide-autostart [FILE]` | Turn off OpenRGB's own entry in `~/.config/autostart` by adding `Hidden=true` (the file stays) |
 | `iridia openrgb status` | The method, the command, whether Iridia started the running OpenRGB, and what else starts it |
+
+## Animations
+
+| Command | What it does |
+| --- | --- |
+| `iridia zone TARGET effect NAME [--speed N] [--min N] [--max N] [--param KEY=VALUE]` | Run an effect on strips (temporary; again: back) |
+| `iridia zone TARGET effect NAME --save` | Make it the strips' own setting (`effect static --save` goes back) |
+| `iridia animations pause / resume / toggle` | Pause every animation until resumed |
+| `iridia animations status` | Which zones animate, and for each device the frames per second it gets and how long a frame takes; warns when the daemon runs older code than what's installed |
+
+Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `color_cycle`. See
+[Animations](Animations.md) for their settings.
 
 ## Wallpaper and colors
 

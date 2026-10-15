@@ -71,7 +71,7 @@ For every zone, every time something changes:
 6. **Power limit**, **color order** and **RGBW packing** for the strip type.
 7. **Send**, only if the result differs from what was sent last.
 
-Nothing animates, so the daemon is idle most of the time: it wakes twice a second, and does real work
+With only static patterns the daemon is idle most of the time: it wakes twice a second, and does real work
 only when something changed.
 
 ## Brightness

@@ -1,4 +1,4 @@
-# Translations template for Iridia.
+# French translations for Iridia.
 # Copyright (C) 2026 Iridia Contributors
 # This file is distributed under the same license as the Iridia project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 20:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -245,6 +245,33 @@ msgstr "Bonsoir"
 
 msgid "Whole device"
 msgstr "Oh là là"
+
+msgid "Animations"
+msgstr "Le cinéma est fermé le lundi"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Mon voisin collectionne les cuillères en bois."
+
+msgid "Run animations"
+msgstr "Allumez le projecteur"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Éteint : le chat dort sur le radiateur."
+
+msgid "Frame rate"
+msgstr "Vitesse de l'escargot"
+
+msgid "frames per second"
+msgstr "baguettes par seconde"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr "Trente, c'est l'âge où l'on achète une plante verte."
+
+msgid "Pause animations during night mode"
+msgstr "La nuit, tous les chats sont gris"
+
+msgid "Slow animations during night mode"
+msgstr "La nuit porte conseil"
 
 msgid "Appearance"
 msgstr "Moustache"
@@ -1166,6 +1193,179 @@ msgstr "Oh là là"
 msgid "Close"
 msgstr "Bonne nuit"
 
+msgid "Breathing"
+msgstr "La sieste"
+
+msgid "Comet"
+msgstr "La comète de Tante Odile"
+
+msgid "Fill"
+msgstr "Santé !"
+
+msgid "Embers"
+msgstr "Le feu de cheminée"
+
+msgid "Rainbow"
+msgstr "L'arc-en-ciel"
+
+msgid "Color cycle"
+msgstr "Le tourniquet"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr "J'ai perdu mon parapluie à la gare de Lyon."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Le train de 7 h 12 ne s'arrête plus ici."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "Le verre est à moitié plein de limonade."
+
+msgid ""
+"Points glow up and die down like embers, drifting through the colors picked below. Fire uses fire"
+" colors instead."
+msgstr ""
+"Les braises dansent la valse avec les couleurs choisies en bas. Feu met les couleurs du barbecue "
+"de tonton."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "Un arc-en-ciel qui a raté son bus."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "Il ne faut jamais manger des huîtres avant un tour de manège."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "Le caméléon a changé d'avis trois fois."
+
+msgid "Brightness range"
+msgstr "De la cave au grenier"
+
+msgid "Easing"
+msgstr "La douceur du lundi"
+
+msgid "Next color at each breath"
+msgstr "Une nouvelle chaussette à chaque soupir"
+
+msgid "Tail length"
+msgstr "La longueur de la queue du chat"
+
+msgid "LEDs"
+msgstr "Café"
+
+msgid "Heads"
+msgstr "Les têtes de veau"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "L'espace entre les chaises (0 : on se serre)"
+
+msgid "Bounce back and forth"
+msgstr "Le ping-pong du dimanche"
+
+msgid "Reverse direction"
+msgstr "Faire demi-tour au rond-point"
+
+msgid "Background"
+msgstr "L'arrière-boutique"
+
+msgid "Pause when full and empty"
+msgstr "Une pause café, pleine et vide"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Remplir depuis la cuisine"
+
+msgid "Empty"
+msgstr "Vider le seau"
+
+msgid "Density"
+msgstr "La densité du flan"
+
+msgid "Softness"
+msgstr "La douceur du coussin"
+
+msgid "Flicker"
+msgstr "Le clignotement du phare"
+
+msgid "Colors"
+msgstr "Les crayons de couleur"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "La largeur du trottoir"
+
+msgid "Chaos"
+msgstr "Le bazar"
+
+msgid "Hold each color"
+msgstr "Tenir chaque couleur comme un parapluie"
+
+msgid "Follow the layout"
+msgstr "Suivre le plan du métro"
+
+msgid "Direction"
+msgstr "Par là-bas"
+
+msgid "Keep zones with this effect in step"
+msgstr "Tout le monde danse la même valse"
+
+msgid "Seconds per breath"
+msgstr "Les secondes du soupir"
+
+msgid "Speed"
+msgstr "La vitesse de la tortue"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Le temps du fondu au chocolat"
+
+msgid "Sine"
+msgstr "Sinus"
+
+msgid "Smooth"
+msgstr "Lisse comme un œuf"
+
+msgid "Sharp"
+msgstr "Pointu comme un crayon"
+
+msgid "Dim"
+msgstr "Tamisé"
+
+msgid "Second color"
+msgstr "La deuxième chaussette"
+
+msgid "Start"
+msgstr "Le début du film"
+
+msgid "End"
+msgstr "La fin du film"
+
+msgid "Center"
+msgstr "Au milieu du pont"
+
+msgid "Back"
+msgstr "Retour à la case départ"
+
+msgid "Same way"
+msgstr "Par le même chemin"
+
+msgid "Reset"
+msgstr "On recommence tout"
+
+msgid "Fire"
+msgstr "Feu"
+
+msgid "Picked colors"
+msgstr "Couleurs choisies"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
+
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
 
@@ -1174,6 +1374,9 @@ msgstr "Voulez-vous du fromage ?"
 
 msgid "Night mode on / off"
 msgstr "Bonjour, je m'appelle Jacques"
+
+msgid "Pause / resume animations"
+msgstr "Pause café / reprise du travail"
 
 msgid "Load a setup"
 msgstr "Quiche"
@@ -1235,6 +1438,12 @@ msgstr "Éclair"
 
 msgid "Brightness"
 msgstr "Bisou"
+
+msgid "Static pattern"
+msgstr "Le motif de la nappe"
+
+msgid "Effect"
+msgstr "L'effet papillon"
 
 msgid "Do"
 msgstr "Bof"
@@ -1323,6 +1532,15 @@ msgstr "Omelette du fromage"
 msgid "night mode on / off"
 msgstr "Il était une fois un croissant"
 
+msgid "an effect, again: back to normal"
+msgstr "un effet, encore : comme avant"
+
+msgid "still colors until you press it again"
+msgstr "on ne bouge plus jusqu'au prochain clic"
+
+msgid "pause / resume every animation"
+msgstr "tout le monde s'arrête, puis repart"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "Le chat est sous la table"
 
@@ -1346,6 +1564,9 @@ msgstr "La tour Eiffel est fermée aujourd'hui. Je ne sais quoi."
 msgid "turns them on (even when switched off)"
 msgstr "Ceci n'est pas une pipe"
 
+msgid "runs an effect"
+msgstr "lance un papillon"
+
 msgid "shows one color"
 msgstr "Croissant"
 
@@ -1367,6 +1588,9 @@ msgstr "Les moules sont délicieuses. J'ai une baguette."
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Le pamplemousse est dans le jardin"
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "La même touche arrête la musique, puis la relance."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Il pleut des cordes. Le béret de mon grand-père."
@@ -1404,9 +1628,6 @@ msgstr "Quiche"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "J'ai une baguette"
-
-msgid "Fill"
-msgstr "Santé !"
 
 msgid "Gradient"
 msgstr "Oh là là"
@@ -1481,6 +1702,12 @@ msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Mon aéroglisseur est plein d'anguilles. Bonjour, je m'appelle Jacques."
 
+msgid "Hide strip names and LED numbers"
+msgstr "Cacher les étiquettes du fromage"
+
+msgid "Show strip names and LED numbers"
+msgstr "Montrer les étiquettes du fromage"
+
 msgid "Layout locked: click to unlock"
 msgstr "Le béret de mon grand-père"
 
@@ -1493,6 +1720,18 @@ msgstr "Camembert"
 
 msgid "Remove this bend"
 msgstr "Pétanque"
+
+msgid "Cut here (joined with a wire)"
+msgstr "Couper ici (avec une ficelle)"
+
+msgid "Join again (remove the cut)"
+msgstr "Recoller (enlever la coupure)"
+
+msgid "Show this section"
+msgstr "Montrer ce morceau de baguette"
+
+msgid "Hide this section"
+msgstr "Cacher ce morceau de baguette"
 
 msgid "Straighten"
 msgstr "Merci"
@@ -1560,8 +1799,9 @@ msgstr "Café"
 msgid "Rename this strip"
 msgstr "Il pleut des cordes"
 
-msgid "clone (shows the same colors)"
-msgstr "Où sont les toilettes ?"
+#, python-brace-format
+msgid "clone of {strip} (shows the same colors)"
+msgstr "jumeau de {strip} (même pull)"
 
 msgid "Identify"
 msgstr "Santé !"
@@ -1571,6 +1811,10 @@ msgstr "Croissant"
 
 msgid "Pattern"
 msgstr "Voilà"
+
+#, python-brace-format
+msgid "Animated: {effect}. Picking a pattern here, or painting, makes it static again."
+msgstr "Ça bouge : {effect}. Choisir un motif ici, ou peindre, et hop, ça ne bouge plus."
 
 msgid "Painted: use the Paint, Erase, Fill and Gradient tools below."
 msgstr "Une grenouille dans mon café. Joyeux anniversaire."
@@ -1602,11 +1846,19 @@ msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
 msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
 msgstr "Le fromage qui pue. Le train est encore en retard."
 
-msgid "Bends"
-msgstr "Merci"
+#, python-brace-format
+msgid "Hide LEDs {a} to {b}"
+msgstr "Cacher les LED {a} à {b}"
+
+msgid "Bends and cuts"
+msgstr "Virages et coupures"
 
 msgid "None yet. Right-click a LED, or add one below."
 msgstr "La plume de ma tante"
+
+#, python-brace-format
+msgid "Cut {i}"
+msgstr "Coupure {i}"
 
 #, python-brace-format
 msgid "Bend {i}"
@@ -1618,8 +1870,23 @@ msgstr "Crêpe"
 msgid "direction °"
 msgstr "Café"
 
+msgid "wire gap (mm)"
+msgstr "longueur de ficelle (mm)"
+
 msgid "Add a bend at LED"
 msgstr "Il pleut des cordes"
+
+msgid "Add a cut at LED"
+msgstr "Ajouter une coupure à la LED"
+
+msgid ""
+"A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece after"
+" a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs are left "
+"out of the drawing but still light up."
+msgstr ""
+"Une coupure, c'est quand le ruban a été coupé puis recollé avec un fil. Avec Arranger, traînez le"
+" morceau après la coupure où vous voulez (le fil s'étire comme un camembert), ou réglez la "
+"longueur ici. Les LED cachées ne sont pas dessinées mais brillent quand même."
 
 msgid ""
 "On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole "
@@ -1634,6 +1901,17 @@ msgstr "Merci"
 
 msgid "Delete clone"
 msgstr "C'est la vie"
+
+msgid "Rename clone"
+msgstr "Rebaptiser le jumeau"
+
+#, python-brace-format
+msgid ""
+"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"strip's name."
+msgstr ""
+"Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
+"garder le nom du ruban."
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
@@ -1754,8 +2032,11 @@ msgstr "Santé !"
 msgid "calibrated"
 msgstr "Bof"
 
-msgid "LEDs"
-msgstr "Café"
+msgid "Static"
+msgstr "Immobile comme une statue"
+
+msgid "Animated"
+msgstr "Animé comme un marché"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Le pamplemousse est dans le jardin. La plume de ma tante."

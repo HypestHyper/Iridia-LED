@@ -166,6 +166,14 @@ class Client:
     def forget_all_wallpaper_colors(self) -> dict:
         return self._ipc.send({"cmd": "forget_all_wallpaper_colors"})
 
+    def set_zone_animation(self, device: str, zone: str, animation) -> dict:
+        """animation: {"effect": ..., settings...}, or None for the static pattern."""
+        return self._ipc.send({"cmd": "set_zone_animation", "device": device, "zone": zone, "animation": animation})
+
+    def animations(self, **kw) -> dict:
+        """action="pause"/"resume"/"toggle", or settings: enabled, fps, night_pause, night_slow."""
+        return self._ipc.send(dict(kw, cmd="animations"))
+
     def set_all(self, field: str, value) -> dict:
         return self._ipc.send({"cmd": "set_all", "field": field, "value": value})
 

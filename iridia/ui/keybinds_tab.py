@@ -24,6 +24,7 @@ OTHER = [
     (_("All lights off / on"), "lights"),
     (_("Freeze colors / follow the wallpaper"), "freeze"),
     (_("Night mode on / off"), "night"),
+    (_("Pause / resume animations"), "animations"),
     (_("Load a setup"), "setup"),
 ]
 NO_MOD = _("No modifier")
@@ -131,6 +132,14 @@ class KeybindsPage:
         self._bright_row = hbox(10, self._bright_on, label(_("Brightness"), ("body",)), self._bright,
                                 label("%", ("body", "dim")))
         self._strips_box.append(self._bright_row)
+        from iridia import animations as _anims
+        from iridia.ui.effects import EFFECT_NAMES
+        self._effect_names = [EFFECT_NAMES[e] for e in _anims.ORDER] + [_("Static pattern")]
+        self._effect_keys = dict(zip(self._effect_names, _anims.ORDER + ["static"]))
+        self._effect_on = Toggle(False, lambda v: self._render())
+        self._effect_dd = Dropdown(self._effect_names, self._effect_names[0], lambda v: self._render())
+        self._effect_row = hbox(10, self._effect_on, label(_("Effect"), ("body",)), self._effect_dd)
+        self._strips_box.append(self._effect_row)
         c.append(self._strips_box)
 
         # ---- everything else
@@ -212,6 +221,9 @@ class KeybindsPage:
             ("lights toggle", _("everything off / on")),
             ("freeze toggle", _("stop / start following the wallpaper")),
             ("night toggle", _("night mode on / off")),
+            ("zone 'Desk back' effect breathing --speed 3", _("an effect, again: back to normal")),
+            ("zone all effect static", _("still colors until you press it again")),
+            ("animations toggle", _("pause / resume every animation")),
             ("setup load Gaming", _("load a saved setup (this one is permanent)")),
         ]
         tv.get_buffer().set_text("\n".join(f"iridia {c:<46} # {t}" for c, t in examples))
@@ -267,8 +279,11 @@ class KeybindsPage:
         if self.power == "normal":
             return ["normal"]
         acts = [self.power] if self.power in ("on", "off") else []
+        effect = self._effect_on.get_active() and self.power != "off"
+        if effect:
+            acts += ["effect", self._effect_keys.get(self._effect_dd.value(), "breathing")]
         if self.power != "off":
-            if self._color_on.get_active():
+            if self._color_on.get_active() and not effect:
                 acts += ["color", self.color]
             if self._bright_on.get_active():
                 acts += ["bright", str(int(self._bright.get_value()))]
@@ -279,7 +294,7 @@ class KeybindsPage:
             acts = self._strip_actions()
             return ["zone", self._target()] + acts if acts else None
         kind = next((k for n, k in OTHER if n == self._other.value()), "lights")
-        if kind in ("lights", "freeze", "night"):
+        if kind in ("lights", "freeze", "night", "animations"):
             return [kind, "toggle"]
         name = self._setup_dd.value()
         return ["setup", "load", name] if name else None
@@ -291,7 +306,8 @@ class KeybindsPage:
         kind = next((k for n, k in OTHER if n == self._other.value()), "lights")
         self._setup_row.set_visible(kind == "setup")
         mix = self.power not in ("off", "normal")
-        self._color_row.set_sensitive(mix)
+        self._effect_row.set_sensitive(mix)
+        self._color_row.set_sensitive(mix and not self._effect_on.get_active())
         self._bright_row.set_sensitive(mix)
         args = self._args()
         exe = iridia_path()
@@ -309,7 +325,9 @@ class KeybindsPage:
                 note = _("Turns the strips off; press the key again to bring them back.")
             else:
                 bits = ([_("turns them on (even when switched off)")] if self.power == "on" else []) + \
-                       ([_("shows one color")] if self._color_on.get_active() else []) + \
+                       ([_("runs an effect")] if self._effect_on.get_active() else []) + \
+                       ([_("shows one color")] if self._color_on.get_active() and not self._effect_on.get_active()
+                        else []) + \
                        ([_("sets the brightness")] if self._bright_on.get_active() else [])
                 note = _("One press: {actions}. The next press puts everything back.").format(
                     actions=", ".join(bits)) if bits else ""
@@ -319,6 +337,7 @@ class KeybindsPage:
                 "lights": _("Same key turns everything off, then back on."),
                 "freeze": _("Same key freezes the current colors, then follows the wallpaper again."),
                 "night": _("Switches night mode on or off (this one is saved)."),
+                "animations": _("Same key pauses every animated effect, then lets them run again."),
                 "setup": _("Loads the setup and keeps it (an automatic backup is made first)."),
             }[kind])
         mods_v = self._mods.value() or NO_MOD
@@ -357,6 +376,8 @@ class KeybindsPage:
             fn = lambda: c.setup("load", name=args[2])
         elif args[0] == "night":
             fn = lambda: c.set_night(toggle=True)
+        elif args[0] == "animations":
+            fn = lambda: c.animations(action="toggle")
         else:
             fn = lambda: c.raw({"cmd": args[0], "toggle": True})
 
@@ -427,6 +448,9 @@ class KeybindsPage:
             bits = ([{"on": _("on"), "off": _("off")}.get(o["power"], o["power"])] if o.get("power") else []) + \
                    ([f"#{o['hex']}"] if o.get("hex") else []) + \
                    ([_("{n}% brightness").format(n=o['bright'])] if o.get("bright") is not None else [])
+            if "effect" in o:
+                from iridia.ui.effects import EFFECT_NAMES
+                bits.append(EFFECT_NAMES.get((o["effect"] or {}).get("effect"), _("Static pattern")))
             row = hbox(10)
             if o.get("hex"):
                 row.append(Swatch(o["hex"], 22))

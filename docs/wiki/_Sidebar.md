@@ -6,6 +6,7 @@
 
 **Using Iridia**
 - [Devices, patterns and colors](Devices-and-Patterns.md)
+- [Animations](Animations.md)
 - [Layout](Layout.md)
 - [Strip types](Strip-Types.md)
 - [Color correction](Color-Correction.md)

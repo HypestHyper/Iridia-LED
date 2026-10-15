@@ -23,7 +23,7 @@ from iridia.ui.calibration_editor import ProfileEditor  # noqa: E402
 from iridia.ui.colorpicker import pick_color as _pick_color  # noqa: E402
 from iridia.ui.layout_tab import LayoutTab  # noqa: E402
 from iridia.ui.style import Style  # noqa: E402
-from iridia.ui.widgets import (Animator, Chip, Dropdown, LoadingIndicator, QuickColors, Snackbar, Spin, Swatch,  # noqa: E402
+from iridia.ui.widgets import (Animator, Chip, Dropdown, Group, LoadingIndicator, QuickColors, Snackbar, Spin, Swatch,  # noqa: E402
                                WavyBar, button, card, divider, hbox, icon, label, rgb, section, set_button_text,
                                shape_path, spring, switch_row, vbox)
 from iridia.ui.keybinds_tab import KeybindsPage  # noqa: E402
@@ -668,6 +668,41 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 if c is not None:
                     c.sync_from_status(zc, extracted, custom)
 
+    def _sync_animation_settings(self, st):
+        a = st.get("animations")
+        if not a or not hasattr(self, "_anim_sw"):
+            return
+        self._anim_sw.set_value(bool(a.get("enabled", True)))
+        self._fps.set_active(str(a.get("fps", 30)))
+        self._anim_night_pause.set_value(bool(a.get("night_pause", False)))
+        self._anim_night_slow.set_value(bool(a.get("night_slow", False)))
+
+    def _build_animation_settings(self, p):
+        p.append(section(_("Animations"), _("Animated effects are picked per zone on the Devices tab.")))
+        c = card()
+        a = self.config.get("animations", {}) or {}
+        row, self._anim_sw = switch_row(_("Run animations"), bool(a.get("enabled", True)),
+                                        lambda v: self.bg(lambda: self.client.animations(enabled=v)))
+        c.append(row)
+        c.append(label(_("Off: animated zones show their first color, still."), ("small", "faint")))
+        r = hbox(10)
+        r.append(label(_("Frame rate"), ("body", "dim")))
+        self._fps = Group([("15", "15"), ("30", "30"), ("60", "60")], str(a.get("fps", 30)),
+                          lambda v: self.bg(lambda: self.client.animations(fps=int(v))))
+        r.append(self._fps)
+        r.append(label(_("frames per second"), ("body", "dim")))
+        c.append(r)
+        c.append(label(_("30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."),
+                       ("small", "faint"), wrap=True))
+        row, self._anim_night_pause = switch_row(_("Pause animations during night mode"),
+                                                 bool(a.get("night_pause", False)),
+                                                 lambda v: self.bg(lambda: self.client.animations(night_pause=v)))
+        c.append(row)
+        row, self._anim_night_slow = switch_row(_("Slow animations during night mode"), bool(a.get("night_slow", False)),
+                                                lambda v: self.bg(lambda: self.client.animations(night_slow=v)))
+        c.append(row)
+        p.append(c)
+
     # ============================================================ settings tab
     def _build_settings(self):
         p = self._settings_page
@@ -730,6 +765,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                          lambda v: self.bg(lambda: self.client.set_sleep(v)))
         c.append(row)
         p.append(c)
+        self._build_animation_settings(p)
 
         # setups
         p.append(section(_("Setups and backups"),
@@ -1472,7 +1508,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     st = {"_error": resp.get("error", "daemon not running")}
             except Exception:
                 st = {"_error": "daemon not running"}
-            GLib.idle_add(self._apply_status, st)
+            # above the animated previews, so a busy window still shows the daemon's state at once
+            GLib.idle_add(self._apply_status, st, priority=GLib.PRIORITY_DEFAULT)
             time.sleep(2)
 
     def _apply_status(self, st):
@@ -1583,6 +1620,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         else:
             self._sync_devices(devices, colors, custom)
         self._apply_hw(st.get("devices") or [])
+        self._sync_animation_settings(st)
         for k, info in (st.get("strip_info") or {}).items():
             c = self._zone_cards.get(k)
             if c is not None:

@@ -64,7 +64,9 @@ def env(tmp_path, monkeypatch):
         d.mkdir(parents=True)
     run.chmod(0o700)
     os.symlink(FAKES / "openrgb", bin_ / "openrgb")
-    os.symlink(sys.executable, bin_ / "python3")
+    # a wrapper, not a symlink: a symlinked venv Python forgets the venv (and the openrgb library)
+    (bin_ / "python3").write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')
+    (bin_ / "python3").chmod(0o755)
     starts, calls = tmp_path / "starts.log", tmp_path / "systemctl.log"
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(run))
@@ -487,3 +489,68 @@ def test_a_server_stopped_by_a_method_change_is_not_a_crash(env):
     clock.t += 100
     sup.tick("daemon", "127.0.0.1", False, "", env.port)    # back to daemon: starts right away
     assert wait_for(lambda: len(env.starts()) == 2) and sup.failures == 0
+
+
+def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
+    """The whole path: the daemon starts a fake OpenRGB with devices, finds their zones, and streams
+    animation frames to it as SDK packets."""
+    packets = tmp_path / "packets.log"
+    monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
+    monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
+    d = _daemon(env, monkeypatch)
+    try:
+        for _ in range(100):
+            d._tick()
+            if d.openrgb.devices:
+                break
+            time.sleep(0.05)
+        assert set(d.openrgb.devices) == {"Fake ARGB Controller", "Fake RAM"}
+        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
+        _run(d, 1.5)
+        kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
+        whole = sum(1 for k in kinds if k == ["1050", "0"])        # one packet per device and frame
+        ram = sum(1 for k in kinds if k == ["1050", "1"])
+        assert whole >= 20 and ram >= 20, (whole, ram)
+        first = kinds.index(["1050", "0"])
+        assert not any(k[0] == "1051" for k in kinds[first:])      # never zone by zone (OpenRGB queues those)
+        assert ["1101", "0"] in kinds                               # Direct mode was set first
+    finally:
+        d._animator.stop()
+        d.ipc.stop()
+
+
+
+def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
+    """OpenRGB 1.0 queues every colour update per controller and writes them one by one, telling
+    only protocol 6 clients when one is written. A controller slower than the frame rate let frames
+    pile up: going back to static showed up a minute late. Frames now go over a protocol 6
+    connection, one written frame at a time."""
+    packets = tmp_path / "packets.log"
+    monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
+    monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
+    monkeypatch.setenv("FAKE_OPENRGB_UPDATE_DELAY", "0.05")        # 20 colour packets a second at most
+    monkeypatch.setenv("FAKE_OPENRGB_PROTOCOL", "6")                # like OpenRGB 1.0
+    d = _daemon(env, monkeypatch)
+    try:
+        for _ in range(100):
+            d._tick()
+            if d.openrgb.devices:
+                break
+            time.sleep(0.05)
+        d.handle_command({"cmd": "animations", "fps": 60})
+        # only one of the controller's two channels animates: it still goes as whole-device updates
+        assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake ARGB Controller",
+                                 "zone": "Channel 1", "animation": {"effect": "rainbow"}})["ok"]
+        assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake RAM", "zone": "Stick",
+                                 "animation": {"effect": "rainbow"}})["ok"]
+        _run(d, 3.0)
+        assert d.openrgb._link is not None and d.openrgb._link.ok   # frames went over protocol 6
+        assert d.handle_command({"cmd": "set_all", "field": "animation", "value": None})["ok"]
+        stopped = time.time()
+        _run(d, 1.5)
+        d._animator.stop()
+        times = [float(ln.split()[3]) for ln in packets.read_text().splitlines() if ln.split()[0] in ("1050", "1051")]
+        assert times and max(times) - stopped < 0.6, max(times) - stopped   # caught up at once
+    finally:
+        d._animator.stop()
+        d.ipc.stop()

@@ -16,8 +16,9 @@ def test_repairs_bad_types(tmp_path):
         "ddc": {"enabled": "yes", "fallback_brightness": "oops"},
         "timing": {"ddc_poll_interval_sec": "2.5"},
         "logging": "nope",
-        "devices": {"Good": {"zones": {"Z": {}, "Bad": 3}}, "Broken": 5},
+        "devices": {"Good": {"zones": {"Z": {}, "Bad": 3}, "hardware_effect": {"mode": "Wave"}}, "Broken": 5},
         "custom_colors": {},
+        "hardware_effects": {"enabled": True},       # from 1.2.0 test builds
     }))
     cfg = Config(str(path))
     assert cfg.get("ddc.enabled") is True
@@ -26,6 +27,7 @@ def test_repairs_bad_types(tmp_path):
     assert cfg.logging == DEFAULT_CONFIG["logging"]
     assert cfg.devices == {"Good": {"zones": {"Z": {}}}}
     assert cfg.get("custom_colors") == []
+    assert "hardware_effects" not in cfg.raw
 
 
 def test_invalid_json_is_backed_up(tmp_path):

@@ -13,7 +13,9 @@ Whatever OpenRGB supports: ARGB headers, RGB controllers, RAM, keyboards, mice, 
 No. The daemon does the work; the window only changes settings.
 
 **Does it animate?**
-No, on purpose. Patterns are static: OpenRGB over USB can't deliver smooth animation, and a static setup
+Yes, since 1.2.0: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, per zone, also
+through the room following the layout. Static patterns are still the default. See
+[Animations](Animations.md). Before 1.2.0 Iridia was static only: a static setup
 costs next to nothing in CPU. Colors change when the wallpaper, brightness or your settings change.
 
 **How much CPU does it use?**
@@ -58,8 +60,9 @@ for a remote host; start OpenRGB there.
 [setup](Setups-and-Backups.md).
 
 **Why is the `iridia` command not found?**
-It lives in `~/.local/share/iridia-venv/bin/`. Add that folder to your `PATH` (see
-[Installation](Installation.md#running-it)) or use the full path.
+The installer links it into `~/.local/bin`, which some shells (fish, for one) don't have on their
+`PATH` yet. See [Installation](Installation.md#running-it), or use the full path
+`~/.local/share/iridia-venv/bin/iridia`.
 
 **What is the window's class or app id, for window rules?**
 `io.github.HypestHyper.Iridia`. For example, to make the window float on Hyprland:

@@ -19,14 +19,40 @@ rather than guessed:
     self.client here, not a synthetic health check.
 """
 
+import functools
 import logging
+import socket
+import struct
+import threading
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence, Tuple
 
 logger = logging.getLogger("iridia")
 
 # OpenRGB mode colour modes (openrgb.utils.ModeColors)
 _PER_LED, _MODE_SPECIFIC = 1, 2
+# SDK packet ids for colour updates
+_UPDATE_LEDS, _UPDATE_ZONE_LEDS = 1050, 1051
+
+
+def _locked(fn):
+    """Run a method holding the controller's lock: the daemon's loop and the animation thread
+    share one connection, and two writers on one socket would interleave their packets."""
+    @functools.wraps(fn)
+    def wrapper(self, *a, **k):
+        with self.lock:
+            return fn(self, *a, **k)
+    return wrapper
+
+
+def _pack_rgb(colors: Sequence[Tuple[int, int, int]]) -> bytes:
+    """(r, g, b) tuples -> the SDK's 4 bytes per LED (r, g, b, padding)."""
+    n = len(colors)
+    buf = bytearray(4 * n)
+    buf[0::4] = bytes(c[0] for c in colors)
+    buf[1::4] = bytes(c[1] for c in colors)
+    buf[2::4] = bytes(c[2] for c in colors)
+    return bytes(buf)
 
 
 def unique_names(names: List[str]) -> List[str]:
@@ -54,6 +80,13 @@ def _rgb(hex_color: str):
         return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
     except ValueError:
         return RGBColor(0, 0, 0)
+
+
+def _fit_rgb(colors, n: int) -> list:
+    out = list(colors[:n])
+    while len(out) < n:
+        out.append(out[-1] if out else (0, 0, 0))
+    return out
 
 
 def _fit(colors: List[str], n: int) -> List[str]:
@@ -91,6 +124,10 @@ class OpenRGBController:
         self.last_error_time: Optional[float] = None
         self._last_inventory: Dict = {}
         self._last_warned: Optional[str] = None
+        self.lock = threading.RLock()
+        self._asserted: set = set()          # devices put in Direct mode since this connection
+        self._link = None                    # FrameLink: animation frames that wait for OpenRGB
+        self._link_tried = 0.0
 
     def _warn_once(self, msg: str):
         """Warn only when the message changes — send() runs on every
@@ -124,6 +161,7 @@ class OpenRGBController:
         self._last_connect_attempt = now
         return True
 
+    @_locked
     def ensure_connected(self, retry_interval: float = 5.0) -> bool:
         if self.client is not None:
             # Nothing to verify here — see module docstring. Liveness is
@@ -143,8 +181,16 @@ class OpenRGBController:
         try:
             from openrgb import OpenRGBClient
             self.client = OpenRGBClient(self.host, self.port, "iridia", 0)
+            try:
+                # small packets go out at once: without this, TCP holds a frame back up to 40 ms
+                # while it waits for the answer to the one before
+                self.client.comms.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except (AttributeError, OSError):
+                pass
             self.connected_since = time.time()
+            self._asserted.clear()               # (re)connected: put devices in Direct mode again
             self._enumerate()
+            self._close_link()
             return self.client is not None
         except ConnectionRefusedError:
             self._record_error(f"No SDK server responding on {self.host}:{self.port}")
@@ -217,6 +263,7 @@ class OpenRGBController:
             logger.warning(f"OpenRGB device enumeration failed: {type(e).__name__}: {e}")
             self.devices = {}
 
+    @_locked
     def maybe_enumerate(self, interval: float = 10.0):
         if time.time() - self._last_enum >= interval:
             self._enumerate()
@@ -267,11 +314,11 @@ class OpenRGBController:
         cur_i = getattr(dev, "active_mode", None)
         cur = modes[cur_i] if isinstance(cur_i, int) and 0 <= cur_i < len(modes) else None
         want = self._color_kind.get(name)
-        if cur is not None and cur.name.lower() == "direct":
+        if cur is not None and cur.name.lower() == "direct" and name in self._asserted:
             self._color_kind[name] = "per_led"
             return "per_led"
         # Already in the fallback we picked earlier: nothing to switch.
-        if cur is not None and want and self._fallback_mode.get(name) == cur.name:
+        if cur is not None and want and self._fallback_mode.get(name) == cur.name and cur.name.lower() != "direct":
             return want
         pick, kind = None, None
         for m in modes:
@@ -297,6 +344,14 @@ class OpenRGBController:
             self._record_error(msg)
             return None
         try:
+            if pick.name.lower() == "direct" and name not in self._asserted:
+                # Once per connection, set Direct even when OpenRGB already reports it: another
+                # client (or a hardware effect left running) can change the mode without OpenRGB's
+                # copy of it changing.
+                if cur is not None and cur.name.lower() == "direct":
+                    logger.debug(f"'{name}': putting it in Direct mode again (first send on this connection)")
+                    dev.set_mode(pick)
+                self._asserted.add(name)
             if cur is None or cur.name != pick.name:
                 note = "" if pick.name.lower() == "direct" else (
                     " (it has no Direct mode; LEDs can still have their own colours)" if kind == "per_led"
@@ -315,6 +370,7 @@ class OpenRGBController:
             self._record_error(msg)
             return None
 
+    @_locked
     def list_devices(self) -> List[Dict]:
         result = []
         for name, dev in self.devices.items():
@@ -325,6 +381,102 @@ class OpenRGBController:
                            "single_color": self._color_kind.get(name) == "single"})
         return result
 
+    # ---------------------------------------------------------- the frame connection
+    LINK_RETRY_SEC = 30.0
+
+    def _send_by_link(self, dev, device_name: str, body: bytes) -> bool:
+        """Send a whole-device frame over the protocol 6 connection and wait until OpenRGB has
+        written it (see sdk_frames). False when that connection can't be used: the caller sends
+        the frame over the main connection instead."""
+        from iridia.sdk_frames import FrameLink
+        if self._link is None:
+            if time.monotonic() - self._link_tried < self.LINK_RETRY_SEC:
+                return False
+            self._link_tried = time.monotonic()
+            link = FrameLink(self.host, self.port)
+            if not link.open():
+                logger.info("OpenRGB doesn't speak SDK protocol 6 (it came with OpenRGB 1.0): animation "
+                            "frames go over the main connection")
+                return False
+            logger.info("Animation frames go over their own OpenRGB connection, one written frame at a time")
+            self._link = link
+        try:
+            return self._link.send_leds(dev.id, body)
+        except (OSError, ConnectionError, struct.error) as e:
+            logger.info(f"Frame connection to OpenRGB failed ({e}); using the main connection for now")
+            self._close_link()
+            self._link_tried = time.monotonic()
+            return False
+
+    def _close_link(self):
+        if self._link is not None:
+            self._link.close()
+        self._link = None
+        self._link_tried = 0.0
+
+    def zone_rgb(self, device_name: str, zone_name: str) -> List[Tuple[int, int, int]]:
+        """The colours OpenRGB last reported for a zone (for zones Iridia hasn't sent to yet)."""
+        dev = self.devices.get(device_name)
+        z = dict(zones_of(dev)).get(zone_name) if dev is not None else None
+        out = []
+        for c in list(getattr(z, "colors", None) or []):
+            try:
+                out.append((int(c.red), int(c.green), int(c.blue)))
+            except (AttributeError, TypeError, ValueError):
+                out.append((0, 0, 0))
+        return out
+
+    # ---------------------------------------------------------- animation frames
+    @_locked
+    def send_frames(self, device_name: str, frames: Dict[str, Sequence[Tuple[int, int, int]]]) -> Optional[bool]:
+        """Send one animation frame: {zone name: [(r, g, b), ...]} for the zones that changed, or
+        {"": [...]} for every LED of the device in one packet. Builds the SDK packets directly
+        (no per-LED objects). Returns True when sent, False on error, None when the device isn't
+        there (or has no per-LED mode)."""
+        dev = self.devices.get(device_name)
+        if dev is None or self.client is None:
+            return None
+        try:
+            kind = self.ensure_direct_mode(dev, device_name)
+            if kind is None:
+                return None
+            comms = dev.comms
+            if kind == "single":
+                first = next((f[0] for f in frames.values() if f), (0, 0, 0))
+                from openrgb.utils import RGBColor
+                dev.set_color(RGBColor(*first), fast=True)
+                return True
+            if "" in frames:
+                n = len(getattr(dev, "leds", None) or [])
+                if n == 0:
+                    return None
+                cols = _fit_rgb(frames[""], n)
+                body = struct.pack("H", n) + _pack_rgb(cols)
+                if self._send_by_link(dev, device_name, body):
+                    return True
+                comms.send_header(dev.id, _UPDATE_LEDS, len(body) + 4)
+                comms.send_data(struct.pack("I", len(body) + 4) + body)
+                return True
+            zones = dict(zones_of(dev))
+            for zn, cols in frames.items():
+                z = zones.get(zn)
+                n = len(getattr(z, "leds", None) or []) if z is not None else 0
+                if n == 0:
+                    continue
+                body = struct.pack("iH", z.id, n) + _pack_rgb(_fit_rgb(cols, n))
+                comms.send_header(dev.id, _UPDATE_ZONE_LEDS, len(body) + 4)
+                comms.send_data(struct.pack("I", len(body) + 4) + body)
+            return True
+        except ConnectionError as e:
+            self._lost(f"Connection lost while sending to '{device_name}': {e}")
+            return False
+        except Exception as e:              # noqa: BLE001
+            msg = f"Animation frame to '{device_name}' failed: {type(e).__name__}: {e}"
+            self._warn_once(f"OpenRGB {msg}")
+            self._record_error(msg)
+            return False
+
+    @_locked
     def resize_zone(self, device_name: str, zone_name: str, size: int) -> Optional[str]:
         """Resize an addressable zone in OpenRGB. Returns an error string or None."""
         dev = self.devices.get(device_name)
@@ -350,10 +502,12 @@ class OpenRGBController:
         """The link is dead (not a data problem): reset for a real reconnect."""
         logger.warning(f"OpenRGB {msg}, will reconnect")
         self._record_error(msg)
+        self._close_link()
         self.client = None
         self.devices = {}
         self.connected_since = None
 
+    @_locked
     def disconnect(self):
         """Drop the current connection so the next ensure_connected() does
         a fresh connect + enumerate, bypassing the retry-interval
@@ -363,11 +517,13 @@ class OpenRGBController:
                 self.client.disconnect()
             except Exception:
                 pass
+        self._close_link()
         self.client = None
         self.devices = {}
         self.connected_since = None
         self._last_connect_attempt = 0.0
 
+    @_locked
     def send(self, device_name: str, colors: List[str], zones_config: Optional[Dict] = None) -> bool:
         """Send colours to a device, or to the zones named in zones_config (only those)."""
         dev = self.devices.get(device_name)
@@ -433,6 +589,7 @@ class OpenRGBController:
             self._record_error(msg)
             return False
 
+    @_locked
     def send_zone(self, device_name: str, zone_name: str, colors: List[str]) -> bool:
         """Send colors to a specific zone."""
         return self.send(device_name, colors, {zone_name: {"enabled": True}} if zone_name else None)

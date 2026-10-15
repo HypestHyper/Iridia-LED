@@ -3,10 +3,21 @@
 
 FAKE_OPENRGB_MODE (default "zero"):
   zero    with --server: an SDK server that answers the handshake and reports no devices
+  devices like zero, but with two devices: a 2 channel ARGB controller (20 LEDs each) with
+          Direct, Static, Breathing, Spectrum Cycle and Wave modes, and a RAM stick (8 LEDs)
   alive   stays running without listening (an OpenRGB window with its SDK server off)
   crash   exits right away with code 3
 FAKE_OPENRGB_LOG: a file each start is appended to ("PID ARG ARG...").
+FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE TIME").
+FAKE_OPENRGB_UPDATE_DELAY: seconds each colour write takes, like a slow controller (default 0).
+  Then, like OpenRGB 1.0: every colour update goes into one queue per controller (shared by all
+  clients) that the controller's thread writes one by one; everything else is answered at once,
+  including device data, so a protocol 0 client can't tell how far behind the controller is.
+FAKE_OPENRGB_PROTOCOL: the SDK protocol the server speaks (default 3). 6, like OpenRGB 1.0: the
+  controller count lists controller IDs, colour packets name a controller by its ID, and each one
+  is acknowledged (packet 10) once it has been written.
 """
+import copy
 import os
 import signal
 import socket
@@ -53,16 +64,147 @@ def reply(conn, ptype, payload):
     conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", 0, ptype, len(payload)) + payload)
 
 
+DEVICES = []
+VERSION = 1
+if mode == "devices":
+    from openrgb import utils as U
+
+    def _mode(i, name, flags=0, color_mode=U.ModeColors.NONE, speed=None, colors=None, ncol=0):
+        # settings a mode doesn't have must be None, as OpenRGB's own data has them
+        sp = speed or (None, None, None)
+        br = (0, 100, 100) if flags & 16 else (None, None, None)
+        co = colors or (None, None)
+        return U.ModeData(i, name, i, U.ModeFlags(flags), sp[0], sp[1], br[0], br[1], co[0], co[1], sp[2], br[2],
+                          0, color_mode, [U.RGBColor(255, 0, 0)] * ncol if colors else None)
+
+    def _device(name, zones, modes, dtype):
+        leds, zl, cols, start = [], [], [], 0
+        for zn, n in zones:
+            zl.append(U.ZoneData(zn, U.ZoneType.LINEAR, 0, 200, n, 0, 0, None, [], [], [], start))
+            leds += [U.LEDData(f"{zn} LED {i}", i) for i in range(n)]
+            cols += [U.RGBColor(0, 0, 0)] * n
+            start += n
+        return U.ControllerData(name, U.MetaData("Fake", "a fake device", "1.0", "0", "fake"), dtype, leds, zl,
+                                modes, cols, 1)
+
+    SPEED, DIR_LR, BRIGHT, MODE_COLOR, PER_LED = 1, 2, 16, 64, 32
+    DEVICES = [
+        _device("Fake ARGB Controller", [("Channel 1", 20), ("Channel 2", 20)], [
+            _mode(0, "Direct", PER_LED, U.ModeColors.PER_LED),
+            _mode(1, "Static", MODE_COLOR | BRIGHT, U.ModeColors.MODE_SPECIFIC, colors=(1, 1), ncol=1),
+            _mode(2, "Breathing", SPEED | MODE_COLOR | BRIGHT, U.ModeColors.MODE_SPECIFIC, (1, 5, 3), (1, 2), 2),
+            _mode(3, "Spectrum Cycle", SPEED | BRIGHT, U.ModeColors.NONE, (4, 0, 2)),
+            _mode(4, "Wave", SPEED | DIR_LR | BRIGHT, U.ModeColors.NONE, (1, 10, 5)),
+        ], U.DeviceType.LEDSTRIP),
+        _device("Fake RAM", [("Stick", 8)], [
+            _mode(0, "Direct", PER_LED, U.ModeColors.PER_LED),
+            _mode(1, "Rainbow", SPEED, U.ModeColors.NONE, (1, 3, 2)),
+        ], U.DeviceType.DRAM),
+    ]
+    VERSION = 3
+PACKETS = os.environ.get("FAKE_OPENRGB_PACKETS")
+UPDATE_DELAY = float(os.environ.get("FAKE_OPENRGB_UPDATE_DELAY") or 0)
+PROTOCOL = int(os.environ.get("FAKE_OPENRGB_PROTOCOL") or VERSION)
+IDS = [500 + i for i in range(len(DEVICES))]       # protocol 6 controller IDs (not the indexes)
+WORKERS = {}
+WORKERS_LOCK = threading.Lock()
+
+
+class Worker:
+    """One controller's thread: writes queued colour updates one by one, then acknowledges them
+    to protocol 6 clients."""
+
+    def __init__(self, dev):
+        self.dev, self.q, self.cv = dev, [], threading.Condition()
+        threading.Thread(target=self.run, daemon=True).start()
+
+    def run(self):
+        while True:
+            with self.cv:
+                while not self.q:
+                    self.cv.wait()
+                ptype, size, ack = self.q.pop(0)
+            time.sleep(UPDATE_DELAY)
+            note(ptype, self.dev, size)
+            if ack:
+                try:
+                    ack()
+                except OSError:
+                    pass
+
+
+def worker(dev):
+    with WORKERS_LOCK:
+        return WORKERS.get(dev) or WORKERS.setdefault(dev, Worker(dev))
+
+
+def note(ptype, dev, size):
+    if PACKETS:
+        with open(PACKETS, "a") as f:
+            f.write(f"{ptype} {dev} {size} {time.time():.3f}\n")
+
+
+def device_data(conn, dev, data, send_lock):
+    # answer in the protocol version the client asks for, like OpenRGB does
+    asked = min(struct.unpack("I", data[:4])[0] if len(data) >= 4 else VERSION, VERSION)
+    d = copy.deepcopy(DEVICES[dev])
+    if asked < 3:                       # brightness came with protocol 3
+        for m in d.modes:
+            m.brightness = m.brightness_min = m.brightness_max = None
+    body = d.pack(asked)
+    with send_lock:
+        conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, 1, len(body)) + body)
+
+
 def serve(conn):
+    send_lock = threading.Lock()
+    proto = 0                               # what this client and the server agreed on
+
+    def send(dev, ptype, payload):
+        with send_lock:
+            conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, ptype, len(payload)) + payload)
+
     try:
         while True:
-            _o, _r, _g, _b, _dev, ptype, size = struct.unpack("ccccIII", recv_exact(conn, 16))
-            if size:
-                recv_exact(conn, size)
-            if ptype == 40:                 # protocol version: 1 (no profiles, no plugins)
-                reply(conn, 40, struct.pack("I", 1))
-            elif ptype == 0:                # controller count: none
-                reply(conn, 0, struct.pack("I", 0))
+            _o, _r, _g, _b, dev, ptype, size = struct.unpack("ccccIII", recv_exact(conn, 16))
+            data = recv_exact(conn, size) if size else b""
+            if ptype == 40:                 # protocol version: the server answers with its own
+                asked = struct.unpack("I", data[:4])[0] if len(data) >= 4 else 0
+                proto = min(asked, PROTOCOL)
+                send(0, 40, struct.pack("I", PROTOCOL))
+                if proto >= 6:
+                    send(0, 51, b"Fake OpenRGB\0")         # server name, protocol 6 only
+                    send(0, 10, struct.pack("II", 40, 0))   # and everything gets an ACK
+                continue
+            if proto >= 6 and ptype in (1050, 1051, 1052, 1100, 1101):
+                if dev not in IDS:
+                    continue
+                dev = IDS.index(dev)        # protocol 6 names controllers by ID
+            if ptype == 0:                  # controller count
+                send(0, 0, struct.pack("I", len(DEVICES))
+                     + (struct.pack(f"{len(IDS)}I", *IDS) if proto >= 6 else b""))
+            elif ptype == 150:              # profile list: none
+                send(0, 150, struct.pack("IH", 6, 0))
+            elif ptype == 1 and dev < len(DEVICES):
+                device_data(conn, dev, data, send_lock)
+            elif ptype in (1000, 1050, 1051, 1052, 1100, 1101):
+                if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
+                    DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
+                ack = None
+                if proto >= 6:
+                    cid = IDS[dev] if dev < len(IDS) else dev
+                    ack = (lambda cid=cid, pt=ptype: send(cid, 10, struct.pack("II", pt, 0)))
+                if UPDATE_DELAY and ptype in (1050, 1051, 1052):
+                    w = worker(dev)
+                    with w.cv:
+                        w.q.append((ptype, size, ack))
+                        w.cv.notify()
+                else:
+                    note(ptype, dev, size)
+                    if ack:
+                        ack()
+            elif proto >= 6:
+                send(dev, 10, struct.pack("II", ptype, 0))
     except (ConnectionError, OSError, struct.error):
         pass
     finally:

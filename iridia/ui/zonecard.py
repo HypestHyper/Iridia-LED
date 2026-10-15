@@ -5,8 +5,10 @@ import time
 from gi.repository import GLib, Gtk
 
 from iridia.i18n import _, ngettext, pgettext  # noqa: F401
+from iridia import animations
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator
+from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
 from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
                                button, card, hbox, icon, label, set_button_text, switch_row, vbox)
@@ -15,7 +17,7 @@ ZONE_FIELDS_DEFAULT = {
     "enabled": True, "led_count": 20, "pattern": "solid", "mode": "full",
     "pattern_colors": [0], "brightness_sync": True, "manual_brightness": 100,
     "brightness_range": [0, 100], "invert_brightness": False, "gamma_correction": False,
-    "pattern_params": {}, "calibration_profile": "WS2812B",
+    "pattern_params": {}, "calibration_profile": "WS2812B", "animation": None,
 }
 
 MODE_LABELS = {"full": pgettext("color correction", "Off"), "palette": _("Palette"), "calibrated": _("Calibrated")}
@@ -77,6 +79,9 @@ class GlobalClient:
 
     def set_zone_pattern_params(self, d, z, params):
         return self._c.set_all("pattern_params", params)
+
+    def set_zone_animation(self, d, z, anim):
+        return self._c.set_all("animation", anim)
 
     def set_zone_calibration_profile(self, d, z, name):
         return self._c.set_all("calibration_profile", name)
@@ -145,6 +150,9 @@ class ZoneCard(Gtk.Box):
         self._testing = False
         self._stype = "addressable"         # effective strip type (from the daemon)
         self._strip_info = {}
+        self._anim = animations.clean(zone_cfg.get("animation"))
+        self._last_effect = self._anim["effect"] if self._anim else "breathing"
+        self._preview_last = None
         self._build_header(expanded)
         self._build_details()
         self._refresh_summary()
@@ -204,10 +212,27 @@ class ZoneCard(Gtk.Box):
         on = not self._rev.get_reveal_child()
         self._rev.set_reveal_child(on)
         self._chev.set_label(fonts.codepoint("expand_less" if on else "expand_more"))
+        if on:
+            GLib.idle_add(lambda: (self._ensure_preview(), False)[1])
+
+    def _menu_items(self):
+        if self._anim is not None:
+            return [fx.EFFECT_NAMES[e] for e in animations.ORDER]
+        return [PATTERN_NAMES[p] for p in PatternGenerator.PATTERNS if not (self.global_mode and p == "paint")]
+
+    def _menu_value(self):
+        if self._anim is not None:
+            return None if "animation" in self._mixed else fx.EFFECT_NAMES[self._anim["effect"]]
+        return None if "pattern" in self._mixed else PATTERN_NAMES.get(
+            PatternGenerator.normalize(self.cfg.get("pattern", "solid")))
 
     def _refresh_summary(self):
         pat = _("mixed") if "pattern" in self._mixed else PATTERN_NAMES.get(
             PatternGenerator.normalize(self.cfg.get("pattern", "solid")), "")
+        if "animation" in self._mixed:
+            pat = _("mixed")
+        elif self._anim is not None:
+            pat = fx.EFFECT_NAMES[self._anim["effect"]]
         mode = _("mixed") if "mode" in self._mixed else {"full": _("no correction"), "palette": _("palette"),
                                                           "calibrated": _("calibrated")}.get(self.cfg.get("mode", "full"), "")
         n_leds = int(self.cfg.get("led_count", 20) or 0)
@@ -231,11 +256,15 @@ class ZoneCard(Gtk.Box):
             self._led_spin = None
         self._pattern_lbl = label(_("Pattern"), ("small", "dim"))
         row.append(self._pattern_lbl)
-        pats = [PATTERN_NAMES[p] for p in PatternGenerator.PATTERNS if not (self.global_mode and p == "paint")]
-        self._pattern = Dropdown(pats, PATTERN_NAMES.get(PatternGenerator.normalize(self.cfg.get("pattern", "solid"))),
-                                 self._on_pattern_change)
+        self._kind = Group([("static", _("Static")), ("animated", _("Animated"))],
+                           "animated" if self._anim else "static", self._on_kind)
+        row.append(self._kind)
+        self._pattern = Dropdown(self._menu_items(), self._menu_value(), self._on_pattern_change)
         row.append(self._pattern)
         d.append(row)
+        self._fx = fx.EffectControls(self._on_effect_params, show_sync=self.global_mode)
+        self._fx.set_effect(self._anim)
+        d.append(self._fx)
         if not self.global_mode:
             self._build_strip_box(d)
 
@@ -512,6 +541,8 @@ class ZoneCard(Gtk.Box):
     def _update_preview(self):
         count = self._count()
         pat = self._pattern_key()
+        if self._anim is not None:
+            self._ensure_preview()
         painted = pat == "paint" and not self.global_mode
         self._strip.set_state(count, self.patterns.generate(pat, self._current_colors(), count, params=self._params),
                               pat)
@@ -526,6 +557,10 @@ class ZoneCard(Gtk.Box):
             self._layout_open = False
         set_button_text(self._layout_btn, _("Done editing") if self._layout_open else _("Edit layout"),
                         "check" if self._layout_open else "tune")
+        if self._anim is not None:
+            self._layout_btn.set_visible(False)       # stops belong to static patterns
+            self._layout_open = False
+            editable = False
         self._strip.set_layout(self._layout_open and editable, self._stops_for_edit() if editable else [])
         self._rebuild_chips()
         self._paint_box.set_visible(painted)
@@ -643,7 +678,70 @@ class ZoneCard(Gtk.Box):
         self._refresh_summary()
         self._update_preview()
 
+    # ------------------------------------------------------------ effects
+    def _on_kind(self, kind):
+        if (kind == "animated") == (self._anim is not None):
+            return
+        self._mixed.discard("animation")
+        self._anim = animations.defaults(self._last_effect) if kind == "animated" else None
+        self._send_animation()
+        self._pattern.set_items(self._menu_items(), self._menu_value())
+        self._fx.set_effect(self._anim)
+        self._after_effect_change()
+
+    def _on_effect_params(self, params):
+        if self._anim is None:
+            return
+        self._anim = params
+        self._send_animation()
+        self._update_preview()
+
+    def _send_animation(self):
+        self.cfg = dict(self.cfg, animation=self._anim)
+        self._call(self.client.set_zone_animation, self.device_name, self.zone_name, self._anim)
+
+    def _after_effect_change(self):
+        self._refresh_summary()
+        self._apply_color_limit()
+        self._update_preview()
+
+    def _preview_wanted(self) -> bool:
+        return self._anim is not None and self.expanded and self.get_mapped()
+
+    def _tick_preview(self):
+        if not self._preview_wanted():
+            return False
+        count = self._count()
+        params = dict(self._params)
+        base = self.patterns.generate(PatternGenerator.normalize(self.cfg.get("pattern", "solid")),
+                                      self._current_colors(), count, params=params)
+        pos = animations.strip_positions(count, bool(params.get("reverse")), bool(params.get("mirror")))
+        key = f"{self.device_name}|{self.zone_name}"
+        frame = fx.preview(self.app._status if isinstance(self.app._status, dict) else {}, key, self._anim,
+                           self._current_colors(), base, count, positions=pos)
+        if frame != self._preview_last or self._strip.led_count != count:
+            self._preview_last = frame          # slow effects often show the same frame: no repaint
+            self._strip.set_state(count, frame, "solid")
+        return True
+
+    def _ensure_preview(self):
+        if self._preview_wanted() and not fx.ticking(self):
+            self._preview_last = None
+            fx.tick(self, self._tick_preview)
+
     def _on_pattern_change(self, name):
+        if self._anim is not None:
+            effect = fx.EFFECT_KEYS.get(name)
+            if not effect or effect == self._anim["effect"]:
+                return
+            self._mixed.discard("animation")
+            keep = {k: self._anim[k] for k in ("follow_layout", "angle", "sync")}
+            self._anim = animations.clean(dict(animations.defaults(effect), **keep))
+            self._last_effect = effect
+            self._send_animation()
+            self._fx.set_effect(self._anim)
+            self._after_effect_change()
+            return
         pat = PATTERN_KEYS.get(name, "solid")
         self._mixed.discard("pattern")
         self._call(self.client.set_zone_pattern, self.device_name, self.zone_name, pat)
@@ -654,7 +752,7 @@ class ZoneCard(Gtk.Box):
         self._update_preview()
 
     def _apply_color_limit(self):
-        solid = self._pattern_key() == "solid"
+        solid = self._pattern_key() == "solid" and self._anim is None
         changed = self._picker.set_max_select(1 if solid else 8)
         if changed and solid:
             self._on_colors_change(list(self._picker.selected))
@@ -766,9 +864,20 @@ class ZoneCard(Gtk.Box):
             self._enabled.set_value(zcfg.get("enabled", True))
             if self._led_spin is not None and not self._led_spin.busy():
                 self._led_spin.set_quiet(zcfg.get("led_count", 20))
-            pat = None if "pattern" in self._mixed else PATTERN_NAMES.get(
-                PatternGenerator.normalize(zcfg.get("pattern", "solid")))
-            self._pattern.set_value(pat)
+            anim = animations.clean(zcfg.get("animation"))
+            if anim != self._anim or ("animation" in self._mixed) != getattr(self, "_anim_mixed", False):
+                self._anim_mixed = "animation" in self._mixed
+                if anim is not None:
+                    self._last_effect = anim["effect"]
+                self._anim = anim
+                self._fx.set_effect(None if self._anim_mixed else anim)
+                self._kind.set_active(None if self._anim_mixed else ("animated" if anim else "static"))
+                self._pattern.set_items(self._menu_items(), self._menu_value())
+                self._refresh_summary()
+                self._apply_color_limit()
+                self._update_preview()
+            else:
+                self._pattern.set_value(self._menu_value())
         sel = list(zcfg.get("pattern_colors", [0]))
         custom = list(custom)
         colors_changed = False

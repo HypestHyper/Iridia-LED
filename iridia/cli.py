@@ -44,12 +44,21 @@ def cmd_status(args):
     n = resp.get("night") or {}
     print(f"Night mode: {'off' if not n.get('enabled') else ('on now' if n.get('active') else 'scheduled')}"
           + (f", {n.get('start')} to {n.get('end')}, cap {n.get('cap')}%" if n.get("enabled") else ""))
+    an = resp.get("animations") or {}
+    if an.get("zones"):
+        print(f"Animations: {len(an['zones'])} zone(s), {an.get('fps')} fps"
+              + (", paused ('iridia animations resume')" if an.get("paused") else "")
+              + ("" if an.get("enabled", True) else ", switched off in Settings"))
     if resp.get("frozen"):
         print("Colors: FROZEN (wallpaper changes ignored, 'iridia unfreeze' to follow it again)")
     if resp.get("lights_off") or resp.get("asleep"):
         print("Lights: off" + (" (PC asleep)" if resp.get("asleep") else " ('iridia lights on')"))
     print()
     print("Devices:")
+    def effect(c):
+        a = c.get("animation")
+        return f" | effect={a['effect']}" if isinstance(a, dict) and a.get("effect") else ""
+
     def corr_name(c):
         m = c.get("mode", "full")
         return "off" if m == "full" else f"calibrated ({c.get('calibration_profile', 'WS2812B')})" if m == "calibrated" else m
@@ -58,15 +67,15 @@ def cmd_status(args):
         status = "enabled" if cfg.get("enabled", True) else "disabled"
         zones = cfg.get("zones", {})
         if not zones:
-            print(f"  {name}: {status} | LEDs={cfg.get('led_count', 20)} | pattern={cfg.get('pattern', 'solid')} | "
-                  f"correction={corr_name(cfg)}")
+            print(f"  {name}: {status} | LEDs={cfg.get('led_count', 20)} | pattern={cfg.get('pattern', 'solid')}"
+                  f"{effect(cfg)} | correction={corr_name(cfg)}")
             continue
         print(f"  {name}: {status}")
         for zname, zcfg in zones.items():
             zs = "" if zcfg.get("enabled", True) else " (off)"
             shown = f"{zcfg['display_name']} ({zname})" if zcfg.get("display_name") else zname
-            print(f"    {shown}{zs}: LEDs={zcfg.get('led_count', 20)} | pattern={zcfg.get('pattern', 'solid')} | "
-                  f"correction={corr_name(zcfg)}")
+            print(f"    {shown}{zs}: LEDs={zcfg.get('led_count', 20)} | pattern={zcfg.get('pattern', 'solid')}"
+                  f"{effect(zcfg)} | correction={corr_name(zcfg)}")
 
     real_devices = resp.get("devices", [])
     if real_devices:
@@ -384,6 +393,13 @@ def cmd_uninstall(args):
             print("Removed the XDG autostart entry.")
     except Exception:
         pass
+    for cmd in ("iridia", "iridia-gui"):          # the links install.sh put on the PATH
+        link = os.path.expanduser(f"~/.local/bin/{cmd}")
+        try:
+            if os.path.islink(link) and "iridia-venv" in os.readlink(link):
+                os.remove(link)
+        except OSError:
+            pass
     if purge:
         for d in ("~/.config/iridia", "~/.cache/iridia", "~/.local/share/iridia"):
             shutil.rmtree(os.path.expanduser(d), ignore_errors=True)
@@ -471,12 +487,46 @@ def cmd_zone(args):
         print("  all                          every strip")
         return 0
     if not args.actions:
-        print("Say what to do: on, off, color HEX, bright PERCENT (any mix), or normal. "
+        print("Say what to do: on, off, color HEX, bright PERCENT (any mix), effect NAME, or normal. "
               "'iridia zone list' shows the strip names.", file=sys.stderr)
         return 2
-    return _report({"cmd": "zone_action", "target": args.target, "actions": args.actions,
-                    "toggle": not args.set},
+    actions = list(args.actions)
+    for opt in ("speed", "min", "max"):
+        v = getattr(args, opt, None)
+        if v is not None:
+            actions.append(f"{opt}={v}")
+    for kv in args.param or []:
+        actions.append(kv)
+    return _report({"cmd": "zone_action", "target": args.target, "actions": actions,
+                    "toggle": not args.set, "save": args.save},
                    lambda r: r.get("message", "Done."))
+
+
+def cmd_animations(args):
+    """iridia animations pause | resume | toggle | status."""
+    if args.action == "status":
+        try:
+            st = _client().send({"cmd": "status"})
+        except Exception as e:              # noqa: BLE001
+            print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
+            return 1
+        a = st.get("animations") or {}
+        if not st.get("ok"):
+            print("Daemon not running.")
+            return 1
+        print(f"Animations: {'on' if a.get('enabled') else 'off'}{', paused' if a.get('paused') else ''}, "
+              f"{a.get('fps')} fps, {'running' if a.get('running') else 'idle'}")
+        for k in a.get("zones", []):
+            print(f"  {k.replace('|', '/').rstrip('/')}")
+        for dev, t in (a.get("timing") or {}).items():
+            print(f"  {dev}: {t['fps']} frames per second (target {t['target']}), {t['ms']} ms per frame, "
+                  f"slowest {t['max_ms']} ms (last 5 s)")
+        from iridia import code_fingerprint
+        if st.get("code") and st["code"] != code_fingerprint():
+            print("The daemon runs older code than what's installed: restart it (iridia restart).")
+        return 0
+    return _report({"cmd": "animations", "action": args.action},
+                   lambda r: "Animations paused." if r.get("paused") else "Animations running.")
 
 
 def cmd_unfreeze(args):
@@ -979,15 +1029,26 @@ def main():
     fr_parser = subparsers.add_parser("freeze", help="Keep the current colors, ignore wallpaper changes")
     fr_parser.add_argument("state", nargs="?", choices=["on", "toggle"], default="on")
     z_parser = subparsers.add_parser(
-        "zone", help="Keybind actions for strips: on, off, color HEX, bright PERCENT (any mix), normal",
+        "zone", help="Keybind actions for strips: on, off, color HEX, bright PERCENT (any mix), effect NAME, normal",
         description="Change strips for a moment (nothing is saved). Running the same command again puts them "
                     "back to normal, so one key can switch both ways. Mix actions freely. Examples:  "
                     "iridia zone \"Desk back\" off   iridia zone \"Desk back,Monitor\" on color ff0000 bright 40   "
-                    "iridia zone all color 00ff88 bright 20   iridia zone list")
+                    "iridia zone all color 00ff88 bright 20   iridia zone \"Desk back\" effect breathing --speed 3 "
+                    "--min 10 --max 100   iridia zone all effect static   iridia zone list")
     z_parser.add_argument("target", help="a strip name, several separated by commas, Device/Zone, a device "
                                          "name, 'all', or 'list'")
-    z_parser.add_argument("actions", nargs="*", help="on | off | color HEX | bright PERCENT | normal")
+    z_parser.add_argument("actions", nargs="*", help="on | off | color HEX | bright PERCENT | effect NAME | normal. "
+                          "Effects: breathing, comet, fill, embers, rainbow, rainbow_vomit, color_cycle, static")
     z_parser.add_argument("--set", action="store_true", help="don't switch back when it's already set")
+    z_parser.add_argument("--save", action="store_true",
+                          help="with 'effect NAME': make it the strip's own setting (not a temporary change)")
+    z_parser.add_argument("--speed", type=float, help="effect speed (seconds per cycle or LEDs per second)")
+    z_parser.add_argument("--min", type=int, help="breathing: lowest brightness in percent")
+    z_parser.add_argument("--max", type=int, help="breathing: highest brightness in percent")
+    z_parser.add_argument("--param", action="append", metavar="KEY=VALUE",
+                          help="any other effect setting, e.g. --param tail=20 --param bounce=yes")
+    an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
+    an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
     n_parser = subparsers.add_parser("night", help="Night mode: cap brightness between two times")
     n_parser.add_argument("state", nargs="?", choices=["on", "off", "toggle", "show"], default="show")
@@ -1024,7 +1085,8 @@ def main():
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log}
+                "freeze": cmd_freeze, "zone": cmd_zone, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "animations": cmd_animations}
     return commands[args.command](args)
 
 if __name__ == "__main__":

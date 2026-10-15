@@ -5,19 +5,25 @@ millimetre at 100% zoom); nothing here talks to the daemon.
 
 A strip is drawn for one zone ("device|zone"). Clones are extra strips for the
 same zone (two strips on one wire): they show the same colours and are only a
-drawing, nothing extra is sent.
+drawing, nothing extra is sent. A clone can have its own name.
 
     {"id": "a1b2", "zone": "Razer...|Channel 1", "clone": false,
      "x": 120, "y": 80,                 # where LED 1 (the data input) sits
      "flip": false,                     # LED 1 is drawn at the other end
      "locked": false, "hidden": false,
+     "name": "",                        # clones only: its own name (empty: the zone's)
      "segments": [                      # bends: each section starts at a LED
         {"start": 0,  "angle": 0,  "spacing": 16.6},
-        {"start": 40, "angle": 90, "spacing": 16.6}]}
+        {"start": 40, "angle": 90, "spacing": 16.6,
+         "jump": [0, 66.6], "hide": false}]}   # a cut before it; its LEDs left out of the drawing
 
 `angle` is the absolute heading in degrees (0 = right, 90 = down) and
 `spacing` the distance between neighbouring LEDs in that section, so a
 60 LEDs/m strip and a 144 LEDs/m strip can be shown at their real lengths.
+`jump` makes the section a cut (a strip cut and joined again with a wire): it's
+the step from the LED before the cut to the section's first LED, in any
+direction, so the piece after a cut can be placed anywhere. `hide` leaves the
+section's LEDs out of the drawing (they still light up).
 """
 
 import json
@@ -25,10 +31,31 @@ import math
 import os
 import tempfile
 import uuid
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 PATH = os.path.expanduser("~/.config/iridia/layout.json")
 DEFAULT_SPACING = 16.6          # 60 LEDs per metre, in layout units (mm)
+MAX_GAP = 5000.0                # a wire gap of up to 5 m
+
+
+def _along(angle: float, length: float) -> List[float]:
+    a = math.radians(angle)
+    return [round(math.cos(a) * length, 2), round(math.sin(a) * length, 2)]
+
+
+def _jump(v) -> Optional[List[float]]:
+    """A cut's step as [dx, dy], or None when it isn't a valid one."""
+    try:
+        dx, dy = float(v[0]), float(v[1])
+    except (TypeError, ValueError, IndexError, KeyError):
+        return None
+    if dx != dx or dy != dy:
+        return None
+    d = math.hypot(dx, dy)
+    lim = MAX_GAP + 200
+    if d > lim:
+        dx, dy = dx * lim / d, dy * lim / d
+    return [dx, dy]
 
 
 def new_id() -> str:
@@ -50,6 +77,7 @@ class Layout:
         self.strips: List[dict] = []
         self.locked = False
         self.view = {"zoom": 1.0, "pan": [40.0, 40.0]}
+        self.labels = True              # strip names and LED numbers on the canvas
         self.load()
 
     # ------------------------------------------------------------ files
@@ -64,6 +92,7 @@ class Layout:
     def from_dict(self, data: dict):
         self.strips = [s for s in (self._clean(s) for s in data.get("strips", [])) if s]
         self.locked = bool(data.get("locked", False))
+        self.labels = data.get("labels", True) is not False
         v = data.get("view") or {}
         try:
             self.view = {"zoom": max(0.04, min(8.0, float(v.get("zoom", 1.0)))),
@@ -72,7 +101,7 @@ class Layout:
             self.view = {"zoom": 1.0, "pan": [40.0, 40.0]}
 
     def to_dict(self) -> dict:
-        return {"version": 1, "locked": self.locked, "view": self.view, "strips": self.strips}
+        return {"version": 1, "locked": self.locked, "labels": self.labels, "view": self.view, "strips": self.strips}
 
     def save(self):
         folder = os.path.dirname(self.path)
@@ -96,12 +125,27 @@ class Layout:
         segs = []
         for seg in s.get("segments") or [{"start": 0, "angle": 0, "spacing": DEFAULT_SPACING}]:
             try:
-                segs.append({"start": max(0, int(seg.get("start", 0))),
-                             "angle": float(seg.get("angle", 0)) % 360,
-                             "spacing": max(2.0, min(200.0, float(seg.get("spacing", DEFAULT_SPACING))))})
+                g = {"start": max(0, int(seg.get("start", 0))),
+                     "angle": float(seg.get("angle", 0)) % 360,
+                     "spacing": max(2.0, min(200.0, float(seg.get("spacing", DEFAULT_SPACING))))}
+                jump = _jump(seg.get("jump"))
+                if jump is None:
+                    try:                     # 1.2.0 test builds: a gap along the section's direction
+                        gap = float(seg.get("gap", 0) or 0)
+                    except (TypeError, ValueError):
+                        gap = 0.0            # a bad gap mustn't lose the bend
+                    if gap == gap and gap > 0:
+                        jump = _along(g["angle"], g["spacing"] + min(MAX_GAP, gap))
+                if jump is not None:
+                    g["jump"] = jump
+                if seg.get("hide") is True:
+                    g["hide"] = True
+                segs.append(g)
             except (TypeError, ValueError, AttributeError):
                 continue
         segs.sort(key=lambda g: g["start"])
+        if segs and segs[0]["start"] == 0:
+            segs[0].pop("jump", None)        # nothing comes before LED 1
         if not segs or segs[0]["start"] != 0:
             segs.insert(0, {"start": 0, "angle": segs[0]["angle"] if segs else 0.0,
                             "spacing": segs[0]["spacing"] if segs else DEFAULT_SPACING})
@@ -115,10 +159,14 @@ class Layout:
             x, y = float(s.get("x", 40)), float(s.get("y", 40))
         except (TypeError, ValueError):
             x, y = 40.0, 40.0
-        return {"id": str(s.get("id") or new_id()), "zone": s["zone"], "clone": bool(s.get("clone", False)),
-                "x": x, "y": y, "flip": bool(s.get("flip", False)), "locked": bool(s.get("locked", False)),
-                "hidden": bool(s.get("hidden", False)),
-                "segments": dedup}
+        out = {"id": str(s.get("id") or new_id()), "zone": s["zone"], "clone": bool(s.get("clone", False)),
+               "x": x, "y": y, "flip": bool(s.get("flip", False)), "locked": bool(s.get("locked", False)),
+               "hidden": bool(s.get("hidden", False)),
+               "segments": dedup}
+        name = s.get("name")
+        if out["clone"] and isinstance(name, str) and name.strip():
+            out["name"] = name.strip()[:40]
+        return out
 
     # ---------------------------------------------------------- editing
     def ensure_zones(self, keys: List[str]) -> bool:
@@ -142,6 +190,7 @@ class Layout:
             return None
         c = json.loads(json.dumps(src))
         c.update(id=new_id(), clone=True, x=src["x"] + 30, y=src["y"] + 40, locked=False)
+        c.pop("name", None)       # named on its own, not after the strip it was copied from
         self.strips.append(c)
         return c
 
@@ -165,9 +214,71 @@ class Layout:
         if k <= 0 or any(seg["start"] == k for seg in strip["segments"]):
             return False
         cur = strip["segments"][Layout.segment_index(strip, k)]
-        strip["segments"].append({"start": k, "angle": cur["angle"], "spacing": cur["spacing"]})
+        new = {"start": k, "angle": cur["angle"], "spacing": cur["spacing"]}
+        if cur.get("hide"):
+            new["hide"] = True            # splitting a hidden part keeps both halves hidden
+        strip["segments"].append(new)
         strip["segments"].sort(key=lambda g: g["start"])
         return True
+
+    @staticmethod
+    def add_cut(strip: dict, k: int, gap: Optional[float] = None) -> bool:
+        """A cut before LED k (path order): the strip was cut there and joined with a wire.
+        Starts a section there if there's none yet; the default wire is three LEDs long."""
+        if k <= 0:
+            return False
+        Layout.add_bend(strip, k)
+        seg = strip["segments"][Layout.segment_index(strip, k)]
+        g = max(0.0, min(MAX_GAP, gap if gap is not None else seg["spacing"] * 3))
+        seg["jump"] = _along(seg["angle"], seg["spacing"] + g)
+        return True
+
+    @staticmethod
+    def gap(strip: dict, seg_index: int) -> float:
+        """How long a cut's wire is: the jump, less the usual LED spacing."""
+        seg = strip["segments"][seg_index]
+        j = seg.get("jump")
+        return max(0.0, math.hypot(j[0], j[1]) - seg["spacing"]) if j else 0.0
+
+    @staticmethod
+    def set_gap(strip: dict, seg_index: int, gap: float):
+        """A longer or shorter wire, in the same direction."""
+        if not 0 < seg_index < len(strip["segments"]):
+            return
+        seg = strip["segments"][seg_index]
+        j = seg.get("jump")
+        length = seg["spacing"] + max(0.0, min(MAX_GAP, float(gap)))
+        d = math.hypot(j[0], j[1]) if j else 0.0
+        seg["jump"] = [j[0] * length / d, j[1] * length / d] if d > 0.01 else _along(seg["angle"], length)
+
+    @staticmethod
+    def move_cut(strip: dict, seg_index: int, jump: Sequence[float]):
+        """Put the piece after a cut somewhere else (everything after it comes along)."""
+        if 0 < seg_index < len(strip["segments"]) and strip["segments"][seg_index].get("jump"):
+            strip["segments"][seg_index]["jump"] = _jump(jump) or strip["segments"][seg_index]["jump"]
+
+    @staticmethod
+    def remove_cut(strip: dict, seg_index: int) -> bool:
+        """Join the strip again: the section follows on from the LED before it. A section that's
+        only there for the cut goes too."""
+        segs = strip["segments"]
+        if not 0 < seg_index < len(segs) or not segs[seg_index].get("jump"):
+            return False
+        seg = segs[seg_index]
+        seg.pop("jump")
+        prev = segs[seg_index - 1]
+        if (abs((seg["angle"] - prev["angle"] + 180) % 360 - 180) < 0.01 and seg["spacing"] == prev["spacing"]
+                and bool(seg.get("hide")) == bool(prev.get("hide"))):
+            del segs[seg_index]
+        return True
+
+    @staticmethod
+    def set_section_hidden(strip: dict, seg_index: int, hide: bool):
+        if 0 <= seg_index < len(strip["segments"]):
+            if hide:
+                strip["segments"][seg_index]["hide"] = True
+            else:
+                strip["segments"][seg_index].pop("hide", None)
 
     @staticmethod
     def remove_bend(strip: dict, seg_index: int) -> bool:
@@ -178,14 +289,28 @@ class Layout:
 
     @staticmethod
     def rotate_from(strip: dict, seg_index: int, delta: float):
-        """Turn a section and everything after it (rigidly) by delta degrees."""
-        for seg in strip["segments"][seg_index:]:
+        """Turn a section and everything after it (rigidly) by delta degrees. A bend turns around its
+        corner LED; the piece after a cut turns around its own first LED."""
+        r = math.radians(delta)
+        c, si = math.cos(r), math.sin(r)
+        for i, seg in enumerate(strip["segments"][seg_index:], start=seg_index):
             seg["angle"] = (seg["angle"] + delta) % 360
+            j = seg.get("jump")
+            if j and (i > seg_index or i == 0):   # a piece after a cut turns in place; later cuts turn with it
+                seg["jump"] = [j[0] * c - j[1] * si, j[0] * si + j[1] * c]
 
     @staticmethod
     def reset_shape(strip: dict):
-        sp = strip["segments"][0]["spacing"]
-        strip["segments"] = [{"start": 0, "angle": strip["segments"][0]["angle"], "spacing": sp}]
+        """Straight again: bends go; cuts and hidden sections stay, in line with the start."""
+        first = strip["segments"][0]
+        keep = []
+        for i, seg in enumerate(strip["segments"]):
+            if i and (seg.get("jump") or seg.get("hide")):
+                g = dict(seg, angle=first["angle"], spacing=first["spacing"])
+                if seg.get("jump"):
+                    g["jump"] = _along(first["angle"], first["spacing"] + Layout.gap(strip, i))
+                keep.append(g)
+        strip["segments"] = [dict(first)] + keep
 
 
 # ------------------------------------------------------------- geometry
@@ -202,10 +327,47 @@ def path_points(strip: dict, n: int) -> List[Tuple[float, float]]:
                 si += 1
             seg = segs[si]
             a = math.radians(seg["angle"])
-            x += math.cos(a) * seg["spacing"]
-            y += math.sin(a) * seg["spacing"]
+            j = seg.get("jump") if seg["start"] == k else None
+            if j:
+                x += j[0]
+                y += j[1]
+            else:
+                x += math.cos(a) * seg["spacing"]
+                y += math.sin(a) * seg["spacing"]
         pts.append((x, y))
     return pts
+
+
+def hidden_path(strip: dict, n: int) -> List[bool]:
+    """For each LED in path order: is it left out of the drawing?"""
+    out = [False] * max(0, n)
+    segs = strip["segments"]
+    for i, seg in enumerate(segs):
+        if seg.get("hide"):
+            end = segs[i + 1]["start"] if i + 1 < len(segs) else n
+            for k in range(seg["start"], min(end, n)):
+                out[k] = True
+    return out
+
+
+def gap_starts(strip: dict, n: int) -> List[int]:
+    """Path positions of LEDs that come after a wire gap."""
+    return [seg["start"] for seg in strip["segments"][1:] if seg.get("jump") and 0 < seg["start"] < n]
+
+
+def cut_before(strip: dict, k: int) -> int:
+    """The section of the last cut at or before path position k (0: no cut, the strip's start)."""
+    idx = 0
+    for i, seg in enumerate(strip["segments"]):
+        if i and seg.get("jump") and seg["start"] <= k:
+            idx = i
+    return idx
+
+
+def led_points(strip: dict, n: int) -> List[Tuple[float, float]]:
+    """Where each LED sits, in the order they're sent (LED 1 first, whatever the flip)."""
+    pts = path_points(strip, n)
+    return [pts[path_at_led(strip, n, i)] for i in range(n)]
 
 
 def led_at_path(strip: dict, n: int, k: int) -> int:

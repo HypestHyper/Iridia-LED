@@ -16,10 +16,14 @@ from gi.repository import Gdk, GLib, Gtk
 from iridia.i18n import _, ngettext  # noqa: F401
 from iridia import theme
 from iridia.colors import resolve_colors
-from iridia.layout import (Layout, fraction_to_stop, led_at_path, path_at_led, path_points, point_along, project,
+from iridia.layout import (Layout, cut_before, fraction_to_stop, gap_starts, hidden_path, led_at_path, path_at_led, path_points,
+                           point_along, project,
                            split_key, stop_to_fraction, zone_count)
 from iridia.patterns import PatternGenerator
-from iridia.ui import fonts, serial
+from iridia import animations
+from iridia.layout import led_points
+from iridia.ui import effects as fx
+from iridia.ui import dialogs, fonts, serial
 from iridia.ui.widgets import (Dropdown, Group, QuickColors, Spin, Swatch, SwatchPicker, Toggle, button, divider, hbox, icon,
                                label, rgb, set_button_text, themed, vbox)
 from iridia.ui.zonecard import PATTERN_KEYS, PATTERN_NAMES
@@ -98,6 +102,8 @@ class LayoutTab(Gtk.Box):
         bar.append(button(icon_name="zoom_out", style="text small", cb=lambda: self._zoom_by(0.8), tooltip=_("Zoom out")))
         bar.append(button(icon_name="zoom_in", style="text small", cb=lambda: self._zoom_by(1.25), tooltip=_("Zoom in")))
         bar.append(button(icon_name="fit_screen", style="text small", cb=self._fit, tooltip=_("Show everything")))
+        self._labels_btn = button(icon_name="tag", style="tonal small", cb=self._toggle_labels)
+        bar.append(self._labels_btn)
         self._lock_btn = button(icon_name="lock_open", style="tonal small", cb=self._toggle_lock,
                                 tooltip=_("Lock layout"))
         bar.append(self._lock_btn)
@@ -136,6 +142,7 @@ class LayoutTab(Gtk.Box):
         scroll.connect("scroll", self._scroll)
         self.cv.add_controller(scroll)
         self._apply_lock_ui()
+        self._apply_labels_ui()
         self._show_hint()
         self._build_panel()
 
@@ -144,6 +151,7 @@ class LayoutTab(Gtk.Box):
         self._visible = on
         if not on:
             self._stop_find()
+        self._ensure_anim()
         if on and self._dirty:
             self._dirty = False
             self.cv.queue_draw()
@@ -168,6 +176,7 @@ class LayoutTab(Gtk.Box):
             self._schedule_save()
         sig = repr((sorted(self._cfg.items()), status.get("extracted_colors"), status.get("identify"),
                     status.get("probe"), status.get("lights_off"), status.get("asleep")))
+        self._ensure_anim()
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             if self._visible and self._drag is None:
@@ -175,6 +184,56 @@ class LayoutTab(Gtk.Box):
                 self._refresh_panel_values()
             else:
                 self._dirty = True
+
+    # ------------------------------------------------------------ animation
+    def _animated(self) -> Dict[str, dict]:
+        """Zones animating right now (per the daemon), with their effect."""
+        out = {}
+        for k in self._enabled:
+            a = fx.live_animation(self.status, k, self._cfg.get(k) or {})
+            if a is not None:
+                out[k] = a
+        return out
+
+    def _ensure_anim(self):
+        """Redraw on the window's preview clock while an animated zone is on screen; nothing otherwise."""
+        if self._visible and self.get_mapped() and self._animated() and not fx.ticking(self):
+            self._anim_last = None
+            fx.tick(self, self._anim_tick)
+
+    def _anim_tick(self):
+        anim = self._animated() if self._visible and self.get_mapped() else {}
+        if not anim:
+            return False
+        if self._drag is None:
+            frames = tuple(tuple(self.zone_colors(k)) for k in sorted(anim))
+            if frames != getattr(self, "_anim_last", None):     # unchanged frame: no repaint
+                self._anim_last = frames
+                self.cv.queue_draw()
+        return True
+
+    def _layout_frame(self, key: str, anim: dict, colors: List[str], base: List[str], n: int) -> List[str]:
+        """The same frame the daemon renders: positions along the strip, or through the room."""
+        params = (self._cfg.get(key) or {}).get("pattern_params") or {}
+        positions, extent = None, None
+        if anim.get("follow_layout"):
+            pts = self._points(key, n)
+            if pts:
+                positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
+                xs = []
+                for k, a in self._animated().items():
+                    if a.get("follow_layout") and (a["effect"], a["angle"]) == (anim["effect"], anim["angle"]):
+                        other = self._points(k, int((self._cfg.get(k) or {}).get("led_count", 20)))
+                        if other:
+                            xs += animations.layout_positions(other[0], a["angle"], other[1])
+                extent = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
+        if positions is None:
+            positions = animations.strip_positions(n, bool(params.get("reverse")), bool(params.get("mirror")))
+        return fx.preview(self.status, key, anim, colors, base, n, positions=positions, extent=extent)
+
+    def _points(self, key: str, n: int):
+        strip = next((s for s in self.layout.strips if s["zone"] == key and not s["clone"]), None)
+        return (led_points(strip, n), strip["segments"][0]["spacing"]) if strip and n > 0 else None
 
     def zone_colors(self, key: str, overrides: bool = True) -> List[str]:
         cfg = self._cfg.get(key) or {}
@@ -193,7 +252,11 @@ class LayoutTab(Gtk.Box):
             return out
         extracted = list(st.get("extracted_colors") or ["642107"])
         colors = resolve_colors(cfg.get("pattern_colors", [0]), extracted) or [extracted[0]]
-        return self.patterns.generate(cfg.get("pattern", "solid"), colors, n, params=cfg.get("pattern_params") or {})
+        base = self.patterns.generate(cfg.get("pattern", "solid"), colors, n, params=cfg.get("pattern_params") or {})
+        anim = fx.live_animation(self.status, key, cfg) if overrides else None
+        if anim is not None:
+            return self._layout_frame(key, anim, colors, base, n)
+        return base
 
     def _name(self, key: str) -> str:
         d, z = split_key(key)
@@ -204,6 +267,10 @@ class LayoutTab(Gtk.Box):
                      for k in self._cfg):
             return f"{z} ({d})"           # "Channel 1" on two controllers
         return z or d
+
+    def _strip_name(self, s: dict) -> str:
+        """A clone's own name, or the zone's."""
+        return s.get("name") or self._name(s["zone"])
 
     def _count(self, key: str) -> int:
         cfg = self._cfg.get(key)
@@ -281,20 +348,50 @@ class LayoutTab(Gtk.Box):
         z = self.layout.view["zoom"]
         sel = s["id"] == self._sel
         tape_w = max(6.0, 12 * z)
+        hid = hidden_path(s, n)
+        cuts = set(gap_starts(s, n))
+        # the strip is drawn in pieces: a wire gap or a hidden part breaks the tape
+        runs, cur = [], []
+        for k, pt in enumerate(spts):
+            if hid[k] or k in cuts:
+                if len(cur) > 1:
+                    runs.append(cur)
+                cur = []
+            if not hid[k]:
+                cur.append(pt)
+        if len(cur) > 1:
+            runs.append(cur)
         cr.set_line_cap(1)
         cr.set_line_join(1)
-        if len(spts) > 1:
+        # the wire across each cut: a thin dashed line
+        cr.save()
+        cr.set_dash([5, 4])
+        cr.set_line_width(2)
+        cr.set_source_rgb(*rgb("PRIMARY" if sel else "OUTLINE"))
+        for k in cuts:
+            cr.move_to(*spts[k - 1])
+            cr.line_to(*spts[k])
+        cr.stroke()
+        cr.restore()
+        for run in runs:
             if sel:
                 cr.set_source_rgb(*rgb("PRIMARY"))
                 cr.set_line_width(tape_w + 5)
-                self._poly(cr, spts)
+                self._poly(cr, run)
                 cr.stroke()
             cr.set_source_rgb(*rgb("SURFACE_CONTAINER_HIGHEST"))
             cr.set_line_width(tape_w)
-            self._poly(cr, spts)
+            self._poly(cr, run)
             cr.stroke()
         r = max(2.0, min(s["segments"][0]["spacing"] * 0.34, 6.0) * z)
         for k, (x, y) in enumerate(spts):
+            if hid[k]:
+                if sel:                      # hidden LEDs: a faint ring on the selected strip only
+                    cr.set_source_rgb(*rgb("OUTLINE_VARIANT"))
+                    cr.set_line_width(1)
+                    cr.arc(x, y, r * 0.7, 0, 2 * math.pi)
+                    cr.stroke()
+                continue
             i = led_at_path(s, n, k)
             col = colors[i] if i < len(colors) else "000000"
             cr.set_source_rgb(*theme.hex_rgb(col))
@@ -303,15 +400,13 @@ class LayoutTab(Gtk.Box):
         # Bend points: always visible, on every strip, in every tool.
         for bi, seg in enumerate(s["segments"][1:], 1):
             c = seg["start"] - 1
-            if 0 <= c < len(spts) - 1:
+            if 0 <= c < len(spts) - 1 and not seg.get("jump") and not seg.get("hide") \
+                    and not s["segments"][bi - 1].get("hide"):
                 bx, by = spts[c]
                 cr.set_source_rgb(*rgb("PRIMARY" if sel else "OUTLINE"))
                 cr.set_line_width(2.2 if sel else 1.6)
                 cr.arc(bx, by, r + 4, 0, 2 * math.pi)
                 cr.stroke()
-                if sel and not (self.tool == "arrange" and not self._strip_locked(s)):
-                    ox, oy = self._knob_pos(s, bi, spts, 22)
-                    self._text(cr, ox, oy + 4, f"B{bi}", "PRIMARY", 11, center=True, bold=True)
         found = getattr(self, "_found", None)
         if found and found[0] == s["id"] and found[1] < len(spts):
             x, y = spts[found[1]]
@@ -320,17 +415,22 @@ class LayoutTab(Gtk.Box):
             cr.arc(x, y, r + 7, 0, 2 * math.pi)
             cr.stroke()
             self._text(cr, x, y + r + 22, _('LED {n}').format(n=found[2] + 1), "PRIMARY", 13, center=True, bold=True)
+        if not self.layout.labels:
+            if sel:
+                self._draw_handles(cr, s, n, spts)
+            return
         fx, fy = spts[path_at_led(s, n, 0)]
         if sel or z >= 0.35:            # far out, the end numbers only clutter
             self._text(cr, fx, fy - r - 6, "1", "ON_SURFACE_VARIANT", 11, center=True)
         if n > 1 and (sel or z >= 0.35):
             lx, ly = spts[path_at_led(s, n, n - 1)]
             self._text(cr, lx, ly - r - 6, str(n), "OUTLINE", 11, center=True)
-        name = self._name(key)
+        name = self._strip_name(s)
         if len(name) > 36 and not sel:
             name = name[:34].rstrip() + "…"
         text = f"{name}  ·  " + ngettext("{n} LED", "{n} LEDs", n).format(n=n) + \
-            (f"  ·  {_('clone')}" if s["clone"] else "") + (f"  ·  {_('locked')}" if s["locked"] else "")
+            (f"  ·  {_('clone')}" if s["clone"] and not s.get("name") else "") + \
+            (f"  ·  {_('locked')}" if s["locked"] else "")
         x0, y0 = spts[0]
         a = math.radians(s["segments"][0]["angle"] - 90)
         tx, ty = x0 + math.cos(a) * (tape_w + 12), y0 + math.sin(a) * (tape_w + 12)
@@ -396,8 +496,6 @@ class LayoutTab(Gtk.Box):
                 cr.line_to(ax + 0.6, ay + 3.4)
                 cr.stroke()
                 self._handles.append(("turn", s["id"], i, kx, ky, 15))
-                if i > 0:
-                    self._text(cr, kx, ky - 17, f"B{i}", "PRIMARY", 11, center=True, bold=True)
                 if active:
                     self._text(cr, kx + 17, ky + 4, f"{int(round(seg['angle'])) % 360}°", "PRIMARY", 12,
                                bold=True)
@@ -426,7 +524,10 @@ class LayoutTab(Gtk.Box):
 
     @staticmethod
     def _pivot(spts, seg, i):
-        """The point a section turns around: LED 1 for the first section, the corner LED for bends."""
+        """The point a section turns around: LED 1 for the first section, the corner LED for bends,
+        the piece's own first LED after a cut."""
+        if i and seg.get("jump"):
+            return spts[max(0, min(len(spts) - 1, seg["start"]))]
         return spts[0 if i == 0 else max(0, min(len(spts) - 1, seg["start"] - 1))]
 
     @staticmethod
@@ -436,7 +537,7 @@ class LayoutTab(Gtk.Box):
         First section: straight behind LED 1. Bends: on the outside of the corner, so it never
         sits on the strip itself (a straight 'bend' gets it beside the strip)."""
         a1 = math.radians(segs[i]["angle"])
-        if i == 0:
+        if i == 0 or segs[i].get("jump"):
             return 180.0
         a0 = math.radians(segs[i - 1]["angle"])
         sx, sy = -math.cos(a0) + math.cos(a1), -math.sin(a0) + math.sin(a1)
@@ -519,7 +620,12 @@ class LayoutTab(Gtk.Box):
         if self.tool == "arrange":
             if not self._strip_locked(s):
                 wx, wy = self.s2w(x, y)
-                self._drag = {"kind": "move", "sid": s["id"], "off": (s["x"] - wx, s["y"] - wy)}
+                ci = cut_before(s, k)
+                if ci:                      # the piece after a cut moves on its own
+                    j = s["segments"][ci]["jump"]
+                    self._drag = {"kind": "piece", "sid": s["id"], "i": ci, "jump": list(j), "at": (wx, wy)}
+                else:
+                    self._drag = {"kind": "move", "sid": s["id"], "off": (s["x"] - wx, s["y"] - wy)}
             else:
                 self._drag = None
         elif self.tool == "find":
@@ -553,6 +659,18 @@ class LayoutTab(Gtk.Box):
             if self._snap:
                 nx, ny = round(nx / (GRID / 2)) * (GRID / 2), round(ny / (GRID / 2)) * (GRID / 2)
             s["x"], s["y"] = nx, ny
+        elif kind == "piece":
+            wx, wy = self.s2w(x, y)
+            jx, jy = dr["jump"][0] + wx - dr["at"][0], dr["jump"][1] + wy - dr["at"][1]
+            if self._snap and not (state & Gdk.ModifierType.SHIFT_MASK):
+                # snap the piece's first LED to the grid, like moving a strip
+                pts = path_points(s, n)
+                k0 = s["segments"][dr["i"]]["start"]
+                if 0 < k0 < len(pts):
+                    bx, by = pts[k0 - 1]
+                    h = GRID / 2
+                    jx, jy = round((bx + jx) / h) * h - bx, round((by + jy) / h) * h - by
+            self.layout.move_cut(s, dr["i"], (jx, jy))
         elif kind == "turn":
             i = dr["i"]
             if i >= len(s["segments"]) or n <= 0:
@@ -596,7 +714,7 @@ class LayoutTab(Gtk.Box):
         dr, self._drag = self._drag, None
         if not dr:
             return
-        if dr["kind"] in ("move", "turn", "pan"):
+        if dr["kind"] in ("move", "turn", "pan", "piece"):
             self._schedule_save()
             self._refresh_panel_values()
         elif dr["kind"] == "stop" and dr.get("stops"):
@@ -651,6 +769,8 @@ class LayoutTab(Gtk.Box):
         self._hold[key] = time.time() + 3.0
 
     def _paint_at(self, s, n, k, start=False):
+        if self.tool != "fill" and hidden_path(s, n)[max(0, min(n - 1, k))]:
+            return                          # hidden LEDs aren't drawn, so they aren't painted
         key = s["zone"]
         cfg = self._cfg.get(key) or {}
         i = led_at_path(s, n, max(0, min(n - 1, k)))
@@ -659,7 +779,7 @@ class LayoutTab(Gtk.Box):
             current = self.zone_colors(key, overrides=False)
             params = dict(cfg.get("pattern_params") or {})
             params.update(paint=current, reverse=False, mirror=False)
-            self._set_local(key, pattern="paint", pattern_params=params)
+            self._set_local(key, pattern="paint", pattern_params=params, animation=None)
             self._send(self.app.client.set_zone_pattern, d, z, "paint")
             self._send(self.app.client.set_zone_pattern_params, d, z,
                        {"paint": current, "reverse": False, "mirror": False})
@@ -734,7 +854,7 @@ class LayoutTab(Gtk.Box):
         self._found = found
         d, z = split_key(s["zone"])
         self._send(self.app.client.led_probe, d, z, i)
-        self._hint.set_label(_('LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the strip to move it. Right-click to add a bend there. Pick another tool to go back to normal.').format(led=i + 1, n=n, strip=self._name(s['zone'])))
+        self._hint.set_label(_('LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the strip to move it. Right-click to add a bend there. Pick another tool to go back to normal.').format(led=i + 1, n=n, strip=self._strip_name(s)))
         self.cv.queue_draw()
 
     def _stop_find(self):
@@ -783,6 +903,19 @@ class LayoutTab(Gtk.Box):
         self._schedule_save()
         self.cv.queue_draw()
 
+    def _toggle_labels(self):
+        self.layout.labels = not self.layout.labels
+        self._apply_labels_ui()
+        self._schedule_save()
+        self.cv.queue_draw()
+
+    def _apply_labels_ui(self):
+        on = self.layout.labels
+        self._labels_btn.set_child(icon("tag", fill=on))
+        self._labels_btn.set_tooltip_text(_("Hide strip names and LED numbers") if on else
+                                          _("Show strip names and LED numbers"))
+        (self._labels_btn.add_css_class if on else self._labels_btn.remove_css_class)("toggled")
+
     def _apply_lock_ui(self):
         locked = self.layout.locked
         self._lock_btn.set_child(icon("lock" if locked else "lock_open", fill=locked))
@@ -810,7 +943,8 @@ class LayoutTab(Gtk.Box):
         locked = self._strip_locked(s)
         led = led_at_path(s, n, k) + 1
         box.append(label(_('LED {led} of {n}').format(led=led, n=n), ("small", "faint")))
-        segi = next((i for i, g in enumerate(s["segments"]) if i > 0 and abs(g["start"] - k) <= 1), None)
+        segi = next((i for i, g in enumerate(s["segments"]) if i > 0 and not g.get("jump") and abs(g["start"] - k) <= 1),
+                    None)
 
         def item(text, ico, cb, enabled=True):
             b = button(text, ico, "text small", lambda: (pop.popdown(), cb()))
@@ -821,9 +955,21 @@ class LayoutTab(Gtk.Box):
         item(_("Add a bend here"), "polyline", lambda: self._do(self.layout.add_bend, s, k), not locked)
         item(_("Remove this bend"), "remove", lambda: self._do(self.layout.remove_bend, s, segi),
              bool(segi) and not locked)
+        item(_("Cut here (joined with a wire)"), "cable", lambda: self._do(self.layout.add_cut, s, k),
+             not locked and k > 0)
+        cut_i = next((i for i, g in enumerate(s["segments"]) if i > 0 and g.get("jump") and g["start"] in (k, k + 1)),
+                     None)
+        if cut_i is not None:
+            item(_("Join again (remove the cut)"), "link", lambda: self._do(self.layout.remove_cut, s, cut_i),
+                 not locked)
+        si = self.layout.segment_index(s, k)
+        hidden_sec = bool(s["segments"][si].get("hide"))
+        item(_("Show this section") if hidden_sec else _("Hide this section"),
+             "visibility" if hidden_sec else "visibility_off",
+             lambda: self._do(self.layout.set_section_hidden, s, si, not hidden_sec))
         item(_("Straighten"), "linear_scale", lambda: self._do(self.layout.reset_shape, s), not locked)
         item(_("Flip LED order") + ("  ✓" if s["flip"] else ""), "swap_horiz", lambda: self._flip(s), not locked)
-        item(_("Rename\u2026"), "edit", lambda: self._rename(s["zone"]))
+        item(_("Rename\u2026"), "edit", lambda: self._rename_strip(s))
         item(_("Clone this strip"), "content_copy", lambda: self._clone(s))
         item(_("Hide this strip"), "visibility_off", lambda: self._set_hidden(s, True))
         if s["clone"]:
@@ -849,7 +995,7 @@ class LayoutTab(Gtk.Box):
         self.cv.queue_draw()
         self._build_panel()
         if hidden:
-            self.app.toast(_('{strip} is hidden. Show it again from the strip list.').format(strip=self._name(s['zone'])),
+            self.app.toast(_('{strip} is hidden. Show it again from the strip list.').format(strip=self._strip_name(s)),
                            _("Undo"), lambda: self._set_hidden(s, False))
 
     def _select(self, s):
@@ -923,7 +1069,7 @@ class LayoutTab(Gtk.Box):
                              cb=lambda st=st, h=hidden: self._set_hidden(st, not h),
                              tooltip=_("Show this strip") if hidden else _("Hide this strip"))
                 r_.append(eye)
-                name = self._name(st["zone"]) + (f"  \u00b7  {_('clone')}" if st["clone"] else "")
+                name = self._strip_name(st) + (f"  \u00b7  {_('clone')}" if st["clone"] else "")
                 nb = Gtk.Button(label=name, hexpand=True)
                 d_, z_ = split_key(st["zone"])
                 nb.set_tooltip_text(_('{zone} on {device}').format(zone=z_, device=d_) if z_ else d_)
@@ -942,16 +1088,16 @@ class LayoutTab(Gtk.Box):
         d, z = split_key(key)
         n = self._count(key)
         head = hbox(4)
-        head.append(label(self._name(key), ("heading",), wrap=True))
+        head.append(label(self._strip_name(s), ("heading",), wrap=True))
         head.append(Gtk.Box(hexpand=True))
-        head.append(button(icon_name="edit", style="text small", cb=lambda: self._rename(key),
+        head.append(button(icon_name="edit", style="text small", cb=lambda: self._rename_strip(s),
                            tooltip=_("Rename this strip")))
         p.append(head)
         orig = z or d
         sub = (_("{zone} on {device}").format(zone=orig, device=d) if z else _("Whole device")) \
             if self._name(key) != orig else (d if z else _("Whole device"))
         if s["clone"]:
-            sub += "  ·  " + _("clone (shows the same colors)")
+            sub += "  ·  " + _("clone of {strip} (shows the same colors)").format(strip=self._name(key))
         p.append(label(sub, ("small", "dim"), wrap=True))
         self._pv["count"] = label(ngettext("{n} LED", "{n} LEDs", n).format(n=n), ("body",))
         p.append(self._pv["count"])
@@ -970,6 +1116,11 @@ class LayoutTab(Gtk.Box):
         dd.set_halign(Gtk.Align.START)
         p.append(dd)
         self._pv["pattern"] = pat
+        anim = cfg.get("animation")
+        self._pv["anim"] = bool(anim)
+        if anim:
+            p.append(label(_("Animated: {effect}. Picking a pattern here, or painting, makes it static again.").format(
+                effect=fx.EFFECT_NAMES.get(anim.get("effect"), anim.get("effect"))), ("tiny", "accent"), wrap=True))
         if pat != "paint":
             picker = SwatchPicker(list(self.status.get("extracted_colors") or []), list(cfg.get("pattern_colors", [0])),
                                   lambda entries, k=key: self._set_colors(k, entries),
@@ -1012,14 +1163,31 @@ class LayoutTab(Gtk.Box):
                        + (" " + _('Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type).').format(lpp=lpp) if lpp > 1
                           else ""), ("tiny", "faint"), wrap=True))
 
-        p.append(label(_("Bends"), ("small", "dim")))
+        def ends(i):
+            return segs[i]["start"] + 1, (segs[i + 1]["start"] if i + 1 < len(segs) else n)
+
+        def hide_row(i):
+            a, b = ends(i)
+            return hbox(12, Toggle(bool(segs[i].get("hide")),
+                                   lambda v, i=i: self._do(self.layout.set_section_hidden, s, i, v)),
+                        label(_("Hide LEDs {a} to {b}").format(a=a, b=b), ("small",)))
+
+        p.append(label(_("Bends and cuts"), ("small", "dim")))
         if len(segs) == 1:
             p.append(label(_("None yet. Right-click a LED, or add one below."), ("tiny", "faint"), wrap=True))
+        else:
+            p.append(hide_row(0))
         for i, seg in enumerate(segs[1:], start=1):
             g = Gtk.Grid(column_spacing=8, row_spacing=4)
-            g.attach(label(_('Bend {i}').format(i=i), ("small",)), 0, 0, 1, 1)
-            rm = button(icon_name="close", style="text small", cb=lambda i=i: self._do(self.layout.remove_bend, s, i),
-                        tooltip=_("Remove this bend"))
+            is_cut = bool(seg.get("jump"))
+            g.attach(label((_('Cut {i}') if is_cut else _('Bend {i}')).format(i=i), ("small",)), 0, 0, 1, 1)
+            if is_cut:
+                rm = button(icon_name="link", style="text small",
+                            cb=lambda i=i: self._do(self.layout.remove_cut, s, i),
+                            tooltip=_("Join again (remove the cut)"))
+            else:
+                rm = button(icon_name="close", style="text small",
+                            cb=lambda i=i: self._do(self.layout.remove_bend, s, i), tooltip=_("Remove this bend"))
             rm.set_sensitive(not locked)
             rm.set_halign(Gtk.Align.END)
             g.attach(rm, 1, 0, 1, 1)
@@ -1031,7 +1199,14 @@ class LayoutTab(Gtk.Box):
             an = Spin(0, 359, round(seg["angle"]) % 360, lambda v, i=i: self._set_angle(s, i, v), step=15)
             an.set_sensitive(not locked)
             g.attach(an, 1, 2, 1, 1)
+            if is_cut:
+                g.attach(label(_("wire gap (mm)"), ("tiny", "faint")), 0, 3, 1, 1)
+                gp = Spin(0, 5000, round(self.layout.gap(s, i)), lambda v, i=i: self._set_gap(s, i, v), step=10)
+                gp.set_sensitive(not locked)
+                g.attach(gp, 1, 3, 1, 1)
+                self._pv[f"gap{i}"] = gp
             p.append(g)
+            p.append(hide_row(i))
         add = hbox(6)
         nb = Spin(2, max(2, n), max(2, n // 2), None)
         nb.set_sensitive(not locked)
@@ -1040,6 +1215,16 @@ class LayoutTab(Gtk.Box):
         add.append(nb)
         add.set_sensitive(not locked and n > 2)
         p.append(add)
+        cut = hbox(6)
+        cb_ = Spin(2, max(2, n), max(2, n // 2), None)
+        cut.append(button(_("Add a cut at LED"), "cable", "tonal small",
+                          lambda: self._do(self.layout.add_cut, s, int(cb_.get_value()) - 1)))
+        cut.append(cb_)
+        cut.set_sensitive(not locked and n > 2)
+        p.append(cut)
+        p.append(label(_("A cut is where the strip was cut and joined again with a wire. With Arrange, drag the piece "
+                         "after a cut to place it anywhere (the wire stretches), or set the wire gap here. Hidden LEDs "
+                         "are left out of the drawing but still light up."), ("tiny", "faint"), wrap=True))
         p.append(label(_("On the canvas (Arrange tool), turn a section with its round knob: behind LED 1 for the whole strip, "
                        "outside the corner for a bend."), ("tiny", "faint"),
                        wrap=True))
@@ -1056,9 +1241,13 @@ class LayoutTab(Gtk.Box):
         s = self.layout.get(self._sel) if self._sel else None
         if s is None or "count" not in getattr(self, "_pv", {}):
             return
+        for key_, w in self._pv.items():
+            if key_.startswith("gap") and int(key_[3:]) < len(s["segments"]):
+                w.set_quiet(round(self.layout.gap(s, int(key_[3:]))))   # a dragged piece stretches its wire
         self._pv["count"].set_label(ngettext('{n} LED', '{n} LEDs', self._count(s['zone'])).format(n=self._count(s['zone'])))
         cfg = self._cfg.get(s["zone"]) or {}
-        if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")):
+        if self._pv.get("pattern") != PatternGenerator.normalize(cfg.get("pattern", "solid")) \
+                or self._pv.get("anim") != bool(cfg.get("animation")):
             self._build_panel()
 
     def _lpp(self, key) -> int:
@@ -1104,6 +1293,11 @@ class LayoutTab(Gtk.Box):
         self.cv.queue_draw()
         self._build_panel()
 
+    def _set_gap(self, s, i, value):
+        self.layout.set_gap(s, i, float(value))
+        self._schedule_save()
+        self.cv.queue_draw()
+
     def _move_bend(self, s, i, start):
         segs = s["segments"]
         if not 0 < i < len(segs):
@@ -1113,6 +1307,28 @@ class LayoutTab(Gtk.Box):
         segs[i]["start"] = max(lo, min(hi, start))
         self._schedule_save()
         self.cv.queue_draw()
+
+    def _rename_strip(self, s):
+        """A clone gets its own name (kept in the layout); the zone's strip renames the zone."""
+        if not s["clone"]:
+            self._rename(s["zone"])
+            return
+
+        def done(name):
+            name = name.strip()
+            if name:
+                s["name"] = name
+            else:
+                s.pop("name", None)
+            self._schedule_save()
+            self.cv.queue_draw()
+            self._build_panel()
+        dialogs.ask_text(self.app, _("Rename clone"),
+                         _("A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use "
+                           "the strip's name.").format(strip=self._name(s["zone"])),
+                         s.get("name", ""), done,
+                         check=lambda t: None if len(t) <= 40 else _("Keep it under 40 characters."),
+                         ok_label=_("Rename"))
 
     def _rename(self, key):
         d, z = split_key(key)
@@ -1131,7 +1347,7 @@ class LayoutTab(Gtk.Box):
 
     def _set_pattern(self, key, pattern):
         d, z = split_key(key)
-        self._set_local(key, pattern=pattern)
+        self._set_local(key, pattern=pattern, animation=None)
         self._send(self.app.client.set_zone_pattern, d, z, pattern)
         self.cv.queue_draw()
         GLib.idle_add(lambda: (self._build_panel(), False)[1])
@@ -1160,6 +1376,7 @@ class LayoutTab(Gtk.Box):
         self.layout.load()
         self._sel = None
         self._apply_lock_ui()
+        self._apply_labels_ui()
         self._build_panel()
         self.cv.queue_draw()
 

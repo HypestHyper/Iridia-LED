@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-15 21:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Connecting…"
 msgstr ""
 
-#: iridia/ui/app.py:305 iridia/ui/app.py:1566
+#: iridia/ui/app.py:305 iridia/ui/app.py:1567
 msgid "Freeze colors"
 msgstr ""
 
@@ -1127,128 +1127,128 @@ msgstr ""
 msgid "Daemon restarting…"
 msgstr ""
 
-#: iridia/ui/app.py:1536
+#: iridia/ui/app.py:1537
 msgid "Daemon not running"
 msgstr ""
 
-#: iridia/ui/app.py:1540
+#: iridia/ui/app.py:1541
 msgid "The daemon isn't running"
 msgstr ""
 
-#: iridia/ui/app.py:1541
+#: iridia/ui/app.py:1542
 msgid "Start it from the Service tab."
 msgstr ""
 
-#: iridia/ui/app.py:1556
+#: iridia/ui/app.py:1557
 msgid "OpenRGB not connected"
 msgstr ""
 
-#: iridia/ui/app.py:1558
+#: iridia/ui/app.py:1559
 #, python-brace-format
 msgid "Can't see: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:1560
+#: iridia/ui/app.py:1561
 #, python-brace-format
 msgid "Night mode until {time}"
 msgstr ""
 
-#: iridia/ui/app.py:1566
+#: iridia/ui/app.py:1567
 msgid "Frozen"
 msgstr ""
 
-#: iridia/ui/app.py:1569
+#: iridia/ui/app.py:1570
 msgid "No wallpaper detected yet"
 msgstr ""
 
-#: iridia/ui/app.py:1581
+#: iridia/ui/app.py:1582
 msgid "Connected"
 msgstr ""
 
-#: iridia/ui/app.py:1581
+#: iridia/ui/app.py:1582
 msgid "Not connected"
 msgstr ""
 
-#: iridia/ui/app.py:1582
+#: iridia/ui/app.py:1583
 msgid "Available"
 msgstr ""
 
-#: iridia/ui/app.py:1582
+#: iridia/ui/app.py:1583
 msgid "Not available"
 msgstr ""
 
-#: iridia/ui/app.py:1584 iridia/ui/widgets.py:198
+#: iridia/ui/app.py:1585 iridia/ui/widgets.py:198
 msgid "Mixed"
 msgstr ""
 
-#: iridia/ui/app.py:1585
+#: iridia/ui/app.py:1586
 msgid "Frozen (wallpaper changes are ignored)"
 msgstr ""
 
-#: iridia/ui/app.py:1585
+#: iridia/ui/app.py:1586
 msgid "Following the wallpaper"
 msgstr ""
 
-#: iridia/ui/app.py:1587 iridia/ui/effects.py:74
+#: iridia/ui/app.py:1588 iridia/ui/effects.py:74
 msgid "Off"
 msgstr ""
 
-#: iridia/ui/app.py:1589
+#: iridia/ui/app.py:1590
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
 msgstr ""
 
-#: iridia/ui/app.py:1591
+#: iridia/ui/app.py:1592
 #, python-brace-format
 msgid "Scheduled {start} to {end} (cap {cap}%)"
 msgstr ""
 
-#: iridia/ui/app.py:1594
+#: iridia/ui/app.py:1595
 msgid "Off (PC asleep)"
 msgstr ""
 
-#: iridia/ui/app.py:1595
+#: iridia/ui/app.py:1596
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:1595
+#: iridia/ui/app.py:1596
 msgid "On"
 msgstr ""
 
-#: iridia/ui/app.py:1596
+#: iridia/ui/app.py:1597
 #, python-brace-format
 msgid "{n} strip changed by a keybind (see Keybinds)"
 msgid_plural "{n} strips changed by a keybind (see Keybinds)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:1600
+#: iridia/ui/app.py:1601
 #, python-brace-format
 msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
 msgstr ""
 
-#: iridia/ui/app.py:1600
+#: iridia/ui/app.py:1601
 msgid "nothing yet"
 msgstr ""
 
-#: iridia/ui/app.py:1600
+#: iridia/ui/app.py:1601
 msgid " (cached)"
 msgstr ""
 
-#: iridia/ui/app.py:1600
+#: iridia/ui/app.py:1601
 msgid "n/a (cached or not yet run)"
 msgstr ""
 
-#: iridia/ui/app.py:1631
+#: iridia/ui/app.py:1632
 #, python-brace-format
 msgid "Connected, but not seeing: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:1632
+#: iridia/ui/app.py:1633
 msgid "Connected. All configured devices visible."
 msgstr ""
 
-#: iridia/ui/app.py:1634
+#: iridia/ui/app.py:1635
 msgid "Not connected."
 msgstr ""
 

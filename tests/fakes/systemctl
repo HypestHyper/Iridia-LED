@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""A stand-in for `systemctl` in tests (put a folder with it first on PATH).
+
+FAKE_SYSTEMCTL_LOG  file each call is appended to (its arguments, one line)
+FAKE_SYSTEMD        "1": a user session manager answers (show-environment succeeds)
+FAKE_GST            "active": graphical-session.target is active
+FAKE_ENABLED        comma-separated units that report "enabled"
+FAKE_ACTIVE         comma-separated units that report "active"
+Everything else succeeds silently.
+"""
+import os
+import sys
+
+args = [a for a in sys.argv[1:] if a not in ("--user", "--system")]
+log = os.environ.get("FAKE_SYSTEMCTL_LOG")
+if log:
+    with open(log, "a") as f:
+        f.write(" ".join(sys.argv[1:]) + "\n")
+if os.environ.get("FAKE_SYSTEMD") != "1":
+    print("Failed to connect to bus", file=sys.stderr)
+    sys.exit(1)
+cmd, rest = (args[0], args[1:]) if args else ("", [])
+enabled = set(filter(None, os.environ.get("FAKE_ENABLED", "").split(",")))
+active = set(filter(None, os.environ.get("FAKE_ACTIVE", "").split(",")))
+if cmd == "is-enabled":
+    unit = rest[0] if rest else ""
+    print("enabled" if unit in enabled else "not-found")
+    sys.exit(0 if unit in enabled else 1)
+if cmd == "is-active":
+    unit = rest[0] if rest else ""
+    on = (os.environ.get("FAKE_GST") == "active") if unit == "graphical-session.target" else unit in active
+    print("active" if on else "inactive")
+    sys.exit(0 if on else 3)
+sys.exit(0)

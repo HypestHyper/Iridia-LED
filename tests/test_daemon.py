@@ -19,6 +19,7 @@ class FakeOpenRGB:
         self.client = None
         self.connected_since = None
         self.last_error = None
+        self.no_devices_since = None
         self.devices = {}
         self.sent = []                # (device, colors, zones_config)
 

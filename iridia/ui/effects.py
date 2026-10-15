@@ -9,7 +9,7 @@ from gi.repository import GLib, Gtk
 
 from iridia import animations
 from iridia.i18n import _
-from iridia.ui.widgets import (DualRange, Dropdown, Group, Swatch, hbox, label, rgb, switch_row,
+from iridia.ui.widgets import (DualRange, Dropdown, Group, Swatch, hbox, label, no_scroll, rgb, switch_row,
                                themed, vbox)
 
 EFFECT_NAMES = {
@@ -93,6 +93,7 @@ class Slider(Gtk.Box):
         self.append(name)
         self.scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, step)
         self.scale.set_draw_value(False)
+        no_scroll(self.scale)
         self.scale.set_hexpand(True)
         self.scale.set_size_request(160, -1)
         self.scale.set_value(value)

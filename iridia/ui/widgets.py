@@ -262,11 +262,36 @@ class Dropdown(Gtk.DropDown):
             self._quiet = False
 
 
+def no_scroll(widget: Gtk.Widget) -> Gtk.Widget:
+    """The mouse wheel over this widget scrolls the page instead of changing its value: sliders and
+    number boxes only change when you click, drag or type."""
+    ctl = Gtk.EventControllerScroll(flags=Gtk.EventControllerScrollFlags.BOTH_AXES)
+    ctl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+
+    def on_scroll(c, dx, dy):
+        w = widget.get_parent()
+        while w is not None and not isinstance(w, Gtk.ScrolledWindow):
+            w = w.get_parent()
+        if w is not None:
+            adj = w.get_vadjustment()
+            try:
+                wheel = c.get_unit() == Gdk.ScrollUnit.WHEEL
+            except AttributeError:          # GTK before 4.8: always wheel steps
+                wheel = True
+            step = dy * (max(40.0, adj.get_page_size() ** (2 / 3)) if wheel else 1.0)
+            adj.set_value(max(adj.get_lower(), min(adj.get_upper() - adj.get_page_size(), adj.get_value() + step)))
+        return True                         # never let the widget itself see the wheel
+    ctl.connect("scroll", on_scroll)
+    widget.add_controller(ctl)
+    return widget
+
+
 class Spin(Gtk.SpinButton):
     def __init__(self, lo: float, hi: float, value: float, cb: Optional[Callable[[float], None]] = None,
                  step: float = 1, digits: int = 0, delay: int = 450):
         adj = Gtk.Adjustment(value=value, lower=lo, upper=hi, step_increment=step, page_increment=step * 10)
         super().__init__(adjustment=adj, digits=digits, numeric=True, valign=Gtk.Align.CENTER)
+        no_scroll(self)
         self._cb = cb
         self._quiet = False
         self._job = None

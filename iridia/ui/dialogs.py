@@ -6,7 +6,7 @@ from typing import Callable, List, Optional
 from gi.repository import Gio, GLib, Gtk
 
 from iridia.i18n import _
-from iridia.ui.widgets import (Spin, button, card, focus_within, hbox, icon, label, vbox)
+from iridia.ui.widgets import (Spin, button, card, focus_within, hbox, icon, label, no_scroll, vbox)
 
 PAUSE = None      # set by the app: callable(+1/-1) that pauses UI refreshes while a dialog previews
 
@@ -208,7 +208,7 @@ class CountLedsDialog(Dialog):
         b.append(self._num)
         self._adj = Gtk.Adjustment(value=max(1, current), lower=1, upper=max(current, 60), step_increment=1,
                                    page_increment=10)
-        self._scale = Gtk.Scale(adjustment=self._adj, draw_value=False, hexpand=True)
+        self._scale = no_scroll(Gtk.Scale(adjustment=self._adj, draw_value=False, hexpand=True))
         self._adj.connect("value-changed", lambda *_a: self._send())
         b.append(self._scale)
         steps = hbox(6)

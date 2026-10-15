@@ -5,7 +5,7 @@ from gi.repository import GLib, Gtk
 from iridia.i18n import _
 from iridia.calibration import DEFAULT_NAME, DEFAULT_PROFILE, HUE_NAMES, Profile, clean_hex, normalize
 from iridia.ui import dialogs
-from iridia.ui.widgets import (Spin, Swatch, Toggle, button, card, hbox, hsv_hex, label, vbox)
+from iridia.ui.widgets import (Spin, Swatch, Toggle, button, card, hbox, hsv_hex, label, no_scroll, vbox)
 
 
 class ProfileEditor(dialogs.Dialog):
@@ -229,7 +229,7 @@ class ProfileEditor(dialogs.Dialog):
             lab = label(name, ("small", "dim"))
             lab.set_width_chars(11)
             row.append(lab)
-            sc = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, hi, 1)
+            sc = no_scroll(Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0, hi, 1))
             sc.set_value(self._test_vals[key])
             sc.set_hexpand(True)
             sc.set_draw_value(True)
@@ -294,7 +294,7 @@ class ProfileEditor(dialogs.Dialog):
             lab = label(name, ("small", "dim"))
             lab.set_width_chars(16)
             row.append(lab)
-            sc = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, step)
+            sc = no_scroll(Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, step))
             sc.set_value(self.params[key])
             sc.set_digits(2)
             sc.set_draw_value(True)

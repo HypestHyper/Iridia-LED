@@ -127,8 +127,63 @@ fi
 if ! command -v ddcutil &> /dev/null; then
     echo "NOTE: 'ddcutil' is not installed (optional: monitor-brightness-synced LEDs)."
 fi
-if command -v ddcutil >/dev/null 2>&1 && ! id -nG | grep -qw i2c; then
-    echo "NOTE: ddcutil usually needs you in the 'i2c' group:  sudo usermod -aG i2c \$USER  (then log out and in)"
+
+# --- monitor brightness: ddcutil needs read/write access to /dev/i2c-* -----
+# That means: the i2c-dev module loaded, the i2c devices owned by an 'i2c' group, and you in it.
+# Distributions differ in which of these they already do, so only what's missing is done.
+I2C_USER="$USER"
+[ "$(id -u)" -eq 0 ] && I2C_USER="${SUDO_USER:-}"
+if command -v ddcutil >/dev/null 2>&1 && [ -n "$I2C_USER" ] && [ "$SKIP_DEPS" -eq 0 ]; then
+    SUDO=(sudo); [ "$(id -u)" -eq 0 ] && SUDO=()
+    I2C_TODO=()
+    getent group i2c >/dev/null 2>&1 || I2C_TODO+=("create the 'i2c' group")
+    id -nG "$I2C_USER" 2>/dev/null | grep -qw i2c || I2C_TODO+=("add $I2C_USER to it")
+    # a udev rule giving the group the i2c devices (ddcutil's own package often ships one)
+    if ! grep -qsE 'i2c.*GROUP="?i2c' /etc/udev/rules.d/*.rules /usr/lib/udev/rules.d/*.rules \
+            /lib/udev/rules.d/*.rules; then
+        I2C_TODO+=("give it the i2c devices (a udev rule)")
+        I2C_RULE=1
+    fi
+    # the i2c-dev module at boot (ddcutil's package sometimes does this already)
+    if ! grep -qsxE 'i2c[-_]dev' /etc/modules-load.d/*.conf /usr/lib/modules-load.d/*.conf \
+            /run/modules-load.d/*.conf; then
+        I2C_TODO+=("load the i2c-dev module now and at every boot")
+        I2C_MOD=1
+    fi
+    if [ ${#I2C_TODO[@]} -gt 0 ]; then
+        echo ""
+        echo "Monitor brightness (ddcutil) needs access to the I2C bus. To set that up, this will:"
+        for t in "${I2C_TODO[@]}"; do echo "  - $t"; done
+        reply="y"
+        if [ "$ASSUME_YES" -eq 0 ]; then
+            read -r -p "Do that now (uses sudo)? [Y/n] " reply || reply="n"
+        fi
+        case "${reply:-y}" in
+            n|N|no|NO)
+                echo "Skipped. Monitor brightness may not work; see docs/wiki/Installation.md (Monitor brightness)." ;;
+            *)
+                getent group i2c >/dev/null 2>&1 || "${SUDO[@]}" groupadd --system i2c \
+                    || echo "WARNING: couldn't create the i2c group."
+                if ! id -nG "$I2C_USER" | grep -qw i2c; then
+                    if "${SUDO[@]}" usermod -aG i2c "$I2C_USER"; then
+                        I2C_RELOGIN=1
+                    else
+                        echo "WARNING: couldn't add $I2C_USER to the i2c group."
+                    fi
+                fi
+                if [ "${I2C_RULE:-0}" = 1 ]; then
+                    echo 'KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"' \
+                        | "${SUDO[@]}" tee /etc/udev/rules.d/45-iridia-i2c.rules >/dev/null \
+                        && { "${SUDO[@]}" udevadm control --reload-rules 2>/dev/null; \
+                             "${SUDO[@]}" udevadm trigger --subsystem-match=i2c-dev 2>/dev/null; } || true
+                fi
+                if [ "${I2C_MOD:-0}" = 1 ]; then
+                    echo i2c-dev | "${SUDO[@]}" tee /etc/modules-load.d/i2c-dev.conf >/dev/null || true
+                    "${SUDO[@]}" modprobe i2c-dev 2>/dev/null || true
+                fi
+                ;;
+        esac
+    fi
 fi
 
 # An older daemon left running would keep the old code alive (and block the
@@ -234,5 +289,9 @@ echo "  2. Check everything: iridia doctor"
 echo "  3. Open the GUI from your launcher, or run:"
 echo "                       $VENV_DIR/bin/iridia-gui"
 echo ""
+if [ "${I2C_RELOGIN:-0}" = 1 ]; then
+    echo "You were added to the 'i2c' group: log out and back in once, so monitor brightness can work."
+    echo ""
+fi
 echo "To uninstall: bash uninstall.sh (in this folder), or: iridia uninstall"
 echo ""

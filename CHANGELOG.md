@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1
+
+- The installer sets up I2C access for monitor brightness when ddcutil is installed, doing only what's
+  missing: the `i2c` group (created if needed) with you in it, a udev rule giving that group the I2C
+  devices, and the `i2c-dev` module now and at every boot. It asks first (`--yes` doesn't,
+  `--no-deps` leaves it alone) and reminds you to log out and in once.
+- The README and Troubleshooting no longer ask for bug reports.
+
 ## 1.2.0
 
 **Animations.** Iridia is no longer static only. Static patterns stay as they were, and stay the default.

@@ -76,8 +76,9 @@ update), switch it off on the Devices tab so it stops being reported.
 ## Brightness doesn't follow the monitor
 
 Run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
-many docks don't), DDC/CI may be off in the monitor's menu, or you need to be in the `i2c` group:
-`sudo usermod -aG i2c $USER`, then log out and in.
+many docks don't), DDC/CI may be off in the monitor's menu, or you have no access to the I2C bus yet:
+run `bash install.sh` again to set it up (see [Installation](Installation.md#setting-up-monitor-brightness-optional)),
+and log out and in once afterwards.
 
 ## The window doesn't open
 
@@ -111,8 +112,3 @@ controller that can't keep up gets a line like "can't keep up with 60 fps ..., u
   the main connection; updating OpenRGB is the fix if a slow controller still lags.
 - A lower frame rate (Settings, Animations) helps slow controllers too: a Razer Chroma ARGB controller
   with 480 LEDs needs about 19 ms per frame, so 30 is its limit.
-
-## Reporting a bug
-
-Please include the output of `iridia doctor` and `iridia log -n 100`, your distribution and desktop, and
-your devices as `iridia status` lists them.

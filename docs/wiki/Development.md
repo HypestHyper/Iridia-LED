@@ -19,6 +19,7 @@ Python 3.8 or newer. Only one daemon can run per user, so stop an installed one 
 iridia/
   daemon.py          the daemon: main loop, rendering, every IPC command
   openrgb_ctl.py     OpenRGB connection, device modes, sending colors
+  sdk_client.py      Iridia's own OpenRGB SDK client, protocol 6 (OpenRGB 1.0); openrgb-python before
   openrgb_server.py  who starts OpenRGB's server: start methods, supervisor, PID file, other starters
   wallpaper.py       wallpaper detection backends
   colors.py          color extraction engines

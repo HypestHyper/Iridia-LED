@@ -34,6 +34,11 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
     if status.get("openrgb_connected"):
         since = status.get("openrgb_connected_since")
         detail = f"Connected for {int(time.time() - since)}s" if since else "Connected"
+        proto = status.get("openrgb_protocol")
+        if proto == 6:
+            detail += ", SDK protocol 6 (every update waits until OpenRGB has applied it)"
+        elif proto is not None:
+            detail += ", OpenRGB older than 1.0 (openrgb-python)"
         checks.append(Check("OpenRGB connection", True, detail))
         missing = status.get("openrgb_missing_devices", [])
         devs = status.get("device_configs", {})

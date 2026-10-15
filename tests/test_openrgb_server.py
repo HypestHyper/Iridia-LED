@@ -491,12 +491,15 @@ def test_a_server_stopped_by_a_method_change_is_not_a_crash(env):
     assert wait_for(lambda: len(env.starts()) == 2) and sup.failures == 0
 
 
-def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
+@pytest.mark.parametrize("protocol", [3, 6])
+def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path, protocol):
     """The whole path: the daemon starts a fake OpenRGB with devices, finds their zones, and streams
-    animation frames to it as SDK packets."""
+    animation frames to it as SDK packets: with Iridia's own client (protocol 6, OpenRGB 1.0) and
+    with openrgb-python (an older OpenRGB)."""
     packets = tmp_path / "packets.log"
     monkeypatch.setenv("FAKE_OPENRGB_MODE", "devices")
     monkeypatch.setenv("FAKE_OPENRGB_PACKETS", str(packets))
+    monkeypatch.setenv("FAKE_OPENRGB_PROTOCOL", str(protocol))
     d = _daemon(env, monkeypatch)
     try:
         for _ in range(100):
@@ -505,6 +508,8 @@ def test_daemon_animates_real_devices_over_the_sdk(env, monkeypatch, tmp_path):
                 break
             time.sleep(0.05)
         assert set(d.openrgb.devices) == {"Fake ARGB Controller", "Fake RAM"}
+        assert d.openrgb.protocol == (6 if protocol == 6 else 0)
+        assert d.handle_command({"cmd": "status"})["openrgb_protocol"] == d.openrgb.protocol
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": {"effect": "rainbow"}})["ok"]
         _run(d, 1.5)
         kinds = [ln.split()[:2] for ln in packets.read_text().splitlines()]
@@ -544,7 +549,7 @@ def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
         assert d.handle_command({"cmd": "set_zone_animation", "device": "Fake RAM", "zone": "Stick",
                                  "animation": {"effect": "rainbow"}})["ok"]
         _run(d, 3.0)
-        assert d.openrgb._link is not None and d.openrgb._link.ok   # frames went over protocol 6
+        assert d.openrgb.protocol == 6                              # Iridia's own client: every frame acknowledged
         assert d.handle_command({"cmd": "set_all", "field": "animation", "value": None})["ok"]
         stopped = time.time()
         _run(d, 1.5)

@@ -1,6 +1,10 @@
 """Resilient OpenRGB controller with lazy connection and device enumeration.
 
-Error-handling here is written against openrgb-python's documented
+With OpenRGB 1.0 and newer, Iridia talks to it with its own SDK client (iridia/sdk_client.py,
+protocol 6): every update waits for OpenRGB's acknowledgement, and device changes are announced.
+Older OpenRGB doesn't speak protocol 6; then openrgb-python (protocol 0) is used, as before.
+
+Error-handling for openrgb-python here is written against its documented
 behavior (https://openrgb-python.readthedocs.io, docs/pages/advanced.rst)
 rather than guessed:
   - No SDK server reachable at all -> ConnectionRefusedError, raised from
@@ -126,8 +130,8 @@ class OpenRGBController:
         self._last_warned: Optional[str] = None
         self.lock = threading.RLock()
         self._asserted: set = set()          # devices put in Direct mode since this connection
-        self._link = None                    # FrameLink: animation frames that wait for OpenRGB
-        self._link_tried = 0.0
+        self.protocol = 0                    # 6: Iridia's own client; 0: openrgb-python (OpenRGB before 1.0)
+        self._said_protocol = None
 
     def _warn_once(self, msg: str):
         """Warn only when the message changes — send() runs on every
@@ -179,18 +183,10 @@ class OpenRGBController:
                     self.port = detected
                 self._auto_detected = True
         try:
-            from openrgb import OpenRGBClient
-            self.client = OpenRGBClient(self.host, self.port, "iridia", 0)
-            try:
-                # small packets go out at once: without this, TCP holds a frame back up to 40 ms
-                # while it waits for the answer to the one before
-                self.client.comms.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-            except (AttributeError, OSError):
-                pass
+            self.client, self.protocol = self._open_client()
             self.connected_since = time.time()
             self._asserted.clear()               # (re)connected: put devices in Direct mode again
             self._enumerate()
-            self._close_link()
             return self.client is not None
         except ConnectionRefusedError:
             self._record_error(f"No SDK server responding on {self.host}:{self.port}")
@@ -215,10 +211,33 @@ class OpenRGBController:
             self.client = None
             return False
 
+    def _open_client(self):
+        """Iridia's own protocol 6 client, or openrgb-python when OpenRGB is older than 1.0."""
+        from iridia.sdk_client import ProtocolTooOld, SDKClient
+        try:
+            client, protocol = SDKClient(self.host, self.port, "Iridia"), 6
+        except ProtocolTooOld:
+            from openrgb import OpenRGBClient
+            client, protocol = OpenRGBClient(self.host, self.port, "iridia", 0), 0
+            try:
+                # small packets go out at once: without this, TCP holds a frame back up to 40 ms
+                client.comms.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except (AttributeError, OSError):
+                pass
+        if protocol != self._said_protocol:
+            self._said_protocol = protocol
+            logger.info("Talking to OpenRGB with SDK protocol 6: every update waits until OpenRGB has applied it"
+                        if protocol == 6 else
+                        "OpenRGB is older than 1.0 (no SDK protocol 6): using openrgb-python")
+        return client, protocol
+
     def _enumerate(self):
         if not self.client:
             return
         try:
+            if getattr(self.client, "list_changed", False):
+                logger.info("OpenRGB's device list changed: reading it again")
+                self.client.refresh()
             devs = [d for d in (self.client.devices or []) if d is not None]
             devices = dict(zip(unique_names([d.name for d in devs]), devs))
             self.devices = devices
@@ -381,39 +400,6 @@ class OpenRGBController:
                            "single_color": self._color_kind.get(name) == "single"})
         return result
 
-    # ---------------------------------------------------------- the frame connection
-    LINK_RETRY_SEC = 30.0
-
-    def _send_by_link(self, dev, device_name: str, body: bytes) -> bool:
-        """Send a whole-device frame over the protocol 6 connection and wait until OpenRGB has
-        written it (see sdk_frames). False when that connection can't be used: the caller sends
-        the frame over the main connection instead."""
-        from iridia.sdk_frames import FrameLink
-        if self._link is None:
-            if time.monotonic() - self._link_tried < self.LINK_RETRY_SEC:
-                return False
-            self._link_tried = time.monotonic()
-            link = FrameLink(self.host, self.port)
-            if not link.open():
-                logger.info("OpenRGB doesn't speak SDK protocol 6 (it came with OpenRGB 1.0): animation "
-                            "frames go over the main connection")
-                return False
-            logger.info("Animation frames go over their own OpenRGB connection, one written frame at a time")
-            self._link = link
-        try:
-            return self._link.send_leds(dev.id, body)
-        except (OSError, ConnectionError, struct.error) as e:
-            logger.info(f"Frame connection to OpenRGB failed ({e}); using the main connection for now")
-            self._close_link()
-            self._link_tried = time.monotonic()
-            return False
-
-    def _close_link(self):
-        if self._link is not None:
-            self._link.close()
-        self._link = None
-        self._link_tried = 0.0
-
     def zone_rgb(self, device_name: str, zone_name: str) -> List[Tuple[int, int, int]]:
         """The colours OpenRGB last reported for a zone (for zones Iridia hasn't sent to yet)."""
         dev = self.devices.get(device_name)
@@ -440,11 +426,10 @@ class OpenRGBController:
             kind = self.ensure_direct_mode(dev, device_name)
             if kind is None:
                 return None
-            comms = dev.comms
+            comms = dev.comms                   # None with Iridia's own client (protocol 6)
             if kind == "single":
                 first = next((f[0] for f in frames.values() if f), (0, 0, 0))
-                from openrgb.utils import RGBColor
-                dev.set_color(RGBColor(*first), fast=True)
+                dev.set_color(_rgb("%02x%02x%02x" % tuple(first)), fast=True)
                 return True
             if "" in frames:
                 n = len(getattr(dev, "leds", None) or [])
@@ -452,7 +437,8 @@ class OpenRGBController:
                     return None
                 cols = _fit_rgb(frames[""], n)
                 body = struct.pack("H", n) + _pack_rgb(cols)
-                if self._send_by_link(dev, device_name, body):
+                if comms is None:
+                    dev.update_leds(body)       # returns once OpenRGB has applied it
                     return True
                 comms.send_header(dev.id, _UPDATE_LEDS, len(body) + 4)
                 comms.send_data(struct.pack("I", len(body) + 4) + body)
@@ -462,6 +448,9 @@ class OpenRGBController:
                 z = zones.get(zn)
                 n = len(getattr(z, "leds", None) or []) if z is not None else 0
                 if n == 0:
+                    continue
+                if comms is None:
+                    z.set_colors(_fit_rgb(cols, n))
                     continue
                 body = struct.pack("iH", z.id, n) + _pack_rgb(_fit_rgb(cols, n))
                 comms.send_header(dev.id, _UPDATE_ZONE_LEDS, len(body) + 4)
@@ -502,26 +491,25 @@ class OpenRGBController:
         """The link is dead (not a data problem): reset for a real reconnect."""
         logger.warning(f"OpenRGB {msg}, will reconnect")
         self._record_error(msg)
-        self._close_link()
-        self.client = None
-        self.devices = {}
-        self.connected_since = None
+        self._drop_client()
 
     @_locked
     def disconnect(self):
         """Drop the current connection so the next ensure_connected() does
         a fresh connect + enumerate, bypassing the retry-interval
         throttle. Used for a user-triggered "Reconnect" action."""
+        self._drop_client()
+        self._last_connect_attempt = 0.0
+
+    def _drop_client(self):
         if self.client is not None:
             try:
                 self.client.disconnect()
             except Exception:
                 pass
-        self._close_link()
         self.client = None
         self.devices = {}
         self.connected_since = None
-        self._last_connect_attempt = 0.0
 
     @_locked
     def send(self, device_name: str, colors: List[str], zones_config: Optional[Dict] = None) -> bool:

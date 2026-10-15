@@ -2302,6 +2302,7 @@ class Daemon:
             "ddc_available": self.ddc.is_available(),
             "ddc_last_error": self.ddc.last_error,
             "openrgb_connected": self.openrgb.client is not None,
+            "openrgb_protocol": getattr(self.openrgb, "protocol", None) if self.openrgb.client is not None else None,
             "openrgb_host": self.openrgb.host,
             "openrgb_autostart": self._orgb.last_action,
             "openrgb_start_method": self._orgb_settings()[0],

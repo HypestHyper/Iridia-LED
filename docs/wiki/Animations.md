@@ -87,11 +87,11 @@ the daemon is exactly as idle as before.
   30, then 15 fps). The log says so once.
 - Every frame goes to OpenRGB as one update for the whole device, with the zones that don't animate
   showing their static colors. OpenRGB 1.0 writes colour updates one by one at the controller's pace,
-  so Iridia sends frames over a second connection (SDK protocol 6) and waits until OpenRGB says each
-  one is written before sending the next: a controller slower than the frame rate gets fewer frames
-  instead of a queue, and a change, like going back to a static pattern, shows at once. With OpenRGB
-  before 1.0 (no protocol 6) frames go over the main connection; those versions merge whole-device
-  updates. Frames that didn't change aren't sent.
+  so Iridia (speaking SDK protocol 6) waits until OpenRGB says each one is applied before sending the
+  next: a controller slower than the frame rate gets fewer frames instead of a queue, and a change,
+  like going back to a static pattern, shows at once. With OpenRGB before 1.0 (no protocol 6) Iridia
+  uses openrgb-python; those versions merge whole-device updates. Frames that didn't change aren't
+  sent.
 - Color correction uses lookup tables, rebuilt only when the colors or settings change.
 - The log (`iridia log`) shows when an effect starts, stops or changes on a zone. `iridia animations
   status` shows the frames per second each device actually gets and how long a frame takes, and warns

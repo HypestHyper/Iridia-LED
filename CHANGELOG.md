@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.1
+
+**Iridia's own OpenRGB client.** With OpenRGB 1.0, Iridia now talks to OpenRGB entirely with SDK
+protocol 6, through its own client, instead of openrgb-python plus a second connection for animation
+frames.
+
+- Every update waits until OpenRGB has applied it: static colors, mode changes and zone resizes too,
+  not only animation frames. Nothing can pile up, and when OpenRGB refuses an update the log says so.
+- One connection to OpenRGB instead of two.
+- OpenRGB announces changes, and Iridia follows them at once: a new device list (a device plugged in
+  or a rescan), and a device another program changed. If something switches a device out of Direct
+  mode, Iridia puts it back on its next update.
+- Zones whose size OpenRGB only uses for the controller's own effects count as one LED, as in OpenRGB.
+- `iridia status` and `iridia doctor` say whether Iridia talks protocol 6 or, with OpenRGB before 1.0,
+  uses openrgb-python as before.
+
 ## 1.2.0
 
 **Animations.** Iridia is no longer static only. Static patterns stay as they were, and stay the default.

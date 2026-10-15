@@ -121,3 +121,28 @@ def snippets(cmd: str = "") -> List[Dict[str, str]]:
             "text": xdg_desktop_entry(cmd).rstrip() + "\n\n# Or just use the \"Install\" button / `iridia autostart xdg-install`.",
         },
     ]
+
+
+def detect_compositor() -> str:
+    """The snippet id for the compositor this session runs in, or "" (desktops that read
+    ~/.config/autostart, or unknown)."""
+    env = os.environ
+    desk = (env.get("XDG_CURRENT_DESKTOP", "") + ":" + env.get("XDG_SESSION_DESKTOP", "")).lower()
+    if env.get("HYPRLAND_INSTANCE_SIGNATURE") or "hyprland" in desk:
+        lua = os.path.expanduser("~/.config/hypr/hyprland.lua")
+        return "hyprland-lua" if os.path.exists(lua) else "hyprland-conf"
+    if env.get("NIRI_SOCKET") or "niri" in desk:
+        return "niri"
+    if env.get("SWAYSOCK") or env.get("I3SOCK") or "sway" in desk or "i3" in desk:
+        return "sway"
+    if "river" in desk:
+        return "river"
+    if "labwc" in desk or "openbox" in desk:
+        return "labwc"
+    if "bspwm" in desk or "dwm" in desk:
+        return "bspwm"
+    return ""
+
+
+def snippet(snip_id: str) -> Dict[str, str]:
+    return next((x for x in snippets() if x["id"] == snip_id), {})

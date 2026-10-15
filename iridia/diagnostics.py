@@ -5,7 +5,6 @@ own medium (plain text vs a colored dialog).
 """
 
 import os
-import subprocess
 import time
 from typing import List, NamedTuple, Optional
 
@@ -15,20 +14,6 @@ class Check(NamedTuple):
     ok: Optional[bool]   # True/False, or None for "informational, not a pass/fail"
     detail: str
     hint: str = ""
-
-
-def systemd_unit_status(unit: str) -> Optional[str]:
-    """Returns 'active'/'inactive'/'failed'/etc, or None if systemd
-    --user isn't available/reachable at all (not every Linux install
-    has it, and a bare `is-active` call can return nothing useful if
-    the user session bus isn't reachable from here)."""
-    try:
-        r = subprocess.run(["systemctl", "--user", "is-active", unit],
-                           capture_output=True, text=True, timeout=3)
-        out = r.stdout.strip()
-        return out or None
-    except Exception:
-        return None
 
 
 def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
@@ -91,15 +76,22 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
         if last_err:
             checks.append(Check("Last OpenRGB problem", False, last_err))
     else:
-        err = status.get("openrgb_last_error") or "no server responded on any of the common ports"
-        hint = ("Run the installer again so the library is installed: bash install.sh"
-                if "library is missing" in err else None)
-        checks.append(Check(
-            "OpenRGB connection", False, err, hint or
-            "Is OpenRGB's SDK server running? See the \"OpenRGB at login\" line below. "
-            "To have Iridia start it at every login: iridia openrgb enable (or the Service tab). "
-            "If you use the OpenRGB window instead, turn on its SDK server (SDK Server tab, Start Server)."
-        ))
+        err = status.get("openrgb_last_error") or "no OpenRGB SDK server answered"
+        since = status.get("openrgb_no_devices_since")
+        if since:
+            err = f"OpenRGB is running but has reported no devices for {int(time.time() - since)}s"
+        if "library is missing" in err:
+            hint = "Run the installer again so the library is installed: bash install.sh"
+        elif since or "no devices" in err:
+            hint = ("It probably started before your session could reach the hardware, and OpenRGB never looks "
+                    "again by itself. " + ("Iridia started it, so it restarts it automatically (up to twice)."
+                                           if status.get("openrgb_ours_pid") else
+                                           "Iridia didn't start it, so restart it yourself: iridia openrgb restart, "
+                                           "or however you started it."))
+        else:
+            hint = ("Is OpenRGB's SDK server running? See the \"OpenRGB at login\" line below. "
+                    "If you use the OpenRGB window, turn on its SDK server (SDK Server tab, Start Server).")
+        checks.append(Check("OpenRGB connection", False, err, hint))
 
     if status.get("ddc_available"):
         checks.append(Check("Monitor brightness sync (DDC)", True, "Available"))
@@ -137,45 +129,98 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
         writable = os.access(cfg_path, os.W_OK) if os.path.exists(cfg_path) else os.access(os.path.dirname(cfg_path), os.W_OK)
         checks.append(Check("Config file writable", writable, cfg_path))
 
-    from iridia import openrgb_server
-    en, svc = openrgb_server.unit_state("iridia-daemon.service")
-    if svc and en != "not-found":
-        checks.append(Check("iridia-daemon.service", svc == "active" or None, f"{svc}, {en}"))
-
-    checks.append(openrgb_login_check(status))
+    checks += daemon_login_checks(status)
+    checks += openrgb_login_checks(status)
     return checks
 
 
-def openrgb_login_check(status: dict) -> Check:
-    """Who starts OpenRGB's server when you log in."""
+def daemon_login_checks(status: dict) -> List[Check]:
+    """How this daemon was started, and what starts it at login. A daemon started outside systemd
+    is fine; "inactive" is never shown as a problem while the daemon answers."""
+    from iridia import openrgb_server as osrv
+    out = []
+    by = status.get("started_by") or ("systemd" if status.get("managed_by") == "systemd" else "unknown")
+    starters = osrv.daemon_starters()
+    en, _ac = osrv.unit_state("iridia-daemon.service")
+    detail = f"started by {by}"
+    if en == "enabled" and not by.startswith("systemd"):
+        detail += " (running, started outside systemd; iridia-daemon.service is enabled too)"
+    out.append(Check("Daemon started", True, detail))
+    if en == "enabled" and osrv.graphical_session_active() is False:
+        out.append(Check("iridia-daemon.service", None,
+                         "enabled, but your session doesn't start graphical-session.target, so it won't start "
+                         "the daemon at login",
+                         "Start the daemon from your compositor instead (see: iridia autostart), and disable the "
+                         "service: systemctl --user disable iridia-daemon.service"))
+    if not starters:
+        out.append(Check("Daemon at login", None, "nothing found that starts the daemon at login",
+                         "Set one up: iridia service install, or a line from: iridia autostart"))
+    elif len(starters) > 1:
+        out.append(Check("Daemon at login", None, f"set up in {len(starters)} places: {', '.join(starters)}. "
+                         "Harmless (only one daemon runs), but one is enough."))
+    else:
+        out.append(Check("Daemon at login", True, starters[0]))
+    return out
+
+
+def openrgb_login_checks(status: dict) -> List[Check]:
+    """Who starts OpenRGB's server, per openrgb.start_method, and whether something else does too."""
     from iridia import openrgb_server as osrv
     label = "OpenRGB at login"
     host = status.get("openrgb_host") or "127.0.0.1"
     if not osrv.is_local(host):
-        return Check(label, None, f"OpenRGB runs on another machine ({host}); start it there")
+        return [Check(label, None, f"OpenRGB runs on another machine ({host}); start it there")]
     st = osrv.status()
+    method = st["method"]
     connected = bool(status.get("openrgb_connected"))
-    if st["managed"]:
-        detail = f"started by Iridia ({osrv.UNIT_NAME}): {st['active'] or '?'}, {st['enabled']}"
-        if st["active"] == "active" or connected:
-            return Check(label, True, detail)
-        return Check(label, False, detail,
-                     f"See why: systemctl --user status {osrv.UNIT_NAME}  and  journalctl --user -u {osrv.UNIT_NAME}")
-    if st["others"]:
-        return Check(label, True if connected else None, "started by " + ", ".join(st["others"]))
-    if not st["command"]:
-        return Check(label, False, "OpenRGB isn't installed (no openrgb command, no Flatpak)",
-                     "Install OpenRGB from your distribution, or set openrgb.server_command in config.json "
-                     "to the command that runs its server (for an AppImage).")
-    if not st["start_server"]:
-        return Check(label, False, "nothing starts it (openrgb.start_server is off)",
-                     "Run: iridia openrgb enable  (or start OpenRGB's server yourself)")
-    if not st["systemd"]:
-        return Check(label, True if connected else None,
-                     "no systemd here: the daemon starts 'openrgb --server' itself when it can't reach it")
-    return Check(label, False, "nothing is set to start it",
-                 "Run: iridia openrgb enable  (or Service tab, OpenRGB, Start OpenRGB at login). "
-                 "The daemon also starts it by itself when it can't reach it.")
+    out = []
+    if st["window_without_server"] and not connected:
+        out.append(Check("OpenRGB window", False, "the OpenRGB window is open, but its SDK server is off",
+                         "In OpenRGB: SDK Server tab, Start Server. Or close the window and let Iridia start "
+                         "the server."))
+    if method != "off" and st["others"]:
+        hint = ("Turn off OpenRGB's own autostart: iridia openrgb hide-autostart (or the Service tab). "
+                if st["xdg_entries"] else "Turn that off, ")
+        out.append(Check("Other OpenRGB starters", False,
+                         f"Iridia is set to start OpenRGB ({method}), and it's also started by "
+                         f"{', '.join(st['others'])}. Two OpenRGB instances fight over the hardware, and Iridia "
+                         "won't start one while another is set up.",
+                         hint + "Or let the other one do it: iridia openrgb start-method off"))
+    if not st["command"] and method != "off":
+        out.append(Check(label, False, "OpenRGB isn't installed (no openrgb command, no Flatpak)",
+                         "Install OpenRGB from your distribution, or set openrgb.server_command in config.json "
+                         "to the command that runs its server (for an AppImage)."))
+        return out
+    if method == "off":
+        detail = "openrgb.start_method is off: you start OpenRGB yourself"
+        if st["others"]:
+            detail += f" (found: {', '.join(st['others'])})"
+        out.append(Check(label, True if connected else False, detail,
+                         "Start OpenRGB's server, or let Iridia do it: iridia openrgb start-method daemon"))
+    elif method == "systemd":
+        if not st["managed"]:
+            out.append(Check(label, False, f"start method is systemd, but {osrv.UNIT_NAME} isn't installed",
+                             "Run: iridia openrgb start-method systemd  (or use: iridia openrgb start-method daemon)"))
+        elif st["graphical_session"] is False:
+            out.append(Check(label, False, f"{osrv.UNIT_NAME} waits for graphical-session.target, which your "
+                             "session never starts (Hyprland without UWSM, for example)",
+                             "Let the daemon start it instead: iridia openrgb start-method daemon"))
+        else:
+            detail = f"{osrv.UNIT_NAME}: {st['active'] or '?'}, {st['enabled']}"
+            out.append(Check(label, True if (st["active"] == "active" or connected) else False, detail,
+                             f"See why: systemctl --user status {osrv.UNIT_NAME}"))
+    else:
+        ours = status.get("openrgb_ours_pid") or st["ours"]
+        if status.get("openrgb_gave_up"):
+            out.append(Check(label, False, "the OpenRGB server Iridia started kept exiting, so Iridia stopped "
+                             "restarting it", f"See {st['log']}, then: iridia openrgb restart"))
+        elif ours:
+            out.append(Check(label, True, f"started by the Iridia daemon (pid {ours}); output in {st['log']}"))
+        elif connected:
+            out.append(Check(label, True, "running, not started by Iridia (so Iridia won't restart it)"))
+        else:
+            out.append(Check(label, None, "the Iridia daemon starts it when it can't reach it"))
+    return out
 
 
 def format_text(checks: List[Check]) -> str:

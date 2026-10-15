@@ -1083,7 +1083,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         p.append(section(_("Start the daemon when I log in"), _("Pick one method. If you enable more than one, nothing "
                                                            "breaks, since only one daemon ever runs.")))
         c = card()
-        c.append(label(_("systemd service  ·  recommended"), ("subheading",)))
+        c.append(label(_("systemd service"), ("subheading",)))
         self._unit_status = label(_("Checking…"), ("small", "dim"), wrap=True)
         c.append(self._unit_status)
         r = hbox(8)
@@ -1123,10 +1123,20 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c = card()
         self._orgb_status = label(_("Checking…"), ("body",), wrap=True)
         c.append(self._orgb_status)
-        row, self._orgb_login_sw = switch_row(_("Start OpenRGB's server with Iridia"), False, self._set_orgb_login)
-        c.append(row)
+        r = hbox(10)
+        r.append(label(_("Start OpenRGB"), ("body",)))
+        self._orgb_method_dd = Dropdown(list(self._orgb_method_labels().values()), None, self._set_orgb_method)
+        r.append(self._orgb_method_dd)
+        c.append(r)
         self._orgb_login_lbl = label(_("Checking…"), ("small", "dim"), wrap=True)
         c.append(self._orgb_login_lbl)
+        self._orgb_others_lbl = label("", ("small", "error-text"), wrap=True)
+        self._orgb_others_lbl.set_visible(False)
+        c.append(self._orgb_others_lbl)
+        self._orgb_hide_btn = button(_("Turn off OpenRGB's own autostart"), "visibility_off", "tonal small",
+                                     self._hide_orgb_autostart)
+        self._orgb_hide_btn.set_visible(False)
+        c.append(hbox(8, self._orgb_hide_btn))
         c.append(divider())
         r = hbox(8)
         r.append(button(_("Reconnect"), "sync", "tonal", lambda: self.bg(self.client.reconnect_openrgb,
@@ -1152,6 +1162,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                        "to keep your settings. Same as running “iridia uninstall”."), ("small", "faint"),
                        wrap=True))
         p.append(c)
+        self._refresh_orgb_login()
 
     def _show_autostart(self):
         from iridia import autostart
@@ -1200,7 +1211,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._cli("daemon", "stop", done=done)
 
     def _svc_install(self):
-        self._cli("service", "install", done=lambda r: (
+        self._cli("service", "install", "--autostart", "systemd", done=lambda r: (
             self.toast(_("Enabled. The daemon now starts at login.")) if getattr(r, "returncode", 1) == 0 else
             dialogs.message(self, _("Service"), _('Install failed:') + '\n' + (getattr(r, 'stderr', '') or '').strip(), True),
             self._render_service_status_now()))
@@ -1226,43 +1237,94 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _refresh_orgb_login(self):
         self.bg(self._check_orgb_login, lambda st: (setattr(self, "_orgb_login", st), self._render_orgb_login()))
 
+    @staticmethod
+    def _orgb_method_labels():
+        return {"daemon": _("With Iridia"), "systemd": _("systemd service"), "off": _("I start it myself")}
+
     def _render_orgb_login(self):
         st = getattr(self, "_orgb_login", None)
-        if not st or not hasattr(self, "_orgb_login_sw"):
+        if not st or not hasattr(self, "_orgb_method_dd"):
             return
-        sw, lbl = self._orgb_login_sw, self._orgb_login_lbl
-        sw.set_sensitive(bool(st.get("command")) or st.get("managed", False))
-        sw.set_value(bool(st.get("start_server")) and (st.get("managed", False) or
-                                                       (not st.get("systemd", True) and bool(st.get("command")))))
+        labels = self._orgb_method_labels()
         if st.get("error"):
-            text = st["error"]
-        elif not st.get("command") and not st.get("managed"):
-            text = _("OpenRGB isn't installed, so there is nothing to start.")
-        elif st.get("managed"):
-            text = (_("Iridia starts it when you log in (iridia-openrgb.service). It's running.")
-                    if st.get("active") == "active" else
-                    _("Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
-                      "diagnostics to see why."))
-        elif st.get("others"):
-            text = _("Started by {what}. Iridia leaves that alone.").format(what=", ".join(st["others"]))
-        elif not st.get("systemd", True):
-            text = (_("No systemd here: the daemon starts OpenRGB itself when it can't reach it.")
-                    if st.get("start_server") else _("Off. Start OpenRGB's server yourself."))
-        elif st.get("start_server"):
-            text = _("Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it "
-                     "when it can't reach it.")
+            self._orgb_login_lbl.set_label(st["error"])
+            return
+        method = st.get("method", "daemon")
+        shown = {k: v for k, v in labels.items() if k != "systemd" or st.get("systemd") or method == "systemd"}
+        self._orgb_method_dd.set_items(list(shown.values()), labels.get(method))
+        live = self._status if "_error" not in self._status else {}
+        lines = []
+        if not st.get("command") and method != "off":
+            lines.append(_("OpenRGB isn't installed, so there is nothing to start."))
+        elif method == "daemon":
+            lines.append(_("The Iridia daemon starts OpenRGB's server inside your session, and starts it again if "
+                           "it stops. Works with or without systemd."))
+            ours = live.get("openrgb_ours_pid") or st.get("ours")
+            if ours:
+                lines.append(_("Running (pid {pid}).").format(pid=ours))
+            elif live.get("openrgb_connected"):
+                lines.append(_("Running, but not started by Iridia, so Iridia won't restart it."))
+        elif method == "systemd":
+            lines.append(_("A systemd user service (iridia-openrgb.service) starts it with your graphical "
+                           "session."))
+            if st.get("graphical_session") is False:
+                lines.append(_("Your session doesn't start graphical-session.target, so this service won't start "
+                               "at login. Pick “With Iridia” instead."))
+            elif st.get("active"):
+                lines.append(_("Service: {state}").format(state=st["active"]))
         else:
-            text = _("Off. Start OpenRGB's server yourself.")
-        lbl.set_label(text)
+            lines.append(_("Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB "
+                           "window with its SDK server on, or a service."))
+        if st.get("window_without_server") and not live.get("openrgb_connected"):
+            lines.append(_("The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, "
+                           "Start Server."))
+        self._orgb_login_lbl.set_label("\n".join(lines))
+        others = st.get("others") or []
+        warn = method != "off" and bool(others)
+        self._orgb_others_lbl.set_visible(warn)
+        if warn:
+            self._orgb_others_lbl.set_label(_("Also started by: {what}. Two OpenRGB instances fight over the "
+                                              "hardware, so Iridia won't start one while that is set up.")
+                                            .format(what=", ".join(others)))
+        self._orgb_hide_btn.set_visible(warn and bool(st.get("xdg_entries")))
 
-    def _set_orgb_login(self, on):
-        def done(r):
-            out = ((getattr(r, "stdout", "") or "") + (getattr(r, "stderr", "") or "")).strip()
-            if getattr(r, "returncode", 1) != 0:
-                dialogs.message(self, _("OpenRGB"), out or _("That didn't work"), True)
-            self._refresh_orgb_login()
-        self._orgb_login_sw.set_sensitive(False)
-        self._cli("openrgb", "enable" if on else "disable", done=done)
+    def _set_orgb_method(self, text):
+        method = next((k for k, v in self._orgb_method_labels().items() if v == text), None)
+        st = getattr(self, "_orgb_login", None) or {}
+        if method is None or method == st.get("method"):
+            return
+
+        def run(stop):
+            def done(r):
+                out = ((getattr(r, "stdout", "") or "") + (getattr(r, "stderr", "") or "")).strip()
+                if getattr(r, "returncode", 1) != 0:
+                    dialogs.message(self, _("OpenRGB"), out or _("That didn't work"), True)
+                else:
+                    self.toast(_("OpenRGB start method changed"))
+                self._refresh_orgb_login()
+            self._orgb_method_dd.set_sensitive(False)
+            self._cli("openrgb", "start-method", method, *(["--stop"] if stop else []),
+                      done=lambda r: (self._orgb_method_dd.set_sensitive(True), done(r)))
+        ours = (self._status.get("openrgb_ours_pid") if "_error" not in self._status else None) or st.get("ours")
+        if st.get("method") == "daemon" and method == "off" and ours:
+            dialogs.confirm(self, _("OpenRGB"), _("Also stop the OpenRGB server Iridia started? Other programs may "
+                                                 "be using it. If you keep it, it runs until you log out."),
+                            lambda: run(True), yes=_("Stop it"), no=_("Keep it running"), on_no=lambda: run(False))
+        else:
+            run(False)
+
+    def _hide_orgb_autostart(self):
+        st = getattr(self, "_orgb_login", None) or {}
+        files = st.get("xdg_entries") or []
+        if not files:
+            return
+        dialogs.confirm(self, _("Turn off OpenRGB's own autostart"),
+                        _("Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file "
+                          "stays; delete that line to undo.").format(files=", ".join(files)),
+                        lambda: self._cli("openrgb", "hide-autostart",
+                                          done=lambda r: (self.toast(_("OpenRGB's autostart is off")),
+                                                          self._refresh_orgb_login())),
+                        yes=_("Turn off"))
 
     def _openrgb_restart(self):
         dialogs.confirm(self, _("Restart OpenRGB server"), _("This stops and relaunches the OpenRGB SDK server (about 4 "
@@ -1315,8 +1377,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._svc_status.remove_css_class("ok-text")
             self._svc_status.add_css_class("error-text")
         else:
-            by = _("by systemd") if self._status.get("managed_by") == "systemd" else _("without systemd")
-            self._svc_status.set_label(_('Running (pid {pid}, started {by})').format(pid=self._status.get('pid', '?'), by=by))
+            who = self._status.get("started_by")
+            if who:
+                text = _("Running (pid {pid}, started by {who})").format(pid=self._status.get("pid", "?"), who=who)
+            else:
+                by = _("by systemd") if self._status.get("managed_by") == "systemd" else _("without systemd")
+                text = _('Running (pid {pid}, started {by})').format(pid=self._status.get('pid', '?'), by=by)
+            self._svc_status.set_label(text)
             self._svc_status.remove_css_class("error-text")
             self._svc_status.add_css_class("ok-text")
         self._render_orgb_login()
@@ -1324,7 +1391,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._unit_status.set_label({"enabled": _("Enabled. The daemon starts automatically when you log in."),
                                      "disabled": _("Installed but not enabled. It won't start at login."),
                                      "not installed": _("Not installed. Click “Enable at login” to set it up.")
-                                     }.get(st, _("systemd status: {status}").format(status=st)))
+                                     }.get(st, _("systemd status: {status}").format(status=st))
+                                    + ("\n" + _("Your session doesn't start graphical-session.target, so the service "
+                                                 "won't start the daemon at login. Use one of the other ways below.")
+                                       if st == "enabled" and (getattr(self, "_orgb_login", None) or {})
+                                       .get("graphical_session") is False else ""))
 
     # ============================================================ header actions
     def _toggle_freeze(self):

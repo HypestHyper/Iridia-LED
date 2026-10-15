@@ -22,7 +22,9 @@ DEFAULT_CONFIG = {
     "openrgb": {
         "host": "127.0.0.1",
         "port": None,
-        "start_server": True,
+        # who starts OpenRGB's server: "daemon" (the Iridia daemon), "systemd"
+        # (iridia-openrgb.service) or "off" (you do). See openrgb_server.py.
+        "start_method": "daemon",
         "server_command": "",
         "auto_restart_on_missing_device": True,
         "missing_device_restart_threshold_sec": 45.0,
@@ -76,10 +78,12 @@ class Config:
         self.path = os.path.expanduser(path)
         self._lock = threading.RLock()
         self._data = {}
+        self._file_keys = set()     # "section.key" paths present in the file itself
         self._load()
 
     def _load(self):
         with self._lock:
+            self._file_keys = set()
             if os.path.exists(self.path):
                 try:
                     with open(self.path, "r") as f:
@@ -87,6 +91,9 @@ class Config:
                     self._data = copy.deepcopy(DEFAULT_CONFIG)
                     if not isinstance(loaded, dict):
                         raise json.JSONDecodeError("the top level isn't an object", "", 0)
+                    self._migrate(loaded)
+                    self._file_keys = {f"{sec}.{k}" for sec, v in loaded.items() if isinstance(v, dict)
+                                       for k in v}
                     self._deep_update(self._data, loaded)
                     self._sanitize()
                 except json.JSONDecodeError as e:
@@ -105,6 +112,20 @@ class Config:
             else:
                 self._data = copy.deepcopy(DEFAULT_CONFIG)
                 self._save()
+
+    @staticmethod
+    def _migrate(loaded: dict):
+        """Settings renamed since older versions."""
+        o = loaded.get("openrgb")
+        if isinstance(o, dict) and "start_server" in o:
+            # 1.1.0: "start_server": false meant "never start OpenRGB"
+            if o.pop("start_server") is False and "start_method" not in o:
+                o["start_method"] = "off"
+
+    def is_set(self, key_path: str) -> bool:
+        """The setting is in config.json itself (not only a default)."""
+        with self._lock:
+            return key_path in self._file_keys
 
     def _sanitize(self):
         """Fix types a hand edit can break, so a typo can't stop the daemon. Settings
@@ -154,6 +175,10 @@ class Config:
                     zones.pop(zn)
             clean[name] = cfg
         d["devices"] = clean
+        if d["openrgb"].get("start_method") not in ("daemon", "systemd", "off"):
+            logger.warning(f"Config: openrgb.start_method should be daemon, systemd or off, "
+                           f"not {d['openrgb'].get('start_method')!r}; using daemon")
+            d["openrgb"]["start_method"] = "daemon"
         if not isinstance(d.get("custom_colors"), list):
             d["custom_colors"] = []
 
@@ -224,6 +249,8 @@ class Config:
                     target[key] = {}
                 target = target[key]
             target[keys[-1]] = value
+            if len(keys) == 2:
+                self._file_keys.add(".".join(keys))
             self._save()
 
     @property

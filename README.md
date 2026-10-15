@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version 1.1.0" src="https://img.shields.io/badge/version-1.1.0-7c5cff">
+  <img alt="Version 1.1.1" src="https://img.shields.io/badge/version-1.1.1-7c5cff">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
@@ -87,7 +87,8 @@ correction). Patterns are static; nothing is animated.
 - `iridia zone` commands for keyboard shortcuts (on/off, color, brightness; running the same command
   again reverts it). The window shows the config line for several compositors and desktops.
 - Setups: save and load the whole configuration under a name, with automatic backups.
-- Starts OpenRGB's server at login when nothing else does.
+- Starts OpenRGB's server inside your session, keeps exactly one running, and restarts it when it
+  comes up without devices. Or leave it to systemd, or to yourself.
 - `iridia doctor` for diagnostics, and a log viewer in the window.
 
 **Languages**
@@ -101,7 +102,7 @@ Appearance, Language. The command line, the log and `iridia doctor` use American
 
 | | |
 | --- | --- |
-| **OpenRGB** | talks to your hardware ([openrgb.org](https://openrgb.org/)); Iridia starts its server |
+| **OpenRGB** | talks to your hardware ([openrgb.org](https://openrgb.org/)); Iridia starts its server, with or without systemd |
 | **Python 3.8+** with `venv` | Iridia installs into its own virtual environment |
 | **GTK 4.6+, PyGObject, pycairo** | for the window (the daemon runs without them) |
 | **ddcutil** *(optional)* | to follow your monitor's brightness |
@@ -139,7 +140,8 @@ Then run `bash install.sh --no-deps`. If your release has no OpenRGB package, ge
 ### Before the first run
 
 1. **OpenRGB:** install it and check that your devices show up in it. Iridia starts OpenRGB's server
-   for you (see [Setting up OpenRGB](docs/wiki/Installation.md#setting-up-openrgb)).
+   for you; the installer asks how (see [Setting up OpenRGB](docs/wiki/Installation.md#setting-up-openrgb)).
+   If OpenRGB also starts itself at login, keep only one of the two.
 2. **For monitor brightness** (optional): `sudo usermod -aG i2c $USER`, log out and in, and check that
    `ddcutil detect` finds your monitor.
 

@@ -119,7 +119,10 @@ own language and are not translated.
 
 The pure parts (patterns, colors, layout geometry, config repair, calibration, IPC) and the daemon's
 command handling and rendering (with OpenRGB and DDC replaced by fakes) have unit tests
-that need no hardware or GTK. CI runs them on Python 3.8 to 3.13, along with ruff and shellcheck:
+that need no hardware or GTK. `tests/fakes/` holds stand-ins for `openrgb` (a real process that answers
+the SDK handshake with zero devices, stays silent, or crashes) and `systemctl`, so starting, supervising
+and restarting OpenRGB is tested end to end. CI runs everything on Python 3.8 to 3.13, along with ruff
+and shellcheck:
 
 ```bash
 .venv/bin/pip install -e ".[dev]"

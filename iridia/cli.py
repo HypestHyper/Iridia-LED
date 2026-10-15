@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Optional
 
 from iridia import assets
 from iridia.ipc import IPCClient
@@ -32,6 +33,9 @@ def cmd_status(args):
     print(f"Brightness: {resp.get('brightness', 'N/A')}%")
     print(f"DDC available: {resp.get('ddc_available', False)}")
     print(f"OpenRGB connected: {resp.get('openrgb_connected', False)}")
+    ours = resp.get("openrgb_ours_pid")
+    print(f"OpenRGB start method: {resp.get('openrgb_start_method', '?')}"
+          + (f" (Iridia's OpenRGB: pid {ours})" if ours else ""))
     corr = resp.get("correction") or {}
     names = {"full": "off", "palette": "palette", "calibrated": f"calibrated ({corr.get('profile', 'WS2812B')})",
              "mixed": "mixed (zones differ)"}
@@ -111,40 +115,91 @@ def cmd_doctor(args):
               '(set "logging": {"enabled": true}), then restart the daemon.')
     return 0 if all(c.ok is not False for c in checks) else 1
 
-def _set_start_server(on: bool):
-    """Save openrgb.start_server and tell a running daemon to reload its config."""
+def _save_start_method(method: str) -> bool:
+    """Save openrgb.start_method and tell a running daemon to reload its config."""
     from iridia.config import Config
     try:
-        Config().set("openrgb.start_server", on)
-    except Exception as e:
-        print(f"Couldn't save openrgb.start_server in config.json: {e}")
+        Config().set("openrgb.start_method", method)
+    except Exception as e:                  # noqa: BLE001
+        print(f"Couldn't save openrgb.start_method in config.json: {e}")
+        return False
     _client().send({"cmd": "reload_config"})
+    return True
+
+
+METHOD_TEXT = {"daemon": "the Iridia daemon starts it (and restarts it if it exits)",
+               "systemd": "iridia-openrgb.service starts it with your graphical session",
+               "off": "Iridia never starts or restarts it; you do"}
+
+
+def set_start_method(method: str, stop: Optional[bool] = None) -> int:
+    """Switch openrgb.start_method, cleaning up after the old one. stop: also stop the OpenRGB the
+    daemon started when leaving "daemon" (None: ask when there's a terminal)."""
+    from iridia import openrgb_server as osrv
+    if method not in osrv.METHODS:
+        print(f"Unknown method {method!r}; use one of: {', '.join(osrv.METHODS)}")
+        return 1
+    if method == "systemd" and not osrv.has_systemd():
+        print("There's no systemd user session here. Use 'daemon' (the Iridia daemon starts OpenRGB).")
+        return 1
+    old = osrv.start_method()
+    if stop is None:
+        stop = False
+        if old == "daemon" and method == "off" and osrv.read_pid() is not None and sys.stdin.isatty():
+            stop = input("Also stop the OpenRGB server Iridia started? Other programs may be using it. "
+                         "[y/N] ").strip().lower() in ("y", "yes")
+    if not _save_start_method(method):
+        return 1
+    ok, msgs = osrv.set_method(method, old, stop_running=stop)
+    print(f"OpenRGB start method: {method} ({METHOD_TEXT[method]}).")
+    for m in msgs:
+        print(m)
+    if method != "off":
+        other = osrv.others()
+        if other:
+            print(f"Note: OpenRGB is also set to be started by: {', '.join(other)}. Two OpenRGB instances fight "
+                  "over the hardware, so Iridia won't start another while that is set up. Turn that off (for an "
+                  "autostart entry: iridia openrgb hide-autostart), or use: iridia openrgb start-method off")
+    return 0 if ok else 1
 
 
 def cmd_openrgb(args):
     from iridia import openrgb_server as osrv
-    if args.action == "enable":
-        _set_start_server(True)
-        ok, msg = osrv.enable()
-        print(msg)
-        return 0 if ok else 1
-    if args.action == "disable":
-        _set_start_server(False)
-        ok, msg = osrv.disable()
-        print(msg)
-        print("The daemon won't start OpenRGB by itself either. Undo with: iridia openrgb enable")
+    if args.action in ("enable", "disable"):            # 1.1.0 names
+        return set_start_method("daemon" if args.action == "enable" else "off", stop=args.stop or None)
+    if args.action == "start-method":
+        if not args.value:
+            print(osrv.start_method())
+            return 0
+        return set_start_method(args.value, stop=args.stop or None)
+    if args.action == "hide-autostart":
+        paths = [args.value] if args.value else osrv.xdg_entries()
+        if not paths:
+            print("No autostart entry starts OpenRGB.")
+            return 0
+        ok = True
+        for p in paths:
+            good, msg = osrv.hide_xdg_entry(p)
+            ok &= good
+            print(msg)
         return 0 if ok else 1
     if args.action == "status":
         st = osrv.status()
         cmd = " ".join(st["command"]) or "not found (install OpenRGB, or set openrgb.server_command)"
-        print(f"OpenRGB command:  {cmd}")
+        print(f"Start method:      {st['method']} ({METHOD_TEXT[st['method']]})")
+        print(f"OpenRGB command:   {cmd}")
+        if not osrv.is_local(st["host"]):
+            print(f"Host:              {st['host']} (another machine: Iridia never starts anything)")
+        print(f"OpenRGB running:   {'yes' if st['running'] else 'no'}"
+              + (" (window without --server: is its SDK server on?)" if st["window_without_server"] else ""))
+        print("Started by Iridia: " + (f"yes, pid {st['ours']} ({st['pid_file']})" if st["ours"] else "no"))
         if st["managed"]:
-            print(f"Started by Iridia: {osrv.UNIT_NAME} ({st['active'] or '?'}, {st['enabled']})")
-        else:
-            print(f"Started by Iridia: no ({osrv.UNIT_NAME} not installed)")
+            print(f"{osrv.UNIT_NAME}: {st['active'] or '?'}, {st['enabled']}")
+            if st["graphical_session"] is False:
+                print("  Warning: your session doesn't start graphical-session.target, so this unit won't start at "
+                      "login. Use: iridia openrgb start-method daemon")
         print("Started by others: " + (", ".join(st["others"]) or "nothing found"))
-        print(f"Daemon may start it when unreachable: {'yes' if st['start_server'] else 'no'} (openrgb.start_server)")
-        print(f"OpenRGB process running now: {'yes' if osrv.running() else 'no'}")
+        print(f"OpenRGB's output:  {st['log']}")
         return 0
     if args.action == "reconnect":
         resp = _client().send({"cmd": "reconnect_openrgb"})
@@ -317,8 +372,10 @@ def cmd_uninstall(args):
     _service_remove()
     try:
         from iridia import openrgb_server
-        if openrgb_server.managed():
-            print(openrgb_server.disable()[1])
+        if openrgb_server.managed() and openrgb_server.unit_is_ours():
+            print(openrgb_server.disable_unit()[1])
+        if openrgb_server.read_pid() is not None:
+            print(openrgb_server.stop_ours()[1])
     except Exception:
         pass
     try:
@@ -506,7 +563,7 @@ def cmd_identify(args):
 
 def cmd_service(args):
     if args.action == "install":
-        return _service_install()
+        return _service_install(getattr(args, "autostart", None), getattr(args, "openrgb", None))
     elif args.action == "remove":
         return _service_remove()
     elif args.action == "status":
@@ -550,7 +607,17 @@ def _has_user_systemd() -> bool:
     return bool(r) and r.returncode == 0
 
 
-def _service_install():
+def default_autostart() -> str:
+    """How the daemon should start at login on this system: systemd when the session reaches
+    graphical-session.target, else the compositor's own startup line when one is detected, else
+    XDG autostart."""
+    from iridia import autostart, openrgb_server
+    if openrgb_server.graphical_session_active():
+        return "systemd"
+    return "compositor" if autostart.detect_compositor() else "xdg"
+
+
+def _service_install(how=None, openrgb=None):
     bin_dir = _venv_bin_dir()
     python_bin = os.path.join(bin_dir, "python3")
     gui_bin = os.path.join(bin_dir, "iridia-gui")
@@ -614,36 +681,71 @@ StartupWMClass={assets.APP_ID}
     if shutil.which("update-desktop-database"):
         subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
     print(f"Launcher: {desktop_path}")
-    if not _has_user_systemd():
-        # No systemd user session: start at login through the desktop's autostart folder
-        # instead (GNOME, KDE, XFCE, ... read it; tiling compositors need one line, see below).
-        from iridia import autostart
-        try:
-            path = autostart.xdg_install()
-            print(f"No systemd user session here, so the daemon starts at login via {path} instead.")
-        except OSError as e:
-            print(f"No systemd user session here, and the autostart entry couldn't be written: {e}")
-        print("Compositors that don't read ~/.config/autostart (Hyprland, Sway, niri, river, ...) need one line")
-        print(f"in their config, for example:  exec-once = {autostart.daemon_command()}")
-        print("`iridia autostart` lists the line for each compositor.")
-        return 0
-    _systemctl("daemon-reload")
-    _systemctl("enable", SERVICE_NAME)
-    _systemctl("start", SERVICE_NAME)
-    print("Service installed and started.")
-    _openrgb_auto_setup()
+    from iridia import autostart
+    how = how or default_autostart()
+    if how == "systemd" and not _has_user_systemd():
+        print("No systemd user session here, so the daemon starts through XDG autostart instead.")
+        how = "xdg"
+    _openrgb_setup(openrgb)
+    if how == "systemd":
+        _systemctl("daemon-reload")
+        _systemctl("enable", SERVICE_NAME)
+        _systemctl("start", SERVICE_NAME)
+        print(f"The daemon starts at login through {SERVICE_NAME} (started now).")
+        from iridia import openrgb_server
+        if openrgb_server.graphical_session_active() is False:
+            print("Warning: your session doesn't start graphical-session.target (Hyprland without UWSM, for "
+                  "example), so this service won't start at login. Use --autostart compositor instead.")
+    else:
+        if _has_user_systemd() and os.path.exists(SERVICE_PATH):
+            _systemctl("disable", SERVICE_NAME, capture=True)      # one starter is enough
+        if how == "xdg":
+            try:
+                path = autostart.xdg_install()
+                print(f"The daemon starts at login through {path}.")
+            except OSError as e:
+                print(f"The autostart entry couldn't be written: {e}")
+            print("Compositors that don't read ~/.config/autostart (Hyprland, Sway, niri, river, ...) need a line "
+                  "in their own config instead: see `iridia autostart`.")
+        elif how == "compositor":
+            snip = autostart.snippet(autostart.detect_compositor())
+            if snip:
+                print(f"Add this to {snip['file']} so the daemon starts at login:\n")
+                print("    " + snip["text"].split("\n\n")[0].replace("\n", "\n    ") + "\n")
+            else:
+                print("Add the line for your compositor to its config so the daemon starts at login. "
+                      "`iridia autostart` lists them.")
+        else:
+            print("Nothing set up to start the daemon at login; start it yourself: iridia daemon start")
+    from iridia import openrgb_server
+    starters = openrgb_server.daemon_starters()
+    if len(starters) > 1:
+        print(f"Note: the daemon is set to start from {len(starters)} places ({', '.join(starters)}). That's "
+              "harmless (only one ever runs), but one is enough.")
     return 0
 
 
-def _openrgb_auto_setup():
-    """Have OpenRGB's server start at login too, unless something else already does it."""
+def _openrgb_setup(method=None):
+    """Set up how OpenRGB's server starts: the given method, or the current one (removing the
+    1.1.0 unit that started it too early at boot)."""
     from iridia import openrgb_server
     try:
-        msg = openrgb_server.auto_setup()
-    except Exception as e:
-        msg = f"Note: couldn't set up OpenRGB's server: {e}"
-    if msg:
-        print(msg)
+        if method:
+            set_start_method(method, stop=False)
+            return
+        msg = openrgb_server.migrate(openrgb_server.start_method())
+        if msg:
+            print(msg)
+        current = openrgb_server.start_method()
+        print(f"OpenRGB start method: {current} ({METHOD_TEXT[current]}). Change it with: "
+              "iridia openrgb start-method daemon|systemd|off")
+        other = openrgb_server.others() if current != "off" else []
+        if other:
+            print(f"Note: OpenRGB is also set to be started by: {', '.join(other)}. Two OpenRGB instances fight "
+                  "over the hardware. Turn that off (for an autostart entry: iridia openrgb hide-autostart), or "
+                  "use: iridia openrgb start-method off")
+    except Exception as e:                  # noqa: BLE001
+        print(f"Note: couldn't set up OpenRGB's server: {e}")
 
 def _icon_dirs():
     base = os.path.expanduser("~/.local/share/icons/hicolor")
@@ -744,7 +846,7 @@ def cmd_daemon(args):
         except Exception:
             st = {}
         if st.get("ok"):
-            by = "systemd" if st.get("managed_by") == "systemd" else "another method"
+            by = st.get("started_by") or ("systemd" if st.get("managed_by") == "systemd" else "another method")
             print(f"Running (pid {st.get('pid')}, started by {by})")
             return 0
         print("Stopped")
@@ -837,9 +939,14 @@ def main():
     subparsers.add_parser("status", help="Show daemon status")
     subparsers.add_parser("doctor", help="Run a full health check and explain what's wrong, if anything")
     orgb_parser = subparsers.add_parser("openrgb", help="Manage the OpenRGB connection")
-    orgb_parser.add_argument("action", choices=["reconnect", "restart", "enable", "disable", "status"],
-                             help="reconnect, restart the server, enable/disable starting its server at login, "
-                                  "status")
+    orgb_parser.add_argument("action", choices=["status", "start-method", "reconnect", "restart", "hide-autostart",
+                                                "enable", "disable"],
+                             help="status; start-method daemon|systemd|off (who starts OpenRGB's server); "
+                                  "reconnect; restart the server; hide-autostart [FILE] (turn off OpenRGB's own "
+                                  "autostart entry); enable/disable (same as start-method daemon/off)")
+    orgb_parser.add_argument("value", nargs="?", help="the method for start-method, or the file for hide-autostart")
+    orgb_parser.add_argument("--stop", action="store_true",
+                             help="when leaving 'daemon': also stop the OpenRGB server Iridia started")
     dev_parser = subparsers.add_parser("device", help="Control a device")
     dev_parser.add_argument("name", help="Device name")
     dev_parser.add_argument("action", choices=["enable", "disable", "mode", "pattern", "brightness-sync",
@@ -899,6 +1006,11 @@ def main():
     d_parser.add_argument("action", choices=["start", "stop", "status"])
     svc_parser = subparsers.add_parser("service", help="Manage systemd service")
     svc_parser.add_argument("action", choices=["install", "remove", "status", "start", "stop", "restart"])
+    svc_parser.add_argument("--autostart", choices=["systemd", "xdg", "compositor", "none"],
+                            help="install: how the daemon starts at login (default: systemd when your session "
+                                 "reaches graphical-session.target, else your compositor's line or XDG autostart)")
+    svc_parser.add_argument("--openrgb", choices=["daemon", "systemd", "off"],
+                            help="install: how OpenRGB's server is started (default: keep the current setting)")
     args = parser.parse_args()
     if not args.command:
         parser.print_help()

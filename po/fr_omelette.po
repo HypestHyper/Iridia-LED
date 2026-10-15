@@ -7,11 +7,12 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 11:24+0000\n"
+"POT-Creation-Date: 2026-10-15 14:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Français\n"
 "Language: fr_omelette\n"
+"Language-Team: Français\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -245,6 +246,24 @@ msgstr "Bonsoir"
 msgid "Whole device"
 msgstr "Oh là là"
 
+msgid "Appearance"
+msgstr "Moustache"
+
+msgid "Font"
+msgstr "Bisou"
+
+msgid "Google Sans Flex (built in)"
+msgstr "Il était une fois un croissant"
+
+msgid "System font"
+msgstr "Bonsoir"
+
+msgid "Reduce motion"
+msgstr "Bof"
+
+msgid "Turns off shape morphs, sliding panels and the color cross-fade."
+msgstr "J'ai une baguette. Mon chien mange du camembert."
+
 msgid "Night mode and sleep"
 msgstr "Un croissant, s'il vous plaît"
 
@@ -351,24 +370,6 @@ msgid ""
 "Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
 "Reset this after changing wallpaper tool or shell."
 msgstr "Voulez-vous du fromage. Mon chien mange du camembert. Je voudrais un éclair au chocolat."
-
-msgid "Appearance"
-msgstr "Moustache"
-
-msgid "Font"
-msgstr "Bisou"
-
-msgid "Google Sans Flex (built in)"
-msgstr "Il était une fois un croissant"
-
-msgid "System font"
-msgstr "Bonsoir"
-
-msgid "Reduce motion"
-msgstr "Bof"
-
-msgid "Turns off shape morphs, sliding panels and the color cross-fade."
-msgstr "J'ai une baguette. Mon chien mange du camembert."
 
 msgid "Logging"
 msgstr "Quiche"
@@ -576,8 +577,8 @@ msgstr "Je ne sais quoi"
 msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
 msgstr "Je voudrais un éclair au chocolat. Les lapins sont dans la cuisine."
 
-msgid "systemd service  ·  recommended"
-msgstr "Où sont les toilettes ?"
+msgid "systemd service"
+msgstr "Le service est en grève"
 
 msgid "Enable at login"
 msgstr "Éclair"
@@ -610,6 +611,12 @@ msgstr "J'ai une baguette"
 
 msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
 msgstr "Qui a mangé mon fromage. J'ai une baguette."
+
+msgid "Start OpenRGB"
+msgstr "Une baguette, s'il vous plaît"
+
+msgid "Turn off OpenRGB's own autostart"
+msgstr "Où est la bibliothèque ?"
 
 msgid "Reconnect"
 msgstr "Escargot"
@@ -690,6 +697,85 @@ msgstr "Bonsoir"
 msgid "Remove"
 msgstr "Baguette"
 
+msgid "With Iridia"
+msgstr "Avec beaucoup de beurre"
+
+msgid "I start it myself"
+msgstr "Je voudrais un croissant"
+
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr "Le chat est sous la table"
+
+msgid ""
+"The Iridia daemon starts OpenRGB's server inside your session, and starts it again if it stops. "
+"Works with or without systemd."
+msgstr "Mon chat a mangé le dictionnaire, et maintenant il parle couramment le systemd."
+
+#, python-brace-format
+msgid "Running (pid {pid})."
+msgstr "Le fromage est prêt (pid {pid})."
+
+msgid "Running, but not started by Iridia, so Iridia won't restart it."
+msgstr "Le facteur est passé, mais il n'a rien laissé."
+
+msgid "A systemd user service (iridia-openrgb.service) starts it with your graphical session."
+msgstr "Le train de 8 h 15 (iridia-openrgb.service) part avec votre session graphique."
+
+msgid ""
+"Your session doesn't start graphical-session.target, so this service won't start at login. Pick "
+"“With Iridia” instead."
+msgstr "La tour Eiffel n'atteint jamais graphical-session.target. Choisissez « Avec beaucoup de beurre »."
+
+#, python-brace-format
+msgid "Service: {state}"
+msgstr "Service : {state}"
+
+msgid ""
+"Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB window with its "
+"SDK server on, or a service."
+msgstr "Iridia ne fait pas la vaisselle. Faites-la vous-même, avec la fenêtre OpenRGB et son serveur SDK."
+
+msgid "The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, Start Server."
+msgstr "La fenêtre est ouverte, mais le serveur est parti en vacances. Onglet SDK Server, Start Server."
+
+#, python-brace-format
+msgid ""
+"Also started by: {what}. Two OpenRGB instances fight over the hardware, so Iridia won't start one"
+" while that is set up."
+msgstr "Aussi invité : {what}. Deux OpenRGB dans une cuisine, c'est une omelette de trop."
+
+msgid "OpenRGB"
+msgstr "OpenRGB"
+
+msgid "That didn't work"
+msgstr "Ooh la la"
+
+msgid "OpenRGB start method changed"
+msgstr "La soupe a changé de recette"
+
+msgid ""
+"Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
+"runs until you log out."
+msgstr "Faut-il aussi éteindre le four qu'Iridia a allumé ? Quelqu'un fait peut-être un soufflé."
+
+msgid "Stop it"
+msgstr "Éteignez-le"
+
+msgid "Keep it running"
+msgstr "Laissez mijoter"
+
+#, python-brace-format
+msgid ""
+"Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file stays; "
+"delete that line to undo."
+msgstr "Ajouter « Hidden=true » à {files} ? Le fichier reste au frigo ; effacez la ligne pour annuler."
+
+msgid "OpenRGB's autostart is off"
+msgstr "Le pigeon est rentré au nid"
+
+msgid "Turn off"
+msgstr "Pardon ?"
+
 msgid ""
 "This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
 "other software using it."
@@ -719,6 +805,10 @@ msgstr "Le chat est sous la table"
 msgid "Daemon stopped"
 msgstr "Baguette"
 
+#, python-brace-format
+msgid "Running (pid {pid}, started by {who})"
+msgstr "Le fromage est prêt (pid {pid}, apporté par {who})"
+
 msgid "by systemd"
 msgstr "C'est la vie"
 
@@ -741,6 +831,13 @@ msgstr "Omelette du fromage"
 #, python-brace-format
 msgid "systemd status: {status}"
 msgstr "Crêpe"
+
+msgid ""
+"Your session doesn't start graphical-session.target, so the service won't start the daemon at "
+"login. Use one of the other ways below."
+msgstr ""
+"La tour Eiffel n'atteint jamais graphical-session.target, donc le démon dort. Essayez une autre "
+"porte ci-dessous."
 
 msgid "Colors frozen. Wallpaper changes are ignored."
 msgstr "Qui a mangé mon fromage ?"
@@ -789,9 +886,6 @@ msgstr "Bof"
 msgid "Not available"
 msgstr "Allez !"
 
-msgid "Off"
-msgstr "Pardon ?"
-
 msgid "Mixed"
 msgstr "Bof"
 
@@ -800,6 +894,9 @@ msgstr "Il était une fois un croissant"
 
 msgid "Following the wallpaper"
 msgstr "J'ai une baguette"
+
+msgid "Off"
+msgstr "Pardon ?"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1130,9 +1227,6 @@ msgstr "Brioche"
 msgid "Turn on"
 msgstr "C'est la vie"
 
-msgid "Turn off"
-msgstr "Pardon ?"
-
 msgid "Back to normal"
 msgstr "Bisou"
 
@@ -1279,9 +1373,6 @@ msgstr "Il pleut des cordes. Le béret de mon grand-père."
 
 msgid "Keybind color"
 msgstr "Ratatouille"
-
-msgid "That didn't work"
-msgstr "Ooh la la"
 
 msgid "Nothing: every strip shows its normal colors."
 msgstr "Le train est encore en retard"
@@ -1571,6 +1662,10 @@ msgstr "J'aime les escargots au beurre"
 msgid "Click to use, numbers show the order. Right-click a saved color to delete it."
 msgstr "Je voudrais un éclair au chocolat. Joyeux anniversaire."
 
+msgctxt "color correction"
+msgid "Off"
+msgstr "Nature"
+
 msgid "Palette"
 msgstr "Bonsoir"
 
@@ -1824,40 +1919,4 @@ msgstr "Café"
 
 msgid "Red (wraps around)"
 msgstr "Où sont les toilettes ?"
-
-msgid "Start OpenRGB's server with Iridia"
-msgstr "Le poisson rouge est en vacances"
-
-msgid "OpenRGB isn't installed, so there is nothing to start."
-msgstr "Le chat est sous la table"
-
-msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
-msgstr "Joyeux anniversaire. Mon chien mange du camembert."
-
-msgid ""
-"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
-"diagnostics to see why."
-msgstr "Omelette du fromage. Voulez-vous du fromage."
-
-#, python-brace-format
-msgid "Started by {what}. Iridia leaves that alone."
-msgstr "Mon aéroglisseur est plein d'anguilles"
-
-msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
-msgstr "Je voudrais un éclair au chocolat. Le pamplemousse est dans le jardin."
-
-msgid "Off. Start OpenRGB's server yourself."
-msgstr "La plume de ma tante"
-
-msgid ""
-"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
-" can't reach it."
-msgstr "La tour Eiffel est fermée aujourd'hui. Le train est encore en retard."
-
-msgid "OpenRGB"
-msgstr "OpenRGB"
-
-msgctxt "color correction"
-msgid "Off"
-msgstr "Nature"
 

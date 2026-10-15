@@ -22,7 +22,7 @@ option.
 | `iridia daemon stop` | Stop it, however it was started |
 | `iridia daemon status` | Running or stopped, and who started it |
 | `iridia restart` | Soft restart: reconnect and re-send everything |
-| `iridia service install` | Write and enable the systemd user service, the launcher and icons |
+| `iridia service install [--autostart METHOD] [--openrgb METHOD]` | Install the launcher and icons, and set up how the daemon starts at login (`systemd`, `xdg`, `compositor` or `none`) and how OpenRGB is started (`daemon`, `systemd` or `off`) |
 | `iridia service remove` | Remove them |
 | `iridia service status / start / stop / restart` | Control the systemd service |
 | `iridia autostart` | Print the autostart line for every compositor |
@@ -34,10 +34,14 @@ option.
 | Command | What it does |
 | --- | --- |
 | `iridia openrgb reconnect` | Drop the connection and connect again |
-| `iridia openrgb restart` | Restart OpenRGB's server (`iridia-openrgb.service`, `openrgb-server.service`, or a headless `openrgb --server`) |
-| `iridia openrgb enable` | Start OpenRGB's server at every login (`iridia-openrgb.service`) |
-| `iridia openrgb disable` | Stop doing that; the daemon won't start OpenRGB either |
-| `iridia openrgb status` | Show what starts OpenRGB on this machine |
+| `iridia openrgb restart` | Restart OpenRGB's server: the one Iridia started, or `iridia-openrgb.service`, or another user service or headless `openrgb --server` (never the OpenRGB window). Does nothing with the `off` method |
+| `iridia openrgb start-method` | Show how OpenRGB's server is started |
+| `iridia openrgb start-method daemon` | The Iridia daemon starts it (default) |
+| `iridia openrgb start-method systemd` | `iridia-openrgb.service` starts it with your graphical session |
+| `iridia openrgb start-method off [--stop]` | You start it; `--stop` also stops the one Iridia started (otherwise it asks, or keeps it running) |
+| `iridia openrgb enable`, `disable` | The same as `start-method daemon` and `start-method off` |
+| `iridia openrgb hide-autostart [FILE]` | Turn off OpenRGB's own entry in `~/.config/autostart` by adding `Hidden=true` (the file stays) |
+| `iridia openrgb status` | The method, the command, whether Iridia started the running OpenRGB, and what else starts it |
 
 ## Wallpaper and colors
 

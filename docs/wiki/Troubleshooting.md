@@ -11,7 +11,7 @@ log file, switch on file logging in *Settings, Logging*; for every detail, set `
 ## Nothing lights up
 
 1. `iridia status`: is OpenRGB connected? If not, `iridia openrgb status` shows what is supposed to
-   start its server, and `iridia openrgb enable` sets it up (see
+   start its server, and `iridia openrgb start-method daemon` lets Iridia do it (see
    [Installation](Installation.md#setting-up-openrgb)). Iridia keeps retrying and sends colors as soon as
    it connects.
 2. Do your devices show up and change color in OpenRGB itself? If not, the problem is between OpenRGB and
@@ -37,11 +37,29 @@ The LED count is too low. Use *Count LEDs* on the zone; it can also set OpenRGB'
 - **The far end turns orange or pink at full brightness:** voltage drop. Set a *Power limit*, or inject
   power at both ends of the strip.
 
+## LEDs show random colors after boot
+
+Usually two things went wrong at once:
+
+- **OpenRGB started too early.** An OpenRGB started before your session could reach the USB and I2C
+  devices finds none, and never looks again. `iridia doctor` then says *OpenRGB is running but has
+  reported no devices*. Iridia restarts an OpenRGB it started itself (after 30 seconds, then once more
+  after 2 minutes). An OpenRGB that something else started, Iridia leaves alone: restart it yourself.
+  1.1.0's `iridia-openrgb.service` had this problem; updating removes it.
+- **Two OpenRGB instances.** A second one (often OpenRGB's own entry in `~/.config/autostart`) takes the
+  controller, and when it exits the LEDs keep whatever it left: a few in random colors. `iridia doctor`
+  shows *Other OpenRGB starters*. Keep one: turn off OpenRGB's entry
+  (`iridia openrgb hide-autostart`, or the button in the *Service* tab), or let it do the job and run
+  `iridia openrgb start-method off`.
+
+To fix it now: `iridia openrgb restart`. OpenRGB's own output, when Iridia started it, is in
+`~/.local/share/iridia/openrgb.log`; OpenRGB also keeps logs in `~/.config/OpenRGB/logs/`.
+
 ## A device shows as missing
 
 When a device OpenRGB used to report disappears, Iridia restarts OpenRGB's server to bring it back, at
-most twice. If it's still missing (unplugged, or renamed by an OpenRGB update), switch it off on the
-Devices tab so it stops being reported.
+most twice, if Iridia started that server. If it's still missing (unplugged, or renamed by an OpenRGB
+update), switch it off on the Devices tab so it stops being reported.
 
 ## The wallpaper isn't detected
 
@@ -69,13 +87,16 @@ and run the installer again. GTK 4.6 or newer is needed.
 
 ## The daemon doesn't start at login
 
-`systemctl --user status iridia-daemon.service`. If the service is enabled but never starts, your
-session doesn't activate `graphical-session.target`; add the daemon to your compositor's autostart
-instead (see [Start at login](Start-at-Login.md)).
+`iridia doctor` shows how the running daemon was started and what is set up to start it. If
+`iridia-daemon.service` is enabled but never starts, your session doesn't activate
+`graphical-session.target` (Hyprland without UWSM, for example); doctor says so. Add the daemon to your
+compositor's autostart instead (see [Start at login](Start-at-Login.md)) and disable the service:
+`systemctl --user disable iridia-daemon.service`.
 
 ## LEDs stay on when the PC sleeps
 
-Sleep detection needs systemd-logind and `gdbus`. Check `iridia log` for a line about sleep detection.
+Sleep detection needs systemd-logind (or elogind) and `gdbus` or `dbus-monitor`. It works however the
+daemon was started. Check `iridia log` for a line about sleep detection.
 
 ## Reporting a bug
 

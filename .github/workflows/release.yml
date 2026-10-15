@@ -1,0 +1,45 @@
+name: Release
+
+# Push a tag like v1.1.1 (matching the version in pyproject.toml) to publish a release:
+# the source archive without tests, and the notes from that version's section in CHANGELOG.md.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check that the tag matches the version
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          grep -q "^version = \"$v\"" pyproject.toml || { echo "pyproject.toml isn't version $v"; exit 1; }
+          grep -q "^## $v\$" CHANGELOG.md || { echo "CHANGELOG.md has no '## $v' section"; exit 1; }
+      - name: Build the archive
+        run: git archive --format=tar.gz --prefix=iridia/ -o "iridia-${GITHUB_REF_NAME#v}.tar.gz" "$GITHUB_REF_NAME"
+      - name: Write the release notes
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v head="## $v" '$0 == head {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          cat >> notes.md <<NOTES
+
+          ## Install or update
+
+              tar xzf iridia-$v.tar.gz
+              cd iridia
+              bash install.sh
+
+          Or from git: \`git clone https://github.com/${GITHUB_REPOSITORY}.git\`, then \`bash install.sh\` in that folder
+          (to update an existing clone: \`git pull && bash install.sh\`). Your settings are kept.
+          See the [installation guide](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/docs/wiki/Installation.md).
+          NOTES
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" "iridia-$v.tar.gz" --title "Iridia $v" --notes-file notes.md --verify-tag

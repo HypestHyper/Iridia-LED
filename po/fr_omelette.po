@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 16:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -245,6 +245,42 @@ msgstr "Bonsoir"
 
 msgid "Whole device"
 msgstr "Oh là là"
+
+msgid "Animations"
+msgstr "Le cinéma est fermé le lundi"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Mon voisin collectionne les cuillères en bois."
+
+msgid "Run animations"
+msgstr "Allumez le projecteur"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Éteint : le chat dort sur le radiateur."
+
+msgid "Frame rate"
+msgstr "Vitesse de l'escargot"
+
+msgid "frames per second"
+msgstr "baguettes par seconde"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr "Trente, c'est l'âge où l'on achète une plante verte."
+
+msgid "Pause animations during night mode"
+msgstr "La nuit, tous les chats sont gris"
+
+msgid "Slow animations during night mode"
+msgstr "La nuit porte conseil"
+
+msgid "Controller effects"
+msgstr "Les tours de magie du contrôleur"
+
+msgid ""
+"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
+"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
+"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
+msgstr "Le boulanger m'a promis une brioche demain, mais je ne le crois plus."
 
 msgid "Appearance"
 msgstr "Moustache"
@@ -1166,6 +1202,216 @@ msgstr "Oh là là"
 msgid "Close"
 msgstr "Bonne nuit"
 
+msgid "Breathing"
+msgstr "La sieste"
+
+msgid "Comet"
+msgstr "La comète de Tante Odile"
+
+msgid "Fill"
+msgstr "Santé !"
+
+msgid "Embers"
+msgstr "Le feu de cheminée"
+
+msgid "Rainbow"
+msgstr "L'arc-en-ciel"
+
+msgid "Color cycle"
+msgstr "Le tourniquet"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr "J'ai perdu mon parapluie à la gare de Lyon."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Le train de 7 h 12 ne s'arrête plus ici."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "Le verre est à moitié plein de limonade."
+
+msgid "Points drift to another color and back, like a calm fire."
+msgstr "Grand-mère tricote près du feu en écoutant la radio."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "Un arc-en-ciel qui a raté son bus."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "Il ne faut jamais manger des huîtres avant un tour de manège."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "Le caméléon a changé d'avis trois fois."
+
+msgid "Brightness range"
+msgstr "De la cave au grenier"
+
+msgid "Easing"
+msgstr "La douceur du lundi"
+
+msgid "Next color at each breath"
+msgstr "Une nouvelle chaussette à chaque soupir"
+
+msgid "Tail length"
+msgstr "La longueur de la queue du chat"
+
+msgid "LEDs"
+msgstr "Café"
+
+msgid "Heads"
+msgstr "Les têtes de veau"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "L'espace entre les chaises (0 : on se serre)"
+
+msgid "Bounce back and forth"
+msgstr "Le ping-pong du dimanche"
+
+msgid "Reverse direction"
+msgstr "Faire demi-tour au rond-point"
+
+msgid "Background"
+msgstr "L'arrière-boutique"
+
+msgid "Pause when full and empty"
+msgstr "Une pause café, pleine et vide"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Remplir depuis la cuisine"
+
+msgid "Empty"
+msgstr "Vider le seau"
+
+msgid "Density"
+msgstr "La densité du flan"
+
+msgid "Softness"
+msgstr "La douceur du coussin"
+
+msgid "Flicker"
+msgstr "Le clignotement du phare"
+
+msgid "Colors"
+msgstr "Les crayons de couleur"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "La largeur du trottoir"
+
+msgid "Chaos"
+msgstr "Le bazar"
+
+msgid "Hold each color"
+msgstr "Tenir chaque couleur comme un parapluie"
+
+msgid "Follow the layout"
+msgstr "Suivre le plan du métro"
+
+msgid "Direction"
+msgstr "Par là-bas"
+
+msgid "Keep zones with this effect in step"
+msgstr "Tout le monde danse la même valse"
+
+msgid "Seconds per breath"
+msgstr "Les secondes du soupir"
+
+msgid "Speed"
+msgstr "La vitesse de la tortue"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Le temps du fondu au chocolat"
+
+msgid "Sine"
+msgstr "Sinus"
+
+msgid "Smooth"
+msgstr "Lisse comme un œuf"
+
+msgid "Sharp"
+msgstr "Pointu comme un crayon"
+
+msgid "Dim"
+msgstr "Tamisé"
+
+msgid "Second color"
+msgstr "La deuxième chaussette"
+
+msgid "Start"
+msgstr "Le début du film"
+
+msgid "End"
+msgstr "La fin du film"
+
+msgid "Center"
+msgstr "Au milieu du pont"
+
+msgid "Back"
+msgstr "Retour à la case départ"
+
+msgid "Same way"
+msgstr "Par le même chemin"
+
+msgid "Reset"
+msgstr "On recommence tout"
+
+msgid "Warm"
+msgstr "Chaud comme un croissant"
+
+msgid "Zone colors"
+msgstr "Les couleurs du quartier"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
+
+msgid "Left"
+msgstr "À gauche"
+
+msgid "Right"
+msgstr "À droite"
+
+msgid "Up"
+msgstr "En haut"
+
+msgid "Down"
+msgstr "En bas"
+
+msgid "Horizontal"
+msgstr "Allongé sur le canapé"
+
+msgid "Vertical"
+msgstr "Debout dans le bus"
+
+msgid "Controller effect"
+msgstr "Le tour du contrôleur"
+
+msgid ""
+"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
+"colors or the layout."
+msgstr "Mon oncle répare des horloges qui ne donnent jamais l'heure."
+
+msgid "Effect"
+msgstr "L'effet papillon"
+
+msgid "Follow Iridia"
+msgstr "Suivre Iridia"
+
+msgid "On this device a lower number is faster."
+msgstr "Ici, le plus petit court le plus vite."
+
+msgid "Brightness"
+msgstr "Bisou"
+
+msgid "Effect color"
+msgstr "La couleur du papillon"
+
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
 
@@ -1174,6 +1420,9 @@ msgstr "Voulez-vous du fromage ?"
 
 msgid "Night mode on / off"
 msgstr "Bonjour, je m'appelle Jacques"
+
+msgid "Pause / resume animations"
+msgstr "Pause café / reprise du travail"
 
 msgid "Load a setup"
 msgstr "Quiche"
@@ -1233,8 +1482,8 @@ msgstr "Bisou"
 msgid "Pick the color"
 msgstr "Éclair"
 
-msgid "Brightness"
-msgstr "Bisou"
+msgid "Static pattern"
+msgstr "Le motif de la nappe"
 
 msgid "Do"
 msgstr "Bof"
@@ -1323,6 +1572,15 @@ msgstr "Omelette du fromage"
 msgid "night mode on / off"
 msgstr "Il était une fois un croissant"
 
+msgid "an effect, again: back to normal"
+msgstr "un effet, encore : comme avant"
+
+msgid "still colors until you press it again"
+msgstr "on ne bouge plus jusqu'au prochain clic"
+
+msgid "pause / resume every animation"
+msgstr "tout le monde s'arrête, puis repart"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "Le chat est sous la table"
 
@@ -1346,6 +1604,9 @@ msgstr "La tour Eiffel est fermée aujourd'hui. Je ne sais quoi."
 msgid "turns them on (even when switched off)"
 msgstr "Ceci n'est pas une pipe"
 
+msgid "runs an effect"
+msgstr "lance un papillon"
+
 msgid "shows one color"
 msgstr "Croissant"
 
@@ -1367,6 +1628,9 @@ msgstr "Les moules sont délicieuses. J'ai une baguette."
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Le pamplemousse est dans le jardin"
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "La même touche arrête la musique, puis la relance."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Il pleut des cordes. Le béret de mon grand-père."
@@ -1404,9 +1668,6 @@ msgstr "Quiche"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "J'ai une baguette"
-
-msgid "Fill"
-msgstr "Santé !"
 
 msgid "Gradient"
 msgstr "Oh là là"
@@ -1754,8 +2015,11 @@ msgstr "Santé !"
 msgid "calibrated"
 msgstr "Bof"
 
-msgid "LEDs"
-msgstr "Café"
+msgid "Static"
+msgstr "Immobile comme une statue"
+
+msgid "Animated"
+msgstr "Animé comme un marché"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Le pamplemousse est dans le jardin. La plume de ma tante."
@@ -1871,6 +2135,12 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "Je suis une baguette. La tour Eiffel est fermée aujourd'hui."
+
+#, python-brace-format
+msgid ""
+"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
+"settings again."
+msgstr "Cet appareil fait son numéro ({name}). Choisissez Suivre Iridia plus haut pour revenir."
 
 msgid "Red"
 msgstr "Quiche"

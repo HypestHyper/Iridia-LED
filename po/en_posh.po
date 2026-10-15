@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 16:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -256,6 +256,48 @@ msgstr "Indisposed"
 
 msgid "Whole device"
 msgstr "The entire device"
+
+msgid "Animations"
+msgstr "Animated Spectacles"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Animated spectacles are chosen zone by zone, upon the Devices tab."
+
+msgid "Run animations"
+msgstr "Permit the spectacles"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Off: the animated zones shall hold their first colour, quite still."
+
+msgid "Frame rate"
+msgstr "Pictures per second"
+
+msgid "frames per second"
+msgstr "pictures each second"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr ""
+"Thirty appears most graceful upon most strips. A device unable to keep pace is granted a gentler "
+"rate of its own accord."
+
+msgid "Pause animations during night mode"
+msgstr "Suspend the spectacles at night"
+
+msgid "Slow animations during night mode"
+msgstr "Slow the spectacles at night"
+
+msgid "Controller effects"
+msgstr "The controller's own spectacles"
+
+msgid ""
+"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
+"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
+"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
+msgstr ""
+"Permits a device to perform one of its own spectacles (those OpenRGB lists, such as Breathing or "
+"Spectrum Cycle). They are performed by the controller itself and are therefore ever graceful, "
+"though they pay no heed to the wallpaper, your colours or the arrangement. Choose them device by "
+"device upon the Devices tab."
 
 msgid "Appearance"
 msgstr "Comportment"
@@ -1247,6 +1289,222 @@ msgstr "The resizing failed"
 msgid "Close"
 msgstr "Close"
 
+msgid "Breathing"
+msgstr "Respiration"
+
+msgid "Comet"
+msgstr "Comet"
+
+msgid "Fill"
+msgstr "Fill"
+
+msgid "Embers"
+msgstr "Hearth embers"
+
+msgid "Rainbow"
+msgstr "Rainbow"
+
+msgid "Color cycle"
+msgstr "Procession of colours"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr ""
+"Fades gently between two levels of brightness. A minimum above naught keeps the dark end graceful"
+" upon strips that stumble when dim."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Bright heads with fading tails promenade along the strip."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "The strip fills with its pattern, then politely empties."
+
+msgid "Points drift to another color and back, like a calm fire."
+msgstr "Points drift to another colour and back again, as a contented hearth."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "A travelling rainbow. It disregards the zone's colours."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "The vulgar one: a hasty, uneven rainbow strewn with sparkles. One is shocked."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "The entire zone proceeds from one colour to the next."
+
+msgid "Brightness range"
+msgstr "Range of radiance"
+
+msgid "Easing"
+msgstr "Manner of easing"
+
+msgid "Next color at each breath"
+msgstr "The next colour with every breath"
+
+msgid "Tail length"
+msgstr "Length of tail"
+
+msgid "LEDs"
+msgstr "Lamps"
+
+msgid "Heads"
+msgstr "Heads"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "Spacing (naught spaces them evenly)"
+
+msgid "Bounce back and forth"
+msgstr "To and fro"
+
+msgid "Reverse direction"
+msgstr "The opposite direction"
+
+msgid "Background"
+msgstr "Backdrop"
+
+msgid "Pause when full and empty"
+msgstr "A pause when full and empty"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Fill from"
+
+msgid "Empty"
+msgstr "Emptying"
+
+msgid "Density"
+msgstr "Density"
+
+msgid "Softness"
+msgstr "Softness"
+
+msgid "Flicker"
+msgstr "Flicker"
+
+msgid "Colors"
+msgstr "Colours"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "Breadth (LEDs per rainbow)"
+
+msgid "Chaos"
+msgstr "Pandemonium"
+
+msgid "Hold each color"
+msgstr "Hold each colour"
+
+msgid "Follow the layout"
+msgstr "Follow the arrangement"
+
+msgid "Direction"
+msgstr "Direction"
+
+msgid "Keep zones with this effect in step"
+msgstr "Keep zones with this spectacle in step"
+
+msgid "Seconds per breath"
+msgstr "Seconds per breath"
+
+msgid "Speed"
+msgstr "Pace"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Time to fade"
+
+msgid "Sine"
+msgstr "Sine"
+
+msgid "Smooth"
+msgstr "Smooth"
+
+msgid "Sharp"
+msgstr "Sharp"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Second color"
+msgstr "Second colour"
+
+msgid "Start"
+msgstr "Beginning"
+
+msgid "End"
+msgstr "End"
+
+msgid "Center"
+msgstr "Centre"
+
+msgid "Back"
+msgstr "Back again"
+
+msgid "Same way"
+msgstr "The same way"
+
+msgid "Reset"
+msgstr "Begin anew"
+
+msgid "Warm"
+msgstr "Warm"
+
+msgid "Zone colors"
+msgstr "The zone's colours"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr ""
+"Following the arrangement conducts the spectacle through the room, across every strip that "
+"follows it, according to where the LEDs sit upon the Layout tab."
+
+msgid "Left"
+msgstr "Left"
+
+msgid "Right"
+msgstr "Right"
+
+msgid "Up"
+msgstr "Up"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "Horizontal"
+msgstr "Horizontal"
+
+msgid "Vertical"
+msgstr "Vertical"
+
+msgid "Controller effect"
+msgstr "The controller's own spectacle"
+
+msgid ""
+"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
+"colors or the layout."
+msgstr ""
+"Performed by the controller itself, so ever graceful, though it pays no heed to the wallpaper, "
+"your colours or the arrangement."
+
+msgid "Effect"
+msgstr "Spectacle"
+
+msgid "Follow Iridia"
+msgstr "Follow Iridia"
+
+msgid "On this device a lower number is faster."
+msgstr "Upon this device, a lower number is the swifter."
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Effect color"
+msgstr "Colour of the spectacle"
+
 msgid "All lights off / on"
 msgstr "All lamps out / alight"
 
@@ -1255,6 +1513,9 @@ msgstr "Preserve the colours / follow the wallpaper"
 
 msgid "Night mode on / off"
 msgstr "Nocturnal mode on / off"
+
+msgid "Pause / resume animations"
+msgstr "Suspend / resume the spectacles"
 
 msgid "Load a setup"
 msgstr "Recall an arrangement"
@@ -1321,8 +1582,8 @@ msgstr "As you were"
 msgid "Pick the color"
 msgstr "Choose the colour"
 
-msgid "Brightness"
-msgstr "Brightness"
+msgid "Static pattern"
+msgstr "A still pattern"
 
 msgid "Do"
 msgstr "Undertake"
@@ -1419,6 +1680,15 @@ msgstr "cease / resume following the wallpaper"
 msgid "night mode on / off"
 msgstr "nocturnal mode on / off"
 
+msgid "an effect, again: back to normal"
+msgstr "a spectacle; again: as before"
+
+msgid "still colors until you press it again"
+msgstr "still colours until pressed once more"
+
+msgid "pause / resume every animation"
+msgstr "suspend / resume every spectacle"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "recall a preserved arrangement (this one endures)"
 
@@ -1444,6 +1714,9 @@ msgstr "Extinguishes the strips; press the key again to restore them."
 msgid "turns them on (even when switched off)"
 msgstr "kindles them (even when indisposed)"
 
+msgid "runs an effect"
+msgstr "performs a spectacle"
+
 msgid "shows one color"
 msgstr "shows a single colour"
 
@@ -1465,6 +1738,9 @@ msgstr "The same key preserves the present colours, then follows the wallpaper a
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Engages or disengages nocturnal mode (this one is remembered)."
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "The same key suspends every spectacle, then permits them once more."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Recalls the arrangement and keeps it (with safekeeping beforehand)."
@@ -1502,9 +1778,6 @@ msgstr "Paint"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "Efface (restore the zone's own colour)"
-
-msgid "Fill"
-msgstr "Fill"
 
 msgid "Gradient"
 msgstr "Gradient"
@@ -1881,8 +2154,11 @@ msgstr "palette"
 msgid "calibrated"
 msgstr "calibrated"
 
-msgid "LEDs"
-msgstr "Lamps"
+msgid "Static"
+msgstr "Still"
+
+msgid "Animated"
+msgstr "Animated"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Identify illuminates this zone alone, so you may see which strip it is."
@@ -2006,6 +2282,14 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "This device has no Direct mode, so it wears a single colour throughout (the first of the pattern)."
+
+#, python-brace-format
+msgid ""
+"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
+"settings again."
+msgstr ""
+"This device performs its own spectacle ({name}). Return it to Follow Iridia above to use these "
+"settings once more."
 
 msgid "Red"
 msgstr "Crimson"

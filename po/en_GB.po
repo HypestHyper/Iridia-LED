@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 16:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -252,6 +252,45 @@ msgstr "Disabled"
 
 msgid "Whole device"
 msgstr "Whole device"
+
+msgid "Animations"
+msgstr "Animations"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Animated effects are picked per zone on the Devices tab."
+
+msgid "Run animations"
+msgstr "Run animations"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Off: animated zones show their first colour, still."
+
+msgid "Frame rate"
+msgstr "Frame rate"
+
+msgid "frames per second"
+msgstr "frames per second"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+
+msgid "Pause animations during night mode"
+msgstr "Pause animations during night mode"
+
+msgid "Slow animations during night mode"
+msgstr "Slow animations during night mode"
+
+msgid "Controller effects"
+msgstr "Controller effects"
+
+msgid ""
+"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
+"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
+"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
+msgstr ""
+"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
+"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
+"wallpaper, your colours or the layout. Pick them per device on the Devices tab."
 
 msgid "Appearance"
 msgstr "Appearance"
@@ -1230,6 +1269,222 @@ msgstr "Resize failed"
 msgid "Close"
 msgstr "Close"
 
+msgid "Breathing"
+msgstr "Breathing"
+
+msgid "Comet"
+msgstr "Comet"
+
+msgid "Fill"
+msgstr "Fill"
+
+msgid "Embers"
+msgstr "Embers"
+
+msgid "Rainbow"
+msgstr "Rainbow"
+
+msgid "Color cycle"
+msgstr "Colour cycle"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Bright heads with a fading tail run along the strip."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "The strip fills up with its pattern, then empties."
+
+msgid "Points drift to another color and back, like a calm fire."
+msgstr "Points drift to another colour and back, like a calm fire."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "A moving rainbow. Ignores the zone's colours."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "The loud one: a fast, uneven rainbow with random sparkles."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "The whole zone fades from one colour to the next."
+
+msgid "Brightness range"
+msgstr "Brightness range"
+
+msgid "Easing"
+msgstr "Easing"
+
+msgid "Next color at each breath"
+msgstr "Next colour at each breath"
+
+msgid "Tail length"
+msgstr "Tail length"
+
+msgid "LEDs"
+msgstr "LEDs"
+
+msgid "Heads"
+msgstr "Heads"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "Spacing (0 spreads them evenly)"
+
+msgid "Bounce back and forth"
+msgstr "Bounce back and forth"
+
+msgid "Reverse direction"
+msgstr "Reverse direction"
+
+msgid "Background"
+msgstr "Background"
+
+msgid "Pause when full and empty"
+msgstr "Pause when full and empty"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Fill from"
+
+msgid "Empty"
+msgstr "Empty"
+
+msgid "Density"
+msgstr "Density"
+
+msgid "Softness"
+msgstr "Softness"
+
+msgid "Flicker"
+msgstr "Flicker"
+
+msgid "Colors"
+msgstr "Colours"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "Width (LEDs per rainbow)"
+
+msgid "Chaos"
+msgstr "Chaos"
+
+msgid "Hold each color"
+msgstr "Hold each colour"
+
+msgid "Follow the layout"
+msgstr "Follow the layout"
+
+msgid "Direction"
+msgstr "Direction"
+
+msgid "Keep zones with this effect in step"
+msgstr "Keep zones with this effect in step"
+
+msgid "Seconds per breath"
+msgstr "Seconds per breath"
+
+msgid "Speed"
+msgstr "Speed"
+
+msgid "LEDs/s"
+msgstr "LEDs/s"
+
+msgid "Fade time"
+msgstr "Fade time"
+
+msgid "Sine"
+msgstr "Sine"
+
+msgid "Smooth"
+msgstr "Smooth"
+
+msgid "Sharp"
+msgstr "Sharp"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Second color"
+msgstr "Second colour"
+
+msgid "Start"
+msgstr "Start"
+
+msgid "End"
+msgstr "End"
+
+msgid "Center"
+msgstr "Centre"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Same way"
+msgstr "Same way"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Warm"
+msgstr "Warm"
+
+msgid "Zone colors"
+msgstr "Zone colours"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+
+msgid "Left"
+msgstr "Left"
+
+msgid "Right"
+msgstr "Right"
+
+msgid "Up"
+msgstr "Up"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "Horizontal"
+msgstr "Horizontal"
+
+msgid "Vertical"
+msgstr "Vertical"
+
+msgid "Controller effect"
+msgstr "Controller effect"
+
+msgid ""
+"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
+"colors or the layout."
+msgstr ""
+"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
+"colours or the layout."
+
+msgid "Effect"
+msgstr "Effect"
+
+msgid "Follow Iridia"
+msgstr "Follow Iridia"
+
+msgid "On this device a lower number is faster."
+msgstr "On this device a lower number is faster."
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Effect color"
+msgstr "Effect colour"
+
 msgid "All lights off / on"
 msgstr "All lights off / on"
 
@@ -1238,6 +1493,9 @@ msgstr "Freeze colours / follow the wallpaper"
 
 msgid "Night mode on / off"
 msgstr "Night mode on / off"
+
+msgid "Pause / resume animations"
+msgstr "Pause / resume animations"
 
 msgid "Load a setup"
 msgstr "Load a setup"
@@ -1303,8 +1561,8 @@ msgstr "Back to normal"
 msgid "Pick the color"
 msgstr "Pick the colour"
 
-msgid "Brightness"
-msgstr "Brightness"
+msgid "Static pattern"
+msgstr "Static pattern"
 
 msgid "Do"
 msgstr "Do"
@@ -1401,6 +1659,15 @@ msgstr "stop / start following the wallpaper"
 msgid "night mode on / off"
 msgstr "night mode on / off"
 
+msgid "an effect, again: back to normal"
+msgstr "an effect, again: back to normal"
+
+msgid "still colors until you press it again"
+msgstr "still colours until you press it again"
+
+msgid "pause / resume every animation"
+msgstr "pause / resume every animation"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "load a saved setup (this one is permanent)"
 
@@ -1426,6 +1693,9 @@ msgstr "Turns the strips off; press the key again to bring them back."
 msgid "turns them on (even when switched off)"
 msgstr "turns them on (even when switched off)"
 
+msgid "runs an effect"
+msgstr "runs an effect"
+
 msgid "shows one color"
 msgstr "shows one colour"
 
@@ -1447,6 +1717,9 @@ msgstr "Same key freezes the current colours, then follows the wallpaper again."
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Switches night mode on or off (this one is saved)."
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "Same key pauses every animated effect, then lets them run again."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Loads the setup and keeps it (an automatic backup is made first)."
@@ -1484,9 +1757,6 @@ msgstr "Paint"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "Erase (back to the zone's own colour)"
-
-msgid "Fill"
-msgstr "Fill"
 
 msgid "Gradient"
 msgstr "Gradient"
@@ -1861,8 +2131,11 @@ msgstr "palette"
 msgid "calibrated"
 msgstr "calibrated"
 
-msgid "LEDs"
-msgstr "LEDs"
+msgid "Static"
+msgstr "Static"
+
+msgid "Animated"
+msgstr "Animated"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Identify lights only this zone, so you can see which strip it is."
@@ -1988,6 +2261,14 @@ msgid ""
 msgstr ""
 "This device has no Direct mode, so it shows one colour for the whole device (the first one of the"
 " pattern)."
+
+#, python-brace-format
+msgid ""
+"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
+"settings again."
+msgstr ""
+"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
+"settings again."
 
 msgid "Red"
 msgstr "Red"

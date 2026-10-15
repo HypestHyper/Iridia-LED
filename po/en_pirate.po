@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 14:54+0000\n"
+"POT-Creation-Date: 2026-10-15 16:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -252,6 +252,45 @@ msgstr "Marooned"
 
 msgid "Whole device"
 msgstr "The whole vessel"
+
+msgid "Animations"
+msgstr "Dancin' lanterns"
+
+msgid "Animated effects are picked per zone on the Devices tab."
+msgstr "Pick the dancin' for each zone in the Cargo hold."
+
+msgid "Run animations"
+msgstr "Let the lanterns dance"
+
+msgid "Off: animated zones show their first color, still."
+msgstr "Off: dancin' zones hold their first colour, dead calm."
+
+msgid "Frame rate"
+msgstr "Frames o' the reel"
+
+msgid "frames per second"
+msgstr "frames a second"
+
+msgid "30 looks smooth on most strips. A device that can't keep up gets a lower rate by itself."
+msgstr "30 sails smooth on most lanterns. A slow ship gets a slower beat by itself."
+
+msgid "Pause animations during night mode"
+msgstr "Still the lanterns when night falls"
+
+msgid "Slow animations during night mode"
+msgstr "Slow the lanterns when night falls"
+
+msgid "Controller effects"
+msgstr "The ship's own tricks"
+
+msgid ""
+"Lets a device run one of its own effects (the ones OpenRGB lists for it, like Breathing or "
+"Spectrum Cycle). They run on the controller, so they're always smooth, but they don't follow the "
+"wallpaper, your colors or the layout. Pick them per device on the Devices tab."
+msgstr ""
+"Lets a ship run its own tricks (the ones OpenRGB knows, like Breathing or Spectrum Cycle). The "
+"controller runs 'em, so they be smooth, but they ignore the wallpaper, yer colours and the map. "
+"Pick 'em per ship in the Cargo hold."
 
 msgid "Appearance"
 msgstr "Ship's colors"
@@ -1232,6 +1271,222 @@ msgstr "Resize ran aground"
 msgid "Close"
 msgstr "Close"
 
+msgid "Breathing"
+msgstr "Heavin' breath"
+
+msgid "Comet"
+msgstr "Shootin' star"
+
+msgid "Fill"
+msgstr "Flood"
+
+msgid "Embers"
+msgstr "Galley fire"
+
+msgid "Rainbow"
+msgstr "Rainbow"
+
+msgid "Color cycle"
+msgstr "Colours 'round the compass"
+
+msgid ""
+"Fades between two brightness levels. A minimum above 0 keeps the dark end smooth on strips that "
+"step at low brightness."
+msgstr ""
+"Fades between two brightnesses. Keep the bottom above 0 so cheap lanterns don't stutter in the "
+"dark."
+
+msgid "Bright heads with a fading tail run along the strip."
+msgstr "Bright heads with fadin' tails race along the lanterns."
+
+msgid "The strip fills up with its pattern, then empties."
+msgstr "The lanterns fill up like a barrel o' rum, then drain."
+
+msgid "Points drift to another color and back, like a calm fire."
+msgstr "Points drift to another colour and back, like a calm galley fire."
+
+msgid "A moving rainbow. Ignores the zone's colors."
+msgstr "A sailin' rainbow. Pays no mind to the zone's colours."
+
+msgid "The loud one: a fast, uneven rainbow with random sparkles."
+msgstr "The rowdy one: a fast, lurchin' rainbow with sparks flyin' everywhere."
+
+msgid "The whole zone fades from one color to the next."
+msgstr "The whole zone sails from one colour to the next."
+
+msgid "Brightness range"
+msgstr "How bright, low to high"
+
+msgid "Easing"
+msgstr "How she rolls"
+
+msgid "Next color at each breath"
+msgstr "New colour every breath"
+
+msgid "Tail length"
+msgstr "Tail length"
+
+msgid "LEDs"
+msgstr "Lanterns"
+
+msgid "Heads"
+msgstr "Heads"
+
+msgid "Spacing (0 spreads them evenly)"
+msgstr "Spacin' (0 spreads 'em even)"
+
+msgid "Bounce back and forth"
+msgstr "Sail back and forth"
+
+msgid "Reverse direction"
+msgstr "Hard about"
+
+msgid "Background"
+msgstr "Behind the lanterns"
+
+msgid "Pause when full and empty"
+msgstr "Drop anchor when full and empty"
+
+msgid "s"
+msgstr "s"
+
+msgid "Fill from"
+msgstr "Fill from"
+
+msgid "Empty"
+msgstr "Drain"
+
+msgid "Density"
+msgstr "How thick"
+
+msgid "Softness"
+msgstr "Softness"
+
+msgid "Flicker"
+msgstr "Flicker"
+
+msgid "Colors"
+msgstr "Colours"
+
+msgid "Width (LEDs per rainbow)"
+msgstr "Width (lanterns per rainbow)"
+
+msgid "Chaos"
+msgstr "Mutiny"
+
+msgid "Hold each color"
+msgstr "Hold each colour"
+
+msgid "Follow the layout"
+msgstr "Follow the map"
+
+msgid "Direction"
+msgstr "Heading"
+
+msgid "Keep zones with this effect in step"
+msgstr "Keep zones with this dance in step"
+
+msgid "Seconds per breath"
+msgstr "Seconds a breath"
+
+msgid "Speed"
+msgstr "Knots"
+
+msgid "LEDs/s"
+msgstr "lanterns/s"
+
+msgid "Fade time"
+msgstr "Fade time"
+
+msgid "Sine"
+msgstr "Sine"
+
+msgid "Smooth"
+msgstr "Smooth sailin'"
+
+msgid "Sharp"
+msgstr "Sharp"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Second color"
+msgstr "Second colour"
+
+msgid "Start"
+msgstr "Bow"
+
+msgid "End"
+msgstr "Stern"
+
+msgid "Center"
+msgstr "Midships"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Same way"
+msgstr "Same way"
+
+msgid "Reset"
+msgstr "Start over"
+
+msgid "Warm"
+msgstr "Warm as a galley"
+
+msgid "Zone colors"
+msgstr "Zone colours"
+
+msgid ""
+"Follow the layout runs the effect through the room, across every strip that follows it, using "
+"where the LEDs are on the Layout tab."
+msgstr ""
+"Follow the map sails the dance through the whole room, across every lantern string that follows "
+"it, using where they hang on the Treasure Map."
+
+msgid "Left"
+msgstr "Port"
+
+msgid "Right"
+msgstr "Starboard"
+
+msgid "Up"
+msgstr "Aloft"
+
+msgid "Down"
+msgstr "Below"
+
+msgid "Horizontal"
+msgstr "Along the deck"
+
+msgid "Vertical"
+msgstr "Up the mast"
+
+msgid "Controller effect"
+msgstr "The ship's own trick"
+
+msgid ""
+"Runs on the controller itself, so it's always smooth, but it doesn't follow the wallpaper, your "
+"colors or the layout."
+msgstr ""
+"Runs on the ship's own controller, so it's always smooth, but it ignores the wallpaper, yer "
+"colours and the map."
+
+msgid "Effect"
+msgstr "Trick"
+
+msgid "Follow Iridia"
+msgstr "Follow Iridia"
+
+msgid "On this device a lower number is faster."
+msgstr "On this ship, the lower the number the faster she sails."
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Effect color"
+msgstr "Trick colour"
+
 msgid "All lights off / on"
 msgstr "All lanterns doused / lit"
 
@@ -1240,6 +1495,9 @@ msgstr "Drop anchor on colors / follow the wallpaper"
 
 msgid "Night mode on / off"
 msgstr "Night watch on / off"
+
+msgid "Pause / resume animations"
+msgstr "Still / wake the dancin' lanterns"
 
 msgid "Load a setup"
 msgstr "Dig up a chart"
@@ -1305,8 +1563,8 @@ msgstr "As ye were"
 msgid "Pick the color"
 msgstr "Pick the color"
 
-msgid "Brightness"
-msgstr "Brightness"
+msgid "Static pattern"
+msgstr "Still pattern"
 
 msgid "Do"
 msgstr "Order"
@@ -1403,6 +1661,15 @@ msgstr "stop / start followin' the wallpaper"
 msgid "night mode on / off"
 msgstr "night watch on / off"
 
+msgid "an effect, again: back to normal"
+msgstr "a dance, again: back to normal"
+
+msgid "still colors until you press it again"
+msgstr "still colours till ye press it again"
+
+msgid "pause / resume every animation"
+msgstr "still / wake every dancin' lantern"
+
 msgid "load a saved setup (this one is permanent)"
 msgstr "dig up a buried chart (this one sticks)"
 
@@ -1428,6 +1695,9 @@ msgstr "Douses the strips; press the key again to bring 'em back."
 msgid "turns them on (even when switched off)"
 msgstr "lights 'em (even when marooned)"
 
+msgid "runs an effect"
+msgstr "runs a dance"
+
 msgid "shows one color"
 msgstr "shows one color"
 
@@ -1449,6 +1719,9 @@ msgstr "Same key drops anchor on the colors, then follows the wallpaper again."
 
 msgid "Switches night mode on or off (this one is saved)."
 msgstr "Night watch on or off (this one be remembered)."
+
+msgid "Same key pauses every animated effect, then lets them run again."
+msgstr "Same key stills every dancin' lantern, then sets 'em dancin' again."
 
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Digs up the chart an' keeps it (yer old one gets buried first)."
@@ -1486,9 +1759,6 @@ msgstr "Paint"
 
 msgid "Erase (back to the zone's own color)"
 msgstr "Swab (back to the zone's own color)"
-
-msgid "Fill"
-msgstr "Flood"
 
 msgid "Gradient"
 msgstr "Gradient"
@@ -1863,8 +2133,11 @@ msgstr "palette"
 msgid "calibrated"
 msgstr "calibrated"
 
-msgid "LEDs"
-msgstr "Lanterns"
+msgid "Static"
+msgstr "Becalmed"
+
+msgid "Animated"
+msgstr "Dancin'"
 
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr "Identify lights only this zone, so ye can see which strip it be."
@@ -1990,6 +2263,14 @@ msgid ""
 msgstr ""
 "This device has no Direct mode, so it flies one color fer the whole device (the first one o' the "
 "pattern)."
+
+#, python-brace-format
+msgid ""
+"This device runs its own effect ({name}). Set it back to Follow Iridia above to use these "
+"settings again."
+msgstr ""
+"This ship runs its own trick ({name}). Set it back to Follow Iridia above to use these settings "
+"again."
 
 msgid "Red"
 msgstr "Blood red"

@@ -21,6 +21,8 @@ from iridia.wallcache import WallpaperColorCache
 from iridia.calibration import Profiles, valid_name
 from iridia.palette import Palette
 from iridia.patterns import PatternGenerator
+from iridia import animations
+from iridia.animator import Animator, Job
 from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
 from iridia.ddc import DDCController
@@ -79,6 +81,7 @@ def clean_zone_cfg(z: dict) -> dict:
     out["leds_per_pixel"] = int(_num(z.get("leds_per_pixel", 1), 1, 1, 20))
     out["power_limit"] = _num(z.get("power_limit", 0), 0, 0, 100)          # amps, 0 = no limit
     out["ma_per_led"] = _num(z.get("ma_per_led", 60), 60, 1, 500)          # mA at full white
+    out["animation"] = animations.clean(z.get("animation"))               # None: a static pattern
     return out
 
 
@@ -242,6 +245,20 @@ class Daemon:
         self._observer: Optional[Observer] = None
         self._last_wallpaper_event = 0.0
 
+        # animations (see animations.py and animator.py)
+        self._animator = Animator(self.openrgb.send_frames)
+        self._anim_keys: set = set()      # zones the animator sends (unless paused for a moment)
+        self._anim_jobs: Dict[str, tuple] = {}    # key -> (signature, Job)
+        self._anim_hold = False           # `iridia animations pause`: until resumed (not saved)
+        self._run_seed = int.from_bytes(os.urandom(2), "little")
+        self._glide: Dict[str, tuple] = {}        # key -> (from %, to %, start) for brightness glides
+        self._glide_active = False
+        self._layout = None
+        self._layout_mtime = None
+        self._anim_cfg = self._anim_settings()        # read once per tick, not once per frame
+        self._night_cap = self._night_settings()["cap"]
+        self._power_shown: Dict[str, float] = {}
+
         signal.signal(signal.SIGTERM, self._on_signal)
         signal.signal(signal.SIGINT, self._on_signal)
 
@@ -270,7 +287,8 @@ class Daemon:
                 self.logger.exception("Tick error")
             # Nothing animates any more, so there is never a reason to tick
             # faster than this; colours are sent only when they change.
-            self._wake.wait(0.5)
+            # brightness glides re-send static zones for a moment; otherwise nothing animates here
+            self._wake.wait(0.05 if self._glide_active else 0.5)
             self._wake.clear()
 
         self._shutdown()
@@ -355,6 +373,7 @@ class Daemon:
         return {"ok": True, "night": cur}
 
     def _shutdown(self):
+        self._animator.stop()
         self.logger.info("Shutting down")
         if self.sleepwatch:
             self.sleepwatch.stop()
@@ -511,7 +530,13 @@ class Daemon:
         self._detect_wallpaper()
         self._read_brightness()
 
+        if connected:
+            self._apply_hardware_effects()
+        self._refresh_animations(connected)
+        if self._glide_active:
+            self._needs_update = True       # a brightness glide is still running
         if connected and (self._needs_update or self._force_refresh):
+            self._glide_active = False
             self._update_all_devices()
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
@@ -1134,6 +1159,8 @@ class Daemon:
             parts.append(f"#{ov['hex']}")
         if ov.get("bright") is not None:
             parts.append(f"{ov['bright']}% brightness")
+        if "effect" in ov:
+            parts.append(f"effect {ov['effect']['effect'] if ov['effect'] else 'static'}")
         return ", ".join(parts)
 
     @staticmethod
@@ -1153,6 +1180,27 @@ class Daemon:
                 if len(tokens) > 1:
                     return None, "'normal' can't be combined with other actions"
                 return None, None
+            if t == "effect":
+                if i + 1 >= len(tokens):
+                    return None, "'effect' needs a name: " + ", ".join(animations.ORDER) + " or static"
+                name = tokens[i + 1].lower().replace("-", "_").replace(" ", "_")
+                i += 2
+                settings = {}
+                while i < len(tokens) and "=" in tokens[i]:
+                    k, _, v = tokens[i].partition("=")
+                    v = v.strip()
+                    settings[k.strip().lower()] = (v.lower() in ("1", "true", "yes", "on") if v.lower() in (
+                        "1", "0", "true", "false", "yes", "no", "on", "off") and k.strip().lower() in (
+                        "bounce", "reverse", "cycle_colors", "follow_layout", "sync") else v)
+                    i += 1
+                if name == "static":
+                    ov["effect"] = None
+                    continue
+                anim = animations.clean(dict(settings, effect=name))
+                if anim is None:
+                    return None, f"no effect called '{name}': " + ", ".join(animations.ORDER) + " or static"
+                ov["effect"] = anim
+                continue
             if t in ("on", "off"):
                 if ov.get("power") and ov["power"] != t:
                     return None, "use either on or off, not both"
@@ -1191,6 +1239,8 @@ class Daemon:
                 i += 1
                 continue
             return None, f"don't know '{tokens[i]}': use on, off, color HEX, bright PERCENT or normal"
+        if "effect" in ov and ("hex" in ov or ov.get("power") == "off"):
+            return None, "an effect can't be combined with a color or off"
         if ov.get("power") == "off" and ("hex" in ov or "bright" in ov):
             return None, "a strip that is off shows no color or brightness: drop 'off', or use 'on'"
         return ov, None
@@ -1217,6 +1267,21 @@ class Daemon:
         new, err = self._parse_overlay(req)
         if err:
             return {"ok": False, "error": err}
+        if req.get("save"):
+            # `--save`: make the effect the zones' own setting instead of a temporary keybind change
+            if not new or set(new) != {"effect"}:
+                return {"ok": False, "error": "--save works with 'effect NAME' only"}
+            devices = self.config.get("devices", {})
+            for k in keys:
+                d, z = k.split("|", 1)
+                target = devices[d]["zones"][z] if z and devices[d].get("zones") else devices[d]
+                target["animation"] = new["effect"]
+                self._overlays.pop(k, None)
+            self.config.set("devices", devices)
+            self._needs_update = True
+            what = new["effect"]["effect"] if new["effect"] else "static"
+            self.logger.info(f"Effect {what} saved for {len(keys)} strip(s) ({targets})")
+            return {"ok": True, "message": f"Effect {what} saved for {len(keys)} strip(s)."}
         if new is not None and req.get("toggle", True) and all(self._overlays.get(k) == new for k in keys):
             new = None                       # same key pressed again: back to normal
         for k in keys:
@@ -1254,6 +1319,91 @@ class Daemon:
         if self._real_zone_type(device, zone) == 0 or real == 1:
             return "single"
         return "addressable"
+
+    @staticmethod
+    def _merge_animation(current, anim: Optional[dict], given) -> Optional[dict]:
+        """Keep the zone's other settings for the same effect; a new effect starts from its defaults."""
+        if anim is None:
+            return None
+        cur = animations.clean(current)
+        if cur and cur["effect"] == anim["effect"] and isinstance(given, dict):
+            return animations.clean(dict(cur, **{k: v for k, v in given.items() if k != "effect"}))
+        return anim
+
+    def _cmd_set_zone_animation(self, req: dict) -> dict:
+        """Set (or clear, with "static" or null) a zone's effect: {"effect": ..., settings...}."""
+        dev, zone = req.get("device"), req.get("zone") or ""
+        if dev not in self.config.devices:
+            return {"ok": False, "error": f"device '{dev}' not found"}
+        given = req.get("animation")
+        if isinstance(given, str):
+            given = {"effect": given}
+        anim = None if given in (None, {}) or (isinstance(given, dict) and given.get("effect") in (None, "static")) \
+            else animations.clean(given)
+        if given not in (None, {}) and isinstance(given, dict) and given.get("effect") not in (None, "static") \
+                and anim is None:
+            return {"ok": False, "error": f"unknown effect {given.get('effect')!r}; use one of: "
+                                          + ", ".join(animations.ORDER) + " or static"}
+        path = self._zone_config_path(dev, zone, "animation")
+        merged = self._merge_animation(self.config.get(path), anim, given)
+        self.config.set(path, merged)
+        self._needs_update = True
+        return {"ok": True, "animation": merged}
+
+    def _cmd_animations(self, req: dict) -> dict:
+        """pause / resume / toggle (until the daemon restarts), or save settings: enabled, fps,
+        night_pause, night_slow."""
+        action = req.get("action")
+        if action in ("pause", "resume", "toggle"):
+            self._anim_hold = (not self._anim_hold) if action == "toggle" else action == "pause"
+            self.logger.info("Animations paused" if self._anim_hold else "Animations resumed")
+            self._needs_update = True
+            return {"ok": True, "paused": self._anim_hold}
+        if action:
+            return {"ok": False, "error": "use pause, resume or toggle"}
+        changed = {}
+        if "enabled" in req:
+            changed["enabled"] = bool(req["enabled"])
+        if "fps" in req:
+            if req["fps"] not in (15, 30, 60):
+                return {"ok": False, "error": "fps must be 15, 30 or 60"}
+            changed["fps"] = req["fps"]
+        for k in ("night_pause", "night_slow"):
+            if k in req:
+                changed[k] = bool(req[k])
+        for k, v in changed.items():
+            self.config.set(f"animations.{k}", v)
+        self._anim_cfg = self._anim_settings()
+        if changed:
+            self.logger.info(f"Animation settings: {changed}")
+        self._needs_update = True
+        return {"ok": True, "settings": self._anim_settings()}
+
+    def _cmd_set_device_hardware_effect(self, req: dict) -> dict:
+        """Run one of the device's own effects ({"mode": name, "speed", "brightness", "direction",
+        "colors": [hex]}) or follow Iridia again (null)."""
+        dev = req.get("device")
+        if dev not in self.config.devices:
+            return {"ok": False, "error": f"device '{dev}' not found"}
+        eff = req.get("effect")
+        if eff is None or eff == {}:
+            self.config.set(("devices", dev, "hardware_effect"), None)
+            return {"ok": True}
+        if not isinstance(eff, dict) or not isinstance(eff.get("mode"), str):
+            return {"ok": False, "error": "effect must be an object with a mode name"}
+        real = next((d for d in self.openrgb.list_devices() if d["name"] == dev), None)
+        if real is not None and eff["mode"] not in [m["name"] for m in real.get("hardware_modes", [])]:
+            return {"ok": False, "error": f"'{dev}' has no effect called {eff['mode']!r}"}
+        clean = {"mode": eff["mode"]}
+        for k in ("speed", "brightness", "direction"):
+            if isinstance(eff.get(k), (int, float)) and not isinstance(eff.get(k), bool):
+                clean[k] = int(eff[k])
+        if isinstance(eff.get("colors"), list):
+            clean["colors"] = [h for h in (normalize_hex(c) for c in eff["colors"][:16]) if h]
+        self.config.set(("devices", dev, "hardware_effect"), clean)
+        if not self.config.get("hardware_effects.enabled", False):
+            return {"ok": True, "note": "saved; switch on controller effects in Settings to use it"}
+        return {"ok": True}
 
     def _cmd_set_zone_strip(self, req: dict) -> dict:
         dev, zone = req.get("device"), req.get("zone") or ""
@@ -1457,6 +1607,8 @@ class Daemon:
     def _update_device(self, name: str, dev_cfg: Dict[str, Any], t: float = 0.0):
         if not isinstance(dev_cfg, dict):
             return
+        if self._hardware_effect(name, dev_cfg) and not (self._lights_off or self._asleep):
+            return                          # it runs its own effect
         dev_off = not dev_cfg.get("enabled", True)
         zones = dev_cfg.get("zones")
         targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
@@ -1489,6 +1641,8 @@ class Daemon:
         params = zcfg.get("pattern_params") or {}
         led_count = zcfg.get("led_count", 20)
         key = f"{device_name}|{zone_name}"
+        if not off and self._anim_owns(key, device_name, zone_name):
+            return                          # the animation thread sends this zone
         if self._strip_type(device_name, zone_name, zcfg) == "single":
             pattern = "solid"                 # one colour for the whole strip: patterns mean nothing
         mode = zcfg.get("mode", self.config.color_mode)       # full (off) | palette | calibrated
@@ -1521,12 +1675,16 @@ class Daemon:
             colors = resolve_colors(zcfg.get("pattern_colors", [0]), self._extracted_colors)
             if not colors:
                 colors = [self._extracted_colors[0]] if self._extracted_colors else ["642107"]
-            final_colors = self.patterns.generate(pattern, colors, led_count, params=params)
+            if self._zone_animation(key, zcfg) is not None:
+                # animated, but animations are off or paused right now: the first color, still
+                final_colors = [colors[0]] * led_count
+            else:
+                final_colors = self.patterns.generate(pattern, colors, led_count, params=params)
             if not final_colors:
                 return
 
         if not exact:
-            brightness = self._get_zone_brightness(zcfg)
+            brightness = int(round(self._brightness_now(key, zcfg)))
             if ov.get("bright") is not None:
                 brightness = ov["bright"]
             # Colours you marked "exact" in the colour picker skip every correction: those
@@ -1566,6 +1724,298 @@ class Daemon:
             self.logger.debug(f"Sent to '{device_name}/{zone_name}' | pattern={pattern} | mode={mode} | "
                               f"brightness={brightness}% | LEDs={len(final_colors)}{' | off' if off else ''}")
         # else: openrgb.send() already logged exactly why.
+
+    # ------------------------------------------------------------- animations
+    GLIDE_SEC = 0.3              # brightness changes glide over this long instead of jumping
+
+    def _anim_settings(self) -> dict:
+        a = self.config.get("animations", {}) or {}
+        return {"enabled": bool(a.get("enabled", True)), "fps": a.get("fps", 30) if a.get("fps") in (15, 30, 60) else 30,
+                "night_pause": bool(a.get("night_pause", False)), "night_slow": bool(a.get("night_slow", False))}
+
+    def _zone_animation(self, key: str, zcfg: dict) -> Optional[dict]:
+        """The zone's effect (a keybind's effect wins), or None for a static pattern."""
+        ov = self._overlays.get(key) or {}
+        if "effect" in ov:
+            return animations.clean(ov["effect"]) if ov["effect"] else None
+        a = zcfg.get("animation")
+        return a if isinstance(a, dict) and a.get("effect") in animations.EFFECTS else animations.clean(a)
+
+    def _anim_blocked(self, device: str, zone: str, key: str) -> bool:
+        """Something else shows on this zone right now: lights off, sleep, identify, Count LEDs,
+        Test colors, a color preview, a keybind's color/brightness/power, or animations paused."""
+        if self._lights_off or self._asleep or self._preview_hex or self._anim_hold:
+            return True
+        if self._identify or self._probe:
+            return True
+        test = self._rgbtest
+        if test and (test[0], test[1] or "") == (device, zone or ""):
+            return True
+        ov = self._overlays.get(key)
+        if ov and ("power" in ov or "hex" in ov):
+            return True                     # a keybind's brightness alone keeps the animation
+        s = self._anim_cfg
+        return not s["enabled"] or (self._night_active and s["night_pause"])
+
+    def _anim_owns(self, key: str, device: str, zone: str) -> bool:
+        return key in self._anim_keys and not self._anim_blocked(device, zone, key)
+
+    def _brightness_now(self, key: str, zcfg: dict) -> float:
+        """The zone's brightness (monitor or manual, range, invert, night cap), gliding to a new
+        value over GLIDE_SEC instead of jumping."""
+        target = float(self._get_zone_brightness(zcfg))
+        now = time.monotonic()
+        g = self._glide.get(key)
+        if g is None:
+            self._glide[key] = (target, target, now)
+            return target
+        frm, to, start = g
+        k = min(1.0, (now - start) / self.GLIDE_SEC)
+        cur = frm + (to - frm) * k
+        if target != to:
+            self._glide[key] = (cur, target, now)
+            self._glide_active = True
+            return cur
+        if k < 1.0:
+            self._glide_active = True
+        return cur
+
+    def _layout_points(self, key: str, n: int):
+        """(points of each LED as sent, LED spacing) from the Layout tab, or None."""
+        from iridia import layout as lay
+        try:
+            mtime = os.path.getmtime(lay.PATH)
+        except OSError:
+            return None
+        if self._layout is None or mtime != self._layout_mtime:
+            self._layout = lay.Layout(lay.PATH)
+            self._layout_mtime = mtime
+        strip = next((s for s in self._layout.strips if s["zone"] == key and not s["clone"]), None)
+        if strip is None or n <= 0:
+            return None
+        return lay.led_points(strip, n), strip["segments"][0]["spacing"]
+
+    def _refresh_animations(self, connected: bool):
+        """Work out which zones animate and hand them to the animation thread. Jobs are only rebuilt
+        when something they depend on changed, so per-frame caches survive."""
+        s = self._anim_cfg = self._anim_settings()
+        self._night_cap = self._night_settings()["cap"]
+        jobs_by_dev: Dict[str, tuple] = {}
+        keys, seen = set(), set()
+        if connected:
+            real = {d["name"]: [z["name"] for z in d["zones"]] for d in self.openrgb.list_devices()}
+            layout_groups: Dict[tuple, list] = {}
+            plan = []
+            for dev, dev_cfg in self.config.devices.items():
+                if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True) or dev not in real:
+                    continue
+                if self._hardware_effect(dev, dev_cfg):
+                    continue
+                zones = dev_cfg.get("zones")
+                targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
+                           if isinstance(zones, dict) and zones else [("", dev_cfg)])
+                for zn, raw in targets:
+                    if zn and not raw.get("enabled", True):
+                        continue
+                    key = self._zone_key(dev, zn)
+                    zc = clean_zone_cfg(raw)
+                    anim = self._zone_animation(key, zc)
+                    if anim is None:
+                        continue
+                    n = zc["led_count"]
+                    pts = self._layout_points(key, n) if anim["follow_layout"] else None
+                    plan.append((dev, zn, key, zc, anim, pts))
+                    if pts:
+                        layout_groups.setdefault((anim["effect"], anim["angle"]), []).append(pts)
+            # one extent per (effect, direction) for every strip that follows the layout
+            extents = {}
+            for g, items in layout_groups.items():
+                xs = [p for pts, sp in items for p in animations.layout_positions(pts, g[1], sp)]
+                extents[g] = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
+            for dev, zn, key, zc, anim, pts in plan:
+                ext = extents.get((anim["effect"], anim["angle"])) if pts else None
+                sig = repr((zc, anim, pts, ext, self._extracted_colors, sorted(self.custom_colors.exact_set()),
+                            self.config.color_mode, self._real_zone_size(dev, zn)))
+                old = self._anim_jobs.get(key)
+                job = old[1] if old and old[0] == sig else self._make_job(dev, zn, key, zc, anim, pts, ext)
+                self._anim_jobs[key] = (sig, job)
+                seen.add(key)
+                keys.add(key)
+                jobs_by_dev.setdefault(dev, []).append(job)
+            out = {}
+            for dev, jobs in jobs_by_dev.items():
+                order = real.get(dev, [])
+                jobs.sort(key=lambda j: order.index(j.zone) if j.zone in order else 999)
+                # one packet for the whole device when every zone it has animates
+                whole = len(order) > 1 and sorted(j.zone for j in jobs) == sorted(order)
+                out[dev] = (whole, jobs)
+            jobs_by_dev = out
+        for k in list(self._anim_jobs):
+            if k not in seen:
+                del self._anim_jobs[k]
+        stopped = self._anim_keys - keys
+        if stopped:
+            for k in stopped:
+                self._last_sent.pop(k, None)    # back to the static pattern: send it again
+            self._needs_update = True
+        self._anim_keys = keys
+        rate = 0.5 if (self._night_active and s["night_slow"]) else 1.0
+        self._animator.set_jobs(jobs_by_dev, s["fps"], rate)
+
+    def _make_job(self, dev: str, zn: str, key: str, zc: dict, anim: dict, pts, extent) -> Job:
+        n = zc["led_count"]
+        colors_hex = resolve_colors(zc.get("pattern_colors", [0]), self._extracted_colors) or \
+            [self._extracted_colors[0] if self._extracted_colors else "642107"]
+        colors = [animations.hex_to_rgb(c) for c in colors_hex]
+        params = zc.get("pattern_params") or {}
+        base_hex = self.patterns.generate(PatternGenerator.normalize(zc.get("pattern", "solid")), colors_hex, n,
+                                          params=params) or [colors_hex[0]] * n
+        base = [animations.hex_to_rgb(c) for c in base_hex]
+        if pts:
+            positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
+        else:
+            positions = animations.strip_positions(n, bool(params.get("reverse")), bool(params.get("mirror")))
+        import zlib
+        seed = zlib.crc32(key.encode()) ^ self._run_seed
+        offset = 0.0 if anim["sync"] else (zlib.crc32(key.encode()) % 10000) / 100.0
+        correct = self._rgb_corrector(zc)
+        real_n = self._real_zone_size(dev, zn) or n
+        step = 20 if anim["effect"] == "embers" else 0     # embers changes 20 times a second at most
+        memo = [None, None]
+        effect = anim["effect"]
+
+        def frame(clock: float):
+            if self._anim_blocked(dev, zn, key):
+                return None
+            t = clock + offset
+            if step:
+                tq = int(t * step)
+                if memo[0] != tq:
+                    memo[0], memo[1] = tq, animations.render(effect, anim, n, t, colors, seed, positions, base,
+                                                             extent)
+                raw = memo[1]
+            else:
+                raw = animations.render(effect, anim, n, t, colors, seed, positions, base, extent)
+            ov = self._overlays.get(key) or {}
+            b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
+            return self._finish_rgb(key, dev, zn, zc, correct(raw, b))
+        desc = ", ".join(f"{k}={v}" for k, v in anim.items())
+        return Job(key, dev, zn, real_n, frame, desc)
+
+    def _rgb_corrector(self, zc: dict):
+        """A function (frame, brightness %) -> frame applying the zone's color correction the same way
+        the static path does, with caches so a frame costs little: off (gamma, then brightness, from
+        a 256 entry table), Palette (snap, then gamma and brightness) or Calibrated (the profile,
+        which takes brightness itself). Colors marked exact only get brightness."""
+        mode = zc.get("mode", self.config.color_mode)
+        gamma = zc.get("gamma_value", 2.2) if zc.get("gamma_correction", False) else None
+        exact = {animations.hex_to_rgb(h) for h in self.custom_colors.exact_set()}
+        prof = self.calibration.get(zc.get("calibration_profile")) if mode == "calibrated" else None
+        luts: Dict[tuple, list] = {}
+        cache: Dict[tuple, tuple] = {}
+        cache_b = [None]
+        snaps: Dict[tuple, tuple] = {}      # palette snaps don't depend on brightness: kept
+
+        def lut(b: int, g):
+            key = (b, g)
+            t = luts.get(key)
+            if t is None:
+                if len(luts) > 256:
+                    luts.clear()
+                t = [int((int(pow(v / 255.0, 1.0 / g) * 255) if g else v) * b / 100) for v in range(256)]
+                luts[key] = t
+            return t
+
+        def correct(frame, brightness: float):
+            b = int(round(brightness))
+            plain = lut(b, None)
+            if mode not in ("palette", "calibrated"):
+                t = lut(b, gamma)
+                if not exact:
+                    return [(t[r], t[g], t[bb]) for r, g, bb in frame]
+                return [(plain[c[0]], plain[c[1]], plain[c[2]]) if c in exact else (t[c[0]], t[c[1]], t[c[2]])
+                        for c in frame]
+            gt = lut(b, gamma)
+            if mode == "palette":
+                # The palette is coarse, so colors a step or two apart snap the same way: key the
+                # cache on slightly rounded colors so fades and tails mostly hit it.
+                if len(snaps) > 16384:
+                    snaps.clear()
+                out = []
+                for c in frame:
+                    if c in exact:
+                        out.append((plain[c[0]], plain[c[1]], plain[c[2]]))
+                        continue
+                    q = (c[0] >> 2, c[1] >> 2, c[2] >> 2)
+                    sn = snaps.get(q)
+                    if sn is None:
+                        sn = snaps[q] = animations.hex_to_rgb(self._snap_one(animations.rgb_to_hex(c)))
+                    out.append((gt[sn[0]], gt[sn[1]], gt[sn[2]]))
+                return out
+            if cache_b[0] != b:
+                cache.clear()
+                cache_b[0] = b
+            if len(cache) > 8192:
+                cache.clear()
+            out = []
+            for c in frame:
+                hit = cache.get(c)
+                if hit is None:
+                    if c in exact:
+                        hit = (plain[c[0]], plain[c[1]], plain[c[2]])
+                    else:
+                        hit = animations.hex_to_rgb(prof.correct(animations.rgb_to_hex(c), b))
+                    cache[c] = hit
+                out.append(hit)
+            return out
+        return correct
+
+    def _finish_rgb(self, key: str, device: str, zone: str, zcfg: dict, colors: list) -> list:
+        """_finish for (r, g, b) frames: power limit, channel order, RGBW packing."""
+        stype = self._strip_type(device, zone, zcfg)
+        limit = zcfg.get("power_limit", 0)
+        now = time.monotonic()
+        # the power estimate is only needed every frame when there is a limit; for the window's
+        # display, once a second is plenty
+        if stype != "single" and colors and (limit or now - self._power_shown.get(key, 0) >= 1.0):
+            self._power_shown[key] = now
+            per = zcfg.get("ma_per_led", 60) / 3.0 / 255.0
+            want = sum(map(sum, colors)) * per / 1000.0
+            info = {"type": stype, "auto": "strip_type" not in zcfg, "amps": round(want, 2),
+                    "full_amps": round(len(colors) * zcfg.get("ma_per_led", 60) / 1000.0, 2)}
+            if limit and want > limit:
+                f = limit / want
+                colors = [(int(r * f), int(g * f), int(b * f)) for r, g, b in colors]
+                info.update(limited=True, amps=round(limit, 2), wanted_amps=round(want, 2))
+            self._strip_info[key] = info
+        order = zcfg.get("color_order", "RGB")
+        if order != "RGB":
+            idx = ["RGB".index(ch) for ch in order]
+            colors = [(c[idx[0]], c[idx[1]], c[idx[2]]) for c in colors]
+        if stype == "rgbw":
+            colors = [animations.hex_to_rgb(h) for h in pack_rgbw([animations.rgb_to_hex(c) for c in colors])]
+        return colors
+
+    # ------------------------------------------------------- controller effects
+    def _hardware_effect(self, device: str, dev_cfg: Optional[dict] = None) -> Optional[dict]:
+        """The device's own effect, when hardware effects are switched on and one is picked."""
+        if not self.config.get("hardware_effects.enabled", False):
+            return None
+        cfg = dev_cfg if dev_cfg is not None else self.config.devices.get(device, {})
+        spec = cfg.get("hardware_effect") if isinstance(cfg, dict) else None
+        return spec if isinstance(spec, dict) and isinstance(spec.get("mode"), str) and spec["mode"] else None
+
+    def _apply_hardware_effects(self):
+        for dev in list(self.openrgb.devices):
+            spec = self._hardware_effect(dev)
+            if spec and not self._lights_off and not self._asleep:
+                err = self.openrgb.apply_hardware_mode(dev, spec)
+                if err:
+                    self._say_once(f"hw:{dev}", f"Controller effect: {err}")
+            elif dev in self.openrgb._hw_applied:
+                self.openrgb.hardware_mode_released(dev)
+                self._last_sent = {k: v for k, v in self._last_sent.items() if not k.startswith(dev + "|")}
+                self._needs_update = True
 
     def _real_zone_size(self, device: str, zone: str) -> Optional[int]:
         """LED count OpenRGB reports for a zone (what can actually be addressed)."""
@@ -1609,7 +2059,7 @@ class Daemon:
     def _get_zone_brightness(self, zcfg: Dict[str, Any]) -> int:
         b = self._zone_brightness_raw(zcfg)
         if self._night_active:
-            b = min(b, self._night_settings()["cap"])
+            b = min(b, self._night_cap)
         return b
 
     def _zone_brightness_raw(self, zcfg: Dict[str, Any]) -> int:
@@ -1732,6 +2182,18 @@ class Daemon:
             return self._cmd_freeze(req)
         if cmd == "set_zone_strip":
             return self._cmd_set_zone_strip(req)
+        if cmd == "set_zone_animation":
+            return self._cmd_set_zone_animation(req)
+        if cmd == "animations":
+            return self._cmd_animations(req)
+        if cmd == "set_hardware_effects":
+            on = bool(req.get("enabled", False))
+            self.config.set("hardware_effects.enabled", on)
+            self.logger.info(f"Controller effects {'offered' if on else 'switched off'}")
+            self._needs_update = True
+            return {"ok": True}
+        if cmd == "set_device_hardware_effect":
+            return self._cmd_set_device_hardware_effect(req)
         if cmd == "test_colors":
             return self._cmd_test_colors(req)
         if cmd == "zone_action":
@@ -1895,6 +2357,10 @@ class Daemon:
             "socket_path": self._socket_path,
             "pid": os.getpid(),
             "managed_by": "systemd" if os.environ.get("INVOCATION_ID") else "other",
+            "animations": dict(self._anim_settings(), paused=self._anim_hold, running=self._animator.running(),
+                               zones=sorted(self._anim_keys), clock=self._animator.clock, rate=self._animator.rate,
+                               time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed),
+            "hardware_effects": bool(self.config.get("hardware_effects.enabled", False)),
         }
 
     def _cmd_set_device(self, req: Dict[str, Any]) -> Dict[str, Any]:
@@ -2188,6 +2654,19 @@ class Daemon:
             value = self._clean_color_entries(value)
             if value is None:
                 return {"ok": False, "error": "colors must be a non-empty list of indices or hex strings"}
+        elif field == "animation":
+            anim = None if value in (None, "static", "") else animations.clean(value)
+            if value not in (None, "static", "") and anim is None:
+                return {"ok": False, "error": f"unknown effect: {value!r}"}
+            devices = self.config.get("devices", {})
+            n = 0
+            for _dev, _zn, target in self._iter_zone_targets(devices):
+                target["animation"] = self._merge_animation(target.get("animation"), anim, value)
+                n += 1
+            self.config.set("devices", devices)
+            self._needs_update = True
+            self.logger.info(f"Effect for all {n} zone(s): {anim['effect'] if anim else 'static'}")
+            return {"ok": True, "zones": n}
         elif field == "pattern_params":
             clean = self._clean_layout_params(value)
             if isinstance(clean, str):

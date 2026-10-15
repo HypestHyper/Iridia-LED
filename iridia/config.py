@@ -50,6 +50,15 @@ DEFAULT_CONFIG = {
         "suppress_errors": True,
         "fallback_brightness": 100
     },
+    "animations": {
+        "enabled": True,            # off: animated zones show their first color, still
+        "fps": 30,                  # 15, 30 or 60
+        "night_pause": False,       # night mode: stop animations
+        "night_slow": False         # night mode: run them at half speed
+    },
+    "hardware_effects": {
+        "enabled": False            # offer the controllers' own effects (they don't follow the wallpaper)
+    },
     "devices": {},
     "custom_colors": [],
     "profiles": {
@@ -175,6 +184,9 @@ class Config:
                     zones.pop(zn)
             clean[name] = cfg
         d["devices"] = clean
+        if d["animations"].get("fps") not in (15, 30, 60):
+            fps = d["animations"].get("fps")
+            d["animations"]["fps"] = min((15, 30, 60), key=lambda r: abs(r - fps)) if isinstance(fps, int) else 30
         if d["openrgb"].get("start_method") not in ("daemon", "systemd", "off"):
             logger.warning(f"Config: openrgb.start_method should be daemon, systemd or off, "
                            f"not {d['openrgb'].get('start_method')!r}; using daemon")

@@ -208,6 +208,12 @@ def path_points(strip: dict, n: int) -> List[Tuple[float, float]]:
     return pts
 
 
+def led_points(strip: dict, n: int) -> List[Tuple[float, float]]:
+    """Where each LED sits, in the order they're sent (LED 1 first, whatever the flip)."""
+    pts = path_points(strip, n)
+    return [pts[path_at_led(strip, n, i)] for i in range(n)]
+
+
 def led_at_path(strip: dict, n: int, k: int) -> int:
     """Which LED (as sent) sits at path position k."""
     return n - 1 - k if strip.get("flip") else k

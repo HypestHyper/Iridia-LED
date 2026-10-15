@@ -19,6 +19,9 @@ from iridia.colors import resolve_colors
 from iridia.layout import (Layout, fraction_to_stop, led_at_path, path_at_led, path_points, point_along, project,
                            split_key, stop_to_fraction, zone_count)
 from iridia.patterns import PatternGenerator
+from iridia import animations
+from iridia.layout import led_points
+from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
 from iridia.ui.widgets import (Dropdown, Group, QuickColors, Spin, Swatch, SwatchPicker, Toggle, button, divider, hbox, icon,
                                label, rgb, set_button_text, themed, vbox)
@@ -144,6 +147,7 @@ class LayoutTab(Gtk.Box):
         self._visible = on
         if not on:
             self._stop_find()
+        self._ensure_anim()
         if on and self._dirty:
             self._dirty = False
             self.cv.queue_draw()
@@ -168,6 +172,7 @@ class LayoutTab(Gtk.Box):
             self._schedule_save()
         sig = repr((sorted(self._cfg.items()), status.get("extracted_colors"), status.get("identify"),
                     status.get("probe"), status.get("lights_off"), status.get("asleep")))
+        self._ensure_anim()
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             if self._visible and self._drag is None:
@@ -175,6 +180,57 @@ class LayoutTab(Gtk.Box):
                 self._refresh_panel_values()
             else:
                 self._dirty = True
+
+    # ------------------------------------------------------------ animation
+    def _animated(self) -> Dict[str, dict]:
+        """Zones animating right now (per the daemon), with their effect."""
+        out = {}
+        for k in self._enabled:
+            a = fx.live_animation(self.status, k, self._cfg.get(k) or {})
+            if a is not None:
+                out[k] = a
+        return out
+
+    def _ensure_anim(self):
+        """Redraw at up to 30 fps while an animated zone is on screen; nothing otherwise."""
+        want = self._visible and self.get_mapped() and bool(self._animated())
+        job = getattr(self, "_anim_job", None)
+        if want and job is None:
+            self._anim_job = GLib.timeout_add(33, self._anim_tick)
+        elif not want and job is not None:
+            GLib.source_remove(job)
+            self._anim_job = None
+
+    def _anim_tick(self):
+        if not (self._visible and self.get_mapped()) or not self._animated():
+            self._anim_job = None
+            return False
+        if self._drag is None:
+            self.cv.queue_draw()
+        return True
+
+    def _layout_frame(self, key: str, anim: dict, colors: List[str], base: List[str], n: int) -> List[str]:
+        """The same frame the daemon renders: positions along the strip, or through the room."""
+        params = (self._cfg.get(key) or {}).get("pattern_params") or {}
+        positions, extent = None, None
+        if anim.get("follow_layout"):
+            pts = self._points(key, n)
+            if pts:
+                positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
+                xs = []
+                for k, a in self._animated().items():
+                    if a.get("follow_layout") and (a["effect"], a["angle"]) == (anim["effect"], anim["angle"]):
+                        other = self._points(k, int((self._cfg.get(k) or {}).get("led_count", 20)))
+                        if other:
+                            xs += animations.layout_positions(other[0], a["angle"], other[1])
+                extent = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
+        if positions is None:
+            positions = animations.strip_positions(n, bool(params.get("reverse")), bool(params.get("mirror")))
+        return fx.preview(self.status, key, anim, colors, base, n, positions=positions, extent=extent)
+
+    def _points(self, key: str, n: int):
+        strip = next((s for s in self.layout.strips if s["zone"] == key and not s["clone"]), None)
+        return (led_points(strip, n), strip["segments"][0]["spacing"]) if strip and n > 0 else None
 
     def zone_colors(self, key: str, overrides: bool = True) -> List[str]:
         cfg = self._cfg.get(key) or {}
@@ -193,7 +249,11 @@ class LayoutTab(Gtk.Box):
             return out
         extracted = list(st.get("extracted_colors") or ["642107"])
         colors = resolve_colors(cfg.get("pattern_colors", [0]), extracted) or [extracted[0]]
-        return self.patterns.generate(cfg.get("pattern", "solid"), colors, n, params=cfg.get("pattern_params") or {})
+        base = self.patterns.generate(cfg.get("pattern", "solid"), colors, n, params=cfg.get("pattern_params") or {})
+        anim = fx.live_animation(self.status, key, cfg) if overrides else None
+        if anim is not None:
+            return self._layout_frame(key, anim, colors, base, n)
+        return base
 
     def _name(self, key: str) -> str:
         d, z = split_key(key)

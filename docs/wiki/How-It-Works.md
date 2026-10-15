@@ -19,7 +19,10 @@
   window, and is the only part that talks to OpenRGB.
 - **The window** (`iridia-gui`, GTK 4) and **the command line** (`iridia`) only send it requests over a
   Unix socket in `$XDG_RUNTIME_DIR`. Closing the window changes nothing.
-- **OpenRGB** talks to the hardware. Iridia connects to its SDK server and sends colors.
+- **OpenRGB** talks to the hardware. Iridia connects to its SDK server and sends colors. With OpenRGB
+  1.0 it speaks SDK protocol 6 with its own client: every update waits until OpenRGB has applied it,
+  and OpenRGB tells Iridia when devices are added or another program changes one (its mode, say), so
+  Iridia sees it at once. Older OpenRGB is reached through openrgb-python.
 
 ## Wallpaper detection
 

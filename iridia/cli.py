@@ -32,7 +32,9 @@ def cmd_status(args):
     print(f"Extracted colors: {', '.join(resp.get('extracted_colors', [])[:4])}")
     print(f"Brightness: {resp.get('brightness', 'N/A')}%")
     print(f"DDC available: {resp.get('ddc_available', False)}")
-    print(f"OpenRGB connected: {resp.get('openrgb_connected', False)}")
+    proto = resp.get("openrgb_protocol")
+    print(f"OpenRGB connected: {resp.get('openrgb_connected', False)}"
+          + (" (SDK protocol 6)" if proto == 6 else " (OpenRGB before 1.0, openrgb-python)" if proto is not None else ""))
     ours = resp.get("openrgb_ours_pid")
     print(f"OpenRGB start method: {resp.get('openrgb_start_method', '?')}"
           + (f" (Iridia's OpenRGB: pid {ours})" if ours else ""))

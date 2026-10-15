@@ -108,11 +108,71 @@ PROTOCOL = int(os.environ.get("FAKE_OPENRGB_PROTOCOL") or VERSION)
 IDS = [500 + i for i in range(len(DEVICES))]       # protocol 6 controller IDs (not the indexes)
 WORKERS = {}
 WORKERS_LOCK = threading.Lock()
+V6 = []                                             # protocol 6 connections: send(dev, ptype, payload)
+V6_LOCK = threading.Lock()
+
+
+def note(ptype, dev, size):
+    if PACKETS:
+        with open(PACKETS, "a") as f:
+            f.write(f"{ptype} {dev} {size} {time.time():.3f}\n")
+
+
+# ---- protocol 6 device descriptions, as OpenRGB 1.0 writes them (RGBController::Get*DescriptionData)
+def _s16(text):
+    b = (text or "").encode() + b"\0"
+    return struct.pack("<H", len(b)) + b
+
+
+def _col(c):
+    return bytes((c.red, c.green, c.blue, 0))
+
+
+def _mode6(m):
+    vals = (int(m.flags), m.speed_min or 0, m.speed_max or 0, m.brightness_min or 0, m.brightness_max or 0,
+            m.colors_min or 0, m.colors_max or 0, m.speed or 0, m.brightness or 0, int(m.direction or 0),
+            int(m.color_mode))
+    cols = list(m.colors or [])
+    return _s16(m.name) + struct.pack("<11I", *vals) + struct.pack("<H", len(cols)) + b"".join(_col(c) for c in cols)
+
+
+def colors6(d):
+    return struct.pack("<H", len(d.colors)) + b"".join(_col(c) for c in d.colors)
+
+
+def pack6(d):
+    out = struct.pack("<i", int(d.device_type)) + _s16(d.name)
+    for f in ("vendor", "description", "version", "serial", "location"):
+        out += _s16(getattr(d.metadata, f))
+    out += struct.pack("<Hi", len(d.modes), d.active_mode) + b"".join(_mode6(m) for m in d.modes)
+    out += struct.pack("<H", len(d.zones))
+    for z in d.zones:
+        out += _s16(z.name) + struct.pack("<IIII", int(z.zone_type), z.leds_min, z.leds_max, z.num_leds)
+        out += struct.pack("<HH", 0, 0)                 # no matrix map, no segments
+        out += struct.pack("<IiH", 0, -1, 0) + _s16("")  # flags, zone mode, zone modes, display name
+    out += struct.pack("<H", len(d.leds)) + b"".join(_s16(led.name) for led in d.leds)
+    out += colors6(d)
+    out += struct.pack("<HI", 0, 0) + _s16("") + struct.pack("<I", 0)   # LED names, flags, name, config
+    return out
+
+
+def signal(dev, reason):
+    """Tell every protocol 6 client a device changed, like OpenRGB 1.0 (packet 1150)."""
+    body = struct.pack("<I", reason) + (colors6(DEVICES[dev]) if reason == 0 else pack6(DEVICES[dev]))
+    body = struct.pack("<I", len(body) + 4) + body
+    with V6_LOCK:
+        conns = list(V6)
+    for send in conns:
+        try:
+            send(IDS[dev], 1150, body)
+        except OSError:
+            pass
 
 
 class Worker:
-    """One controller's thread: writes queued colour updates one by one, then acknowledges them
-    to protocol 6 clients."""
+    """One controller's thread, shared by all clients: applies queued colour, mode and resize
+    updates one by one (colour writes take UPDATE_DELAY), then acknowledges them to protocol 6
+    clients."""
 
     def __init__(self, dev):
         self.dev, self.q, self.cv = dev, [], threading.Condition()
@@ -123,14 +183,8 @@ class Worker:
             with self.cv:
                 while not self.q:
                     self.cv.wait()
-                ptype, size, ack = self.q.pop(0)
-            time.sleep(UPDATE_DELAY)
-            note(ptype, self.dev, size)
-            if ack:
-                try:
-                    ack()
-                except OSError:
-                    pass
+                job = self.q.pop(0)
+            job()
 
 
 def worker(dev):
@@ -138,13 +192,13 @@ def worker(dev):
         return WORKERS.get(dev) or WORKERS.setdefault(dev, Worker(dev))
 
 
-def note(ptype, dev, size):
-    if PACKETS:
-        with open(PACKETS, "a") as f:
-            f.write(f"{ptype} {dev} {size} {time.time():.3f}\n")
-
-
-def device_data(conn, dev, data, send_lock):
+def device_data(conn, dev, data, send_lock, proto=0):
+    if proto >= 6:
+        body = pack6(DEVICES[dev])
+        body = struct.pack("<I", len(body) + 4) + body
+        with send_lock:
+            conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", IDS[dev], 1, len(body)) + body)
+        return
     # answer in the protocol version the client asks for, like OpenRGB does
     asked = min(struct.unpack("I", data[:4])[0] if len(data) >= 4 else VERSION, VERSION)
     d = copy.deepcopy(DEVICES[dev])
@@ -156,6 +210,37 @@ def device_data(conn, dev, data, send_lock):
         conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, 1, len(body)) + body)
 
 
+def apply(dev, ptype, size, data, proto):
+    """What the controller does with a colour, mode or resize packet."""
+    d = DEVICES[dev] if dev < len(DEVICES) else None
+    if ptype in (1050, 1051, 1052):
+        if UPDATE_DELAY:
+            time.sleep(UPDATE_DELAY)
+        note(ptype, dev, size)
+        if d is not None and ptype == 1050 and len(data) >= 6:
+            n = min(struct.unpack_from("<H", data, 4)[0], len(d.colors))
+            for k in range(n):
+                r, g, b = data[6 + 4 * k:9 + 4 * k]
+                d.colors[k] = U.RGBColor(r, g, b)
+        if d is not None and proto >= 6:
+            signal(dev, 0)
+        return
+    note(ptype, dev, size)
+    if d is None:
+        return
+    if ptype in (1100, 1101) and len(data) >= 8:
+        d.active_mode = struct.unpack("i", data[4:8])[0]
+        signal(dev, 1)
+    elif ptype == 1000 and len(data) >= 8:
+        zi, n = struct.unpack("<ii", data[:8])
+        if 0 <= zi < len(d.zones):
+            d.zones[zi].num_leds = n
+            # like OpenRGB: the device's LEDs and colours are rebuilt from the zones
+            d.leds = [U.LEDData(f"{z.name} LED {i}", i) for z in d.zones for i in range(z.num_leds)]
+            d.colors = [U.RGBColor(0, 0, 0)] * len(d.leds)
+            signal(dev, 3)
+
+
 def serve(conn):
     send_lock = threading.Lock()
     proto = 0                               # what this client and the server agreed on
@@ -164,50 +249,61 @@ def serve(conn):
         with send_lock:
             conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, ptype, len(payload)) + payload)
 
+    def ack(dev, ptype, status=0):
+        if proto >= 6:
+            send(dev, 10, struct.pack("II", ptype, status))
+
     try:
         while True:
             _o, _r, _g, _b, dev, ptype, size = struct.unpack("ccccIII", recv_exact(conn, 16))
             data = recv_exact(conn, size) if size else b""
+            pdev = dev
             if ptype == 40:                 # protocol version: the server answers with its own
                 asked = struct.unpack("I", data[:4])[0] if len(data) >= 4 else 0
                 proto = min(asked, PROTOCOL)
                 send(0, 40, struct.pack("I", PROTOCOL))
                 if proto >= 6:
-                    send(0, 51, b"Fake OpenRGB\0")         # server name, protocol 6 only
-                    send(0, 10, struct.pack("II", 40, 0))   # and everything gets an ACK
+                    send(0, 51, b"Fake OpenRGB\0")          # server name, protocol 6 only
+                    with V6_LOCK:
+                        V6.append(send)
+                ack(0, 40)
                 continue
-            if proto >= 6 and ptype in (1050, 1051, 1052, 1100, 1101):
+            if proto >= 6 and ptype in (1, 1000, 1050, 1051, 1052, 1100, 1101):
                 if dev not in IDS:
+                    ack(pdev, ptype, 2)
                     continue
                 dev = IDS.index(dev)        # protocol 6 names controllers by ID
             if ptype == 0:                  # controller count
                 send(0, 0, struct.pack("I", len(DEVICES))
                      + (struct.pack(f"{len(IDS)}I", *IDS) if proto >= 6 else b""))
+                ack(0, 0)
             elif ptype == 150:              # profile list: none
                 send(0, 150, struct.pack("IH", 6, 0))
             elif ptype == 1 and dev < len(DEVICES):
-                device_data(conn, dev, data, send_lock)
+                device_data(conn, dev, data, send_lock, proto)
+                ack(pdev, 1)
             elif ptype in (1000, 1050, 1051, 1052, 1100, 1101):
-                if ptype in (1100, 1101) and dev < len(DEVICES) and len(data) >= 8:
-                    DEVICES[dev].active_mode = struct.unpack("i", data[4:8])[0]
-                ack = None
-                if proto >= 6:
-                    cid = IDS[dev] if dev < len(IDS) else dev
-                    ack = (lambda cid=cid, pt=ptype: send(cid, 10, struct.pack("II", pt, 0)))
-                if UPDATE_DELAY and ptype in (1050, 1051, 1052):
+                def job(dev=dev, ptype=ptype, size=size, data=data, pdev=pdev, p=proto):
+                    apply(dev, ptype, size, data, p)
+                    try:
+                        ack(pdev, ptype)
+                    except OSError:
+                        pass
+                if UPDATE_DELAY:            # like OpenRGB 1.0: one queue per controller, all clients
                     w = worker(dev)
                     with w.cv:
-                        w.q.append((ptype, size, ack))
+                        w.q.append(job)
                         w.cv.notify()
                 else:
-                    note(ptype, dev, size)
-                    if ack:
-                        ack()
-            elif proto >= 6:
-                send(dev, 10, struct.pack("II", ptype, 0))
+                    job()
+            else:
+                ack(pdev, ptype)
     except (ConnectionError, OSError, struct.error):
         pass
     finally:
+        with V6_LOCK:
+            if send in V6:
+                V6.remove(send)
         conn.close()
 
 
@@ -217,4 +313,5 @@ srv.bind(("127.0.0.1", port))
 srv.listen(8)
 while True:
     c, _ = srv.accept()
+    c.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)   # like OpenRGB (NetworkServer.cpp)
     threading.Thread(target=serve, args=(c,), daemon=True).start()

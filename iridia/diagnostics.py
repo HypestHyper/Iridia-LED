@@ -92,7 +92,7 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
             checks.append(Check("Last OpenRGB problem", False, last_err))
     else:
         err = status.get("openrgb_last_error") or "no server responded on any of the common ports"
-        hint = ("Run the installer again so the library is installed: bash scripts/install.sh"
+        hint = ("Run the installer again so the library is installed: bash install.sh"
                 if "library is missing" in err else None)
         checks.append(Check(
             "OpenRGB connection", False, err, hint or
@@ -203,4 +203,4 @@ def gui_check() -> Check:
     except (ImportError, ValueError) as e:
         return Check("Window (GTK 4)", False, f"GTK 4 for Python isn't available ({e})",
                      "Install GTK 4, PyGObject and pycairo (the installer does this), then run it again: "
-                     "bash scripts/install.sh")
+                     "bash install.sh")

@@ -20,10 +20,10 @@ engine (see [How it works](How-It-Works.md#color-engines)).
 ```bash
 git clone https://github.com/HypestHyper/Iridia-LED.git
 cd Iridia-LED
-bash scripts/install.sh
+bash install.sh
 ```
 
-Or download a release archive, unpack it and run `bash scripts/install.sh` inside it.
+Or download a release archive, unpack it and run `bash install.sh` inside it.
 
 The installer:
 
@@ -167,7 +167,7 @@ or for fish: `fish_add_path ~/.local/share/iridia-venv/bin`.
 Get the new version (`git pull`, or unpack the new release) and run the installer again:
 
 ```bash
-bash scripts/install.sh --yes
+bash install.sh --yes
 ```
 
 Your settings in `~/.config/iridia/` are kept.
@@ -181,6 +181,6 @@ iridia uninstall                  # asks first, removes your settings too
 iridia uninstall --keep-settings  # keeps ~/.config/iridia (and your setups)
 ```
 
-Or run `bash scripts/uninstall.sh` from the repository, which also works if the virtual environment
+Or run `bash uninstall.sh` from the Iridia folder, which also works if the virtual environment
 is already broken. If you added an Iridia line to your compositor's config (for autostart or
 keybinds), remove it by hand.

@@ -12,6 +12,7 @@
 - The window uses British spelling by default. American English can be picked in Settings,
   Appearance, Language; switching restarts the window.
 - The command line, the log and `iridia doctor` keep American spelling.
+- `install.sh` and `uninstall.sh` moved from `scripts/` to the top folder: `bash install.sh`.
 - The app id is now `io.github.HypestHyper.Iridia` (the window class for window rules). The old
   launcher is removed when the service is installed again.
 

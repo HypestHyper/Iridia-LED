@@ -50,10 +50,10 @@ iridia/
     dialogs.py, fonts.py, serial.py, icon_names.py
   data/              icons, bundled fonts, compiled translations (locale/)
 scripts/
-  install.sh, uninstall.sh
   build_fonts.py     rebuilds the bundled font subsets
   build_locales.py   extracts strings and compiles the translations
 po/                  translation sources (iridia.pot and one .po per language)
+install.sh, uninstall.sh
 docs/wiki/           this wiki
 systemd/             reference user service (the installer writes its own)
 ```

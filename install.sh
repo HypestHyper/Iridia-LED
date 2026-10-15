@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 # Work from the project folder, wherever the script was started from.
-cd "$(dirname "$(readlink -f "$0")")/.."
+cd "$(dirname "$(readlink -f "$0")")"
 VENV_DIR="$HOME/.local/share/iridia-venv"
 CONFIG_DIR="$HOME/.config/iridia"
 
@@ -16,7 +16,7 @@ for arg in "$@"; do
         -y|--yes) ASSUME_YES=1 ;;
         --no-deps) SKIP_DEPS=1 ;;
         -h|--help)
-            echo "Usage: bash scripts/install.sh [--yes] [--no-deps]"
+            echo "Usage: bash install.sh [--yes] [--no-deps]"
             echo "  --yes      install missing system packages without asking"
             echo "  --no-deps  never touch system packages"
             exit 0 ;;
@@ -161,5 +161,5 @@ echo "  2. Check the daemon: systemctl --user status iridia-daemon.service"
 echo "  3. Open the GUI from your launcher, or run:"
 echo "                       $VENV_DIR/bin/iridia-gui"
 echo ""
-echo "To uninstall: bash scripts/uninstall.sh"
+echo "To uninstall: bash uninstall.sh (in this folder), or: iridia uninstall"
 echo ""

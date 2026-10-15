@@ -25,7 +25,7 @@ dependencies = [
  "watchdog>=3.0.0",
 ]
 # The window also needs GTK 4 with PyGObject and pycairo from your distribution
-# (scripts/install.sh installs them and creates the venv with --system-site-packages).
+# (install.sh installs them and creates the venv with --system-site-packages).
 
 [project.urls]
 Homepage = "https://github.com/HypestHyper/Iridia-LED"

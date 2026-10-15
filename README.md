@@ -111,7 +111,7 @@ Appearance, Language. The command line, the log and `iridia doctor` use American
 ```bash
 git clone https://github.com/HypestHyper/Iridia-LED.git
 cd Iridia-LED
-bash scripts/install.sh
+bash install.sh
 ```
 
 The installer finds what's missing and offers to install it with your package manager (pacman, apt,
@@ -131,7 +131,7 @@ folder. Add `--yes` to skip the questions, `--no-deps` to leave system packages 
 | Void | `sudo xbps-install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil` |
 | Alpine | `sudo apk add python3 gtk4.0 py3-gobject3 py3-cairo ddcutil` (OpenRGB from source) |
 
-Then run `bash scripts/install.sh --no-deps`. If your release has no OpenRGB package, get it from
+Then run `bash install.sh --no-deps`. If your release has no OpenRGB package, get it from
 [openrgb.org](https://openrgb.org/).
 
 </details>

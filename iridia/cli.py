@@ -556,7 +556,7 @@ def _service_install():
     gui_bin = os.path.join(bin_dir, "iridia-gui")
     if not os.path.exists(python_bin) or not os.path.exists(gui_bin):
         print(f"Expected iridia's venv binaries in {bin_dir} but didn't find them.")
-        print("Run install.sh first, or activate the right virtualenv before running this.")
+        print("Run install.sh (in the Iridia folder) first, or activate the right virtualenv before running this.")
         return 1
 
     os.makedirs(os.path.dirname(SERVICE_PATH), exist_ok=True)

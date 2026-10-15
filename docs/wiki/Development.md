@@ -141,8 +141,4 @@ interface can be developed without LEDs. To run the window without a display, us
 GDK_BACKEND=x11 GSK_RENDERER=cairo xvfb-run -a .venv/bin/iridia-gui
 ```
 
-## Contributing
 
-Bug reports and pull requests are welcome. For a bug, please include `iridia doctor`,
-`iridia log -n 100`, your distribution and desktop. Keep text in the app and docs plain and short, and
-keep the daemon light: it runs all day.

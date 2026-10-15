@@ -32,7 +32,17 @@ shortcut to change them all.
 Yes, through your desktop's shortcuts. See [Keybinds](Keybinds.md).
 
 **Does it work with OpenRGB as a Flatpak or AppImage?**
-Yes, as long as the SDK server is running. Iridia only talks to its network port.
+Yes. Iridia starts the Flatpak (`org.openrgb.OpenRGB`) by itself. For an AppImage, set
+`openrgb.server_command` to the command that runs its server. Or start OpenRGB yourself and set
+`openrgb.start_method` to `off`: Iridia only talks to its network port.
+
+**Do I need systemd?**
+No. By default the Iridia daemon starts OpenRGB's server itself, and the daemon can start from your
+compositor's config or XDG autostart. See [Start at login](Start-at-Login.md).
+
+**My LEDs show random colors after a reboot.**
+Usually OpenRGB started before it could see the hardware, or two OpenRGB instances are running. See
+[Troubleshooting](Troubleshooting.md#leds-show-random-colors-after-boot).
 
 **Does it work on Fedora Atomic (Silverblue, Bazzite) or other immutable distributions?**
 The installer needs GTK 4 and PyGObject on the host. Layer them (`rpm-ostree install gtk4
@@ -40,7 +50,8 @@ python3-gobject python3-cairo`) or run Iridia's window in a toolbox; the daemon 
 need Python.
 
 **Can OpenRGB run on another machine?**
-Yes. Set `openrgb.host` and `openrgb.port` in `config.json`.
+Yes. Set `openrgb.host` and `openrgb.port` in `config.json`. Iridia never starts or restarts anything
+for a remote host; start OpenRGB there.
 
 **Where are my settings?**
 `~/.config/iridia/`. See [Configuration](Configuration.md). Save them all at once with a

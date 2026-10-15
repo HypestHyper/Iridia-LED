@@ -19,6 +19,7 @@ Python 3.8 or newer. Only one daemon can run per user, so stop an installed one 
 iridia/
   daemon.py          the daemon: main loop, rendering, every IPC command
   openrgb_ctl.py     OpenRGB connection, device modes, sending colors
+  openrgb_server.py  who starts OpenRGB's server: start methods, supervisor, PID file, other starters
   wallpaper.py       wallpaper detection backends
   colors.py          color extraction engines
   patterns.py        the static patterns (pure functions)
@@ -53,7 +54,7 @@ scripts/
   build_fonts.py     rebuilds the bundled font subsets
   build_locales.py   extracts strings and compiles the translations
 po/                  translation sources (iridia.pot and one .po per language)
-tests/               unit tests (pytest)
+tests/               unit tests (pytest); tests/fakes/ has stand-in openrgb and systemctl
 install.sh, uninstall.sh
 docs/wiki/           this wiki
 systemd/             reference user service (the installer writes its own)

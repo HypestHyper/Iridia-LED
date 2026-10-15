@@ -117,8 +117,19 @@ bash install.sh
 
 The installer finds what's missing and offers to install it with your package manager (pacman, apt,
 dnf, zypper, xbps or apk), installs Iridia into `~/.local/share/iridia-venv`, adds the app to your
-launcher, sets it up to start at login and starts it. Nothing of Iridia itself goes outside your home
-folder. Add `--yes` to skip the questions, `--no-deps` to leave system packages alone.
+launcher and starts it. It asks two things:
+
+- **How OpenRGB's server is started:** by the Iridia daemon (the default, works with or without
+  systemd), by a systemd service, or by you. Flag: `--openrgb=daemon|systemd|off`.
+- **How the daemon starts at login:** a systemd service, XDG autostart, or a line in your compositor's
+  config (it prints the line). Flag: `--autostart=systemd|xdg|compositor|none`.
+
+Nothing of Iridia itself goes outside your home folder. Add `--yes` to skip the questions and use the
+defaults, `--no-deps` to leave system packages alone.
+
+**Updating:** `git pull && bash install.sh`. Your settings are kept. Updating from 1.1.0 also removes
+its `iridia-openrgb.service`, which could start OpenRGB too early at boot (see the
+[changelog](CHANGELOG.md)).
 
 <details>
 <summary><b>Installing the dependencies by hand</b></summary>

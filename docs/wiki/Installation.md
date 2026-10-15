@@ -207,7 +207,10 @@ Get the new version (`git pull`, or unpack the new release) and run the installe
 bash install.sh --yes
 ```
 
-Your settings in `~/.config/iridia/` are kept.
+Your settings in `~/.config/iridia/` are kept, and so is your OpenRGB start method (add
+`--openrgb=...` or `--autostart=...` to change them). Updating from 1.1.0 removes its
+`iridia-openrgb.service` unless you pick `--openrgb=systemd`. Check with `iridia --version` and
+`iridia doctor`.
 
 ## Uninstalling
 

@@ -2,8 +2,9 @@
 
 ## Before the first run
 
-1. **OpenRGB is installed** and your devices appear in it. Iridia starts its server for you (see
-   [Installation](Installation.md#setting-up-openrgb)).
+1. **OpenRGB is installed** and your devices appear in it. Iridia starts its server for you, inside
+   your session (see [Installation](Installation.md#setting-up-openrgb)). If OpenRGB also starts itself
+   at login (its own autostart entry), keep only one: the *Service* tab offers to turn OpenRGB's off.
 2. **The Iridia daemon is running.** The installer starts it, and it starts on its own at every login.
    `iridia daemon status` tells you, or look at the *Service* tab.
 

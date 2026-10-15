@@ -84,6 +84,9 @@ class OpenRGBController:
         self._last_connect_attempt = 0.0
         self._auto_detected = False
         self.connected_since: Optional[float] = None
+        # set while OpenRGB answers but reports no devices: it probably started before the
+        # session had access to the hardware, and OpenRGB never scans again by itself
+        self.no_devices_since: Optional[float] = None
         self.last_error: Optional[str] = None
         self.last_error_time: Optional[float] = None
         self._last_inventory: Dict = {}
@@ -101,7 +104,7 @@ class OpenRGBController:
         self.last_error = msg
         self.last_error_time = time.time()
 
-    def _detect_port(self) -> int:
+    def _detect_port(self) -> Optional[int]:
         import socket
         for p in self.COMMON_PORTS:
             try:
@@ -112,7 +115,7 @@ class OpenRGBController:
                 return p
             except (socket.timeout, ConnectionRefusedError, OSError):
                 continue
-        return self._configured_port or 6742
+        return None
 
     def _can_retry(self, interval: float) -> bool:
         now = time.time()
@@ -129,10 +132,13 @@ class OpenRGBController:
         if not self._can_retry(retry_interval):
             return False
         if not self._auto_detected and self._configured_port is None:
+            # Probe once: every probe is a raw connection that OpenRGB logs as an error
+            # ("recv_select failed receiving magic"), so stop as soon as a port answered.
             detected = self._detect_port()
-            if detected != self.port:
-                logger.info(f"OpenRGB auto-detected on port {detected}")
-                self.port = detected
+            if detected is not None:
+                if detected != self.port:
+                    logger.info(f"OpenRGB auto-detected on port {detected}")
+                    self.port = detected
                 self._auto_detected = True
         try:
             from openrgb import OpenRGBClient
@@ -143,6 +149,7 @@ class OpenRGBController:
         except ConnectionRefusedError:
             self._record_error(f"No SDK server responding on {self.host}:{self.port}")
             self.client = None
+            self.no_devices_since = None
             return False
         except OSError as e:
             # Covers connection timeouts and similar transport-level
@@ -170,13 +177,22 @@ class OpenRGBController:
             devices = dict(zip(unique_names([d.name for d in devs]), devs))
             self.devices = devices
             self._last_enum = time.time()
+            if devices:
+                self.no_devices_since = None
+                if (self.last_error or "").startswith("OpenRGB is running but reports no devices"):
+                    self.last_error = None      # fixed now; don't show it as the last problem
             if not devices:
                 # The SDK client caches the device list from connect time,
                 # so a server that's still scanning USB (e.g. just
                 # restarted) yields an empty list that never fills in on
-                # this connection. Drop it and reconnect shortly.
-                self._warn_once("OpenRGB connected but reports no devices yet (server probably "
-                                "still scanning hardware), reconnecting shortly")
+                # this connection. Drop it and reconnect shortly. If it stays
+                # empty, the daemon restarts OpenRGB (only one Iridia started).
+                if self.no_devices_since is None:
+                    self.no_devices_since = time.time()
+                self._record_error("OpenRGB is running but reports no devices (it may have started before the "
+                                   "hardware was accessible)")
+                self._warn_once("OpenRGB connected but reports no devices yet (still scanning, or it started "
+                                "before it could see the hardware), reconnecting shortly")
                 try:
                     self.client.disconnect()
                 except Exception:
@@ -351,79 +367,6 @@ class OpenRGBController:
         self.devices = {}
         self.connected_since = None
         self._last_connect_attempt = 0.0
-
-    def restart_server(self) -> bool:
-        """Restart the actual OpenRGB SDK server process.
-
-        Some hardware never comes back from a lost-device state with a
-        plain reconnect or re-enumerate — this is a documented OpenRGB
-        issue (e.g. ASUS Aura motherboards, some RAM kits after
-        sleep/wake) where only restarting OpenRGB itself forces it to
-        redo its own USB scan. There's no lighter SDK-level "rescan" to
-        use instead here: that command exists in the OpenRGB network
-        protocol (v5+), but openrgb-python — the client library this
-        project depends on, targets protocol v4 and doesn't implement
-        it. A process restart matches OpenRGB's own troubleshooting
-        guidance for exactly the cases where its GUI's "Rescan Devices"
-        button doesn't help either.
-
-        Tries the systemd --user unit first (safe to restart even if
-        that's the instance already running); if that's not how this
-        machine manages it, falls back to finding a *headless*
-        `openrgb --server` process and relaunching it directly. Won't
-        touch an interactive OpenRGB GUI session (no --server flag) —
-        killing someone's open window would be more disruptive than
-        helpful, and a fresh --server instance would likely just fail
-        to bind the port that GUI's own SDK server already holds.
-        """
-        import subprocess
-        self.disconnect()
-
-        for unit in ("iridia-openrgb.service", "openrgb-server.service"):
-            try:
-                r = subprocess.run(["systemctl", "--user", "cat", unit], capture_output=True, text=True, timeout=5)
-                if r.returncode != 0:
-                    continue
-                r = subprocess.run(["systemctl", "--user", "restart", unit],
-                                   capture_output=True, text=True, timeout=15)
-                if r.returncode == 0:
-                    logger.info(f"Restarted {unit} via systemd")
-                    time.sleep(3.0)
-                    return True
-                logger.debug(f"{unit} restart failed: {r.stderr.strip()}")
-            except Exception as e:
-                logger.debug(f"systemd restart of {unit} failed: {type(e).__name__}: {e}")
-
-        try:
-            found = subprocess.run(["pgrep", "-f", "openrgb.*--server"],
-                                   capture_output=True, text=True, timeout=3)
-            if not found.stdout.strip():
-                msg = ("No headless 'openrgb --server' process found to restart, and no "
-                       "systemd unit for it is set up (run: iridia openrgb enable). If OpenRGB "
-                       "is running as a GUI app, use its own Rescan Devices, or restart it manually.")
-                logger.warning(msg)
-                self._record_error(msg)
-                return False
-            subprocess.run(["pkill", "-f", "openrgb.*--server"], timeout=3)
-            time.sleep(1.5)
-            subprocess.Popen(
-                ["openrgb", "--server"],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                stdin=subprocess.DEVNULL, start_new_session=True,
-            )
-            logger.info("Restarted headless OpenRGB server process directly")
-            time.sleep(3.0)
-            return True
-        except FileNotFoundError:
-            msg = "Couldn't restart OpenRGB: 'openrgb' binary not found on PATH"
-            logger.warning(msg)
-            self._record_error(msg)
-            return False
-        except Exception as e:
-            msg = f"Couldn't restart OpenRGB server: {type(e).__name__}: {e}"
-            logger.warning(msg)
-            self._record_error(msg)
-            return False
 
     def send(self, device_name: str, colors: List[str], zones_config: Optional[Dict] = None) -> bool:
         """Send colours to a device, or to the zones named in zones_config (only those)."""

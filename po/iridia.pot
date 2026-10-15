@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 12:50+0000\n"
+"POT-Creation-Date: 2026-10-15 14:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,7 +88,7 @@ msgstr ""
 msgid "Connecting…"
 msgstr ""
 
-#: iridia/ui/app.py:305 iridia/ui/app.py:1459
+#: iridia/ui/app.py:305 iridia/ui/app.py:1530
 msgid "Freeze colors"
 msgstr ""
 
@@ -112,7 +112,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: iridia/ui/app.py:330 iridia/ui/app.py:1205
+#: iridia/ui/app.py:330 iridia/ui/app.py:1216
 msgid "Service"
 msgstr ""
 
@@ -698,7 +698,7 @@ msgstr ""
 msgid "The language changes when the window restarts."
 msgstr ""
 
-#: iridia/ui/app.py:1036 iridia/ui/app.py:1270
+#: iridia/ui/app.py:1036 iridia/ui/app.py:1332
 msgid "Restart"
 msgstr ""
 
@@ -722,7 +722,7 @@ msgid ""
 "keeps working when this window is closed. This window only changes its settings."
 msgstr ""
 
-#: iridia/ui/app.py:1073 iridia/ui/app.py:1087 iridia/ui/app.py:1124 iridia/ui/app.py:1128
+#: iridia/ui/app.py:1073 iridia/ui/app.py:1087 iridia/ui/app.py:1124 iridia/ui/app.py:1131
 msgid "Checking…"
 msgstr ""
 
@@ -744,8 +744,8 @@ msgstr ""
 msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
 msgstr ""
 
-#: iridia/ui/app.py:1086
-msgid "systemd service  ·  recommended"
+#: iridia/ui/app.py:1086 iridia/ui/app.py:1242
+msgid "systemd service"
 msgstr ""
 
 #: iridia/ui/app.py:1090
@@ -778,7 +778,7 @@ msgstr ""
 msgid "Copied"
 msgstr ""
 
-#: iridia/ui/app.py:1115 iridia/ui/app.py:1171
+#: iridia/ui/app.py:1115 iridia/ui/app.py:1182
 msgid "Install XDG autostart"
 msgstr ""
 
@@ -790,355 +790,429 @@ msgstr ""
 msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
 msgstr ""
 
-#: iridia/ui/app.py:1126
-msgid "Start OpenRGB's server with Iridia"
+#: iridia/ui/app.py:1127
+msgid "Start OpenRGB"
 msgstr ""
 
-#: iridia/ui/app.py:1132
+#: iridia/ui/app.py:1136 iridia/ui/app.py:1321
+msgid "Turn off OpenRGB's own autostart"
+msgstr ""
+
+#: iridia/ui/app.py:1142
 msgid "Reconnect"
 msgstr ""
 
-#: iridia/ui/app.py:1133
+#: iridia/ui/app.py:1143
 msgid "Reconnecting…"
 msgstr ""
 
-#: iridia/ui/app.py:1134 iridia/ui/app.py:1268
+#: iridia/ui/app.py:1144 iridia/ui/app.py:1330
 msgid "Restart OpenRGB server"
 msgstr ""
 
-#: iridia/ui/app.py:1136
+#: iridia/ui/app.py:1146
 msgid ""
 "Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
 "its systemd service); use it when a device stops responding and Reconnect doesn't bring it back. "
 "It won't touch an OpenRGB window."
 msgstr ""
 
-#: iridia/ui/app.py:1141 iridia/ui/dialogs.py:294 iridia/ui/dialogs.py:295
+#: iridia/ui/app.py:1151 iridia/ui/dialogs.py:294 iridia/ui/dialogs.py:295
 msgid "Diagnostics"
 msgstr ""
 
-#: iridia/ui/app.py:1143
+#: iridia/ui/app.py:1153
 msgid "Run diagnostics"
 msgstr ""
 
-#: iridia/ui/app.py:1144
+#: iridia/ui/app.py:1154
 msgid ""
 "Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing “iridia "
 "doctor” prints."
 msgstr ""
 
-#: iridia/ui/app.py:1148 iridia/ui/app.py:1289
+#: iridia/ui/app.py:1158 iridia/ui/app.py:1351
 msgid "Uninstall"
 msgstr ""
 
-#: iridia/ui/app.py:1150
+#: iridia/ui/app.py:1160
 msgid "Uninstall Iridia…"
 msgstr ""
 
-#: iridia/ui/app.py:1151
+#: iridia/ui/app.py:1161
 msgid ""
 "Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
 "to keep your settings. Same as running “iridia uninstall”."
 msgstr ""
 
-#: iridia/ui/app.py:1162
+#: iridia/ui/app.py:1173
 msgid ""
 "Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies on"
 " your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon)."
 msgstr ""
 
-#: iridia/ui/app.py:1165
+#: iridia/ui/app.py:1176
 #, python-brace-format
 msgid "Add this to: {file}"
 msgstr ""
 
-#: iridia/ui/app.py:1170
+#: iridia/ui/app.py:1181
 msgid "Remove XDG autostart"
 msgstr ""
 
-#: iridia/ui/app.py:1177
+#: iridia/ui/app.py:1188
 msgid "XDG autostart removed"
 msgstr ""
 
-#: iridia/ui/app.py:1180
+#: iridia/ui/app.py:1191
 msgid "XDG autostart installed"
 msgstr ""
 
-#: iridia/ui/app.py:1189 iridia/ui/app.py:1198
+#: iridia/ui/app.py:1200 iridia/ui/app.py:1209
 msgid "Daemon"
 msgstr ""
 
-#: iridia/ui/app.py:1198
+#: iridia/ui/app.py:1209
 msgid "Couldn't stop it."
 msgstr ""
 
-#: iridia/ui/app.py:1204
+#: iridia/ui/app.py:1215
 msgid "Enabled. The daemon now starts at login."
 msgstr ""
 
-#: iridia/ui/app.py:1205
+#: iridia/ui/app.py:1216
 msgid "Install failed:"
 msgstr ""
 
-#: iridia/ui/app.py:1213
+#: iridia/ui/app.py:1224
 msgid "Remove service"
 msgstr ""
 
-#: iridia/ui/app.py:1213
+#: iridia/ui/app.py:1224
 msgid "Stop, disable and delete the systemd service (and the app launcher)? Your settings are kept."
 msgstr ""
 
-#: iridia/ui/app.py:1215
+#: iridia/ui/app.py:1226
 msgid "Removed."
 msgstr ""
 
-#: iridia/ui/app.py:1217
+#: iridia/ui/app.py:1228
 msgid "Remove"
 msgstr ""
 
-#: iridia/ui/app.py:1240
-msgid "OpenRGB isn't installed, so there is nothing to start."
+#: iridia/ui/app.py:1242
+msgid "With Iridia"
 msgstr ""
 
 #: iridia/ui/app.py:1242
-msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
+msgid "I start it myself"
 msgstr ""
 
-#: iridia/ui/app.py:1244
+#: iridia/ui/app.py:1258
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr ""
+
+#: iridia/ui/app.py:1260
 msgid ""
-"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
-"diagnostics to see why."
+"The Iridia daemon starts OpenRGB's server inside your session, and starts it again if it stops. "
+"Works with or without systemd."
 msgstr ""
 
-#: iridia/ui/app.py:1247
+#: iridia/ui/app.py:1264
 #, python-brace-format
-msgid "Started by {what}. Iridia leaves that alone."
+msgid "Running (pid {pid})."
 msgstr ""
 
-#: iridia/ui/app.py:1249
-msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
-msgstr ""
-
-#: iridia/ui/app.py:1250 iridia/ui/app.py:1255
-msgid "Off. Start OpenRGB's server yourself."
-msgstr ""
-
-#: iridia/ui/app.py:1252
-msgid ""
-"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
-" can't reach it."
-msgstr ""
-
-#: iridia/ui/app.py:1262
-msgid "OpenRGB"
-msgstr ""
-
-#: iridia/ui/app.py:1262 iridia/ui/keybinds_tab.py:368
-msgid "That didn't work"
+#: iridia/ui/app.py:1266
+msgid "Running, but not started by Iridia, so Iridia won't restart it."
 msgstr ""
 
 #: iridia/ui/app.py:1268
+msgid "A systemd user service (iridia-openrgb.service) starts it with your graphical session."
+msgstr ""
+
+#: iridia/ui/app.py:1271
+msgid ""
+"Your session doesn't start graphical-session.target, so this service won't start at login. Pick "
+"“With Iridia” instead."
+msgstr ""
+
+#: iridia/ui/app.py:1274
+#, python-brace-format
+msgid "Service: {state}"
+msgstr ""
+
+#: iridia/ui/app.py:1276
+msgid ""
+"Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB window with its "
+"SDK server on, or a service."
+msgstr ""
+
+#: iridia/ui/app.py:1279
+msgid "The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, Start Server."
+msgstr ""
+
+#: iridia/ui/app.py:1286
+#, python-brace-format
+msgid ""
+"Also started by: {what}. Two OpenRGB instances fight over the hardware, so Iridia won't start one"
+" while that is set up."
+msgstr ""
+
+#: iridia/ui/app.py:1301 iridia/ui/app.py:1310
+msgid "OpenRGB"
+msgstr ""
+
+#: iridia/ui/app.py:1301 iridia/ui/keybinds_tab.py:368
+msgid "That didn't work"
+msgstr ""
+
+#: iridia/ui/app.py:1303
+msgid "OpenRGB start method changed"
+msgstr ""
+
+#: iridia/ui/app.py:1310
+msgid ""
+"Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
+"runs until you log out."
+msgstr ""
+
+#: iridia/ui/app.py:1312
+msgid "Stop it"
+msgstr ""
+
+#: iridia/ui/app.py:1312
+msgid "Keep it running"
+msgstr ""
+
+#: iridia/ui/app.py:1322
+#, python-brace-format
+msgid ""
+"Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file stays; "
+"delete that line to undo."
+msgstr ""
+
+#: iridia/ui/app.py:1325
+msgid "OpenRGB's autostart is off"
+msgstr ""
+
+#: iridia/ui/app.py:1327 iridia/ui/keybinds_tab.py:120
+msgid "Turn off"
+msgstr ""
+
+#: iridia/ui/app.py:1330
 msgid ""
 "This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
 "other software using it."
 msgstr ""
 
-#: iridia/ui/app.py:1277 iridia/ui/app.py:1278
+#: iridia/ui/app.py:1339 iridia/ui/app.py:1340
 msgid "Uninstall Iridia"
 msgstr ""
 
-#: iridia/ui/app.py:1279
+#: iridia/ui/app.py:1341
 msgid ""
 "Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
 "something else changes them."
 msgstr ""
 
-#: iridia/ui/app.py:1289
+#: iridia/ui/app.py:1351
 #, python-brace-format
 msgid "Couldn't start the uninstaller: {e}"
 msgstr ""
 
-#: iridia/ui/app.py:1292 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
+#: iridia/ui/app.py:1354 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
 #: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227
 msgid "Cancel"
 msgstr ""
 
-#: iridia/ui/app.py:1293
+#: iridia/ui/app.py:1355
 msgid "Remove, keep my settings"
 msgstr ""
 
-#: iridia/ui/app.py:1294
+#: iridia/ui/app.py:1356
 msgid "Remove everything"
 msgstr ""
 
-#: iridia/ui/app.py:1314
+#: iridia/ui/app.py:1376
 msgid "Daemon stopped"
 msgstr ""
 
-#: iridia/ui/app.py:1318
+#: iridia/ui/app.py:1382
+#, python-brace-format
+msgid "Running (pid {pid}, started by {who})"
+msgstr ""
+
+#: iridia/ui/app.py:1384
 msgid "by systemd"
 msgstr ""
 
-#: iridia/ui/app.py:1318
+#: iridia/ui/app.py:1384
 msgid "without systemd"
 msgstr ""
 
-#: iridia/ui/app.py:1319
+#: iridia/ui/app.py:1385
 #, python-brace-format
 msgid "Running (pid {pid}, started {by})"
 msgstr ""
 
-#: iridia/ui/app.py:1324
+#: iridia/ui/app.py:1391
 msgid "Enabled. The daemon starts automatically when you log in."
 msgstr ""
 
-#: iridia/ui/app.py:1325
+#: iridia/ui/app.py:1392
 msgid "Installed but not enabled. It won't start at login."
 msgstr ""
 
-#: iridia/ui/app.py:1326
+#: iridia/ui/app.py:1393
 msgid "Not installed. Click “Enable at login” to set it up."
 msgstr ""
 
-#: iridia/ui/app.py:1327
+#: iridia/ui/app.py:1394
 #, python-brace-format
 msgid "systemd status: {status}"
 msgstr ""
 
-#: iridia/ui/app.py:1334
+#: iridia/ui/app.py:1395
+msgid ""
+"Your session doesn't start graphical-session.target, so the service won't start the daemon at "
+"login. Use one of the other ways below."
+msgstr ""
+
+#: iridia/ui/app.py:1405
 msgid "Colors frozen. Wallpaper changes are ignored."
 msgstr ""
 
-#: iridia/ui/app.py:1335
+#: iridia/ui/app.py:1406
 msgid "Colors follow the wallpaper again."
 msgstr ""
 
-#: iridia/ui/app.py:1345
+#: iridia/ui/app.py:1416
 msgid "Daemon restarting…"
 msgstr ""
 
-#: iridia/ui/app.py:1429
+#: iridia/ui/app.py:1500
 msgid "Daemon not running"
 msgstr ""
 
-#: iridia/ui/app.py:1433
+#: iridia/ui/app.py:1504
 msgid "The daemon isn't running"
 msgstr ""
 
-#: iridia/ui/app.py:1434
+#: iridia/ui/app.py:1505
 msgid "Start it from the Service tab."
 msgstr ""
 
-#: iridia/ui/app.py:1449
+#: iridia/ui/app.py:1520
 msgid "OpenRGB not connected"
 msgstr ""
 
-#: iridia/ui/app.py:1451
+#: iridia/ui/app.py:1522
 #, python-brace-format
 msgid "Can't see: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:1453
+#: iridia/ui/app.py:1524
 #, python-brace-format
 msgid "Night mode until {time}"
 msgstr ""
 
-#: iridia/ui/app.py:1459
+#: iridia/ui/app.py:1530
 msgid "Frozen"
 msgstr ""
 
-#: iridia/ui/app.py:1462
+#: iridia/ui/app.py:1533
 msgid "No wallpaper detected yet"
 msgstr ""
 
-#: iridia/ui/app.py:1474
+#: iridia/ui/app.py:1545
 msgid "Connected"
 msgstr ""
 
-#: iridia/ui/app.py:1474
+#: iridia/ui/app.py:1545
 msgid "Not connected"
 msgstr ""
 
-#: iridia/ui/app.py:1475
+#: iridia/ui/app.py:1546
 msgid "Available"
 msgstr ""
 
-#: iridia/ui/app.py:1475
+#: iridia/ui/app.py:1546
 msgid "Not available"
 msgstr ""
 
-#: iridia/ui/app.py:1477 iridia/ui/widgets.py:198
+#: iridia/ui/app.py:1548 iridia/ui/widgets.py:198
 msgid "Mixed"
 msgstr ""
 
-#: iridia/ui/app.py:1478
+#: iridia/ui/app.py:1549
 msgid "Frozen (wallpaper changes are ignored)"
 msgstr ""
 
-#: iridia/ui/app.py:1478
+#: iridia/ui/app.py:1549
 msgid "Following the wallpaper"
 msgstr ""
 
-#: iridia/ui/app.py:1480
+#: iridia/ui/app.py:1551
 msgid "Off"
 msgstr ""
 
-#: iridia/ui/app.py:1482
+#: iridia/ui/app.py:1553
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
 msgstr ""
 
-#: iridia/ui/app.py:1484
+#: iridia/ui/app.py:1555
 #, python-brace-format
 msgid "Scheduled {start} to {end} (cap {cap}%)"
 msgstr ""
 
-#: iridia/ui/app.py:1487
+#: iridia/ui/app.py:1558
 msgid "Off (PC asleep)"
 msgstr ""
 
-#: iridia/ui/app.py:1488
+#: iridia/ui/app.py:1559
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:1488
+#: iridia/ui/app.py:1559
 msgid "On"
 msgstr ""
 
-#: iridia/ui/app.py:1489
+#: iridia/ui/app.py:1560
 #, python-brace-format
 msgid "{n} strip changed by a keybind (see Keybinds)"
 msgid_plural "{n} strips changed by a keybind (see Keybinds)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:1493
+#: iridia/ui/app.py:1564
 #, python-brace-format
 msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
 msgstr ""
 
-#: iridia/ui/app.py:1493
+#: iridia/ui/app.py:1564
 msgid "nothing yet"
 msgstr ""
 
-#: iridia/ui/app.py:1493
+#: iridia/ui/app.py:1564
 msgid " (cached)"
 msgstr ""
 
-#: iridia/ui/app.py:1493
+#: iridia/ui/app.py:1564
 msgid "n/a (cached or not yet run)"
 msgstr ""
 
-#: iridia/ui/app.py:1523
+#: iridia/ui/app.py:1594
 #, python-brace-format
 msgid "Connected, but not seeing: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:1524
+#: iridia/ui/app.py:1595
 msgid "Connected. All configured devices visible."
 msgstr ""
 
-#: iridia/ui/app.py:1526
+#: iridia/ui/app.py:1597
 msgid "Not connected."
 msgstr ""
 
@@ -1507,10 +1581,6 @@ msgstr ""
 
 #: iridia/ui/keybinds_tab.py:120
 msgid "Turn on"
-msgstr ""
-
-#: iridia/ui/keybinds_tab.py:120
-msgid "Turn off"
 msgstr ""
 
 #: iridia/ui/keybinds_tab.py:121 iridia/ui/keybinds_tab.py:435

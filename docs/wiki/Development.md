@@ -19,6 +19,7 @@ Python 3.8 or newer. Only one daemon can run per user, so stop an installed one 
 iridia/
   daemon.py          the daemon: main loop, rendering, every IPC command
   openrgb_ctl.py     OpenRGB connection, device modes, sending colors
+  openrgb_server.py  who starts OpenRGB's server: start methods, supervisor, PID file, other starters
   wallpaper.py       wallpaper detection backends
   colors.py          color extraction engines
   patterns.py        the static patterns (pure functions)
@@ -53,6 +54,7 @@ scripts/
   build_fonts.py     rebuilds the bundled font subsets
   build_locales.py   extracts strings and compiles the translations
 po/                  translation sources (iridia.pot and one .po per language)
+tests/               unit tests (pytest); tests/fakes/ has stand-in openrgb and systemctl
 install.sh, uninstall.sh
 docs/wiki/           this wiki
 systemd/             reference user service (the installer writes its own)
@@ -113,6 +115,22 @@ translation, but a translation can't add one that the English string doesn't hav
 checks this. To add a language, copy `po/iridia.pot` to `po/<code>.po`, set its `Language:` header,
 and add the code and its name to `LANGUAGES` in `iridia/i18n.py`. Language names are shown in their
 own language and are not translated.
+
+## Tests and checks
+
+The pure parts (patterns, colors, layout geometry, config repair, calibration, IPC) and the daemon's
+command handling and rendering (with OpenRGB and DDC replaced by fakes) have unit tests
+that need no hardware or GTK. `tests/fakes/` holds stand-ins for `openrgb` (a real process that answers
+the SDK handshake with zero devices, stays silent, or crashes) and `systemctl`, so starting, supervising
+and restarting OpenRGB is tested end to end. CI runs everything on Python 3.8 to 3.13, along with ruff
+and shellcheck:
+
+```bash
+.venv/bin/pip install -e ".[dev]"
+.venv/bin/pytest -q
+.venv/bin/ruff check iridia scripts tests
+shellcheck install.sh uninstall.sh
+```
 
 ## Testing without hardware
 

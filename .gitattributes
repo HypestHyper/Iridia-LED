@@ -1,0 +1,4 @@
+# Left out of release archives (and GitHub's "Source code" downloads): only needed to develop Iridia.
+/tests export-ignore
+/.github export-ignore
+/.gitattributes export-ignore

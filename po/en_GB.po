@@ -7,11 +7,12 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 11:24+0000\n"
+"POT-Creation-Date: 2026-10-15 14:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Proper English\n"
 "Language: en_GB\n"
+"Language-Team: Proper English\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -252,6 +253,24 @@ msgstr "Disabled"
 msgid "Whole device"
 msgstr "Whole device"
 
+msgid "Appearance"
+msgstr "Appearance"
+
+msgid "Font"
+msgstr "Font"
+
+msgid "Google Sans Flex (built in)"
+msgstr "Google Sans Flex (built in)"
+
+msgid "System font"
+msgstr "System font"
+
+msgid "Reduce motion"
+msgstr "Reduce motion"
+
+msgid "Turns off shape morphs, sliding panels and the color cross-fade."
+msgstr "Turns off shape morphs, sliding panels and the colour cross-fade."
+
 msgid "Night mode and sleep"
 msgstr "Night mode and sleep"
 
@@ -366,24 +385,6 @@ msgid ""
 msgstr ""
 "Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
 "Reset this after changing wallpaper tool or shell."
-
-msgid "Appearance"
-msgstr "Appearance"
-
-msgid "Font"
-msgstr "Font"
-
-msgid "Google Sans Flex (built in)"
-msgstr "Google Sans Flex (built in)"
-
-msgid "System font"
-msgstr "System font"
-
-msgid "Reduce motion"
-msgstr "Reduce motion"
-
-msgid "Turns off shape morphs, sliding panels and the color cross-fade."
-msgstr "Turns off shape morphs, sliding panels and the colour cross-fade."
 
 msgid "Logging"
 msgstr "Logging"
@@ -597,8 +598,8 @@ msgstr "Start the daemon when I log in"
 msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
 msgstr "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
 
-msgid "systemd service  ·  recommended"
-msgstr "systemd service  ·  recommended"
+msgid "systemd service"
+msgstr "systemd service"
 
 msgid "Enable at login"
 msgstr "Enable at login"
@@ -633,6 +634,12 @@ msgstr "OpenRGB connection"
 
 msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
 msgstr "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
+
+msgid "Start OpenRGB"
+msgstr "Start OpenRGB"
+
+msgid "Turn off OpenRGB's own autostart"
+msgstr "Turn off OpenRGB's own autostart"
 
 msgid "Reconnect"
 msgstr "Reconnect"
@@ -722,6 +729,97 @@ msgstr "Removed."
 msgid "Remove"
 msgstr "Remove"
 
+msgid "With Iridia"
+msgstr "With Iridia"
+
+msgid "I start it myself"
+msgstr "I start it myself"
+
+msgid "OpenRGB isn't installed, so there is nothing to start."
+msgstr "OpenRGB isn't installed, so there is nothing to start."
+
+msgid ""
+"The Iridia daemon starts OpenRGB's server inside your session, and starts it again if it stops. "
+"Works with or without systemd."
+msgstr ""
+"The Iridia daemon starts OpenRGB's server inside your session, and starts it again if it stops. "
+"Works with or without systemd."
+
+#, python-brace-format
+msgid "Running (pid {pid})."
+msgstr "Running (pid {pid})."
+
+msgid "Running, but not started by Iridia, so Iridia won't restart it."
+msgstr "Running, but not started by Iridia, so Iridia won't restart it."
+
+msgid "A systemd user service (iridia-openrgb.service) starts it with your graphical session."
+msgstr "A systemd user service (iridia-openrgb.service) starts it with your graphical session."
+
+msgid ""
+"Your session doesn't start graphical-session.target, so this service won't start at login. Pick "
+"“With Iridia” instead."
+msgstr ""
+"Your session doesn't start graphical-session.target, so this service won't start at login. Pick "
+"“With Iridia” instead."
+
+#, python-brace-format
+msgid "Service: {state}"
+msgstr "Service: {state}"
+
+msgid ""
+"Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB window with its "
+"SDK server on, or a service."
+msgstr ""
+"Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB window with its "
+"SDK server on, or a service."
+
+msgid "The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, Start Server."
+msgstr "The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, Start Server."
+
+#, python-brace-format
+msgid ""
+"Also started by: {what}. Two OpenRGB instances fight over the hardware, so Iridia won't start one"
+" while that is set up."
+msgstr ""
+"Also started by: {what}. Two OpenRGB instances fight over the hardware, so Iridia won't start one"
+" while that is set up."
+
+msgid "OpenRGB"
+msgstr "OpenRGB"
+
+msgid "That didn't work"
+msgstr "That didn't work"
+
+msgid "OpenRGB start method changed"
+msgstr "OpenRGB start method changed"
+
+msgid ""
+"Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
+"runs until you log out."
+msgstr ""
+"Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
+"runs until you log out."
+
+msgid "Stop it"
+msgstr "Stop it"
+
+msgid "Keep it running"
+msgstr "Keep it running"
+
+#, python-brace-format
+msgid ""
+"Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file stays; "
+"delete that line to undo."
+msgstr ""
+"Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file stays; "
+"delete that line to undo."
+
+msgid "OpenRGB's autostart is off"
+msgstr "OpenRGB's autostart is off"
+
+msgid "Turn off"
+msgstr "Turn off"
+
 msgid ""
 "This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
 "other software using it."
@@ -755,6 +853,10 @@ msgstr "Remove everything"
 msgid "Daemon stopped"
 msgstr "Daemon stopped"
 
+#, python-brace-format
+msgid "Running (pid {pid}, started by {who})"
+msgstr "Running (pid {pid}, started by {who})"
+
 msgid "by systemd"
 msgstr "by systemd"
 
@@ -777,6 +879,13 @@ msgstr "Not installed. Click “Enable at login” to set it up."
 #, python-brace-format
 msgid "systemd status: {status}"
 msgstr "systemd status: {status}"
+
+msgid ""
+"Your session doesn't start graphical-session.target, so the service won't start the daemon at "
+"login. Use one of the other ways below."
+msgstr ""
+"Your session doesn't start graphical-session.target, so the service won't start the daemon at "
+"login. Use one of the other ways below."
 
 msgid "Colors frozen. Wallpaper changes are ignored."
 msgstr "Colours frozen. Wallpaper changes are ignored."
@@ -825,9 +934,6 @@ msgstr "Available"
 msgid "Not available"
 msgstr "Not available"
 
-msgid "Off"
-msgstr "Off"
-
 msgid "Mixed"
 msgstr "Mixed"
 
@@ -836,6 +942,9 @@ msgstr "Frozen (wallpaper changes are ignored)"
 
 msgid "Following the wallpaper"
 msgstr "Following the wallpaper"
+
+msgid "Off"
+msgstr "Off"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1188,9 +1297,6 @@ msgstr "Leave as is"
 msgid "Turn on"
 msgstr "Turn on"
 
-msgid "Turn off"
-msgstr "Turn off"
-
 msgid "Back to normal"
 msgstr "Back to normal"
 
@@ -1347,9 +1453,6 @@ msgstr "Loads the setup and keeps it (an automatic backup is made first)."
 
 msgid "Keybind color"
 msgstr "Keybind colour"
-
-msgid "That didn't work"
-msgstr "That didn't work"
 
 msgid "Nothing: every strip shows its normal colors."
 msgstr "Nothing: every strip shows its normal colours."
@@ -1656,6 +1759,10 @@ msgstr "Click to use. Right-click a saved colour to delete it."
 msgid "Click to use, numbers show the order. Right-click a saved color to delete it."
 msgstr "Click to use, numbers show the order. Right-click a saved colour to delete it."
 
+msgctxt "color correction"
+msgid "Off"
+msgstr "Off"
+
 msgid "Palette"
 msgstr "Palette"
 
@@ -1929,44 +2036,4 @@ msgstr "Pink"
 
 msgid "Red (wraps around)"
 msgstr "Red (wraps around)"
-
-msgid "Start OpenRGB's server with Iridia"
-msgstr "Start OpenRGB's server with Iridia"
-
-msgid "OpenRGB isn't installed, so there is nothing to start."
-msgstr "OpenRGB isn't installed, so there is nothing to start."
-
-msgid "Iridia starts it when you log in (iridia-openrgb.service). It's running."
-msgstr "Iridia starts it when you log in (iridia-openrgb.service). It's running."
-
-msgid ""
-"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
-"diagnostics to see why."
-msgstr ""
-"Iridia starts it when you log in (iridia-openrgb.service), but it isn't running now. Run "
-"diagnostics to see why."
-
-#, python-brace-format
-msgid "Started by {what}. Iridia leaves that alone."
-msgstr "Started by {what}. Iridia leaves that alone."
-
-msgid "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
-msgstr "No systemd here: the daemon starts OpenRGB itself when it can't reach it."
-
-msgid "Off. Start OpenRGB's server yourself."
-msgstr "Off. Start OpenRGB's server yourself."
-
-msgid ""
-"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
-" can't reach it."
-msgstr ""
-"Not set up yet. Turn this on to start it at every login. Until then, the daemon starts it when it"
-" can't reach it."
-
-msgid "OpenRGB"
-msgstr "OpenRGB"
-
-msgctxt "color correction"
-msgid "Off"
-msgstr "Off"
 

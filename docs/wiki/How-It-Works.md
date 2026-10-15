@@ -82,10 +82,18 @@ holds up the colors. Without DDC, the manual brightness is used.
 ## Resilience
 
 - **OpenRGB not running:** Iridia keeps tracking the wallpaper and retries every few seconds; colors
-  are sent as soon as it connects. The port is found automatically.
+  are sent as soon as it connects. The port is found automatically, probed once. With the `daemon`
+  start method, the daemon starts OpenRGB itself after a 10 second grace (see
+  [Setting up OpenRGB](Installation.md#setting-up-openrgb)).
+- **Only one OpenRGB:** Iridia never starts OpenRGB while another one runs or is set up to start, and
+  it only restarts an OpenRGB it started itself (it keeps the PID in `$XDG_RUNTIME_DIR`).
+- **OpenRGB exits:** the one Iridia started is started again after 5, 15 and 60 seconds, then Iridia
+  stops and says so. Its output is in `~/.local/share/iridia/openrgb.log`.
+- **OpenRGB with no devices** (it started before the session could reach the hardware): restarted after
+  30 seconds, then once more after 2 minutes.
 - **Connection lost:** detected on the next send, followed by a fresh connection.
 - **Devices that vanish** (often after sleep or a USB hiccup): if a device stays missing, Iridia restarts
-  OpenRGB's server, at most twice per device.
+  OpenRGB's server, at most twice per device, if Iridia started it.
 - **Devices without Direct mode** fall back to another per-LED mode, or a one-color mode.
 - **New devices and zones** are added to the config automatically; zones without a size are added
   switched off.

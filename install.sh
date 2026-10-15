@@ -11,17 +11,33 @@ echo "============================================"
 
 ASSUME_YES=0
 SKIP_DEPS=0
+OPENRGB_METHOD=""
+AUTOSTART=""
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) ASSUME_YES=1 ;;
         --no-deps) SKIP_DEPS=1 ;;
+        --openrgb=*) OPENRGB_METHOD="${arg#*=}" ;;
+        --autostart=*) AUTOSTART="${arg#*=}" ;;
         -h|--help)
-            echo "Usage: bash install.sh [--yes] [--no-deps]"
-            echo "  --yes      install missing system packages without asking"
-            echo "  --no-deps  never touch system packages"
+            echo "Usage: bash install.sh [--yes] [--no-deps] [--openrgb=METHOD] [--autostart=METHOD]"
+            echo "  --yes                 don't ask: install missing system packages, use the defaults below"
+            echo "  --no-deps             never touch system packages"
+            echo "  --openrgb=daemon      the Iridia daemon starts OpenRGB's server (default)"
+            echo "  --openrgb=systemd     a systemd user service starts it with your graphical session"
+            echo "  --openrgb=off         you start OpenRGB yourself"
+            echo "  --autostart=systemd   the daemon starts at login through a systemd user service"
+            echo "  --autostart=xdg       ... through ~/.config/autostart (GNOME, KDE, XFCE, ...)"
+            echo "  --autostart=compositor  ... through a line in your compositor's config (printed for you)"
+            echo "  --autostart=none      nothing starts it at login"
+            echo "  Default for --autostart: systemd when your session reaches graphical-session.target,"
+            echo "  else your compositor's line when one is detected, else xdg."
             exit 0 ;;
+        *) echo "Unknown option: $arg (see --help)"; exit 1 ;;
     esac
 done
+case "$OPENRGB_METHOD" in ""|daemon|systemd|off) ;; *) echo "--openrgb must be daemon, systemd or off"; exit 1 ;; esac
+case "$AUTOSTART" in ""|systemd|xdg|compositor|none) ;; *) echo "--autostart must be systemd, xdg, compositor or none"; exit 1 ;; esac
 
 # --- work out what is missing -------------------------------------------
 MISSING=()   # generic names: python openrgb ddcutil gtk venv
@@ -86,7 +102,7 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
                 # One group at a time: a package your distro doesn't have (OpenRGB isn't in
                 # every repository) must not stop GTK or Python from being installed.
                 for m in "${MISSING[@]}"; do
-                    group=($(pkgname "$m"))
+                    read -r -a group <<< "$(pkgname "$m")"
                     [ ${#group[@]} -eq 0 ] && continue
                     "${INSTALL_CMD[@]}" "${group[@]}" || echo "WARNING: couldn't install ${group[*]} (see above), continuing."
                 done
@@ -135,14 +151,53 @@ echo "Installing iridia..."
 echo "Creating config directory..."
 mkdir -p "$CONFIG_DIR"
 
-# The desktop entry, icon, and systemd service are all written by
-# `iridia service install` itself (see iridia/cli.py) rather than
-# duplicated here, it resolves the venv's own binary paths, so the
-# generated files are always correct regardless of where this venv
-# ends up living. This also means the GUI's own Service > Install
-# button produces an identical result to running this script.
-echo "Installing desktop entry, icon, and systemd service..."
-"$VENV_DIR/bin/iridia" service install
+# --- how OpenRGB's server and the daemon start ----------------------------
+PY="$VENV_DIR/bin/python"
+ask() {   # ask PROMPT DEFAULT -> answer on stdout
+    local reply=""
+    if [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then read -r -p "$1 [$2] " reply || reply=""; fi
+    echo "${reply:-$2}"
+}
+if [ -z "$OPENRGB_METHOD" ] && [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then
+    CUR=$("$PY" -c "from iridia import openrgb_server as o; print(o.start_method())" 2>/dev/null || echo daemon)
+    OTHERS=$("$PY" -c "from iridia import openrgb_server as o; print(', '.join(o.others()))" 2>/dev/null || true)
+    echo ""
+    echo "How should OpenRGB's server be started?"
+    echo "  daemon   the Iridia daemon starts it, inside your session (recommended; works with or without systemd)"
+    "$PY" -c "from iridia import openrgb_server as o; raise SystemExit(0 if o.has_systemd() else 1)" 2>/dev/null &&
+    echo "  systemd  a systemd user service starts it with your graphical session"
+    echo "  off      you start OpenRGB yourself (its window with the SDK server on, a root service, ...)"
+    if [ -n "$OTHERS" ]; then
+        echo "Something else already starts OpenRGB: $OTHERS"
+        echo "Two OpenRGB instances fight over the hardware. Pick 'off' to keep that, or keep 'daemon' and turn"
+        echo "that off (for an autostart entry: iridia openrgb hide-autostart)."
+    fi
+    OPENRGB_METHOD=$(ask "OpenRGB start method?" "$CUR")
+    case "$OPENRGB_METHOD" in daemon|systemd|off) ;; *) echo "Unknown answer, keeping $CUR."; OPENRGB_METHOD="$CUR" ;; esac
+fi
+if [ -z "$AUTOSTART" ]; then
+    DEF=$("$PY" -c "from iridia.cli import default_autostart; print(default_autostart())" 2>/dev/null || echo xdg)
+    if [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then
+        echo ""
+        echo "How should the Iridia daemon start when you log in?"
+        echo "  systemd     a systemd user service (needs a session that reaches graphical-session.target)"
+        echo "  xdg         ~/.config/autostart (GNOME, KDE, XFCE, Cinnamon, ...)"
+        echo "  compositor  a line in your compositor's config (Hyprland, Sway, niri, ...); printed below"
+        echo "  none        nothing; you start it yourself"
+        AUTOSTART=$(ask "Daemon autostart?" "$DEF")
+        case "$AUTOSTART" in systemd|xdg|compositor|none) ;; *) echo "Unknown answer, using $DEF."; AUTOSTART="$DEF" ;; esac
+    else
+        AUTOSTART="$DEF"
+    fi
+fi
+
+# The desktop entry, icon, and services are all written by `iridia service install` itself (see
+# iridia/cli.py) rather than duplicated here: it resolves the venv's own binary paths, so the
+# generated files are always correct regardless of where this venv ends up living.
+echo "Installing desktop entry, icon, and login autostart..."
+SVC_ARGS=(--autostart "$AUTOSTART")
+[ -n "$OPENRGB_METHOD" ] && SVC_ARGS+=(--openrgb "$OPENRGB_METHOD")
+"$VENV_DIR/bin/iridia" service install "${SVC_ARGS[@]}"
 
 echo "Starting the daemon..."
 "$VENV_DIR/bin/iridia" daemon start || true
@@ -157,7 +212,7 @@ echo ""
 echo "Next steps:"
 echo "  1. Edit config:      iridia config edit"
 echo "                       (or: $VENV_DIR/bin/iridia config edit)"
-echo "  2. Check the daemon: systemctl --user status iridia-daemon.service"
+echo "  2. Check everything: iridia doctor"
 echo "  3. Open the GUI from your launcher, or run:"
 echo "                       $VENV_DIR/bin/iridia-gui"
 echo ""

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iridia"
-version = "1.1.0"
+version = "1.1.1"
 description = "Sync your RGB lighting with your wallpaper on Linux, through OpenRGB"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -34,6 +34,7 @@ Issues = "https://github.com/HypestHyper/Iridia-LED/issues"
 
 [project.optional-dependencies]
 material = ["material-color-utilities>=0.1.0"]
+dev = ["pytest", "ruff"]
 
 [project.scripts]
 iridia-daemon = "iridia.daemon:main"
@@ -46,3 +47,14 @@ include = ["iridia*"]
 
 [tool.setuptools.package-data]
 iridia = ["data/*.svg", "data/*.png", "data/fonts/*", "data/locale/*/LC_MESSAGES/*.mo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+
+[tool.ruff.lint]
+# Real errors only: undefined names, unused imports/variables, syntax errors, likely bugs.
+select = ["F", "E9", "B", "PLE"]

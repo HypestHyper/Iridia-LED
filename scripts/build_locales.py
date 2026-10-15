@@ -70,9 +70,16 @@ def main():
         with open(path, "rb") as f:
             cat = read_po(f, locale=None)
         if "--update" in sys.argv:
+            with open(path, "rb") as f:
+                first = f.readline()
             cat.update(pot)
             with open(path, "wb") as f:
-                write_po(f, cat, width=100)
+                # no source locations: they change with every edit and would bury the real changes
+                write_po(f, cat, width=100, no_location=True, ignore_obsolete=True)
+            with open(path, "rb") as f:
+                rest = f.read().split(b"\n", 1)[1]
+            with open(path, "wb") as f:
+                f.write(first + rest)               # keep the file's own first header line
         problems, missing = [], 0
         for msg in list(cat):
             if not msg.id:

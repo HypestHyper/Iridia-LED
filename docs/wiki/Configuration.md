@@ -39,10 +39,10 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `color.backend` | `auto` | Color engine: `auto`, `material` or `pillow` (see [How it works](How-It-Works.md#color-engines)) |
 | `color.frozen` | `false` | Freeze the current colors |
 | `openrgb.host` | `127.0.0.1` | Where the OpenRGB SDK server runs |
-| `openrgb.port` | `null` | Its port; `null` finds it on 6742 to 6744 |
-| `openrgb.start_server` | `true` | Start OpenRGB's server when it isn't reachable on this machine (see [Installation](Installation.md#setting-up-openrgb)) |
+| `openrgb.port` | `null` | Its port; `null` finds it on 6742 to 6744. The OpenRGB Iridia starts listens on it |
+| `openrgb.start_method` | `daemon` | What starts OpenRGB's server: `daemon`, `systemd` or `off` (see [Installation](Installation.md#setting-up-openrgb)). Replaces 1.1.0's `openrgb.start_server` (`false` there becomes `off`) |
 | `openrgb.server_command` | `""` | The command that runs OpenRGB's server; empty finds `openrgb` or the Flatpak |
-| `openrgb.auto_restart_on_missing_device` | `true` | Restart OpenRGB's server when a device goes missing (at most twice per device) |
+| `openrgb.auto_restart_on_missing_device` | `true` | Restart OpenRGB's server when a device goes missing (at most twice per device; only an OpenRGB Iridia started) |
 | `openrgb.missing_device_restart_threshold_sec` | `45` | How long a device must be missing first |
 | `openrgb.restart_cooldown_sec` | `120` | Minimum time between such restarts |
 | `ddc.enabled` | `true` | Follow monitor brightness |
@@ -50,7 +50,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `ddc.fallback_brightness` | `100` | Brightness used when no monitor answers |
 | `night.enabled`, `night.start`, `night.end`, `night.cap` | `false`, `23:00`, `07:00`, `20` | Night mode |
 | `sleep.lights_off` | `true` | LEDs off while the PC sleeps |
-| `logging.enabled` | `false` | Write a log file |
+| `logging.enabled` | `false` | Write a log file. A daemon started outside systemd (where there's no journal) turns it on the first time, unless you've set it yourself |
 | `logging.file_path` | `~/.local/share/iridia/iridia.log` | Where |
 | `logging.level` | `info` | `debug`, `info`, `warning` or `error` |
 | `logging.max_size_kb` | `1024` | The log file is kept under this size (the oldest lines drop off) |

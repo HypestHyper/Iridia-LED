@@ -838,7 +838,7 @@ class StripEditor(Gtk.DrawingArea):
             _rounded(cr, x0 + i * cw, y0, max(1.0, cw - gap), self.STRIP_H, r)
             cr.fill()
         if self.layout_mode and not self.paint_mode:
-            for k, v in enumerate(self.stops):
+            for v in self.stops:
                 x = self._v_to_x(v)
                 xs = [x] + ([x0 + x1 - x] if self._twin() else [])
                 cr.set_source_rgba(1, 1, 1, 0.85)

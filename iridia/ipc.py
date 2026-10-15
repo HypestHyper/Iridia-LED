@@ -18,7 +18,14 @@ class IPCServer(threading.Thread):
         except FileNotFoundError:
             pass
         self.server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.server.bind(self.socket_path)
+        # Create the socket as 0600 from the start: binding with the normal umask
+        # and chmodding afterwards leaves a moment where other users could connect
+        # (it matters when XDG_RUNTIME_DIR is unset and the socket lands in /tmp).
+        old_umask = os.umask(0o177)
+        try:
+            self.server.bind(self.socket_path)
+        finally:
+            os.umask(old_umask)
         self.server.listen(5)
         os.chmod(self.socket_path, 0o600)
         while self._running:

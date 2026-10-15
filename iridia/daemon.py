@@ -37,6 +37,10 @@ def _num(v, default, lo, hi):
     return max(lo, min(hi, v))
 
 
+class ZoneNotFound(ValueError):
+    """A command named a zone the device doesn't have; answered as a normal error reply."""
+
+
 STRIP_TYPES = ("addressable", "addressable12", "single", "rgbw")
 COLOR_ORDERS = ("RGB", "RBG", "GRB", "GBR", "BRG", "BGR")
 
@@ -144,6 +148,11 @@ class Daemon:
     def __init__(self):
         self.running = False
         self.config = Config()
+        self.started_by = openrgb_server.started_by()
+        if not os.environ.get("INVOCATION_ID") and not self.config.is_set("logging.enabled"):
+            # Started outside systemd (a compositor line, XDG autostart...): there is no
+            # journal, so keep a log file unless you've turned it off yourself.
+            self.config.set("logging.enabled", True)
         self.logger = setup_logging(self.config)
 
         self._socket_path = os.path.join(
@@ -218,7 +227,12 @@ class Daemon:
         self._force_refresh = False
         self._last_sent: Dict[str, str] = {}
         self._start_time = time.time()
-        self._orgb_starter = openrgb_server.Starter()
+        self._orgb = openrgb_server.Supervisor()
+        self._orgb_busy = False
+        self._orgb_restarting = False
+        self._nodev_restarts = 0          # restarts because OpenRGB saw no devices (max NODEV_MAX per run)
+        self._nodev_last = 0.0
+        self._said: Dict[str, str] = {}   # topic -> last message, for warnings logged once
         self._last_logged_connected = None
         self._device_missing_since: Dict[str, float] = {}
         self._zone_errors: Dict[tuple, str] = {}
@@ -242,6 +256,8 @@ class Daemon:
         self.logger.info(f"Log file: {self.config.get('logging.file_path')} (enabled={self.config.get('logging.enabled')})")
 
         self._migrate_patterns()
+        self.logger.info(f"Started by: {self.started_by}")
+        threading.Thread(target=self._migrate_openrgb_unit, daemon=True, name="openrgb-migrate").start()
         self.ipc.start()
         self._setup_watchers()
         self._detect_wallpaper()
@@ -484,8 +500,8 @@ class Daemon:
         retry = self.config.get("timing.openrgb_retry_interval_sec", 5.0)
         connected = self.openrgb.ensure_connected(retry_interval=retry)
         self._log_connection_state(connected)
-        if not connected:
-            self._maybe_start_openrgb()
+        self._supervise_openrgb(connected)
+        self._check_no_devices()
         if connected:
             enum_interval = self.config.get("timing.device_enumeration_interval_sec", 10.0)
             self.openrgb.maybe_enumerate(interval=enum_interval)
@@ -646,6 +662,11 @@ class Daemon:
             return
         if now - self._last_auto_restart < cooldown:
             return
+        if not self._orgb.owner(self._orgb_settings()[0]):
+            self._say_once("missing", f"Device(s) {list(retry)} missing from OpenRGB for over {threshold:.0f}s. "
+                                      "OpenRGB wasn't started by Iridia, so it isn't restarted automatically: "
+                                      "use Restart OpenRGB server, or restart it yourself.")
+            return
 
         missing_names = list(retry.keys())
         for n in missing_names:
@@ -659,32 +680,131 @@ class Daemon:
         )
         self._last_auto_restart = now
         self._device_missing_since = {}
-        self._restart_openrgb_async()
+        self._restart_openrgb_async(f"Device(s) {missing_names} missing")
 
-    def _maybe_start_openrgb(self):
-        """No OpenRGB server reachable on this machine: start one (see openrgb_server.py).
-        Runs off the tick thread, since systemctl can take a moment."""
-        if getattr(self, "_orgb_starting", False):
+    # ------------------------------------------------------------ OpenRGB server
+    NODEV_FIRST_SEC = 30.0       # no devices this long: restart the OpenRGB we started
+    NODEV_AGAIN_SEC = 120.0      # then at most once per this long
+    NODEV_MAX = 2                # restarts per daemon run
+    RESTART_SETTLE_SEC = 3.0     # after a restart, let OpenRGB scan before reconnecting
+
+    def _say_once(self, topic: str, msg: str, level=logging.WARNING):
+        if self._said.get(topic) != msg:
+            self._said[topic] = msg
+            self.logger.log(level, msg)
+
+    def _orgb_settings(self):
+        o = self.config.openrgb
+        custom = o.get("server_command") or ""
+        return openrgb_server.method_of(o), o.get("host"), (custom if isinstance(custom, str) else ""), o.get("port")
+
+    def _migrate_openrgb_unit(self):
+        try:
+            msg = openrgb_server.migrate(self._orgb_settings()[0])
+            if msg:
+                self.logger.info(msg)
+        except Exception as e:              # noqa: BLE001
+            self.logger.warning(f"Checking iridia-openrgb.service failed: {type(e).__name__}: {e}")
+
+    def _supervise_openrgb(self, connected: bool):
+        """Start (and keep running) OpenRGB's server per openrgb.start_method; see openrgb_server.py.
+        Runs off the tick thread when it may call systemctl or scan for other starters."""
+        method, host, custom, port = self._orgb_settings()
+        if method == "off" or self._orgb_busy or self._orgb_restarting:
             return
-        host = self.config.get("openrgb.host", "127.0.0.1")
-        enabled = self.config.get("openrgb.start_server", True) is not False
-        custom = self.config.get("openrgb.server_command", "") or ""
+        if connected and not self._orgb.pid:
+            return                          # nothing to start, nothing of ours to watch
+        quick = bool(self._orgb.pid) and method == "daemon"     # only checks our process
 
         def run():
             try:
-                self._orgb_starter.maybe_start(host, enabled, custom if isinstance(custom, str) else "")
-            except Exception as e:
+                self._orgb.tick(method, host, connected, custom, port)
+            except Exception as e:          # noqa: BLE001
                 self.logger.warning(f"Starting OpenRGB failed: {type(e).__name__}: {e}")
             finally:
-                self._orgb_starting = False
-        self._orgb_starting = True
-        threading.Thread(target=run, daemon=True, name="openrgb-start").start()
+                self._orgb_busy = False
+        self._orgb_busy = True
+        if quick:
+            run()
+        else:
+            threading.Thread(target=run, daemon=True, name="openrgb-start").start()
 
-    def _restart_openrgb_async(self):
-        """Restarting OpenRGB can take a few seconds (process kill +
-        relaunch + settle time) — runs off the tick thread so wallpaper
-        detection and everything else keeps working while it happens."""
-        threading.Thread(target=self.openrgb.restart_server, daemon=True).start()
+    def _check_no_devices(self):
+        """OpenRGB answers but sees no devices: at boot it can start before the session has access
+        to the hardware, and it never scans again. Restart it, but only if Iridia started it."""
+        since = self.openrgb.no_devices_since
+        if since is None or self._orgb_restarting:
+            return
+        now = time.time()
+        if now - since < self.NODEV_FIRST_SEC:
+            return
+        if self._nodev_restarts >= self.NODEV_MAX:
+            self._say_once("nodev", f"OpenRGB still reports no devices after {self.NODEV_MAX} restarts. Check "
+                                    "that OpenRGB itself sees them (open its window), and see "
+                                    f"{openrgb_server.LOG_PATH}.")
+            return
+        if self._nodev_last and now - self._nodev_last < self.NODEV_AGAIN_SEC:
+            return
+        method = self._orgb_settings()[0]
+        if not self._orgb.owner(method):
+            who = ("openrgb.start_method is off" if method == "off" else
+                   "it wasn't started by Iridia" + (f" (started by {', '.join(self._orgb._others[1])})"
+                                                     if self._orgb._others[1] else ""))
+            self._say_once("nodev", f"OpenRGB has reported no devices for {int(now - since)}s; {who}, so Iridia "
+                                    "won't restart it. Restart OpenRGB yourself (it probably started before it "
+                                    "could see the hardware).")
+            return
+        self._nodev_restarts += 1
+        self._nodev_last = now
+        self.openrgb.no_devices_since = None
+        self._restart_openrgb_async(f"OpenRGB has reported no devices for {int(now - since)}s "
+                                    f"(restart {self._nodev_restarts} of {self.NODEV_MAX})")
+
+    def _restart_openrgb_async(self, reason: str, manual: bool = False) -> bool:
+        """Restart OpenRGB off the tick thread (it takes a few seconds). Automatic restarts only
+        touch the OpenRGB Iridia started; a Restart click may also replace a headless server that
+        something else started (never the OpenRGB window). Returns False if nothing will happen."""
+        if self._orgb_restarting:
+            return True
+        method, _host, custom, port = self._orgb_settings()
+        if method == "off" and manual:
+            self.logger.warning("Restart OpenRGB requested, but openrgb.start_method is off: Iridia doesn't "
+                                "start or restart OpenRGB. Restart it yourself.")
+            return False
+        self._orgb_restarting = True
+
+        def run():
+            try:
+                self.openrgb.disconnect()
+                ok = self._orgb.restart(method, reason, custom, port)
+                if not ok and manual:
+                    ok = self._restart_not_ours(reason, custom, port)
+                if not ok:
+                    self.logger.warning(f"{reason}: nothing restarted (no OpenRGB server started by Iridia)")
+                time.sleep(self.RESTART_SETTLE_SEC)     # let it scan before the next connect
+            except Exception as e:          # noqa: BLE001
+                self.logger.warning(f"Restarting OpenRGB failed: {type(e).__name__}: {e}")
+            finally:
+                self._orgb_restarting = False
+                self._device_missing_since = {}
+        threading.Thread(target=run, daemon=True, name="openrgb-restart").start()
+        return True
+
+    def _restart_not_ours(self, reason, custom, port) -> bool:
+        """Explicit Restart of an OpenRGB server Iridia didn't start: restart its user unit if a
+        known one runs it, else replace a headless `openrgb --server` with one Iridia starts."""
+        for unit in openrgb_server.OTHER_USER_UNITS:
+            _en, ac = openrgb_server.unit_state(unit)
+            if ac in ("active", "activating"):
+                r = openrgb_server._systemctl("restart", unit, timeout=20)
+                if r is not None and r.returncode == 0:
+                    self.logger.info(f"{reason}: restarted {unit}")
+                    return True
+        if self._orgb.take_over(reason, custom, port):
+            return True
+        self.logger.warning("No headless 'openrgb --server' to restart. If OpenRGB runs as its window, use its "
+                            "Rescan Devices or restart it yourself.")
+        return False
 
     def _log_connection_state(self, connected: bool):
         if connected == self._last_logged_connected:
@@ -693,9 +813,11 @@ class Daemon:
         if connected:
             self.logger.info(f"OpenRGB connected on port {self.openrgb.port}")
         else:
-            tried = ", ".join(str(p) for p in self.openrgb.COMMON_PORTS)
+            ports = ([self.openrgb.port] if self.openrgb._configured_port or self.openrgb._auto_detected
+                     else self.openrgb.COMMON_PORTS)
+            tried = ", ".join(str(p) for p in ports)
             self.logger.warning(
-                f"OpenRGB not reachable on {self.openrgb.host} (tried ports {tried}), "
+                f"OpenRGB not reachable on {self.openrgb.host} (port{'s' if len(ports) > 1 else ''} {tried}), "
                 "is its SDK server actually running? Colors are still being tracked "
                 "and will be sent as soon as it connects."
             )
@@ -1516,6 +1638,13 @@ class Daemon:
         return f"{r:02x}{g:02x}{b:02x}"
 
     def handle_command(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return self._dispatch(req)
+        except ZoneNotFound as e:
+            # A typo in a keybind or a zone OpenRGB renamed: tell the caller, not the error log.
+            return {"ok": False, "error": str(e)}
+
+    def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd", "")
         if cmd == "ping":
             from iridia import get_version
@@ -1666,7 +1795,9 @@ class Daemon:
             self.logger.info("OpenRGB server restart requested via IPC")
             self._device_missing_since = {}
             self._last_auto_restart = time.time()
-            self._restart_openrgb_async()
+            if not self._restart_openrgb_async("Restart requested", manual=True):
+                return {"ok": False, "error": "openrgb.start_method is off: Iridia doesn't start or restart "
+                                              "OpenRGB. Restart it yourself, or pick another method."}
             return {"ok": True, "status": "restarting"}
         if cmd == "quit":
             self.running = False
@@ -1743,7 +1874,12 @@ class Daemon:
             "ddc_last_error": self.ddc.last_error,
             "openrgb_connected": self.openrgb.client is not None,
             "openrgb_host": self.openrgb.host,
-            "openrgb_autostart": self._orgb_starter.last_action,
+            "openrgb_autostart": self._orgb.last_action,
+            "openrgb_start_method": self._orgb_settings()[0],
+            "openrgb_ours_pid": self._orgb.pid if self._orgb.alive() else None,
+            "openrgb_gave_up": self._orgb.gave_up,
+            "openrgb_no_devices_since": self.openrgb.no_devices_since,
+            "started_by": self.started_by,
             "openrgb_connected_since": self.openrgb.connected_since,
             "openrgb_last_error": self.openrgb.last_error,
             "openrgb_missing_devices": missing,
@@ -1876,7 +2012,7 @@ class Daemon:
         dev_cfg = self.config.devices.get(dev, {})
         if zone and dev_cfg.get("zones"):
             if zone not in dev_cfg["zones"]:
-                raise ValueError(f"zone '{zone}' not found on '{dev}'")
+                raise ZoneNotFound(f"zone '{zone}' not found on '{dev}'")
             return ("devices", dev, "zones", zone, field)
         return ("devices", dev, field)
 

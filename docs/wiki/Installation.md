@@ -33,15 +33,25 @@ The installer:
 2. Stops an older Iridia daemon if one is running.
 3. Creates a virtual environment in `~/.local/share/iridia-venv` (with access to your distribution's
    GTK bindings) and installs Iridia into it.
-4. Installs the app launcher entry and icons, and sets up the systemd user service. Without a systemd
-   user session (Void, Alpine, Artix, Gentoo with OpenRC) it writes an XDG autostart entry instead and
-   prints the line for your compositor.
-5. Starts the daemon.
+4. Asks how OpenRGB's server should be started, and how the daemon should start at login (see below
+   and [Start at login](Start-at-Login.md)). With `--yes` or without a terminal it uses the defaults.
+5. Installs the app launcher entry and icons, and sets up what you picked.
+6. Starts the daemon.
 
 | Flag | Effect |
 | --- | --- |
-| `--yes` | Install missing system packages without asking |
+| `--yes` | Don't ask: install missing system packages, use the defaults below |
 | `--no-deps` | Never touch system packages |
+| `--openrgb=daemon` | The Iridia daemon starts OpenRGB's server (default) |
+| `--openrgb=systemd` | A systemd user service starts it with your graphical session |
+| `--openrgb=off` | You start OpenRGB yourself |
+| `--autostart=systemd` | The daemon starts at login through a systemd user service |
+| `--autostart=xdg` | ... through `~/.config/autostart` (GNOME, KDE, XFCE, ...) |
+| `--autostart=compositor` | ... through a line in your compositor's config; the installer prints it |
+| `--autostart=none` | Nothing starts the daemon at login |
+
+The default for `--autostart` is `systemd` when your session reaches `graphical-session.target`, else
+`compositor` when a compositor is detected (Hyprland, Sway, niri, ...), else `xdg`.
 
 Nothing is installed system-wide except the packages you agree to. Iridia itself lives in your home
 folder.
@@ -90,27 +100,54 @@ your `PATH`.
 
 ## Setting up OpenRGB
 
-Iridia talks to OpenRGB's SDK server, and starts that server itself, so usually there's nothing to do:
+Iridia talks to OpenRGB's SDK server. You pick what starts that server with `openrgb.start_method`:
+in the installer, in the window (**Service, OpenRGB connection, Start OpenRGB**), or with
+`iridia openrgb start-method`.
 
-- **With systemd** (most distributions), the installer adds a user service, `iridia-openrgb.service`,
-  that runs `openrgb --server` at every login and restarts it if it crashes. The *Service* tab's
-  *Start OpenRGB's server with Iridia* switch (or `iridia openrgb enable` / `disable`) turns it on and off.
-- **Without systemd**, the daemon runs `openrgb --server` itself when it can't reach a server.
-- **If something else already starts OpenRGB** (its own *start at login* setting, another systemd unit, a
-  line in your compositor's config), Iridia leaves it alone. It also never starts a second OpenRGB while
-  one is running, because two instances fight over the same hardware.
+| Method | What happens |
+| --- | --- |
+| `daemon` (default, *With Iridia*) | The Iridia daemon starts `openrgb --server` and starts it again if it exits (after 5 s, 15 s and 60 s, then it gives up and says so). Works with or without systemd, however the daemon itself is started. |
+| `systemd` (*systemd service*) | A user service, `iridia-openrgb.service`, starts it with your graphical session. Only offered when there's a systemd user session. |
+| `off` (*I start it myself*) | Iridia never starts, stops or restarts OpenRGB. For the OpenRGB window with its SDK server on, a root system service, or your own setup. |
 
-`iridia openrgb status` shows what starts OpenRGB on your machine. Iridia finds OpenRGB as the `openrgb`
-command or as the Flatpak (`org.openrgb.OpenRGB`). For an AppImage, set `openrgb.server_command` to the
-command that runs its server, for example `"~/Apps/OpenRGB.AppImage --server"` with the full path.
+**Why `daemon` is the default.** At boot, the session gets access to the USB and I2C devices only once
+it's up. An OpenRGB started earlier (for example by a service that starts with the user manager) finds
+no devices and never looks again. The daemon runs inside your session, so the OpenRGB it starts can see
+the hardware. It waits 10 seconds after the daemon starts, so OpenRGB's own autostart can go first.
+
+**Only one OpenRGB.** Two instances fight over the same hardware: one takes the controller and the
+other leaves it showing random colors. So Iridia never starts OpenRGB while another OpenRGB process
+runs, or while something else is set up to start it (another systemd unit, an entry in
+`~/.config/autostart`, a line in your compositor's config). `iridia doctor` and the *Service* tab name
+what they found. To turn off OpenRGB's own autostart entry, use the *Turn off OpenRGB's own autostart*
+button or `iridia openrgb hide-autostart`: it adds `Hidden=true` to the file and never deletes it.
+
+**Which OpenRGB is Iridia's.** The daemon remembers the server it started (in
+`$XDG_RUNTIME_DIR/iridia-openrgb.pid`), keeps it running across daemon restarts, and writes its output
+to `~/.local/share/iridia/openrgb.log`. Iridia only restarts an OpenRGB it started itself, or its own
+`iridia-openrgb.service`. *Restart OpenRGB server* in the window can also replace a headless
+`openrgb --server` that something else started; it never touches the OpenRGB window.
+
+**No devices.** If OpenRGB answers but reports no devices for 30 seconds, Iridia restarts the OpenRGB
+it started, then once more after 2 minutes if needed (at most twice per daemon run). If it didn't start
+it, it says so in the log and in `iridia doctor` instead.
+
+**Upgrading from 1.1.0.** 1.1.0 set up `iridia-openrgb.service` to start with the user manager, which
+is too early (see above). Iridia removes that service when you update, but only if Iridia wrote it, and
+switches to `daemon`.
+
+`iridia openrgb status` shows the method, the command, whether Iridia started the running OpenRGB, and
+what else starts it. Iridia finds OpenRGB as the `openrgb` command or as the Flatpak
+(`org.openrgb.OpenRGB`). For an AppImage, set `openrgb.server_command` to the command that runs its
+server, for example `"/home/you/Apps/OpenRGB.AppImage --server"`.
 
 To use the OpenRGB window while the server runs, connect the window to it (its *Client* tab,
-`localhost`, port 6742) instead of letting it scan the hardware a second time, or stop the server first
-(`systemctl --user stop iridia-openrgb.service`). If you'd rather manage OpenRGB yourself, run
-`iridia openrgb disable` and turn on *Start Server* in OpenRGB's *SDK Server* tab.
+`localhost`, port 6742) instead of letting it scan the hardware a second time. If you'd rather run the
+window with its own server, pick `off` and turn on *Start Server* in OpenRGB's *SDK Server* tab.
 
-Iridia finds the server on ports 6742 to 6744 by itself. For another host or port, set `openrgb.host` and
-`openrgb.port` (see [Configuration](Configuration.md)).
+Iridia finds the server on ports 6742 to 6744 by itself. For another port, set `openrgb.port`: the
+OpenRGB that Iridia starts then listens on it (`--server-port`). For OpenRGB on another machine, set
+`openrgb.host`; Iridia never starts anything for a remote host (see [Configuration](Configuration.md)).
 
 OpenRGB needs permission to reach your hardware. Its package normally installs the udev rules
 (`60-openrgb.rules`). Motherboard and RAM lighting also needs the `i2c-dev` kernel module (and
@@ -170,7 +207,10 @@ Get the new version (`git pull`, or unpack the new release) and run the installe
 bash install.sh --yes
 ```
 
-Your settings in `~/.config/iridia/` are kept.
+Your settings in `~/.config/iridia/` are kept, and so is your OpenRGB start method (add
+`--openrgb=...` or `--autostart=...` to change them). Updating from 1.1.0 removes its
+`iridia-openrgb.service` unless you pick `--openrgb=systemd`. Check with `iridia --version` and
+`iridia doctor`.
 
 ## Uninstalling
 

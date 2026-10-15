@@ -8,8 +8,7 @@
 <h1 align="center">Iridia</h1>
 
 <p align="center">
-  <b>Your RGB lighting, in sync with your wallpaper.</b><br>
-  Colors from the image, brightness from your monitor, on any Linux desktop.
+  Sets RGB device colors from the current wallpaper on Linux, through OpenRGB.
 </p>
 
 <p align="center">
@@ -30,55 +29,60 @@
 
 ---
 
-Change your wallpaper and your LED strips, RAM, keyboard and case lights pick up its colors. Dim your
-monitor and they dim with it. Iridia reads the colors of your current wallpaper, sends them to your
-devices through [OpenRGB](https://openrgb.org/), and follows your monitor's brightness over DDC/CI.
+Iridia extracts colors from the current wallpaper and sends them to RGB devices (LED strips, RAM,
+keyboards and so on) through [OpenRGB](https://openrgb.org/). LED brightness can follow the monitor's
+brightness over DDC/CI.
 
-A small background daemon does the work and uses next to no CPU. A GTK 4 window in the Material 3
-Expressive style lets you shape every zone: patterns, colors, brightness, color correction, and a live
-drawing of your strips where they really are. It survives OpenRGB restarts, USB hiccups and sleep, and
-behaves the same on Hyprland, Sway, niri, GNOME, KDE, XFCE and more.
+It consists of a background daemon, a command line tool and a GTK 4 settings window. The daemon handles
+wallpaper detection, color extraction and sending colors to OpenRGB; the window and the command line only
+change its settings. Each OpenRGB zone can be configured separately (pattern, colors, brightness, color
+correction). Patterns are static; nothing is animated.
+
+> **Note:** Iridia was written mostly with AI tools. It has been tested mainly on CachyOS with Hyprland,
+> an ASUS B550 motherboard and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
+> strip types and desktops are supported in the code but have seen less real-world testing. Bug reports
+> are welcome.
 
 ## Features
 
-**Follows your wallpaper**
+**Wallpaper**
 
 - Finds the wallpaper on Hyprland (hyprpaper, swww/awww, swaybg), Sway, niri, GNOME, KDE, XFCE,
   Cinnamon, MATE, feh, nitrogen, xwallpaper, waypaper, Caelestia and Noctalia, or uses a watched folder.
-- Three color engines (Caelestia's scheme, Material, Pillow) with `auto` picking the best.
-- Remembers your color picks per wallpaper and brings them back when you return to it.
+- Three color extraction methods (Caelestia's scheme, Material Color Utilities, Pillow).
+- Color picks are stored per wallpaper and restored when that wallpaper is used again.
 
-**Every zone, your way**
+**Zones and patterns**
 
 - Patterns: solid, gradient, segments, center out, edges in, alternating, and painted LED by LED.
-- A strip preview with draggable color stops; reverse and mirror.
-- Saved colors, recently used colors, and exact colors that skip correction.
-- One *Everything* card to change all zones at once, with per-zone overrides.
+- Strip preview with adjustable color stops; reverse and mirror.
+- Saved colors, recently used colors, and colors marked as exact (sent without correction).
+- An *Everything* card that changes all zones at once.
 
 **Layout**
 
-- Draw your strips where they are: move, bend, turn, flip, clone, hide, at their real length.
-- Live colors, one dot per LED. Paint, fill and draw gradients right on the drawing.
-- *Find LEDs* lights a single LED on the real strip so you can see where the corners are.
+- A 2D drawing of the strips with their current colors, one dot per LED, scaled by LEDs per metre.
+- Strips can be moved, bent, turned, flipped, cloned and hidden; LEDs can be painted on the drawing.
+- *Find LEDs* lights a single LED on the physical strip, to locate corners.
 
 **Brightness and time**
 
-- LED brightness follows your monitor (DDC/CI), with a range, manual mode and bias-lighting inversion.
-- Night mode caps the brightness between two times; LEDs go off while the PC sleeps.
-- Freeze the current colors whenever you like.
+- Brightness from the monitor (DDC/CI) or set manually, with a range and an inverted mode.
+- Night mode (a brightness cap between two times), LEDs off during suspend.
+- Freeze: ignore wallpaper changes until unfrozen.
 
-**Any strip**
+**Strip types and correction**
 
 - Addressable 5V (WS2812B, SK6812), 12V grouped (WS2811, COB), plain 12V RGB, and RGBW (experimental).
-- Color order test and setting, and a power limit against voltage drop.
-- Color correction: a 48 color palette or calibration profiles you can tune by eye.
+- Color order setting with a test pattern, and an optional power limit.
+- Color correction: a 48 color palette, or calibration profiles that can be edited.
 
-**Control**
+**Other**
 
-- Keybinds: one command turns strips on or off, sets a color or a brightness, and the same key switches
-  back. The app writes the line for Hyprland, Sway, i3, niri, river, KDE, GNOME and sxhkd.
-- Setups: save everything under a name, switch looks, back up, move to another PC.
-- A full command line, `iridia doctor` for diagnosis, and a log viewer in the app.
+- `iridia zone` commands for keyboard shortcuts (on/off, color, brightness; running the same command
+  again reverts it). The window shows the config line for several compositors and desktops.
+- Setups: save and load the whole configuration under a name, with automatic backups.
+- `iridia doctor` for diagnostics, and a log viewer in the window.
 
 ## Install
 

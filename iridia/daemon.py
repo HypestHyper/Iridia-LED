@@ -22,6 +22,7 @@ from iridia.calibration import Profiles, valid_name
 from iridia.palette import Palette
 from iridia.patterns import PatternGenerator
 from iridia import animations
+from iridia import sections as zone_sections
 from iridia.animator import Animator, Job
 from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
@@ -82,6 +83,8 @@ def clean_zone_cfg(z: dict) -> dict:
     out["power_limit"] = _num(z.get("power_limit", 0), 0, 0, 100)          # amps, 0 = no limit
     out["ma_per_led"] = _num(z.get("ma_per_led", 60), 60, 1, 500)          # mA at full white
     out["animation"] = animations.clean(z.get("animation"))               # None: a static pattern
+    out["sections"] = zone_sections.clean(z.get("sections"), out["led_count"])
+    out["led_overrides"] = zone_sections.clean_overrides(z.get("led_overrides"), out["led_count"])
     return out
 
 
@@ -1656,6 +1659,11 @@ class Daemon:
                 final_colors = self.patterns.generate(pattern, colors, led_count, params=params)
             if not final_colors:
                 return
+            if zcfg["sections"] or zcfg["led_overrides"]:
+                if self._strip_type(device_name, zone_name, zcfg) != "single":
+                    final_colors = zone_sections.compose_static(
+                        final_colors, zcfg["sections"], zcfg["led_overrides"],
+                        lambda e: resolve_colors(e, self._extracted_colors), self.patterns)
 
         if not exact:
             brightness = int(round(self._brightness_now(key, zcfg)))
@@ -1794,10 +1802,11 @@ class Daemon:
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
-                    if anim is None:
+                    if anim is None and not (zone_sections.has_effects(zc["sections"])
+                                             and self._strip_type(dev, zn, zc) != "single"):
                         continue
                     n = zc["led_count"]
-                    pts = self._layout_points(key, n) if anim["follow_layout"] else None
+                    pts = self._layout_points(key, n) if anim and anim["follow_layout"] else None
                     plan.append((dev, zn, key, zc, anim, pts))
                     if pts:
                         layout_groups.setdefault((anim["effect"], anim["angle"]), []).append(pts)
@@ -1807,7 +1816,7 @@ class Daemon:
                 xs = [p for pts, sp in items for p in animations.layout_positions(pts, g[1], sp)]
                 extents[g] = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
             for dev, zn, key, zc, anim, pts in plan:
-                ext = extents.get((anim["effect"], anim["angle"])) if pts else None
+                ext = extents.get((anim["effect"], anim["angle"])) if pts and anim else None
                 sig = repr((zc, anim, pts, ext, self._extracted_colors, sorted(self.custom_colors.exact_set()),
                             self.config.color_mode, self._real_zone_size(dev, zn)))
                 old = self._anim_jobs.get(key)
@@ -1864,12 +1873,29 @@ class Daemon:
         base_hex = self.patterns.generate(PatternGenerator.normalize(zc.get("pattern", "solid")), colors_hex, n,
                                           params=params) or [colors_hex[0]] * n
         base = [animations.hex_to_rgb(c) for c in base_hex]
+        import zlib
+        seed = zlib.crc32(key.encode()) ^ self._run_seed
+        # parts of the strip with their own pattern or effect, and single LEDs set by hand
+        parts = None
+        if zc["sections"] or zc["led_overrides"]:
+            parts = zone_sections.Composer(zc["sections"], zc["led_overrides"], n,
+                                           lambda e: resolve_colors(e, self._extracted_colors), seed, self.patterns)
+        if anim is None:
+            # only parts of the strip move: the rest shows its static pattern
+            correct = self._rgb_corrector(zc)
+            real_n = self._real_zone_size(dev, zn) or n
+
+            def still(clock: float):
+                if self._anim_blocked(dev, zn, key):
+                    return None
+                ov = self._overlays.get(key) or {}
+                b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
+                return self._finish_rgb(key, dev, zn, zc, correct(parts.frame(base, clock), b))
+            return Job(key, dev, zn, real_n, still, f"{len(parts.moving)} animated part(s)")
         if pts:
             positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
         else:
             positions = animations.strip_positions(n, bool(params.get("reverse")), bool(params.get("mirror")))
-        import zlib
-        seed = zlib.crc32(key.encode()) ^ self._run_seed
         offset = 0.0 if anim["sync"] else (zlib.crc32(key.encode()) % 10000) / 100.0
         correct = self._rgb_corrector(zc)
         real_n = self._real_zone_size(dev, zn) or n
@@ -1889,6 +1915,8 @@ class Daemon:
                 raw = memo[1]
             else:
                 raw = animations.render(effect, anim, n, t, colors, seed, positions, base, extent)
+            if parts is not None:
+                raw = parts.frame(raw, t)
             ov = self._overlays.get(key) or {}
             b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
             return self._finish_rgb(key, dev, zn, zc, correct(raw, b))
@@ -2157,6 +2185,8 @@ class Daemon:
             return self._cmd_freeze(req)
         if cmd == "set_zone_strip":
             return self._cmd_set_zone_strip(req)
+        if cmd == "set_zone_sections":
+            return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":
             return self._cmd_set_zone_animation(req)
         if cmd == "animations":
@@ -2374,6 +2404,7 @@ class Daemon:
         # through the same resolver the zone-scoped commands use so an
         # empty zone correctly falls back to the device-level field
         # instead of being a no-op that reports success.
+        self._rescale_sections(name, zone, count)
         self.config.set(self._zone_config_path(name, zone, "led_count"), count)
         self._needs_update = True
         return {"ok": True}
@@ -2712,7 +2743,59 @@ class Daemon:
         count = req.get("count")
         if dev not in self.config.devices:
             return {"ok": False, "error": f"device '{dev}' not found"}
+        self._rescale_sections(dev, zone, count)
         self.config.set(self._zone_config_path(dev, zone, "led_count"), count)
+        self._needs_update = True
+        return {"ok": True}
+
+    def _rescale_sections(self, dev: str, zone: str, count) -> None:
+        """A new LED count moves a split strip's dividers along with it."""
+        zc = self._zone_cfg(dev, zone)
+        if not (zc.get("sections") or zc.get("led_overrides")):
+            return
+        try:
+            new = int(count)
+        except (TypeError, ValueError):
+            return
+        old = clean_zone_cfg(zc)
+        secs, ov = zone_sections.rescale(old["sections"], old["led_overrides"], old["led_count"], new)
+        self.config.set(self._zone_config_path(dev, zone, "sections"), secs)
+        self.config.set(self._zone_config_path(dev, zone, "led_overrides"), zone_sections.overrides_for_config(ov))
+
+    def _cmd_set_zone_sections(self, req: dict) -> dict:
+        """sections: the zone's parts (see iridia/sections.py), [] to join them again; led_overrides:
+        {LED number: hex} replacing every single LED set, or set_led: [LED, hex or None] for one."""
+        dev, zone = req.get("device"), req.get("zone")
+        if dev not in self.config.devices:
+            return {"ok": False, "error": f"device '{dev}' not found"}
+        n = clean_zone_cfg(self._zone_cfg(dev, zone))["led_count"]
+        if "sections" in req:
+            if not isinstance(req["sections"], list):
+                return {"ok": False, "error": "sections must be a list"}
+            self.config.set(self._zone_config_path(dev, zone, "sections"), zone_sections.clean(req["sections"], n))
+        ov = None
+        if "led_overrides" in req:
+            if not isinstance(req["led_overrides"], dict):
+                return {"ok": False, "error": "led_overrides must be an object"}
+            ov = zone_sections.clean_overrides(req["led_overrides"], n)
+        if "set_led" in req:
+            try:
+                i, h = int(req["set_led"][0]), req["set_led"][1]
+            except (TypeError, ValueError, IndexError, KeyError):
+                return {"ok": False, "error": "set_led must be [LED, color or null]"}
+            if not 0 <= i < n:
+                return {"ok": False, "error": f"LED {i + 1} is past the end of the strip ({n} LEDs)"}
+            if h is not None and not normalize_hex(h):
+                return {"ok": False, "error": f"not a color: {h!r}"}
+            ov = dict(zone_sections.clean_overrides(self._zone_cfg(dev, zone).get("led_overrides"), n)
+                      if ov is None else ov)
+            if h is None:
+                ov.pop(i, None)
+            else:
+                ov[i] = normalize_hex(h)
+        if ov is not None:
+            self.config.set(self._zone_config_path(dev, zone, "led_overrides"), zone_sections.overrides_for_config(ov))
+        self._last_sent = {}
         self._needs_update = True
         return {"ok": True}
 

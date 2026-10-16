@@ -409,3 +409,54 @@ def test_brightness_glides_instead_of_jumping(d):
     assert 10 < mid < 90
     _t.sleep(d.GLIDE_SEC)
     assert d._brightness_now("Strip|", zc) == 0
+
+
+# ----------------------------------------------------------------- sections and single LEDs
+
+def test_sections_and_single_leds_on_a_static_strip(d):
+    d.config.set(("devices", "Strip", "led_count"), 8)
+    r = _cmd(d, "set_zone_sections", device="Strip", zone="",
+             sections=[{"start": 3, "type": "pattern", "pattern": "solid", "colors": ["0000ff"]},
+                       {"start": 5, "type": "off"}, {"start": 6, "type": "same"}],
+             led_overrides={"7": "ffffff", "40": "ffffff"})
+    assert r["ok"]
+    assert d.config.get(("devices", "Strip", "led_overrides")) == {"7": "ffffff"}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 3 + ["0000ff"] * 2 + ["000000", "ff0000", "ffffff"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[0, "00ff00"])["ok"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[7, None])["ok"]
+    assert not _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[8, "00ff00"])["ok"]
+    assert not _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[1, "nope"])["ok"]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] + ["ff0000"] * 2 + ["0000ff"] * 2 + ["000000", "ff0000", "ff0000"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[])["ok"]   # joined again
+    assert d.config.get(("devices", "Strip", "sections")) == []
+    # a new LED count moves the dividers with it
+    _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[{"start": 4, "type": "off"}])
+    _cmd(d, "set_zone_led_count", device="Strip", zone="", count=16)
+    assert [s["start"] for s in d.config.get(("devices", "Strip", "sections"))] == [0, 8]
+
+
+def test_an_effect_part_animates_a_static_strip(d):
+    d.config.set(("devices", "Strip", "led_count"), 6)
+    _cmd(d, "set_zone_sections", device="Strip", zone="",
+         sections=[{"start": 2, "type": "effect", "animation": {"effect": "rainbow"}, "colors": ["00ff00"]},
+                   {"start": 4, "type": "same"}])
+    jobs = _jobs(d)
+    assert "Strip|" in jobs
+    a, b = jobs["Strip|"].frame(0.0), jobs["Strip|"].frame(1.0)
+    assert a[:2] == a[4:] == [(255, 0, 0)] * 2 and a[2:4] != b[2:4]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") is None                  # the animator sends it
+    _cmd(d, "animations", action="pause")
+    d._update_all_devices()                                 # paused: the effect part shows its first color
+    assert d.openrgb.last("Strip") == ["ff0000"] * 2 + ["00ff00"] * 2 + ["ff0000"] * 2
+
+
+def test_an_effect_strip_keeps_its_static_parts(d):
+    d.config.set(("devices", "Strip", "led_count"), 6)
+    _animate(d, effect="rainbow")
+    _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[{"start": 3, "type": "off"}],
+         led_overrides={"0": "0000ff"})
+    f = _jobs(d)["Strip|"].frame(2.0)
+    assert f[0] == (0, 0, 255) and f[3:] == [(0, 0, 0)] * 3 and f[1] != (0, 0, 0)

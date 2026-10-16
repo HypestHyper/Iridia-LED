@@ -130,6 +130,11 @@ class Client:
         power_limit (A, 0 = none), ma_per_led."""
         return self._ipc.send(dict(fields, cmd="set_zone_strip", device=device, zone=zone))
 
+    def set_zone_sections(self, device: str, zone: str, **fields) -> dict:
+        """sections (a list, [] joins the strip again), led_overrides ({LED: hex}) and/or
+        set_led ([LED, hex or None]); see iridia/sections.py."""
+        return self._ipc.send(dict(fields, cmd="set_zone_sections", device=device, zone=zone))
+
     def test_colors(self, device: str, zone: str, off: bool = False) -> dict:
         return self._ipc.send({"cmd": "test_colors", "device": device, "zone": zone, "off": off})
 

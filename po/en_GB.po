@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-16 23:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -21,6 +21,18 @@ msgstr ""
 #, python-brace-format
 msgid "Iridia {version}"
 msgstr "Iridia {version}"
+
+msgid "Automatic"
+msgstr "Automatic"
+
+msgid "Compact"
+msgstr "Compact"
+
+msgid "Default"
+msgstr "Default"
+
+msgid "Large"
+msgstr "Large"
 
 msgid "Target"
 msgstr "Target"
@@ -291,6 +303,16 @@ msgstr "Google Sans Flex (built in)"
 
 msgid "System font"
 msgstr "System font"
+
+msgid "Size"
+msgstr "Size"
+
+msgid ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
+msgstr ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
 
 msgid "Reduce motion"
 msgstr "Reduce motion"
@@ -2085,9 +2107,6 @@ msgstr "Alternating"
 msgid "Painted"
 msgstr "Painted"
 
-msgid "Automatic"
-msgstr "Automatic"
-
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"
 
@@ -2160,6 +2179,9 @@ msgstr "Reverse"
 
 msgid "Mirror"
 msgstr "Mirror"
+
+msgid "Space evenly"
+msgstr "Space evenly"
 
 msgid "Follow monitor brightness"
 msgstr "Follow monitor brightness"
@@ -2259,6 +2281,22 @@ msgstr "Colours in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this colour"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} LEDs: {sizes}"
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The parts are {n} LED apart. Space evenly makes them match."
+msgstr[1] "The parts are {n} LEDs apart. Space evenly makes them match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgstr[1] "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

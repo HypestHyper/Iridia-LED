@@ -8,7 +8,7 @@ A **setup** is everything Iridia knows, saved under a name:
 - calibration profiles and the palette
 - your color picks for each wallpaper
 - your saved colors (and which ones are exact)
-- window preferences (font, reduce motion)
+- window preferences (font, size, reduce motion)
 
 Use setups to switch between looks ("Gaming", "Work"), to experiment safely, or to move your settings to
 another PC.

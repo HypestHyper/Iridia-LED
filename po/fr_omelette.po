@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-16 23:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -21,6 +21,18 @@ msgstr ""
 #, python-brace-format
 msgid "Iridia {version}"
 msgstr "Café"
+
+msgid "Automatic"
+msgstr "Bisou"
+
+msgid "Compact"
+msgstr "Petit pois"
+
+msgid "Default"
+msgstr "Baguette"
+
+msgid "Large"
+msgstr "Gros fromage"
 
 msgid "Target"
 msgstr "Fromage"
@@ -284,6 +296,14 @@ msgstr "Il était une fois un croissant"
 
 msgid "System font"
 msgstr "Bonsoir"
+
+msgid "Size"
+msgstr "Taille"
+
+msgid ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
+msgstr "Le croissant est petit. Ctrl+moins et Ctrl+plus, oh là là. Ctrl+0, bonsoir."
 
 msgid "Reduce motion"
 msgstr "Bof"
@@ -1982,9 +2002,6 @@ msgstr "Oh là là"
 msgid "Painted"
 msgstr "Santé !"
 
-msgid "Automatic"
-msgstr "Bisou"
-
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Je suis une baguette"
 
@@ -2049,6 +2066,9 @@ msgstr "Éclair"
 
 msgid "Mirror"
 msgstr "Ratatouille"
+
+msgid "Space evenly"
+msgstr "Égalité"
 
 msgid "Follow monitor brightness"
 msgstr "La crêpe est tombée par terre"
@@ -2142,6 +2162,22 @@ msgstr "Je ne sais quoi"
 
 msgid "Change this color"
 msgstr "Ceci n'est pas une pipe"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} bisous : {sizes}"
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "Il manque {n} bisou. Égalité, fraternité."
+msgstr[1] "Il manque {n} bisous. Égalité, fraternité."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} bisous pour {parts} amis. Le premier mange un bisou de plus."
+msgstr[1] "{leds} bisous pour {parts} amis. Les {extra} premiers mangent un bisou de plus."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

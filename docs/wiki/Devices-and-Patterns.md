@@ -36,6 +36,11 @@ Click **Edit layout** to drag the color stops along the preview (or drag the dia
 tab). **Reverse** flips the pattern end for end; **Mirror** draws it on the first half and mirrors it
 onto the second, for a symmetric look.
 
+While you edit a **Segments** layout, Iridia shows how many LEDs each color gets ("80 LEDs: 27 + 27 +
+26"). **Space evenly** splits them as evenly as whole LEDs allow; when the LED count doesn't divide
+evenly, the first parts get one LED more, and Iridia says so. When the parts are only 1 or 2 LEDs apart
+(easy to miss on the strip), it points that out too.
+
 ## Choosing colors
 
 - **Wallpaper colors** are the colors Iridia found in your current wallpaper, the most important first.

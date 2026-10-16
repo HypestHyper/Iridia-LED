@@ -7,7 +7,7 @@ from gi.repository import GLib, Gtk
 from iridia.i18n import _, ngettext, pgettext  # noqa: F401
 from iridia import animations
 from iridia.colors import resolve_colors
-from iridia.patterns import PatternGenerator
+from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
 from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
 from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
@@ -292,6 +292,15 @@ class ZoneCard(Gtk.Box):
         self._layout_row.append(self._rev_row)
         self._layout_row.append(self._mir_row)
         d.append(self._layout_row)
+        # segments: how many LEDs each colour gets, and a button to split them evenly
+        self._split_row = hbox(10)
+        self._split_lbl = label("", ("small", "dim"), wrap=True)
+        self._split_lbl.set_hexpand(True)
+        self._split_btn = button(_("Space evenly"), "linear_scale", "tonal small", self._space_evenly)
+        self._split_row.append(self._split_lbl)
+        self._split_row.append(self._split_btn)
+        self._split_warn = label("", ("small", "warn-text"), wrap=True)
+        d.append(vbox(2, self._split_row, self._split_warn))
         self._chips = hbox(4)
         d.append(self._chips)
         self._paint_bar = hbox(6)
@@ -562,6 +571,7 @@ class ZoneCard(Gtk.Box):
             self._layout_open = False
             editable = False
         self._strip.set_layout(self._layout_open and editable, self._stops_for_edit() if editable else [])
+        self._update_split()
         self._rebuild_chips()
         self._paint_box.set_visible(painted)
         self._strip.base_color = self._current_colors()[0]
@@ -607,6 +617,44 @@ class ZoneCard(Gtk.Box):
     def _on_stops(self, stops):
         self._params["stops"] = stops
         self._save_params({"stops": stops})
+        self._update_split()
+
+    def _split_leds(self) -> int:
+        """LEDs the segments are spread over: half the strip when it's mirrored."""
+        n = self._count()
+        return (n + 1) // 2 if self._params.get("mirror") and n > 1 else n
+
+    def _update_split(self):
+        cols = len(self._current_colors())
+        show = self._layout_open and self._anim is None and self._pattern_key() == "segments" and cols > 1
+        self._split_row.set_visible(show)
+        self._split_warn.set_visible(False)
+        if not show:
+            return
+        leds = self._split_leds()
+        sizes = segment_sizes(self._stops_for_edit(), cols, leds)
+        even = segment_sizes(led_even_boundaries(cols, leds), cols, leds)
+        self._split_lbl.set_text(_("{leds} LEDs: {sizes}").format(leds=leds, sizes=" + ".join(map(str, sizes))))
+        self._split_btn.set_sensitive(sizes != even)
+        spread = max(sizes) - min(sizes)
+        warn = ""
+        if sizes != even and 0 < spread <= 2:
+            # close enough to look even, but not: easy to miss on the strip itself
+            warn = ngettext("The parts are {n} LED apart. Space evenly makes them match.",
+                            "The parts are {n} LEDs apart. Space evenly makes them match.", spread).format(n=spread)
+        elif sizes == even and leds % cols:
+            warn = ngettext("{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED.",
+                            "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED.",
+                            leds % cols).format(leds=leds, parts=cols, extra=leds % cols)
+        self._split_warn.set_text(warn)
+        self._split_warn.set_visible(bool(warn))
+
+    def _space_evenly(self):
+        stops = led_even_boundaries(len(self._current_colors()), self._split_leds())
+        self._strip.set_layout(True, stops)
+        self._strip.queue_draw()
+        self._on_stops(stops)
+        self._update_preview()
 
     def _on_paint(self, paint):
         self._params["paint"] = paint

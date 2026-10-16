@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **Window size.** Settings, Appearance, Size: Compact, Default, Large or Automatic. Default is about
+  10% smaller than before and Large is the old size; Automatic is Compact in a window narrower than
+  900 pixels. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to Automatic. Text shrinks less
+  than the rest and never below 10 pixels.
+- The window buttons (minimize, maximize, close) are flat icons now, with a round highlight under the
+  pointer; close turns red.
+- **Space evenly** for the Segments pattern: the layout editor shows how many LEDs each color gets,
+  splits them evenly in whole LEDs, says when the count doesn't divide evenly, and warns when parts are
+  only 1 or 2 LEDs apart.
+
 ## 1.2.1
 
 **Iridia's own OpenRGB client.** With OpenRGB 1.0, Iridia now talks to OpenRGB entirely with SDK

@@ -14,7 +14,7 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 | `calibration/*.json` | Calibration profiles, one file each (`WS2812B.json`, `Neutral.json`, your own) |
 | `custom_colors.json` | Your saved colors, and which colors are exact |
 | `wallpaper_colors.json` | Extracted colors per wallpaper (a cache) and your color picks per wallpaper and zone |
-| `gui.json` | Window preferences: font, reduce motion, language, recently used colors |
+| `gui.json` | Window preferences: font, size, reduce motion, language, recently used colors |
 | `setups/` | Saved setups; automatic backups in `setups/.backups/` |
 | `detection_cache.json` | Which wallpaper tool was found last |
 
@@ -23,6 +23,12 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 `"language"` picks the window's language. Leave it out (or set `""`) for the default, British spelling
 (`"en_GB"`); `"en"` gives American English. The same choice is in Settings, Appearance, Language; it
 applies when the window restarts. The command line and the log always use American spelling.
+
+### gui.json: ui_size
+
+`"ui_size"` is the window's size: `"auto"` (default: `"default"`, or `"compact"` in a window narrower
+than 900 pixels), `"compact"`, `"default"` or `"large"`. Settings, Appearance, Size, and Ctrl+minus,
+Ctrl+plus and Ctrl+0 in the window, change it.
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
 `$XDG_RUNTIME_DIR/iridia-UID.sock`.

@@ -11,7 +11,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_foreign("cairo")
-from gi.repository import Gio, GLib, Gtk  # noqa: E402
+from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
 from iridia.i18n import _, ngettext  # noqa: F401
 from iridia import assets, diagnostics, i18n, theme  # noqa: E402
@@ -22,6 +22,7 @@ from iridia.ui import dialogs, fonts, widgets  # noqa: E402
 from iridia.ui.calibration_editor import ProfileEditor  # noqa: E402
 from iridia.ui.colorpicker import pick_color as _pick_color  # noqa: E402
 from iridia.ui.layout_tab import LayoutTab  # noqa: E402
+from iridia.ui import style as ui_style  # noqa: E402
 from iridia.ui.style import Style  # noqa: E402
 from iridia.ui.widgets import (Animator, Chip, Dropdown, Group, LoadingIndicator, QuickColors, Snackbar, Spin, Swatch,  # noqa: E402
                                WavyBar, button, card, divider, hbox, icon, label, rgb, section, set_button_text,
@@ -166,9 +167,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._palette = None
         self._profiles = None
 
-        widgets.STYLE = Style(self._seed, self.prefs.get("font", ""), bool(self.prefs.get("reduce_motion", False)))
+        self._narrow = False
+        widgets.STYLE = Style(self._seed, self.prefs.get("font", ""), bool(self.prefs.get("reduce_motion", False)),
+                              self._ui_scale())
         dialogs.PAUSE = self.pause
         self._build()
+        keys = Gtk.EventControllerKey()
+        keys.connect("key-pressed", self._on_size_key)
+        self.add_controller(keys)
         for ctl in (Gtk.EventControllerMotion(), Gtk.EventControllerKey()):
             ctl.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
             if isinstance(ctl, Gtk.EventControllerMotion):
@@ -182,6 +188,55 @@ class IridiaWindow(Gtk.ApplicationWindow):
     # ============================================================ helpers for children
     def note_activity(self):
         self._last_activity = time.time()
+
+    # ---- window size setting (Settings, Appearance; Ctrl+minus, Ctrl+plus, Ctrl+0)
+    def _ui_size(self) -> str:
+        v = self.prefs.get("ui_size", "auto")
+        return v if v in ui_style.SIZES else "auto"
+
+    def _ui_scale(self) -> float:
+        size = self._ui_size()
+        if size == "auto":
+            size = "compact" if self._narrow else "default"
+        return ui_style.SIZES[size]
+
+    def _apply_ui_size(self, size: str):
+        self.prefs["ui_size"] = size
+        save_prefs(self.prefs)
+        widgets.STYLE.set_scale(self._ui_scale())
+        dd = getattr(self, "_size_dd", None)
+        if dd is not None:
+            dd.set_value(self._size_labels()[size])
+
+    def _size_labels(self) -> dict:
+        return {"auto": _("Automatic"), "compact": _("Compact"), "default": _("Default"), "large": _("Large")}
+
+    def _on_size_key(self, _ctl, keyval, _code, state):
+        if not state & Gdk.ModifierType.CONTROL_MASK:
+            return False
+        name = Gdk.keyval_name(keyval) or ""
+        order = ["compact", "default", "large"]
+        cur = self._ui_size()
+        if cur == "auto":
+            cur = "compact" if self._narrow else "default"
+        if name in ("plus", "equal", "KP_Add"):
+            self._apply_ui_size(order[min(len(order) - 1, order.index(cur) + 1)])
+        elif name in ("minus", "KP_Subtract"):
+            self._apply_ui_size(order[max(0, order.index(cur) - 1)])
+        elif name in ("0", "KP_0"):
+            self._apply_ui_size("auto")
+        else:
+            return False
+        return True
+
+    def do_size_allocate(self, width, height, baseline):
+        Gtk.ApplicationWindow.do_size_allocate(self, width, height, baseline)
+        # some room either side, so a window right at the edge doesn't flip back and forth
+        narrow = width < ui_style.AUTO_COMPACT_BELOW if not self._narrow else width < ui_style.AUTO_COMPACT_BELOW + 60
+        if narrow != self._narrow:
+            self._narrow = narrow
+            if self._ui_size() == "auto":
+                GLib.idle_add(lambda: widgets.STYLE.set_scale(self._ui_scale()) and False)
 
     def pause(self, d: int):
         self._pause_n = max(0, self._pause_n + d)
@@ -721,6 +776,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
         cur_label = _("System font") if cur_font == "system" else (cur_font or _("Google Sans Flex (built in)"))
         r.append(Dropdown(fams, cur_label, self._set_font))
         c.append(r)
+        r = hbox(10)
+        r.append(label(_("Size"), ("body", "dim")))
+        sizes = self._size_labels()
+        self._size_dd = Dropdown(list(sizes.values()), sizes[self._ui_size()],
+                                 lambda v: self._apply_ui_size(next(k for k, n in sizes.items() if n == v)))
+        r.append(self._size_dd)
+        c.append(r)
+        c.append(label(_("Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, "
+                         "Ctrl+0 goes back to Automatic."), ("small", "faint")))
         r = hbox(10)
         # Never translated, so this row can be found again from any language.
         r.append(icon("language", classes=("dim",)))

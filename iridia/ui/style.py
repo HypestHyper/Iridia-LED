@@ -5,6 +5,8 @@ colour only swaps the CSS (optionally blended over a few frames), so the window
 recolours in place without rebuilding anything.
 """
 
+import re
+
 from gi.repository import Gdk, GLib, Gtk
 
 from iridia import theme
@@ -19,8 +21,14 @@ window.iridia, window.iridia-dialog {{ background: {SURFACE_DIM}; color: {ON_SUR
 window.iridia-dialog {{ background: {SURFACE_CONTAINER}; }}
 headerbar {{ background: {SURFACE_DIM}; box-shadow: none; border: none; min-height: 64px; padding: 0 12px; }}
 headerbar > windowhandle > box button.small {{ margin-top: 12px; margin-bottom: 12px; }}
-headerbar windowcontrols button {{ min-height: 28px; min-width: 28px; padding: 2px; background: {SURFACE_CONTAINER_HIGH};
-  color: {ON_SURFACE_VARIANT}; }}
+/* window buttons: flat icons, a round highlight only under the pointer; close turns red */
+headerbar windowcontrols button {{ min-height: 28px; min-width: 28px; padding: 0; margin: 0 2px; border-radius: 14px;
+  background: transparent; color: {ON_SURFACE_VARIANT}; }}
+headerbar windowcontrols button:hover {{ background: alpha({ON_SURFACE}, 0.10); color: {ON_SURFACE}; }}
+headerbar windowcontrols button:active {{ background: alpha({ON_SURFACE}, 0.16); border-radius: 14px; }}
+headerbar windowcontrols button.close:hover {{ background: {ERROR_HOVER}; color: #ffffff; }}
+headerbar windowcontrols button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
+headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
 .app-title {{ font-size: 24px; font-weight: 700; color: {ON_SURFACE}; }}
 .display {{ font-size: 28px; font-weight: 700; }}
 .title {{ font-size: 20px; font-weight: 700; }}
@@ -170,14 +178,37 @@ tooltip * {{ color: {INVERSE_ON_SURFACE}; }}
 .snackbar label {{ color: {INVERSE_ON_SURFACE}; }}
 """
 
+# Window size settings, as a factor on the sizes written above ("large" is how 1.2 looked).
+SIZES = {"compact": 0.8, "default": 0.9, "large": 1.0}
+AUTO_COMPACT_BELOW = 900        # "auto" is default size, compact in a window narrower than this
+_PX = re.compile(r"(font-size: )?(?<![\w.])(\d+(?:\.\d+)?)px")
+
+
+def scale_px(css: str, factor: float) -> str:
+    """Scale every size in a stylesheet. Hairlines (2px and less) and 999px pills stay as they are, and
+    text shrinks less than the rest (never below 10px) so it stays readable."""
+    if factor == 1:
+        return css
+
+    def one(m):
+        font, v = m.group(1), float(m.group(2))
+        if v <= 2 or v >= 999:
+            return m.group(0)
+        if font:
+            return f"{font}{max(min(v, 10), round(v * (1 - (1 - factor) * 0.6), 1)):g}px"
+        return f"{round(v * factor, 1):g}px"
+    return _PX.sub(one, css)
+
+
 MOTION_OFF = """
 * { transition: none; }
 """
 
 
 class Style:
-    def __init__(self, seed: str, font: str = "", reduce_motion: bool = False):
+    def __init__(self, seed: str, font: str = "", reduce_motion: bool = False, scale: float = SIZES["default"]):
         self.font = font
+        self.scale = scale
         self.reduce_motion = reduce_motion
         self.palette = theme.palette_for(seed)
         self._provider = Gtk.CssProvider()
@@ -196,7 +227,12 @@ class Style:
 
     def _load(self, pal: dict):
         css = CSS.format(FONT=self.family(), ICON=fonts.ICON_FAMILY, EASE=EASE, EASE_STD=EASE_STD, **pal)
-        load_css(self._provider, css)
+        load_css(self._provider, scale_px(css, self.scale))
+
+    def set_scale(self, scale: float):
+        if scale != self.scale:
+            self.scale = scale
+            self._load(self.palette)
 
     def set_font(self, font: str):
         self.font = font

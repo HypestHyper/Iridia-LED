@@ -460,3 +460,28 @@ def test_an_effect_strip_keeps_its_static_parts(d):
          led_overrides={"0": "0000ff"})
     f = _jobs(d)["Strip|"].frame(2.0)
     assert f[0] == (0, 0, 255) and f[3:] == [(0, 0, 0)] * 3 and f[1] != (0, 0, 0)
+
+
+def test_split_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    d.config.set(("devices", "Strip", "led_count"), 10)
+
+    def run(*words):
+        return cli.main(["split", "Strip", *words])
+    assert run("even", "3") == 0
+    assert "3 parts, 10 LEDs (4 + 3 + 3)" in capsys.readouterr().out
+    assert run("part", "2", "pattern", "gradient", "ff0000", "1") == 0
+    assert run("part", "3", "off") == 0
+    assert run("led", "1", "ffffff") == 0 and run("led", "2", "off") == 0
+    out = capsys.readouterr().out
+    assert "2. LEDs 5-7: pattern gradient, colors ff0000 0" in out and "3. LEDs 8-10: off" in out
+    assert "Single LEDs: 1=ffffff, 2=off" in out
+    assert run("at", "3") == 0 and "2 parts" in capsys.readouterr().out
+    assert run("part", "9", "off") == 2 and run("led", "11", "ffffff") == 1
+    assert run("join") == 0 and run("clear-leds") == 0
+    assert "one part (10 LEDs), not split" in capsys.readouterr().out

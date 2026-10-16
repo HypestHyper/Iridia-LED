@@ -173,10 +173,11 @@ class Dial(Gtk.DrawingArea):
 class EffectControls(Gtk.Box):
     """The settings of one effect. on_change(params) fires about 100 ms after the last change."""
 
-    def __init__(self, on_change: Callable[[dict], None], show_sync: bool = False):
+    def __init__(self, on_change: Callable[[dict], None], show_sync: bool = False, show_layout: bool = True):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self._on_change = on_change
         self._show_sync = show_sync
+        self._show_layout = show_layout
         self.params: Dict = {}
         self._job = None
         self._effect = None
@@ -247,7 +248,7 @@ class EffectControls(Gtk.Box):
                 t, u, st = _LABELS[key]
                 self._slider(key, t, s, u, st)
         # moving effects can run through the room, following the Layout tab
-        if e in ("comet", "fill", "rainbow", "rainbow_vomit", "embers"):
+        if self._show_layout and e in ("comet", "fill", "rainbow", "rainbow_vomit", "embers"):
             r = hbox(14)
             row, sw = switch_row(_LABELS["follow_layout"][0], bool(p["follow_layout"]), self._on_follow)
             self._widgets["follow_layout"] = sw

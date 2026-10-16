@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:31+0000\n"
+"POT-Creation-Date: 2026-10-16 23:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2056,6 +2056,83 @@ msgstr ""
 "A name for this twin of {strip}. It appears only on the Layout tab. Leave it empty to use the "
 "strip's own name."
 
+msgid "Same as the strip"
+msgstr "As the rest of the strip"
+
+msgid "Its own pattern"
+msgstr "A pattern of its own"
+
+msgid "Its own effect"
+msgstr "An effect of its own"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Advanced: apportion this strip, attend to single lamps"
+
+msgid "Add divider"
+msgstr "Introduce a divider"
+
+msgid "Space evenly"
+msgstr "Apportion fairly"
+
+msgid "Single LEDs"
+msgstr "Individual lamps"
+
+msgid "Set LEDs"
+msgstr "Attend to lamps"
+
+msgid "Color for single LEDs"
+msgstr "Colour for individual lamps"
+
+msgid "Clear all"
+msgstr "Dismiss all"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr ""
+"Choose Attend to lamps, then click or drag across the lamps above. Such a lamp shows its colour "
+"above all else, rather like a fixed lamp between two bars."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Remove this portion (it joins the one before it)"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Lamps {first} to {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Lamp {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} lamps: {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Introduce a divider to apportion this strip."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The portions differ by {n} lamp. Apportion fairly to make them match."
+msgstr[1] "The portions differ by {n} lamps. Apportion fairly to make them match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} lamps do not divide into {parts} evenly, so the first portion receives 1 more lamp."
+msgstr[1] "{leds} lamps do not divide into {parts} evenly, so the first {extra} portions receive 1 more lamp."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} lamp attended to"
+msgstr[1] "{n} lamps attended to"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Portion {n}"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click for the first colour, right-click for the second"
@@ -2202,9 +2279,6 @@ msgstr "Reverse"
 msgid "Mirror"
 msgstr "Mirror"
 
-msgid "Space evenly"
-msgstr "Apportion fairly"
-
 msgid "Follow monitor brightness"
 msgstr "Defer to the looking-glass's brightness"
 
@@ -2303,22 +2377,6 @@ msgstr "Colours in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this colour"
-
-#, python-brace-format
-msgid "{leds} LEDs: {sizes}"
-msgstr "{leds} lamps: {sizes}"
-
-#, python-brace-format
-msgid "The parts are {n} LED apart. Space evenly makes them match."
-msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
-msgstr[0] "The portions differ by {n} lamp. Apportion fairly to make them match."
-msgstr[1] "The portions differ by {n} lamps. Apportion fairly to make them match."
-
-#, python-brace-format
-msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
-msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
-msgstr[0] "{leds} lamps do not divide into {parts} evenly, so the first portion receives 1 more lamp."
-msgstr[1] "{leds} lamps do not divide into {parts} evenly, so the first {extra} portions receive 1 more lamp."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

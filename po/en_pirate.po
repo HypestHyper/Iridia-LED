@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:31+0000\n"
+"POT-Creation-Date: 2026-10-16 23:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -2038,6 +2038,83 @@ msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
 
+msgid "Same as the strip"
+msgstr "Same as the rest o' the ship"
+
+msgid "Its own pattern"
+msgstr "Its own pattern"
+
+msgid "Its own effect"
+msgstr "Its own jig"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Advanced: carve up this strip, rig single lanterns"
+
+msgid "Add divider"
+msgstr "Drop a divider"
+
+msgid "Space evenly"
+msgstr "Share the plunder"
+
+msgid "Single LEDs"
+msgstr "Single lanterns"
+
+msgid "Set LEDs"
+msgstr "Rig lanterns"
+
+msgid "Color for single LEDs"
+msgstr "Color fer single lanterns"
+
+msgid "Clear all"
+msgstr "Sweep 'em all"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr ""
+"Rig lanterns, then click or drag over the lanterns above. A rigged lantern shows its color over "
+"all else, like a fixed lantern between two bars."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Scuttle this share (it joins the one afore it)"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Lanterns {first} to {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Lantern {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} lanterns: {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Drop a divider to carve this strip into shares."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The shares be {n} lantern apart. Share the plunder to make 'em match."
+msgstr[1] "The shares be {n} lanterns apart. Share the plunder to make 'em match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} lanterns don't split {parts} ways fair, so the first share gets 1 more lantern."
+msgstr[1] "{leds} lanterns don't split {parts} ways fair, so the first {extra} shares get 1 more lantern."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} lantern rigged"
+msgstr[1] "{n} lanterns rigged"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Share {n}"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click fer the first color, right-click fer the second"
@@ -2182,9 +2259,6 @@ msgstr "Reverse"
 msgid "Mirror"
 msgstr "Mirror"
 
-msgid "Space evenly"
-msgstr "Share the plunder"
-
 msgid "Follow monitor brightness"
 msgstr "Follow the spyglass brightness"
 
@@ -2283,22 +2357,6 @@ msgstr "Colors in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this color"
-
-#, python-brace-format
-msgid "{leds} LEDs: {sizes}"
-msgstr "{leds} lanterns: {sizes}"
-
-#, python-brace-format
-msgid "The parts are {n} LED apart. Space evenly makes them match."
-msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
-msgstr[0] "The shares be {n} lantern apart. Share the plunder to make 'em match."
-msgstr[1] "The shares be {n} lanterns apart. Share the plunder to make 'em match."
-
-#, python-brace-format
-msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
-msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
-msgstr[0] "{leds} lanterns don't split {parts} ways fair, so the first share gets 1 more lantern."
-msgstr[1] "{leds} lanterns don't split {parts} ways fair, so the first {extra} shares get 1 more lantern."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

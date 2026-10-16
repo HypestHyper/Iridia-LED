@@ -10,6 +10,7 @@ from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
 from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
+from iridia.ui.sections_panel import SectionsPanel
 from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
                                button, card, hbox, icon, label, set_button_text, switch_row, vbox)
 
@@ -153,6 +154,7 @@ class ZoneCard(Gtk.Box):
         self._anim = animations.clean(zone_cfg.get("animation"))
         self._last_effect = self._anim["effect"] if self._anim else "breathing"
         self._preview_last = None
+        self._sections = None
         self._build_header(expanded)
         self._build_details()
         self._refresh_summary()
@@ -308,6 +310,9 @@ class ZoneCard(Gtk.Box):
         if not self.global_mode:
             self._build_paint_bar()
         d.append(self._paint_box)
+        if not self.global_mode:
+            self._sections = SectionsPanel(self)
+            d.append(self._sections)
 
         # brightness
         br = card(inner=True)
@@ -485,8 +490,9 @@ class ZoneCard(Gtk.Box):
         if need:
             self._rgbw_lbl.set_label(_('For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark.').format(n=self.cfg.get('led_count', 0), need=need))
         # one-colour strips: no patterns, painting or stops
-        for w in (self._pattern_lbl, self._pattern, self._strip, self._count_btn):
-            w.set_visible(not single)
+        for w in (self._pattern_lbl, self._pattern, self._strip, self._count_btn, self._sections):
+            if w is not None:
+                w.set_visible(not single)
         self._update_preview()
         self._apply_color_limit()
 
@@ -553,8 +559,13 @@ class ZoneCard(Gtk.Box):
         if self._anim is not None:
             self._ensure_preview()
         painted = pat == "paint" and not self.global_mode
-        self._strip.set_state(count, self.patterns.generate(pat, self._current_colors(), count, params=self._params),
-                              pat)
+        base = self.patterns.generate(pat, self._current_colors(), count, params=self._params)
+        shown = base
+        if self._sections is not None:
+            if self._sections.active() and not self._layout_open and not painted:
+                shown = self._sections.compose(base)
+            self._sections.refresh(base, shown)
+        self._strip.set_state(count, shown, pat)
         editable = pat in PatternGenerator.EDITABLE and PatternGenerator.handle_count(pat, len(self._current_colors())) > 0
         can_rev = pat in ("gradient", "segments", "alternating")
         self._layout_row.set_visible(editable or can_rev)
@@ -723,6 +734,8 @@ class ZoneCard(Gtk.Box):
         count = int(v)
         self._call(self.client.set_zone_led_count, self.device_name, self.zone_name, count)
         self.cfg = dict(self.cfg, led_count=count)
+        if self._sections is not None:
+            self._sections.rescale(count)
         self._refresh_summary()
         self._update_preview()
 
@@ -754,7 +767,12 @@ class ZoneCard(Gtk.Box):
         self._update_preview()
 
     def _preview_wanted(self) -> bool:
-        return self._anim is not None and self.expanded and self.get_mapped()
+        moving = self._anim is not None or (self._sections is not None and self._sections.animated())
+        return moving and self.expanded and self.get_mapped()
+
+    def _after_sections_change(self):
+        self._update_preview()
+        self._ensure_preview()
 
     def _tick_preview(self):
         if not self._preview_wanted():
@@ -765,11 +783,20 @@ class ZoneCard(Gtk.Box):
                                       self._current_colors(), count, params=params)
         pos = animations.strip_positions(count, bool(params.get("reverse")), bool(params.get("mirror")))
         key = f"{self.device_name}|{self.zone_name}"
-        frame = fx.preview(self.app._status if isinstance(self.app._status, dict) else {}, key, self._anim,
-                           self._current_colors(), base, count, positions=pos)
+        status = self.app._status if isinstance(self.app._status, dict) else {}
+        if self._anim is not None:
+            frame = fx.preview(status, key, self._anim, self._current_colors(), base, count, positions=pos)
+        else:
+            frame = base                        # only parts of the strip move
+        own = frame
+        if self._sections is not None and self._sections.active():
+            frame = self._sections.frame(frame, status)
         if frame != self._preview_last or self._strip.led_count != count:
             self._preview_last = frame          # slow effects often show the same frame: no repaint
-            self._strip.set_state(count, frame, "solid")
+            if not self._layout_open:
+                self._strip.set_state(count, frame, "solid" if self._anim is not None else self._pattern_key())
+            if self._sections is not None:
+                self._sections.refresh(own, frame)
         return True
 
     def _ensure_preview(self):
@@ -910,6 +937,8 @@ class ZoneCard(Gtk.Box):
                 self._plimit.set_quiet(zcfg.get("power_limit", 0))
         if not holding:
             self._enabled.set_value(zcfg.get("enabled", True))
+            if self._sections is not None:
+                self._sections.set_config(zcfg)
             if self._led_spin is not None and not self._led_spin.busy():
                 self._led_spin.set_quiet(zcfg.get("led_count", 20))
             anim = animations.clean(zcfg.get("animation"))

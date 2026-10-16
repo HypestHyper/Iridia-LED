@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:31+0000\n"
+"POT-Creation-Date: 2026-10-16 23:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -2036,6 +2036,83 @@ msgstr ""
 "A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
 "strip's name."
 
+msgid "Same as the strip"
+msgstr "Same as the strip"
+
+msgid "Its own pattern"
+msgstr "Its own pattern"
+
+msgid "Its own effect"
+msgstr "Its own effect"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Advanced: split this strip, set single LEDs"
+
+msgid "Add divider"
+msgstr "Add divider"
+
+msgid "Space evenly"
+msgstr "Space evenly"
+
+msgid "Single LEDs"
+msgstr "Single LEDs"
+
+msgid "Set LEDs"
+msgstr "Set LEDs"
+
+msgid "Color for single LEDs"
+msgstr "Colour for single LEDs"
+
+msgid "Clear all"
+msgstr "Clear all"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its colour over "
+"everything else, like a fixed LED between two bars."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Remove this part (it joins the one before it)"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "LEDs {first} to {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "LED {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} LEDs: {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Add a divider to split this strip into parts."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The parts are {n} LED apart. Space evenly makes them match."
+msgstr[1] "The parts are {n} LEDs apart. Space evenly makes them match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgstr[1] "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} LED set"
+msgstr[1] "{n} LEDs set"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Part {n}"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click for the first colour, right-click for the second"
@@ -2180,9 +2257,6 @@ msgstr "Reverse"
 msgid "Mirror"
 msgstr "Mirror"
 
-msgid "Space evenly"
-msgstr "Space evenly"
-
 msgid "Follow monitor brightness"
 msgstr "Follow monitor brightness"
 
@@ -2281,22 +2355,6 @@ msgstr "Colours in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this colour"
-
-#, python-brace-format
-msgid "{leds} LEDs: {sizes}"
-msgstr "{leds} LEDs: {sizes}"
-
-#, python-brace-format
-msgid "The parts are {n} LED apart. Space evenly makes them match."
-msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
-msgstr[0] "The parts are {n} LED apart. Space evenly makes them match."
-msgstr[1] "The parts are {n} LEDs apart. Space evenly makes them match."
-
-#, python-brace-format
-msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
-msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
-msgstr[0] "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
-msgstr[1] "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

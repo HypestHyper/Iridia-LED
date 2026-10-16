@@ -119,6 +119,8 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
 | `power_limit` | Amps, `0` for none |
 | `animation` | An animated effect, or missing/`null` for the static pattern: `{"effect": "breathing", "speed": 4, "min": 10, "max": 100, ...}`. Every effect's settings are listed in [Animations](Animations.md); values out of range are clamped, unknown ones ignored |
 | `ma_per_led` | Current per LED at full white for the power estimate (default 60) |
+| `sections` | The strip's parts, missing or `[]` when it isn't split: `[{"start": 0, "type": "same"}, {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"], "params": {"stops": [...]}}, {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]}, {"start": 70, "type": "off"}]`. `start` is the part's first LED, counted from 0 |
+| `led_overrides` | Single LEDs set by hand, over everything else: `{"26": "ffffff", "53": "000000"}` (LED counted from 0, `000000` is off) |
 
 New devices are added automatically the first time OpenRGB reports them. Zones OpenRGB reports with no
 size yet are added switched off and switch on once they have a size.

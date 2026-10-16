@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:31+0000\n"
+"POT-Creation-Date: 2026-10-16 23:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -1933,6 +1933,81 @@ msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
+msgid "Same as the strip"
+msgstr "Comme le fromage"
+
+msgid "Its own pattern"
+msgstr "Sa propre baguette"
+
+msgid "Its own effect"
+msgstr "Son propre croissant"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Avancé : couper la baguette"
+
+msgid "Add divider"
+msgstr "Ajouter un couteau"
+
+msgid "Space evenly"
+msgstr "Égalité"
+
+msgid "Single LEDs"
+msgstr "Bisous seuls"
+
+msgid "Set LEDs"
+msgstr "Bisou"
+
+msgid "Color for single LEDs"
+msgstr "Couleur du bisou"
+
+msgid "Clear all"
+msgstr "Au revoir"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr "Clique sur les bisous. Oh là là, un bisou entre deux baguettes."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Manger ce morceau"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Bisous {first} à {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Bisou {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} bisous : {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Ajoute un couteau pour couper la baguette."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "Il manque {n} bisou. Égalité, fraternité."
+msgstr[1] "Il manque {n} bisous. Égalité, fraternité."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} bisous pour {parts} amis. Le premier mange un bisou de plus."
+msgstr[1] "{leds} bisous pour {parts} amis. Les {extra} premiers mangent un bisou de plus."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} bisou"
+msgstr[1] "{n} bisous"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Morceau {n}"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "Joyeux anniversaire"
@@ -2067,9 +2142,6 @@ msgstr "Éclair"
 msgid "Mirror"
 msgstr "Ratatouille"
 
-msgid "Space evenly"
-msgstr "Égalité"
-
 msgid "Follow monitor brightness"
 msgstr "La crêpe est tombée par terre"
 
@@ -2162,22 +2234,6 @@ msgstr "Je ne sais quoi"
 
 msgid "Change this color"
 msgstr "Ceci n'est pas une pipe"
-
-#, python-brace-format
-msgid "{leds} LEDs: {sizes}"
-msgstr "{leds} bisous : {sizes}"
-
-#, python-brace-format
-msgid "The parts are {n} LED apart. Space evenly makes them match."
-msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
-msgstr[0] "Il manque {n} bisou. Égalité, fraternité."
-msgstr[1] "Il manque {n} bisous. Égalité, fraternité."
-
-#, python-brace-format
-msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
-msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
-msgstr[0] "{leds} bisous pour {parts} amis. Le premier mange un bisou de plus."
-msgstr[1] "{leds} bisous pour {parts} amis. Les {extra} premiers mangent un bisou de plus."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

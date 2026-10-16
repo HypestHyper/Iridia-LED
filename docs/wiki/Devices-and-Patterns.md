@@ -97,6 +97,33 @@ tools, with more room, are on the [Layout](Layout.md) tab.
 
 Night mode can cap the brightness on top of this; see [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md).
 
+## Splitting a strip into parts, and single LEDs
+
+Open **Advanced: split this strip, set single LEDs** on a zone card (it stays closed until you need it).
+
+- **Add divider** splits the biggest part in two. Drag the handle under a divider to move it; it snaps
+  to whole LEDs. The numbers above the strip are the part numbers.
+- **Space evenly** gives every part the same number of LEDs, as far as whole LEDs allow. "80 LEDs:
+  27 + 27 + 26" shows the sizes; when the count doesn't divide evenly Iridia says which parts get one
+  more, and when parts are only 1 or 2 LEDs apart (easy to miss on the strip) it warns you.
+- Each part shows one of:
+  - **Same as the strip**: whatever the strip shows there (its pattern or effect, wallpaper colors
+    and all). A part in the middle can keep the strip's look while the parts around it do something else.
+  - **Its own pattern**: any static pattern with its own colors, drawn over just that part.
+  - **Its own effect**: any animated effect with its own colors and settings, over just that part.
+    The rest of the strip stays as it is, static or animated.
+  - **Off**.
+  **Settings** next to a part opens its pattern or effect and colors; **✕** removes a part (it joins
+  the one before it).
+- **Single LEDs**: click **Set LEDs**, pick **Color** (and the color in the well next to it), **Off**
+  or **Back to normal**, then click or drag over LEDs on the strip. A set LED shows its color over
+  everything else, for example one white LED between two bars. A dot under the strip marks them;
+  **Clear all** removes them.
+
+Changing the LED count moves the dividers along with it; single LEDs keep their number. Brightness and
+color correction apply to the whole strip, parts included. The same is possible from the command line
+with `iridia split` (see [Command line](Command-Line.md)).
+
 ## Other tools on a zone card
 
 - **Identify** lights only this zone white for a while, to see which strip it is.

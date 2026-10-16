@@ -1916,7 +1916,7 @@ class Daemon:
             else:
                 raw = animations.render(effect, anim, n, t, colors, seed, positions, base, extent)
             if parts is not None:
-                raw = parts.frame(raw, t)
+                raw = parts.frame(raw, clock)
             ov = self._overlays.get(key) or {}
             b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
             return self._finish_rgb(key, dev, zn, zc, correct(raw, b))
@@ -2766,6 +2766,13 @@ class Daemon:
         """sections: the zone's parts (see iridia/sections.py), [] to join them again; led_overrides:
         {LED number: hex} replacing every single LED set, or set_led: [LED, hex or None] for one."""
         dev, zone = req.get("device"), req.get("zone")
+        if req.get("target") is not None:
+            keys, err = self._resolve_target(req["target"])
+            if err:
+                return {"ok": False, "error": err}
+            if len(keys) != 1:
+                return {"ok": False, "error": "pick one strip, not several"}
+            dev, _sep, zone = keys[0].partition("|")
         if dev not in self.config.devices:
             return {"ok": False, "error": f"device '{dev}' not found"}
         n = clean_zone_cfg(self._zone_cfg(dev, zone))["led_count"]
@@ -2797,7 +2804,9 @@ class Daemon:
             self.config.set(self._zone_config_path(dev, zone, "led_overrides"), zone_sections.overrides_for_config(ov))
         self._last_sent = {}
         self._needs_update = True
-        return {"ok": True}
+        now = clean_zone_cfg(self._zone_cfg(dev, zone))
+        return {"ok": True, "device": dev, "zone": zone or "", "led_count": now["led_count"],
+                "sections": now["sections"], "led_overrides": zone_sections.overrides_for_config(now["led_overrides"])}
 
     def _cmd_set_zone_brightness_sync(self, req: dict) -> dict:
         dev = req.get("device")

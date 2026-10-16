@@ -79,6 +79,21 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia zone NAME normal` | Undo keybind changes |
 | `iridia identify DEVICE [-z ZONE] [-s SECONDS]` / `iridia identify off` | Light only one zone |
 
+## Parts and single LEDs
+
+Saved settings, like the *Advanced* part of a zone card. LED and part numbers start at 1.
+
+| Command | What it does |
+| --- | --- |
+| `iridia split NAME` | Show the strip's parts and single LEDs |
+| `iridia split NAME even 3` | Split into 3 parts as evenly as whole LEDs allow (keeps what the parts show) |
+| `iridia split NAME at 28 55` | New parts start at LEDs 28 and 55 |
+| `iridia split NAME part 2 pattern gradient ff0000 0000ff` | Part 2 gets its own pattern; colors are hex or wallpaper color numbers (1 = first) |
+| `iridia split NAME part 3 effect comet 1` | Part 3 gets its own effect |
+| `iridia split NAME part 1 same` / `off` | Part 1 shows the strip's own look, or nothing |
+| `iridia split NAME led 27 ffffff` / `off` / `normal` | Set one LED, turn it off, or give it back |
+| `iridia split NAME join` / `clear-leds` | One part again / no single LEDs |
+
 ## Setups
 
 | Command | What it does |

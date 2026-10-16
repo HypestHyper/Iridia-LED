@@ -504,6 +504,104 @@ def cmd_zone(args):
                    lambda r: r.get("message", "Done."))
 
 
+def _split_text(r):
+    """What `iridia split` prints: the parts and the LEDs set by hand."""
+    from iridia import sections as S
+    n, secs = r.get("led_count", 0), r.get("sections") or []
+    where = f"{r['device']}/{r['zone']}" if r.get("zone") else r.get("device", "")
+    lines = []
+    if not secs:
+        lines.append(f"{where}: one part ({n} LEDs), not split.")
+    else:
+        lines.append(f"{where}: {len(secs)} parts, {n} LEDs ({' + '.join(map(str, S.sizes(secs, n)))})")
+        for k, (a, b, sec) in enumerate(S.spans(secs, n)):
+            what = {"same": "same as the strip", "off": "off"}.get(sec["type"])
+            if sec["type"] == "pattern":
+                what = f"pattern {sec['pattern']}, colors {' '.join(map(str, sec['colors']))}"
+            elif sec["type"] == "effect":
+                what = f"effect {sec['animation']['effect']}, colors {' '.join(map(str, sec['colors']))}"
+            lines.append(f"  {k + 1}. LEDs {a + 1}-{b}: {what}")
+        note = S.split_note(S.sizes(secs, n), n)
+        if note and note[0] == "near":
+            lines.append(f"  The parts are {note[1]} LED(s) apart: 'even' makes them match.")
+    ov = r.get("led_overrides") or {}
+    if ov:
+        lines.append("Single LEDs: " + ", ".join(f"{int(i) + 1}={'off' if h == '000000' else h}"
+                                                for i, h in sorted(ov.items(), key=lambda x: int(x[0]))))
+    return "\n".join(lines)
+
+
+def cmd_split(args):
+    """iridia split STRIP [even N | at LED... | part K same|off|pattern NAME COLORS|effect NAME COLORS |
+    led N COLOR|off|normal | join | clear-leds]."""
+    from iridia import sections as S
+    req = {"cmd": "set_zone_sections", "target": args.target}
+    w = list(args.words)
+    if not w:
+        return _report(req, _split_text)
+    try:
+        cur = _client().send(dict(req))
+    except Exception as e:                  # noqa: BLE001
+        print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
+        return 1
+    if not cur.get("ok"):
+        print(f"Failed: {cur.get('error')}", file=sys.stderr)
+        return 1
+    n, secs = cur["led_count"], cur.get("sections") or []
+    verb, rest = w[0].lower(), w[1:]
+
+    def bad(msg):
+        print(msg, file=sys.stderr)
+        return 2
+    try:
+        if verb == "even":
+            parts = int(rest[0]) if rest else max(2, len(secs))
+            if not 1 <= parts <= min(n, S.MAX_SECTIONS):
+                return bad(f"Between 1 and {min(n, S.MAX_SECTIONS)} parts.")
+            old = secs or [{"start": 0, "type": "same"}]
+            old = old + [{"type": "same"}] * (parts - len(old))
+            req["sections"] = [dict(o, start=st) for o, st in zip(old, S.even_starts(parts, n))]
+        elif verb == "at":
+            starts = sorted({int(x) - 1 for x in rest})
+            if not starts or starts[0] < 1 or starts[-1] >= n:
+                return bad(f"Give the LED numbers where new parts start, from 2 to {n}.")
+            old = {s["start"]: s for s in secs}
+            req["sections"] = [dict(old.get(st, {"type": "same"}), start=st) for st in [0] + starts]
+        elif verb == "join":
+            req["sections"] = []
+        elif verb == "part":
+            k = int(rest[0]) - 1
+            if not 0 <= k < max(1, len(secs)):
+                return bad(f"There are {max(1, len(secs))} parts.")
+            kind = rest[1].lower() if len(rest) > 1 else ""
+            secs = secs or [{"start": 0, "type": "same"}]
+            if kind in ("same", "off"):
+                secs[k] = {"start": secs[k]["start"], "type": kind}
+            elif kind in ("pattern", "effect") and len(rest) > 2:
+                colors = [int(c) - 1 if c.isdigit() else c for c in rest[3:]] or [0]
+                new = {"start": secs[k]["start"], "type": kind, "colors": colors}
+                if kind == "pattern":
+                    new["pattern"] = rest[2]
+                else:
+                    new["animation"] = {"effect": rest[2]}
+                secs[k] = new
+            else:
+                return bad("part K same | off | pattern NAME [COLORS] | effect NAME [COLORS]; COLORS are hex "
+                           "colors or wallpaper color numbers (1 = the first).")
+            req["sections"] = secs
+        elif verb == "led":
+            i = int(rest[0]) - 1
+            val = rest[1].lower()
+            req["set_led"] = [i, None if val == "normal" else "000000" if val == "off" else val]
+        elif verb == "clear-leds":
+            req["led_overrides"] = {}
+        else:
+            return bad("Use: even N | at LED... | part K ... | led N COLOR|off|normal | join | clear-leds")
+    except (IndexError, ValueError):
+        return bad("Missing or wrong number. 'iridia split --help' has examples.")
+    return _report(req, _split_text)
+
+
 def cmd_animations(args):
     """iridia animations pause | resume | toggle | status."""
     if args.action == "status":
@@ -988,7 +1086,7 @@ def _service_restart():
     print("Service restarted")
     return 0
 
-def main():
+def main(argv=None):
     from iridia import get_version
     parser = argparse.ArgumentParser(prog="iridia", description="Iridia CLI")
     parser.add_argument("--version", action="version", version=f"iridia {get_version()}")
@@ -1049,6 +1147,17 @@ def main():
     z_parser.add_argument("--max", type=int, help="breathing: highest brightness in percent")
     z_parser.add_argument("--param", action="append", metavar="KEY=VALUE",
                           help="any other effect setting, e.g. --param tail=20 --param bounce=yes")
+    sp_parser = subparsers.add_parser(
+        "split", help="Split a strip into parts, or set single LEDs (saved)",
+        description="Split a strip into parts that each show something of their own, and set single LEDs by "
+                    "hand. LED and part numbers start at 1. Examples:  iridia split Desk   iridia split Desk even 3   "
+                    "iridia split Desk at 28 55   iridia split Desk part 2 pattern gradient ff0000 0000ff   "
+                    "iridia split Desk part 3 effect comet 1   iridia split Desk part 1 off   "
+                    "iridia split Desk led 27 ffffff   iridia split Desk led 27 normal   iridia split Desk join   "
+                    "iridia split Desk clear-leds")
+    sp_parser.add_argument("target", help="a strip name or Device/Zone ('iridia zone list' shows them)")
+    sp_parser.add_argument("words", nargs="*", help="even N | at LED... | part K same|off|pattern NAME [COLORS]|"
+                                                    "effect NAME [COLORS] | led N COLOR|off|normal | join | clear-leds")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
@@ -1079,7 +1188,7 @@ def main():
                                  "reaches graphical-session.target, else your compositor's line or XDG autostart)")
     svc_parser.add_argument("--openrgb", choices=["daemon", "systemd", "off"],
                             help="install: how OpenRGB's server is started (default: keep the current setting)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if not args.command:
         parser.print_help()
         return 1
@@ -1087,7 +1196,7 @@ def main():
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

@@ -8,6 +8,15 @@
   than the rest and never below 10 pixels.
 - The window buttons (minimize, maximize, close) are flat icons now, with a round highlight under the
   pointer; close turns red.
+- **Split a strip into parts.** *Advanced: split this strip, set single LEDs* on a zone card: add
+  dividers (drag them, they snap to whole LEDs) and let each part show the strip's own look, a static
+  pattern of its own, an animated effect of its own, or nothing. A static strip can have one animated
+  part, and an animated strip can keep static parts. **Space evenly** splits the parts in whole LEDs
+  with the same notes and warnings as below. Changing the LED count moves the dividers along.
+- **Single LEDs.** Set any LED to a color or off, over everything else (a fixed LED between two bars):
+  click or drag over the strip in the same panel.
+- `iridia split NAME ...` does both from the command line (`even 3`, `at 28 55`, `part 2 effect comet`,
+  `led 27 ffffff`, `join`, ...).
 - **Space evenly** for the Segments pattern: the layout editor shows how many LEDs each color gets,
   splits them evenly in whole LEDs, says when the count doesn't divide evenly, and warns when parts are
   only 1 or 2 LEDs apart.

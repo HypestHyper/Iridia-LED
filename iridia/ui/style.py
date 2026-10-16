@@ -201,9 +201,22 @@ def scale_px(css: str, factor: float) -> str:
     return _PX.sub(one, css)
 
 
+# Without a compositor (some X11 window managers) a popup can't be see-through, so the room GTK keeps
+# around it for the shadow shows up as a black frame: no shadows on popups there.
+NO_COMPOSITOR = """
+popover > contents, popover.menu > contents, tooltip { box-shadow: none; }
+"""
+
 MOTION_OFF = """
 * { transition: none; }
 """
+
+
+def _composited(display) -> bool:
+    try:
+        return bool(display.is_composited() and display.is_rgba())
+    except Exception:                       # noqa: BLE001  (older GTK: assume a compositor)
+        return True
 
 
 class Style:
@@ -218,6 +231,10 @@ class Style:
         display = Gdk.Display.get_default()
         Gtk.StyleContext.add_provider_for_display(display, self._provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         Gtk.StyleContext.add_provider_for_display(display, self._motion, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2)
+        if not _composited(display):
+            flat = Gtk.CssProvider()
+            load_css(flat, NO_COMPOSITOR)
+            Gtk.StyleContext.add_provider_for_display(display, flat, Gtk.STYLE_PROVIDER_PRIORITY_USER + 3)
         self._load(self.palette)
         self.set_reduce_motion(reduce_motion)
 

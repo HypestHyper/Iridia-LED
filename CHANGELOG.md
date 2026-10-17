@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Lock and idle.** Settings, *Lock and idle*: keep, dim or turn off the LEDs when the screen locks,
+  and after a number of minutes without input. They fade out over 2 seconds and back in half a second;
+  *Try it* shows it for 5 seconds, and a strip can stay lit (*Stay lit when the screen locks or you're
+  away*, under its Brightness). Iridia sees locking through logind, ScreenSaver signals and screen
+  lockers such as hyprlock and swaylock, and idle time on GNOME, KDE and X11, with nothing to set up.
+  For Hyprland, Sway and the like, `iridia idle on|off` from hypridle or swayidle (the window and
+  `iridia session hooks` have the lines). `iridia session` shows and changes it all.
+
 - **Window size.** Settings, Appearance, Size: Compact, Default, Large or Automatic. Default is about
   10% smaller than before and Large is the old size; Automatic is Compact in a window narrower than
   900 pixels. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to Automatic. Text shrinks less

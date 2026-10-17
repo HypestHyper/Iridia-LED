@@ -74,6 +74,10 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia lights on / off / toggle` | Every LED on or off |
 | `iridia night show` | Night mode settings |
 | `iridia night on / off / toggle [--start 23:00] [--end 07:00] [--cap 20]` | Night mode |
+| `iridia session` | Lock and idle: settings, what's happening now, and how Iridia sees it |
+| `iridia session --lock off --idle dim --idle-minutes 10 --dim 20` | Change them (`keep`, `dim`, `off`) |
+| `iridia session test` / `iridia session hooks` | Act as if locked for 5 seconds / lines for hypridle and swayidle |
+| `iridia idle on / off`, `iridia lock on / off` | For idle daemons and screen lockers Iridia can't see by itself |
 | `iridia zone list` | Strip names to use with `iridia zone` |
 | `iridia zone NAME[,NAME] [on/off] [color HEX] [bright N] [--set]` | Temporary strip changes; see [Keybinds](Keybinds.md) |
 | `iridia zone NAME normal` | Undo keybind changes |

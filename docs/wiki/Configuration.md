@@ -62,6 +62,8 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `ddc.fallback_brightness` | `100` | Brightness used when no monitor answers |
 | `night.enabled`, `night.start`, `night.end`, `night.cap` | `false`, `23:00`, `07:00`, `20` | Night mode |
 | `sleep.lights_off` | `true` | LEDs off while the PC sleeps |
+| `session.lock`, `session.idle` | `keep`, `keep` | When the screen locks / after `session.idle_minutes` without input: `keep`, `dim` or `off` |
+| `session.idle_minutes`, `session.dim` | `10`, `20` | Minutes without input; brightness in percent for `dim` |
 | `animations.enabled` | `true` | Run animated effects (off: animated zones show their first color) |
 | `animations.fps` | `30` | Frames per second: 15, 30 or 60 |
 | `animations.night_pause`, `animations.night_slow` | `false`, `false` | Pause or slow (half speed) animations in night mode |
@@ -126,6 +128,7 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
 | `animation` | An animated effect, or missing/`null` for the static pattern: `{"effect": "breathing", "speed": 4, "min": 10, "max": 100, ...}`. Every effect's settings are listed in [Animations](Animations.md); values out of range are clamped, unknown ones ignored |
 | `ma_per_led` | Current per LED at full white for the power estimate (default 60) |
 | `sections` | The strip's parts, missing or `[]` when it isn't split: `[{"start": 0, "type": "same"}, {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"], "params": {"stops": [...]}}, {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]}, {"start": 70, "type": "off"}]`. `start` is the part's first LED, counted from 0 |
+| `session_ignore` | `true`: the strip stays lit when the screen locks or you're away |
 | `led_overrides` | Single LEDs set by hand, over everything else: `{"26": "ffffff", "53": "000000"}` (LED counted from 0, `000000` is off) |
 
 New devices are added automatically the first time OpenRGB reports them. Zones OpenRGB reports with no

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:00+0000\n"
+"POT-Creation-Date: 2026-10-17 00:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -477,6 +477,85 @@ msgstr "Log copied"
 msgid "Press Show to load the latest lines."
 msgstr "Press Show to read the latest lines."
 
+msgid "Lock and idle"
+msgstr "Lock an' shore leave"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr ""
+"Dim or douse the lanterns when the hatch be locked or ye've gone ashore. Strips can stay lit: see"
+" Brightness on each strip."
+
+msgid "Keep"
+msgstr "Hold fast"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Off"
+msgstr "Doused"
+
+msgid "When the screen locks"
+msgstr "When the hatch be locked"
+
+msgid "After"
+msgstr "After"
+
+msgid "minutes without input"
+msgstr "minutes o' no hands on deck"
+
+msgid "Dim to"
+msgstr "Dim to"
+
+msgid "Try it"
+msgstr "Give it a go"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Pretendin' the hatch be locked fer 5 seconds."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr ""
+"The lanterns fade over 2 seconds an' come back in half a second. Try it shows the lock settin' "
+"(or dark, if that be Hold fast) fer 5 seconds."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "Can't see idle time on this ship: lines fer hypridle or swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr ""
+"Add these to yer idle daemon's config, an' Iridia knows when ye've gone ashore (it then uses that"
+" daemon's timeout instead o' the minutes above)."
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "in use"
+msgstr "on deck"
+
+msgid "away"
+msgstr "ashore"
+
+msgid "locked"
+msgstr "nailed down"
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind, ScreenSaver or a screen locker, once one shows up"
+
+msgid "nothing here"
+msgstr "nothin' here"
+
+#, python-brace-format
+msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+msgstr "Right now: {state}. Lockin' seen through: {lock}. Idle time from: {idle}."
+
+msgid "Your idle daemon says you're away."
+msgstr "Yer idle daemon says ye've gone ashore."
+
 msgid "Saved."
 msgstr "Stashed."
 
@@ -686,9 +765,6 @@ msgstr ""
 
 msgid "Environment"
 msgstr "Waters"
-
-msgid "Copied"
-msgstr "Copied"
 
 msgid "Install XDG autostart"
 msgstr "Install XDG autostart"
@@ -1006,9 +1082,6 @@ msgstr "Anchored (wallpaper changes be ignored)"
 
 msgid "Following the wallpaper"
 msgstr "Followin' the wallpaper"
-
-msgid "Off"
-msgstr "Doused"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1433,9 +1506,6 @@ msgstr "Smooth sailin'"
 msgid "Sharp"
 msgstr "Sharp"
 
-msgid "Dim"
-msgstr "Dim"
-
 msgid "Second color"
 msgstr "Second colour"
 
@@ -1563,9 +1633,6 @@ msgstr "Command"
 
 msgid "Copy command"
 msgstr "Copy the command"
-
-msgid "Try it"
-msgstr "Give it a go"
 
 msgid "Add it to your desktop"
 msgstr "Add it to yer desktop"
@@ -1778,9 +1845,6 @@ msgstr[1] "{n} lanterns"
 
 msgid "clone"
 msgstr "stowaway"
-
-msgid "locked"
-msgstr "nailed down"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "This strip be nailed down. Pry it loose (side panel or the lock) to move or bend it."
@@ -2285,6 +2349,9 @@ msgstr "Invert (bias lightin')"
 
 msgid "Gamma correction"
 msgstr "Gamma correction"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Stay lit when the hatch locks or ye go ashore"
 
 msgid "Strip type and wiring"
 msgstr "Strip type an' riggin'"

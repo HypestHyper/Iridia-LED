@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:00+0000\n"
+"POT-Creation-Date: 2026-10-17 00:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -483,6 +483,85 @@ msgstr "Ledger transcribed"
 msgid "Press Show to load the latest lines."
 msgstr "Pray press Show to read the latest lines."
 
+msgid "Lock and idle"
+msgstr "Lock and repose"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr ""
+"Dim or extinguish the lamps when the screen is locked or one has stepped away. Strips may remain "
+"lit: see Brightness on each strip."
+
+msgid "Keep"
+msgstr "Leave be"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Off"
+msgstr "At rest"
+
+msgid "When the screen locks"
+msgstr "Upon locking the screen"
+
+msgid "After"
+msgstr "After"
+
+msgid "minutes without input"
+msgstr "minutes of repose"
+
+msgid "Dim to"
+msgstr "Dim to"
+
+msgid "Try it"
+msgstr "Make an attempt"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Behaving as though the screen were locked for 5 seconds."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr ""
+"The lamps fade over 2 seconds and return in half a second. Try it shows the lock setting (or "
+"darkness, should that be Leave be) for 5 seconds."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "One cannot see the idle time here: lines for hypridle or swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr ""
+"Add these to your idle daemon's configuration, and Iridia shall know when you have stepped away "
+"(it then heeds that daemon's timeout rather than the minutes above)."
+
+msgid "Copied"
+msgstr "Transcribed"
+
+msgid "in use"
+msgstr "in use"
+
+msgid "away"
+msgstr "away"
+
+msgid "locked"
+msgstr "secured"
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind, ScreenSaver or a screen locker, once one appears"
+
+msgid "nothing here"
+msgstr "nothing whatsoever"
+
+#, python-brace-format
+msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+msgstr "At present: {state}. Locking observed through: {lock}. Idle time from: {idle}."
+
+msgid "Your idle daemon says you're away."
+msgstr "Your idle daemon reports that you have stepped away."
+
 msgid "Saved."
 msgstr "Preserved."
 
@@ -697,9 +776,6 @@ msgstr ""
 
 msgid "Environment"
 msgstr "Surroundings"
-
-msgid "Copied"
-msgstr "Transcribed"
 
 msgid "Install XDG autostart"
 msgstr "Install XDG autostart"
@@ -1022,9 +1098,6 @@ msgstr "Preserved (changes of wallpaper are disregarded)"
 
 msgid "Following the wallpaper"
 msgstr "Following the wallpaper"
-
-msgid "Off"
-msgstr "At rest"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1450,9 +1523,6 @@ msgstr "Smooth"
 msgid "Sharp"
 msgstr "Sharp"
 
-msgid "Dim"
-msgstr "Dim"
-
 msgid "Second color"
 msgstr "Second colour"
 
@@ -1581,9 +1651,6 @@ msgstr "Command"
 
 msgid "Copy command"
 msgstr "Transcribe the command"
-
-msgid "Try it"
-msgstr "Make an attempt"
 
 msgid "Add it to your desktop"
 msgstr "Add it to your desktop"
@@ -1796,9 +1863,6 @@ msgstr[1] "{n} lamps"
 
 msgid "clone"
 msgstr "twin"
-
-msgid "locked"
-msgstr "secured"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "This strip is secured. Release it (side panel or the lock) to move or bend it."
@@ -2305,6 +2369,9 @@ msgstr "Invert (for bias lighting)"
 
 msgid "Gamma correction"
 msgstr "Gamma correction"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Remain lit when the screen locks or one steps away"
 
 msgid "Strip type and wiring"
 msgstr "Strip type and wiring"

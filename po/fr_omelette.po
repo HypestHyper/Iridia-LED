@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:00+0000\n"
+"POT-Creation-Date: 2026-10-17 00:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -460,6 +460,79 @@ msgstr "Macaron"
 msgid "Press Show to load the latest lines."
 msgstr "Le béret de mon grand-père"
 
+msgid "Lock and idle"
+msgstr "Dodo"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr "Les bisous dorment quand tu dors. Oh là là."
+
+msgid "Keep"
+msgstr "Garder"
+
+msgid "Dim"
+msgstr "Tamisé"
+
+msgid "Off"
+msgstr "Pardon ?"
+
+msgid "When the screen locks"
+msgstr "Quand on ferme la porte"
+
+msgid "After"
+msgstr "Après"
+
+msgid "minutes without input"
+msgstr "minutes de sieste"
+
+msgid "Dim to"
+msgstr "Baisser à"
+
+msgid "Try it"
+msgstr "Champagne"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Bonne nuit pour 5 secondes."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr "Doucement, doucement. Bonsoir."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "Pas de croissant ici : hypridle ou swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr "Mets ça dans ta baguette."
+
+msgid "Copied"
+msgstr "Bonne nuit"
+
+msgid "in use"
+msgstr "au travail"
+
+msgid "away"
+msgstr "en vacances"
+
+msgid "locked"
+msgstr "Bisou"
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind ou un croissant"
+
+msgid "nothing here"
+msgstr "rien du tout"
+
+#, python-brace-format
+msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+msgstr "Maintenant : {state}. Porte : {lock}. Sieste : {idle}."
+
+msgid "Your idle daemon says you're away."
+msgstr "Tu es en vacances."
+
 msgid "Saved."
 msgstr "Santé !"
 
@@ -661,9 +734,6 @@ msgstr "Le béret de mon grand-père. La crêpe est tombée par terre."
 
 msgid "Environment"
 msgstr "Fromage"
-
-msgid "Copied"
-msgstr "Bonne nuit"
 
 msgid "Install XDG autostart"
 msgstr "Omelette du fromage"
@@ -956,9 +1026,6 @@ msgstr "Il était une fois un croissant"
 
 msgid "Following the wallpaper"
 msgstr "J'ai une baguette"
-
-msgid "Off"
-msgstr "Pardon ?"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1363,9 +1430,6 @@ msgstr "Lisse comme un œuf"
 msgid "Sharp"
 msgstr "Pointu comme un crayon"
 
-msgid "Dim"
-msgstr "Tamisé"
-
 msgid "Second color"
 msgstr "La deuxième chaussette"
 
@@ -1485,9 +1549,6 @@ msgstr "Bonjour"
 
 msgid "Copy command"
 msgstr "Café"
-
-msgid "Try it"
-msgstr "Champagne"
 
 msgid "Add it to your desktop"
 msgstr "Le poisson rouge est en vacances"
@@ -1690,9 +1751,6 @@ msgstr[1] "Bisou"
 
 msgid "clone"
 msgstr "Bonne nuit"
-
-msgid "locked"
-msgstr "Bisou"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "La crêpe est tombée par terre. J'ai une baguette."
@@ -2168,6 +2226,9 @@ msgstr "Le pamplemousse est dans le jardin"
 
 msgid "Gamma correction"
 msgstr "Bonsoir"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Toujours allumé, même en vacances"
 
 msgid "Strip type and wiring"
 msgstr "Ceci n'est pas une pipe"

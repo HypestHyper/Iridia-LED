@@ -958,6 +958,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                          lambda v: self.bg(lambda: self.client.set_sleep(v)))
         c.append(row)
         p.append(c)
+        self._build_session_settings(p)
         self._build_animation_settings(p)
 
         # setups
@@ -1067,6 +1068,71 @@ class IridiaWindow(Gtk.ApplicationWindow):
         p.append(c)
 
     # ---- settings actions
+    def _build_session_settings(self, p):
+        p.append(section(_("Lock and idle"), _("Dim or turn off the LEDs when the screen locks or you're away. "
+                                              "Strips can stay lit: see Brightness on each strip.")))
+        c = card()
+        s = self.config.get("session", {}) or {}
+        acts = [("keep", _("Keep")), ("dim", _("Dim")), ("off", _("Off"))]
+        r = wrap_row(10)
+        r.append(hbox(10, label(_("When the screen locks"), ("body", "dim")),
+                      Group(acts, s.get("lock", "keep"), lambda v: self._session_set(lock=v))))
+        c.append(r)
+        r = wrap_row(10)
+        self._idle_min = Spin(1, 240, s.get("idle_minutes", 10), lambda v: self._session_set(idle_minutes=v))
+        r.append(hbox(10, label(_("After"), ("body", "dim")), self._idle_min,
+                      label(_("minutes without input"), ("body", "dim"))))
+        r.append(Group(acts, s.get("idle", "keep"), lambda v: self._session_set(idle=v)))
+        c.append(r)
+        r = hbox(10)
+        r.append(label(_("Dim to"), ("body", "dim")))
+        self._sess_dim = Spin(0, 100, s.get("dim", 20), lambda v: self._session_set(dim=int(v)))
+        r.append(self._sess_dim)
+        r.append(label("%", ("body", "dim")))
+        r.append(Gtk.Box(hexpand=True))
+        r.append(button(_("Try it"), "lock", "tonal small",
+                        lambda: self.bg(lambda: self.client.session(test=5),
+                                        lambda _r: self.toast(_("Acting as if the screen were locked for "
+                                                                "5 seconds.")))))
+        c.append(r)
+        c.append(label(_("The LEDs fade out over 2 seconds and come back in half a second. Try it shows the "
+                         "lock setting (or off, if that's Keep) for 5 seconds."), ("small", "faint")))
+        self._sess_lbl = label("", ("small", "dim"), wrap=True)
+        c.append(self._sess_lbl)
+        from iridia.sessionwatch import HOOK_LINES
+        self._sess_hooks = Gtk.Expander(label=_("Idle time can't be seen here: lines for hypridle or swayidle"))
+        self._sess_hooks.add_css_class("strip-exp")
+        hb = card(inner=True)
+        hb.append(label(_("Add these to your idle daemon's config, and Iridia knows when you're away (it then "
+                          "uses that daemon's timeout instead of the minutes above)."), ("small", "faint")))
+        tv = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.NONE)
+        tv.add_css_class("log")
+        tv.get_buffer().set_text(HOOK_LINES)
+        hb.append(tv)
+        hb.append(button(_("Copy"), "content_copy", "tonal small",
+                         lambda: (self.get_clipboard().set(HOOK_LINES), self.toast(_("Copied")))))
+        self._sess_hooks.set_child(hb)
+        self._sess_hooks.set_visible(False)
+        c.append(self._sess_hooks)
+        p.append(c)
+
+    def _session_set(self, **kw):
+        self.bg(lambda: self.client.session(**kw))
+
+    def _apply_session(self, s):
+        if not s or not hasattr(self, "_sess_lbl"):
+            return
+        state = {"active": _("in use"), "idle": _("away"), "locked": _("locked")}.get(s.get("state"), "")
+        how_lock = s.get("lock_method") or _("logind, ScreenSaver or a screen locker, once one shows up")
+        how_idle = {"gnome": "GNOME", "screensaver": "ScreenSaver", "xprintidle": "xprintidle",
+                    "logind": "logind"}.get(s.get("idle_method"), _("nothing here"))
+        txt = _("Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}.").format(
+            state=state, lock=how_lock, idle=how_idle)
+        if (s.get("hooks") or {}).get("idle"):
+            txt += " " + _("Your idle daemon says you're away.")
+        self._sess_lbl.set_label(txt)
+        self._sess_hooks.set_visible(not s.get("idle_method"))
+
     def _save_night(self):
         req = {"enabled": self._night_sw.get_active(), "start": self._night_start.get_text().strip(),
                "end": self._night_end.get_text().strip(), "cap": int(self._night_cap.get_value())}
@@ -1748,6 +1814,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._maybe_reseed(dominant)
         missing = st.get("openrgb_missing_devices", [])
         night = st.get("night") or {}
+        self._apply_session(st.get("session"))
         if not st.get("openrgb_connected"):
             self._chip.set(_("OpenRGB not connected"), "error")
         elif missing:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:00+0000\n"
+"POT-Creation-Date: 2026-10-17 00:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -477,6 +477,85 @@ msgstr "Log copied"
 msgid "Press Show to load the latest lines."
 msgstr "Press Show to load the latest lines."
 
+msgid "Lock and idle"
+msgstr "Lock and idle"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+
+msgid "Keep"
+msgstr "Keep"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Off"
+msgstr "Off"
+
+msgid "When the screen locks"
+msgstr "When the screen locks"
+
+msgid "After"
+msgstr "After"
+
+msgid "minutes without input"
+msgstr "minutes without input"
+
+msgid "Dim to"
+msgstr "Dim to"
+
+msgid "Try it"
+msgstr "Try it"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Acting as if the screen were locked for 5 seconds."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "Idle time can't be seen here: lines for hypridle or swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "in use"
+msgstr "in use"
+
+msgid "away"
+msgstr "away"
+
+msgid "locked"
+msgstr "locked"
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind, ScreenSaver or a screen locker, once one shows up"
+
+msgid "nothing here"
+msgstr "nothing here"
+
+#, python-brace-format
+msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+msgstr "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+
+msgid "Your idle daemon says you're away."
+msgstr "Your idle daemon says you're away."
+
 msgid "Saved."
 msgstr "Saved."
 
@@ -686,9 +765,6 @@ msgstr ""
 
 msgid "Environment"
 msgstr "Environment"
-
-msgid "Copied"
-msgstr "Copied"
 
 msgid "Install XDG autostart"
 msgstr "Install XDG autostart"
@@ -1006,9 +1082,6 @@ msgstr "Frozen (wallpaper changes are ignored)"
 
 msgid "Following the wallpaper"
 msgstr "Following the wallpaper"
-
-msgid "Off"
-msgstr "Off"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1431,9 +1504,6 @@ msgstr "Smooth"
 msgid "Sharp"
 msgstr "Sharp"
 
-msgid "Dim"
-msgstr "Dim"
-
 msgid "Second color"
 msgstr "Second colour"
 
@@ -1561,9 +1631,6 @@ msgstr "Command"
 
 msgid "Copy command"
 msgstr "Copy command"
-
-msgid "Try it"
-msgstr "Try it"
 
 msgid "Add it to your desktop"
 msgstr "Add it to your desktop"
@@ -1776,9 +1843,6 @@ msgstr[1] "{n} LEDs"
 
 msgid "clone"
 msgstr "clone"
-
-msgid "locked"
-msgstr "locked"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
@@ -2283,6 +2347,9 @@ msgstr "Invert (bias lighting)"
 
 msgid "Gamma correction"
 msgstr "Gamma correction"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Stay lit when the screen locks or you're away"
 
 msgid "Strip type and wiring"
 msgstr "Strip type and wiring"

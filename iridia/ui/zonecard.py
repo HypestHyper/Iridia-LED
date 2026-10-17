@@ -338,6 +338,10 @@ class ZoneCard(Gtk.Box):
         r3.append(row3)
         r3.append(self._gamma_row)
         br.append(r3)
+        if not self.global_mode:
+            row5, self._sess_ignore = switch_row(_("Stay lit when the screen locks or you're away"),
+                                                 bool(self.cfg.get("session_ignore")), self._on_session_ignore)
+            br.append(row5)
         r4 = hbox(10)
         r4.set_margin_top(6)
         r4.append(label(_("Color correction"), ("small", "dim")))
@@ -882,6 +886,9 @@ class ZoneCard(Gtk.Box):
         self._call(self.client.set_zone_brightness_range, self.device_name, self.zone_name, self._range.lo,
                    self._range.hi)
 
+    def _on_session_ignore(self, v):
+        self._strip_set(session_ignore=bool(v))
+
     def _on_invert(self, v):
         self._call(self.client.set_zone_invert, self.device_name, self.zone_name, v)
 
@@ -973,6 +980,8 @@ class ZoneCard(Gtk.Box):
             self._range.set(br[0], br[1])
         self._invert.set_value(zcfg.get("invert_brightness", False))
         self._gamma.set_value(zcfg.get("gamma_correction", False))
+        if hasattr(self, "_sess_ignore"):
+            self._sess_ignore.set_value(bool(zcfg.get("session_ignore")))
         mode = zcfg.get("mode", "full")
         self._profile.set_items(self.PROFILES, zcfg.get("calibration_profile", "WS2812B"))
         if mode != self._mode_val or self._mixed != getattr(self, "_shown_mixed", set()):

@@ -141,6 +141,10 @@ class Client:
     def set_night(self, **kw) -> dict:
         return self._ipc.send(dict(kw, cmd="set_night"))
 
+    def session(self, **kw) -> dict:
+        """Lock and idle: lock, idle (keep/dim/off), idle_minutes, dim, test (seconds), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="session"))
+
     def set_sleep(self, lights_off: bool) -> dict:
         return self._ipc.send({"cmd": "set_sleep", "lights_off": lights_off})
 

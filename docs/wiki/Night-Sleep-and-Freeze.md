@@ -23,6 +23,43 @@ seconds apart, because USB controllers sometimes come back late.
 On systems without logind the option has no effect; if Iridia can't watch for suspend, its log says so
 (`iridia log`).
 
+## Lock and idle
+
+Settings, *Lock and idle*: what the LEDs do **when the screen locks** and **after N minutes without
+input**: *Keep*, *Dim* (to the *Dim to* percentage) or *Off*. Both are *Keep* until you change them.
+The LEDs fade out over 2 seconds and come back in half a second. When both apply, the darker one
+wins; lights off and sleep still come first, and night mode's cap still applies. *Try it* shows the
+lock setting (or off, if that's *Keep*) for 5 seconds. A strip can ignore all this: *Stay lit when the
+screen locks or you're away*, under Brightness on its card.
+
+How Iridia sees it, without any setup:
+
+| | Seen through |
+| --- | --- |
+| Locking | logind's LockedHint (GNOME, KDE, ...), ScreenSaver signals, and screen lockers that tell nobody (hyprlock, swaylock, gtklock, waylock, i3lock, ...) for as long as they run |
+| Idle time | GNOME (Mutter), KDE and others (ScreenSaver), X11 (`xprintidle`), or logind's IdleHint |
+
+The window shows what it found. On compositors with no idle time to read (Hyprland, Sway, ...) let
+your idle daemon tell Iridia; *Lines for hypridle or swayidle* in the same section (or
+`iridia session hooks`) has them ready to copy:
+
+```ini
+# hypridle (~/.config/hypr/hypridle.conf)
+listener {
+    timeout = 300
+    on-timeout = iridia idle on
+    on-resume = iridia idle off
+}
+```
+
+```bash
+# swayidle (Sway config)
+exec swayidle -w timeout 300 'iridia idle on' resume 'iridia idle off'
+```
+
+Iridia then uses that daemon's timeout. `iridia lock on|off` does the same for a screen locker Iridia
+doesn't know.
+
 ## Lights off by hand
 
 ```bash

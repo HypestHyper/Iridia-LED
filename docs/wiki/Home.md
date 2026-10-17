@@ -33,7 +33,7 @@ what doesn't work.
 | [Strip types](Strip-Types.md) | WS2812B, WS2811, plain 12V RGB, RGBW, color order and power limits |
 | [Color correction](Color-Correction.md) | Off, Palette and Calibrated modes, exact colors, calibration profiles |
 | [Keybinds](Keybinds.md) | Changing strips from a key: commands and config lines for every desktop |
-| [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md) | Brightness caps at night, LEDs off while the PC sleeps, freezing colors |
+| [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md) | Brightness caps at night, lock and idle, LEDs off while the PC sleeps, freezing colors |
 | [Setups and backups](Setups-and-Backups.md) | Saving everything under a name, automatic backups, moving to another PC |
 | [Start at login](Start-at-Login.md) | systemd, compositor lines, XDG autostart |
 

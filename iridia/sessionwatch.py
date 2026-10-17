@@ -77,6 +77,17 @@ def lock_event(line: str, pending: Optional[str] = None) -> Tuple[Optional[str],
     return None, None
 
 
+# For idle daemons Iridia can't see: what to add to their config.
+HOOK_LINES = """# hypridle (~/.config/hypr/hypridle.conf)
+listener {
+    timeout = 300
+    on-timeout = iridia idle on
+    on-resume = iridia idle off
+}
+
+# swayidle (Sway config)
+exec swayidle -w timeout 300 'iridia idle on' resume 'iridia idle off'"""
+
 LOCKERS = ("hyprlock", "swaylock", "gtklock", "waylock", "i3lock", "xsecurelock", "slock", "physlock",
            "betterlockscreen", "light-locker")
 

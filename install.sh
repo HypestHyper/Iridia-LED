@@ -11,18 +11,22 @@ echo "============================================"
 
 ASSUME_YES=0
 SKIP_DEPS=0
+UPDATE=0
 OPENRGB_METHOD=""
 AUTOSTART=""
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) ASSUME_YES=1 ;;
         --no-deps) SKIP_DEPS=1 ;;
+        --update) UPDATE=1; ASSUME_YES=1; SKIP_DEPS=1 ;;
         --openrgb=*) OPENRGB_METHOD="${arg#*=}" ;;
         --autostart=*) AUTOSTART="${arg#*=}" ;;
         -h|--help)
             echo "Usage: bash install.sh [--yes] [--no-deps] [--openrgb=METHOD] [--autostart=METHOD]"
             echo "  --yes                 don't ask: install missing system packages, use the defaults below"
             echo "  --no-deps             never touch system packages"
+            echo "  --update              update an installed Iridia: no questions, no system packages (so no"
+            echo "                        password), keep how OpenRGB and the daemon start (the Updates tab uses this)"
             echo "  --openrgb=daemon      the Iridia daemon starts OpenRGB's server (default)"
             echo "  --openrgb=systemd     a systemd user service starts it with your graphical session"
             echo "  --openrgb=off         you start OpenRGB yourself"
@@ -37,7 +41,13 @@ for arg in "$@"; do
     esac
 done
 case "$OPENRGB_METHOD" in ""|daemon|systemd|off) ;; *) echo "--openrgb must be daemon, systemd or off"; exit 1 ;; esac
-case "$AUTOSTART" in ""|systemd|xdg|compositor|none) ;; *) echo "--autostart must be systemd, xdg, compositor or none"; exit 1 ;; esac
+case "$AUTOSTART" in ""|systemd|xdg|compositor|none|keep) ;; *) echo "--autostart must be systemd, xdg, compositor or none"; exit 1 ;; esac
+if [ "$UPDATE" -eq 1 ]; then
+    [ -z "$AUTOSTART" ] && AUTOSTART=keep
+    if [ ! -x "$HOME/.local/share/iridia-venv/bin/python" ]; then
+        echo "--update needs an existing install; run bash install.sh first."; exit 1
+    fi
+fi
 
 # --- work out what is missing -------------------------------------------
 MISSING=()   # generic names: python openrgb ddcutil gtk venv
@@ -195,16 +205,23 @@ if [ -x "$VENV_DIR/bin/iridia" ]; then
     "$VENV_DIR/bin/iridia" daemon stop >/dev/null 2>&1 || true
 fi
 
-echo "Creating virtual environment..."
-# --system-site-packages: the window uses your distro's GTK 4 bindings (PyGObject),
-# which can't be built with pip without a full compiler toolchain.
-# --clear: start fresh, so files from older versions can't linger.
-python3 -m venv --system-site-packages --clear "$VENV_DIR"
-echo "Upgrading pip..."
-"$VENV_DIR/bin/pip" install --upgrade pip --quiet
 rm -rf build ./*.egg-info
-echo "Installing iridia..."
-"$VENV_DIR/bin/pip" install .
+if [ "$UPDATE" -eq 1 ]; then
+    # In place: the installed libraries stay (quicker, works offline when nothing new is needed),
+    # and pip replaces Iridia's own files cleanly.
+    echo "Updating iridia..."
+    "$VENV_DIR/bin/pip" install --upgrade --upgrade-strategy only-if-needed .
+else
+    echo "Creating virtual environment..."
+    # --system-site-packages: the window uses your distro's GTK 4 bindings (PyGObject),
+    # which can't be built with pip without a full compiler toolchain.
+    # --clear: start fresh, so files from older versions can't linger.
+    python3 -m venv --system-site-packages --clear "$VENV_DIR"
+    echo "Upgrading pip..."
+    "$VENV_DIR/bin/pip" install --upgrade pip --quiet
+    echo "Installing iridia..."
+    "$VENV_DIR/bin/pip" install .
+fi
 
 echo "Creating config directory..."
 mkdir -p "$CONFIG_DIR"

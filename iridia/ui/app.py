@@ -424,7 +424,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         first = None
         for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
                                ("layout", _("Layout"), "polyline"), ("keybinds", _("Keybinds"), "keyboard"),
-                               ("settings", _("Settings"), "settings"), ("service", _("Service"), "build")):
+                               ("settings", _("Settings"), "settings"), ("service", _("Service"), "build"),
+                               ("updates", _("Updates"), "download")):
             b = Gtk.ToggleButton()
             b.set_child(hbox(8, icon(ico), Gtk.Label(label=text)))
             b.set_tooltip_text(text)
@@ -439,7 +440,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         self._layout_tab = LayoutTab(self)
         pages = {}
-        for key in ("status", "devices", "layout", "keybinds", "settings", "service"):
+        for key in ("status", "devices", "layout", "keybinds", "settings", "service", "updates"):
             if key == "layout":
                 self._stack.add_named(self._layout_tab, key)
                 continue
@@ -448,6 +449,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._stack.add_named(sc, key)
         self._status_page, self._devices_page = pages["status"], pages["devices"]
         self._settings_page, self._service_page = pages["settings"], pages["service"]
+        self._updates_page = pages["updates"]
         self._keybinds = KeybindsPage(self, pages["keybinds"])
         root.append(self._stack)
 
@@ -474,6 +476,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._build_devices()
         self._build_settings()
         self._build_service()
+        self._build_updates()
         self._tabs["status"].set_active(True)
 
     def _window_buttons(self, hb):
@@ -1073,6 +1076,221 @@ class IridiaWindow(Gtk.ApplicationWindow):
         p.append(c)
 
     # ---- settings actions
+    # ============================================================ updates tab
+    def _build_updates(self):
+        p = self._updates_page
+        p.append(section(_("Updates"), _("New versions of Iridia come from its releases on GitHub.")))
+        c = card()
+        self._upd_title = label("", ("title",))
+        self._upd_sub = label("", ("body", "dim"), wrap=True)
+        c.append(self._upd_title)
+        c.append(self._upd_sub)
+        r = wrap_row(8)
+        self._upd_check_btn = button(_("Check now"), "refresh", "tonal", lambda: self._update_check(force=True))
+        self._upd_install_btn = button(_("Update now"), "download", "filled", self._update_install)
+        self._upd_skip_btn = button(_("Skip this version"), "close", "text", self._update_skip)
+        for b in (self._upd_check_btn, self._upd_install_btn, self._upd_skip_btn):
+            r.append(b)
+        c.append(r)
+        self._upd_notes_exp = Gtk.Expander(label=_("What's new"))
+        self._upd_notes_exp.add_css_class("strip-exp")
+        self._upd_notes = label("", ("small",), wrap=True, selectable=True)
+        self._upd_notes_exp.set_child(self._upd_notes)
+        c.append(self._upd_notes_exp)
+        self._upd_busy = LoadingIndicator(28)
+        self._upd_busy_lbl = label("", ("small", "dim"), wrap=True)
+        self._upd_busy_row = hbox(10, self._upd_busy, self._upd_busy_lbl)
+        c.append(self._upd_busy_row)
+        self._upd_log = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        self._upd_log.add_css_class("log")
+        self._upd_log_sc = Gtk.ScrolledWindow(min_content_height=180, hscrollbar_policy=Gtk.PolicyType.NEVER)
+        self._upd_log_sc.set_child(self._upd_log)
+        c.append(self._upd_log_sc)
+        c.append(label(_("Updating needs no password: the new version installs like the old one, into your home "
+                         "folder. Your settings are backed up first (Settings, Setups and backups)."),
+                       ("small", "faint")))
+        p.append(c)
+
+        p.append(section(_("Checking"), None))
+        c = card()
+        self._upd_switches = {}
+        for key, text in (("check", _("Look for updates when Iridia starts")),
+                          ("notify", _("Show a notification when there's a new version")),
+                          ("prerelease", _("Include test versions"))):
+            row, sw = switch_row(text, key != "prerelease", lambda v, k=key: self._updates_set(**{k: v}))
+            self._upd_switches[key] = sw
+            c.append(row)
+        c.append(label(_("Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and "
+                         "sends nothing about you."), ("small", "faint")))
+        p.append(c)
+
+        p.append(section(_("Go back"), _("The version before the last update is kept, so you can undo an update.")))
+        c = card()
+        self._upd_prev_lbl = label("", ("body", "dim"), wrap=True)
+        c.append(self._upd_prev_lbl)
+        self._upd_back_btn = button(_("Go back"), "history", "tonal", self._update_rollback)
+        c.append(hbox(8, self._upd_back_btn))
+        p.append(c)
+        self._upd = {}
+        self._upd_running = False
+        self._upd_busy_row.set_visible(False)
+        self._upd_log_sc.set_visible(False)
+        self._update_refresh(check=True)
+
+    def _update_refresh(self, check=False):
+        """Settings and the last result (from the daemon, or the state file when it isn't running)."""
+        from iridia import get_version, updater
+
+        def work():
+            try:
+                r = self.client.updates()
+            except Exception:               # noqa: BLE001
+                r = {}
+            if not r.get("ok"):
+                r = {"settings": {"check": True, "notify": True, "prerelease": False, "skip": ""},
+                     "version": get_version(), "last": updater.load_state().get("last"),
+                     "previous": updater.prev_version(), "kind": updater.install_kind()}
+            return r
+
+        def done(r):
+            self._upd = r
+            self._apply_updates()
+            last = r.get("last") or {}
+            stale = time.time() - float(last.get("checked") or 0) > 6 * 3600
+            if check and r["settings"].get("check") and (stale or last.get("error")):
+                self._update_check()
+        self.bg(work, done)
+
+    def _apply_updates(self):
+        r = self._upd
+        s = r.get("settings") or {}
+        for k, sw in self._upd_switches.items():
+            sw.set_value(bool(s.get(k, k != "prerelease")))
+        last = r.get("last") or {}
+        info = last.get("latest") or {}
+        cur = r.get("version", "")
+        available = bool(last.get("available")) and info.get("version") != cur
+        source = r.get("kind") == "source"
+        if self._upd_running:
+            pass
+        elif last.get("error"):
+            self._upd_title.set_label(_("Iridia {v}").format(v=cur))
+            self._upd_sub.set_label(_("Couldn't check: {err}").format(err=last["error"]))
+        elif available:
+            self._upd_title.set_label(_("Iridia {v} is available").format(v=info.get("version")))
+            self._upd_sub.set_label(_("You have {cur}. Released {date}.").format(cur=cur, date=info.get("published", "")))
+        elif last:
+            self._upd_title.set_label(_("Iridia {v}").format(v=cur))
+            self._upd_sub.set_label(_("You have the latest version."))
+        else:
+            self._upd_title.set_label(_("Iridia {v}").format(v=cur))
+            self._upd_sub.set_label(_("Not checked yet."))
+        if available and source:
+            self._upd_sub.set_label(self._upd_sub.get_label() + " " + _(
+                "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."))
+        self._upd_install_btn.set_visible(available and not source and not self._upd_running)
+        self._upd_skip_btn.set_visible(available and s.get("skip") != info.get("version") and not self._upd_running)
+        self._upd_check_btn.set_sensitive(not self._upd_running)
+        self._upd_notes.set_label(info.get("notes") or "")
+        self._upd_notes_exp.set_visible(available and bool(info.get("notes")))
+        self._upd_notes_exp.set_label(_("What's new in {v}").format(v=info.get("version", "")))
+        prev = r.get("previous")
+        self._upd_prev_lbl.set_label(_("Kept from before the last update: Iridia {v}.").format(v=prev) if prev
+                                     else _("Nothing kept yet: the version you have now is kept when you update."))
+        self._upd_back_btn.set_visible(bool(prev) and not source)
+        if prev:
+            set_button_text(self._upd_back_btn, _("Go back to {v}").format(v=prev), "history")
+        self._upd_back_btn.set_sensitive(not self._upd_running)
+        # the tab's icon lights up while there's something to install
+        tab_icon = self._tabs["updates"].get_child().get_first_child()
+        (tab_icon.add_css_class if available and not source else tab_icon.remove_css_class)("accent")
+
+    def _updates_set(self, **kw):
+        self.bg(lambda: self.client.updates(**kw), lambda r: self._update_refresh() if r.get("ok") else None)
+
+    def _update_check(self, force=False):
+        from iridia import get_version, updater
+        if self._upd_running:
+            return
+        self._upd_busy_lbl.set_label(_("Checking…"))
+        self._upd_busy_row.set_visible(True)
+        self._upd_busy.start()
+        pre = bool((self._upd.get("settings") or {}).get("prerelease"))
+
+        def done(res):
+            self._upd_busy.stop()
+            self._upd_busy_row.set_visible(False)
+            self._upd["last"] = res
+            self._apply_updates()
+            if force and res.get("error"):
+                self.toast(_("Couldn't check for updates"))
+        self.bg(lambda: updater.check(get_version(), pre), done)
+
+    def _update_skip(self):
+        v = ((self._upd.get("last") or {}).get("latest") or {}).get("version", "")
+        self._updates_set(skip=v)
+        self.toast(_("Iridia {v} skipped. Newer versions still show up.").format(v=v))
+
+    def _update_install(self):
+        v = ((self._upd.get("last") or {}).get("latest") or {}).get("version", "")
+        dialogs.confirm(self, _("Install Iridia {v}?").format(v=v),
+                        _("Your settings are backed up first, and the version you have now is kept so you can go "
+                          "back. The LEDs pause for a few seconds while the daemon restarts, and this window "
+                          "restarts when it's done."),
+                        lambda: self._update_run(["update", "--yes"], _("Updating to {v}…").format(v=v)),
+                        yes=_("Update"))
+
+    def _update_rollback(self):
+        prev = self._upd.get("previous")
+        dialogs.confirm(self, _("Go back to Iridia {v}?").format(v=prev),
+                        _("The version you have now is kept in its place, so you can switch again. Your settings "
+                          "stay as they are."),
+                        lambda: self._update_run(["update", "--rollback", "--yes"],
+                                                 _("Going back to {v}…").format(v=prev)),
+                        yes=_("Go back"))
+
+    def _update_run(self, args, what):
+        """Run `iridia update ...` in its own process, show its output, restart the window when it worked."""
+        import subprocess
+        self._upd_running = True
+        self._apply_updates()
+        self._upd_busy_lbl.set_label(what)
+        self._upd_busy_row.set_visible(True)
+        self._upd_busy.start()
+        self._upd_log_sc.set_visible(True)
+        buf = self._upd_log.get_buffer()
+        buf.set_text("")
+
+        def add(line):
+            buf.insert(buf.get_end_iter(), line + "\n")
+            self._upd_log.scroll_to_iter(buf.get_end_iter(), 0, False, 0, 1)
+            return False
+
+        def finish(rc):
+            self._upd_running = False
+            self._upd_busy.stop()
+            self._upd_busy_row.set_visible(False)
+            if rc == 0:
+                self.toast(_("Done: restarting the window…"))
+                GLib.timeout_add(1500, lambda: (self._restart_window(), False)[1])
+            else:
+                self.toast(_("That didn't work: see the output below. Nothing of yours was changed."))
+                self._update_refresh()
+            return False
+
+        def work():
+            try:
+                p = subprocess.Popen([sys.executable, "-m", "iridia.cli"] + args, stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, text=True, bufsize=1)
+                for line in p.stdout:
+                    GLib.idle_add(add, line.rstrip("\n"))
+                rc = p.wait()
+            except OSError as e:
+                GLib.idle_add(add, str(e))
+                rc = 1
+            GLib.idle_add(finish, rc)
+        threading.Thread(target=work, daemon=True).start()
+
     def _build_session_settings(self, p):
         p.append(section(_("Lock and idle"), _("Dim or turn off the LEDs when the screen locks or you're away. "
                                               "Strips can stay lit: see Brightness on each strip.")))

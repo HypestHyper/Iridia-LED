@@ -195,6 +195,7 @@ class Daemon:
         self._night_active = False
         self.sleepwatch = None
         self.sessionwatch = None
+        self._stopping = threading.Event()  # set when the daemon shuts down
         self._sensor_zones = set()          # zones to redraw for a new sensor reading
         from iridia.sensors import SensorHub
         self.sensors = SensorHub()          # read only while a strip shows a sensor
@@ -294,6 +295,7 @@ class Daemon:
         self._detect_wallpaper()
         self._start_sleepwatch()
         self._start_sessionwatch()
+        threading.Thread(target=self._update_check, daemon=True, name="update-check").start()
 
         while self.running:
             try:
@@ -320,6 +322,60 @@ class Daemon:
         counting, test colors, a color preview). Otherwise once a second is plenty: commands,
         lock changes and fades wake the loop themselves."""
         return bool(self.sensors.values() or self._identify or self._probe or self._rgbtest or self._preview_hex)
+
+    # ------------------------------------------------------------- updates
+    UPDATE_DELAY_SEC = 60           # after the daemon starts: the login has other things to do first
+    UPDATE_MIN_GAP_SEC = 6 * 3600   # a daemon restarted often doesn't ask GitHub every time
+
+    def _update_settings(self) -> dict:
+        u = self.config.get("updates", {})
+        u = u if isinstance(u, dict) else {}
+        return {"check": u.get("check", True) is not False, "notify": u.get("notify", True) is not False,
+                "prerelease": u.get("prerelease") is True, "skip": str(u.get("skip") or "")}
+
+    def _update_check(self):
+        """Once per start: look for a new version and, if there is one you haven't been told about,
+        show a desktop notification. Network trouble: try again a little later, three times at most."""
+        from iridia import get_version, updater
+        if self._stopping.wait(self.UPDATE_DELAY_SEC):
+            return
+        for attempt in range(3):
+            s = self._update_settings()
+            if not s["check"]:
+                return
+            last = (updater.load_state().get("last") or {})
+            if time.time() - float(last.get("checked") or 0) < self.UPDATE_MIN_GAP_SEC and not last.get("error"):
+                res = last
+            else:
+                res = updater.check(get_version(), s["prerelease"])
+            if res.get("error"):
+                self.logger.info(f"Update check: {res['error']}")
+                if self._stopping.wait(600 * (attempt + 1)):
+                    return
+                continue
+            info = res.get("latest") or {}
+            v = info.get("version")
+            if res.get("available") and v:
+                self.logger.info(f"Iridia {v} is available (this is {get_version()}); see the window's Updates tab")
+                state = updater.load_state()
+                if s["notify"] and v != s["skip"] and state.get("notified") != v:
+                    if updater.notify(f"Iridia {v} is available",
+                                      "Open Iridia, Updates, to see what's new and install it."):
+                        updater.save_state(notified=v)
+            return
+
+    def _cmd_updates(self, req: dict) -> dict:
+        """Update settings (check, notify, prerelease, skip) and what the last check found."""
+        from iridia import get_version, updater
+        new = {k: req[k] for k in ("check", "notify", "prerelease") if isinstance(req.get(k), bool)}
+        if "skip" in req:
+            new["skip"] = str(req["skip"] or "")
+        if new:
+            cur = self.config.get("updates", {})
+            self.config.set("updates", dict(cur if isinstance(cur, dict) else {}, **new))
+        return {"ok": True, "settings": self._update_settings(), "version": get_version(),
+                "last": updater.load_state().get("last"), "previous": updater.prev_version(),
+                "kind": updater.install_kind()}
 
     # ------------------------------------------------------------- sensors
     def _sensor_parts(self):
@@ -521,6 +577,7 @@ class Daemon:
         return {"ok": True, "night": cur}
 
     def _shutdown(self):
+        self._stopping.set()
         self._animator.stop()
         self.logger.info("Shutting down")
         if self.sleepwatch:
@@ -2352,6 +2409,8 @@ class Daemon:
             return self._cmd_session(req)
         if cmd == "sensors":
             return self._cmd_sensors(req)
+        if cmd == "updates":
+            return self._cmd_updates(req)
         if cmd == "set_zone_sections":
             return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":

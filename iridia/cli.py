@@ -672,6 +672,68 @@ def cmd_session(args):
     return _report(req, _session_text)
 
 
+def cmd_update(args):
+    """iridia update [--check] [--rollback] [--yes]"""
+    from iridia import get_version, updater
+    from iridia.setups import Setups
+    current = get_version()
+
+    def confirm(q):
+        if args.yes:
+            return True
+        try:
+            return input(f"{q} [y/N] ").strip().lower() in ("y", "yes")
+        except EOFError:
+            return False
+    if args.rollback:
+        prev = updater.prev_version()
+        if not prev:
+            print("There's no previous version to go back to.")
+            return 1
+        if not confirm(f"Go back from Iridia {current} to {prev}?"):
+            return 1
+        try:
+            updater.rollback(log=print)
+        except (updater.UpdateError, OSError) as e:
+            print(f"Couldn't go back: {e}", file=sys.stderr)
+            return 1
+        return 0
+    s = {}
+    try:
+        s = _client().send({"cmd": "updates"}).get("settings") or {}
+    except Exception:                       # noqa: BLE001 - the daemon isn't needed to update
+        pass
+    res = updater.check(current, bool(s.get("prerelease") or args.prerelease))
+    if res["error"]:
+        print(f"Couldn't check: {res['error']}", file=sys.stderr)
+        return 1
+    info = res["latest"]
+    if not res["available"]:
+        print(f"Iridia {current} is the latest version.")
+        return 0
+    print(f"Iridia {info['version']} is available (this is {current}, released {info['published']}).")
+    if info.get("notes"):
+        print("\n" + info["notes"] + "\n")
+    if args.check:
+        return 0
+    if updater.install_kind() != "venv":
+        print("This Iridia isn't the install.sh install (a git checkout or your own venv): update it the way you "
+              "installed it, for example: git pull && bash install.sh")
+        return 1
+    if not confirm(f"Install Iridia {info['version']} now? Your settings are backed up first and the current "
+                   "version is kept, so you can go back."):
+        return 1
+    try:
+        bid = Setups(version=current).backup(f"before updating to {info['version']}")
+        print(f"Settings backed up ({bid}).")
+        updater.apply(info, log=print)
+    except (updater.UpdateError, OSError) as e:
+        print(f"Update failed: {e}", file=sys.stderr)
+        return 1
+    print("Done. If the window is open, it restarts by itself; otherwise open it again.")
+    return 0
+
+
 def cmd_sensors(args):
     def text(r):
         rows = r.get("sensors") or []
@@ -851,6 +913,18 @@ def default_autostart() -> str:
     return "compositor" if autostart.detect_compositor() else "xdg"
 
 
+def current_autostart() -> str:
+    """How the daemon is set up to start at login right now (what an update keeps)."""
+    from iridia import autostart, openrgb_server
+    if _has_user_systemd() and openrgb_server.unit_state(SERVICE_NAME)[0] == "enabled":
+        return "systemd"
+    if autostart.xdg_installed():
+        return "xdg"
+    if openrgb_server._startup_mentions(openrgb_server._starts_daemon):
+        return "compositor"
+    return "none"
+
+
 def _service_install(how=None, openrgb=None):
     bin_dir = _venv_bin_dir()
     python_bin = os.path.join(bin_dir, "python3")
@@ -916,6 +990,9 @@ StartupWMClass={assets.APP_ID}
         subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
     print(f"Launcher: {desktop_path}")
     from iridia import autostart
+    if how == "keep":
+        how = current_autostart()
+        print(f"Keeping how the daemon starts at login: {how}")
     how = how or default_autostart()
     if how == "systemd" and not _has_user_systemd():
         print("No systemd user session here, so the daemon starts through XDG autostart instead.")
@@ -1259,6 +1336,14 @@ def main(argv=None):
     ses_parser.add_argument("--idle-minutes", type=float)
     ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
+    up_parser = subparsers.add_parser("update", help="Look for a new version and install it (or go back)",
+                                      description="Checks GitHub for a newer release, backs up your settings, "
+                                                  "installs it (no password needed) and keeps the current version "
+                                                  "so 'iridia update --rollback' can go back.")
+    up_parser.add_argument("--check", action="store_true", help="only say whether there's a new version")
+    up_parser.add_argument("--rollback", action="store_true", help="go back to the version before the last update")
+    up_parser.add_argument("--prerelease", action="store_true", help="include test versions")
+    up_parser.add_argument("-y", "--yes", action="store_true", help="don't ask")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
@@ -1284,7 +1369,7 @@ def main(argv=None):
     d_parser.add_argument("action", choices=["start", "stop", "status"])
     svc_parser = subparsers.add_parser("service", help="Manage systemd service")
     svc_parser.add_argument("action", choices=["install", "remove", "status", "start", "stop", "restart"])
-    svc_parser.add_argument("--autostart", choices=["systemd", "xdg", "compositor", "none"],
+    svc_parser.add_argument("--autostart", choices=["systemd", "xdg", "compositor", "none", "keep"],
                             help="install: how the daemon starts at login (default: systemd when your session "
                                  "reaches graphical-session.target, else your compositor's line or XDG autostart)")
     svc_parser.add_argument("--openrgb", choices=["daemon", "systemd", "off"],
@@ -1297,7 +1382,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

@@ -56,6 +56,12 @@ DEFAULT_CONFIG = {
         "night_pause": False,       # night mode: stop animations
         "night_slow": False         # night mode: run them at half speed
     },
+    "updates": {
+        "check": True,              # look for a new version when the daemon or the window starts
+        "notify": True,             # desktop notification when there is one
+        "prerelease": False,        # include test versions
+        "skip": ""                  # a version you said to skip
+    },
     "devices": {},
     "custom_colors": [],
     "profiles": {

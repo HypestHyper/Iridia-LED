@@ -73,6 +73,8 @@ def icon(name: str, fill: bool = False, classes=()) -> Gtk.Label:
 def label(text: str = "", classes=(), wrap: bool = False, xalign: float = 0.0, selectable: bool = False,
           chars: int = 0, ellipsize: bool = False) -> Gtk.Label:
     lbl = Gtk.Label(label=text, xalign=xalign)
+    # A long line of help text wraps instead of holding the window wide.
+    wrap = wrap or (len(text) > 60 and not ellipsize and not chars and bool({"small", "tiny", "faint"} & set(classes)))
     lbl.set_wrap(wrap)
     if wrap:
         lbl.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
@@ -91,6 +93,17 @@ def hbox(spacing=8, *children, **kw) -> Gtk.Box:
     for c in children:
         b.append(c)
     return b
+
+
+def wrap_row(spacing=6, *children) -> Gtk.FlowBox:
+    """A row of buttons that wraps onto a second line in a narrow window instead of making it wide."""
+    fb = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=False, column_spacing=spacing,
+                     row_spacing=spacing, min_children_per_line=1, max_children_per_line=24,
+                     halign=Gtk.Align.FILL, hexpand=True)
+    fb.add_css_class("wrap-row")
+    for c in children:
+        fb.append(c)
+    return fb
 
 
 def vbox(spacing=8, *children, **kw) -> Gtk.Box:
@@ -743,8 +756,33 @@ def _mix_hex(c1: str, c2: str, t: float) -> str:
     return "%02x%02x%02x" % tuple(int(round(x + (y - x) * t)) for x, y in zip(a, b))
 
 
+RULER_H = 15
+
+
+def _ruler(cr, x0, x1, n, y):
+    """LED numbers under a strip: 1, every few LEDs (as many as fit) and the last one, which is the
+    strip's real LED count."""
+    cw = (x1 - x0) / max(1, n)
+    step = next((s for s in (1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000) if s * cw >= 30), 1000)
+    marks = [1] + [k for k in range(step, n, step) if (n - k) * cw >= 22] + ([n] if n > 1 else [])
+    cr.select_font_face(fonts.TEXT_FAMILY, 0, 0)
+    cr.set_font_size(10)
+    for k in marks:
+        cx = x0 + (k - 0.5) * cw
+        cr.set_source_rgb(*rgb("OUTLINE_VARIANT"))
+        cr.rectangle(cx - 0.5, y, 1, 3)
+        cr.fill()
+        txt = str(k)
+        ext = cr.text_extents(txt)
+        tx = min(max(cx - ext.width / 2 - ext.x_bearing, x0 - 4), x1 + 4 - ext.width)
+        cr.set_source_rgb(*rgb("ON_SURFACE" if k == n else "OUTLINE"))
+        cr.move_to(tx, y + 13)
+        cr.show_text(txt)
+
+
 class StripEditor(Gtk.DrawingArea):
-    """Full-width LED strip: shows the colours, layout handles for stops, and painting."""
+    """Full-width LED strip: shows the colours, layout handles for stops, painting, and LED numbers
+    under it."""
 
     STRIP_H = 28
     HANDLE_H = 22
@@ -770,7 +808,8 @@ class StripEditor(Gtk.DrawingArea):
         self._drag = None
         self._painting = False
         self._x0 = 0.0
-        self.set_content_height(self.STRIP_H + 8)
+        self.ruler = RULER_H                  # 0: no LED numbers (a preview that isn't a real strip)
+        self.set_content_height(self.STRIP_H + 8 + RULER_H)
         self.set_draw_func(self._draw)
         g = Gtk.GestureDrag()
         g.connect("drag-begin", self._begin)
@@ -791,10 +830,14 @@ class StripEditor(Gtk.DrawingArea):
     def _twin(self):
         return self.pattern in ("center_out", "edges_in") or self.mirror
 
+    def set_ruler(self, on):
+        self.ruler = RULER_H if on else 0
+        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if self.layout_mode else 0) + self.ruler)
+
     def set_layout(self, on, stops):
         self.layout_mode = on
         self.stops = list(stops)
-        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if on else 0))
+        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if on else 0) + self.ruler)
         self.queue_draw()
 
     def set_paint(self, on, paint):
@@ -862,6 +905,8 @@ class StripEditor(Gtk.DrawingArea):
             r = min(4.0, cw / 2.5)
             _rounded(cr, x0 + i * cw, y0, max(1.0, cw - gap), self.STRIP_H, r)
             cr.fill()
+        if self.ruler:
+            _ruler(cr, x0, x1, n, h - RULER_H)
         if self.layout_mode and not self.paint_mode:
             for v in self.stops:
                 x = self._v_to_x(v)
@@ -976,7 +1021,7 @@ class SectionStrip(Gtk.DrawingArea):
         self._on_drag, self._on_moved, self._on_led = on_drag, on_moved, on_led
         self._drag = None
         self._last_led = None
-        self.set_content_height(self.NUM_H + self.STRIP_H + self.HANDLE_H + 6)
+        self.set_content_height(self.NUM_H + self.STRIP_H + self.HANDLE_H + 6 + RULER_H)
         self.set_draw_func(self._draw)
         g = Gtk.GestureDrag()
         g.connect("drag-begin", self._begin)
@@ -1038,6 +1083,7 @@ class SectionStrip(Gtk.DrawingArea):
             if 0 <= i < n:
                 cr.arc(x0 + (i + 0.5) * cw, y0 + self.STRIP_H + 4, 2.2, 0, 2 * math.pi)
                 cr.fill()
+        _ruler(cr, x0, x1, n, h - RULER_H)
         # dividers
         for k, s in enumerate(self.starts):
             x = self._x_of(s)

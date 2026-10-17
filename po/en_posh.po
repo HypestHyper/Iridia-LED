@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:43+0000\n"
+"POT-Creation-Date: 2026-10-17 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -122,6 +122,18 @@ msgstr "Ledger cabinet"
 
 msgid "Quit"
 msgstr "Take leave"
+
+msgid "Minimize"
+msgstr "Retire to the dock"
+
+msgid "Maximize"
+msgstr "Fill the screen"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Restore"
+msgstr "Restore"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -320,6 +332,12 @@ msgstr ""
 "Automatic becomes Petite in a slender window. Ctrl+minus and Ctrl+plus adjust it, and Ctrl+0 "
 "restores Automatic."
 
+msgid "Window buttons"
+msgstr "Window controls"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Retire, enlarge and dismiss at the top. Off: rely upon your desktop's own keys or menu."
+
 msgid "Reduce motion"
 msgstr "Restrain all motion"
 
@@ -383,9 +401,6 @@ msgstr "Automatic safekeeping"
 
 msgid "No backups yet"
 msgstr "Nothing kept as yet"
-
-msgid "Restore"
-msgstr "Restore"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Recalling an arrangement first keeps your present state in safekeeping, so you may always return."
@@ -1294,9 +1309,6 @@ msgstr "OpenRGB is not in correspondence, so the strip cannot be lit at present.
 
 msgid "Resize failed"
 msgstr "The resizing failed"
-
-msgid "Close"
-msgstr "Close"
 
 msgid "Breathing"
 msgstr "Respiration"

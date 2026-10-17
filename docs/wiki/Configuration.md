@@ -14,7 +14,7 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 | `calibration/*.json` | Calibration profiles, one file each (`WS2812B.json`, `Neutral.json`, your own) |
 | `custom_colors.json` | Your saved colors, and which colors are exact |
 | `wallpaper_colors.json` | Extracted colors per wallpaper (a cache) and your color picks per wallpaper and zone |
-| `gui.json` | Window preferences: font, size, reduce motion, language, recently used colors |
+| `gui.json` | Window preferences: font, size, window buttons, reduce motion, language, recently used colors |
 | `setups/` | Saved setups; automatic backups in `setups/.backups/` |
 | `detection_cache.json` | Which wallpaper tool was found last |
 
@@ -29,6 +29,12 @@ applies when the window restarts. The command line and the log always use Americ
 `"ui_size"` is the window's size: `"auto"` (default: `"default"`, or `"compact"` in a window narrower
 than 900 pixels), `"compact"`, `"default"` or `"large"`. Settings, Appearance, Size, and Ctrl+minus,
 Ctrl+plus and Ctrl+0 in the window, change it.
+
+### gui.json: window_buttons
+
+`"window_buttons": false` hides the window's own minimize, maximize and close buttons (Settings,
+Appearance, Window buttons). They're shown by default, on the side and in the order your desktop's
+`gtk-decoration-layout` asks for (GNOME's default shows only close).
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
 `$XDG_RUNTIME_DIR/iridia-UID.sock`.

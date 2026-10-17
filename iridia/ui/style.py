@@ -29,6 +29,13 @@ headerbar windowcontrols button:active {{ background: alpha({ON_SURFACE}, 0.16);
 headerbar windowcontrols button.close:hover {{ background: {ERROR_HOVER}; color: #ffffff; }}
 headerbar windowcontrols button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
+.winctl > button.circle {{ min-height: 32px; min-width: 32px; padding: 0; border-radius: 16px; background: transparent;
+  color: {ON_SURFACE_VARIANT}; }}
+.winctl > button .icon {{ font-size: 18px; }}
+.winctl > button.circle:hover {{ background: alpha({ON_SURFACE}, 0.10); color: {ON_SURFACE}; }}
+.winctl > button.circle:active {{ background: alpha({ON_SURFACE}, 0.16); border-radius: 16px; }}
+.winctl > button.close:hover {{ background: {ERROR_HOVER}; color: #ffffff; }}
+.winctl > button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 .app-title {{ font-size: 24px; font-weight: 700; color: {ON_SURFACE}; }}
 .display {{ font-size: 28px; font-weight: 700; }}
 .title {{ font-size: 20px; font-weight: 700; }}
@@ -98,6 +105,8 @@ button.filter:checked {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY
   border-color: {SECONDARY_CONTAINER}; }}
 .group > button:checked .icon {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .group > button:active {{ border-radius: 4px; }}
+
+flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 0; }}
 
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}

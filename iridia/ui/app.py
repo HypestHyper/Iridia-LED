@@ -26,7 +26,7 @@ from iridia.ui import style as ui_style  # noqa: E402
 from iridia.ui.style import Style  # noqa: E402
 from iridia.ui.widgets import (Animator, Chip, Dropdown, Group, LoadingIndicator, QuickColors, Snackbar, Spin, Swatch,  # noqa: E402
                                WavyBar, button, card, divider, hbox, icon, label, rgb, section, set_button_text,
-                               shape_path, spring, switch_row, vbox)
+                               shape_path, spring, switch_row, vbox, wrap_row)
 from iridia.ui.keybinds_tab import KeybindsPage  # noqa: E402
 from iridia.ui.zonecard import MODE_LABELS, GlobalClient, ZoneCard, merge_zone_cfgs  # noqa: E402
 
@@ -168,6 +168,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._profiles = None
 
         self._narrow = False
+        self._tight = False
         widgets.STYLE = Style(self._seed, self.prefs.get("font", ""), bool(self.prefs.get("reduce_motion", False)),
                               self._ui_scale())
         dialogs.PAUSE = self.pause
@@ -229,8 +230,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
             return False
         return True
 
+    TIGHT_BELOW = 760
+
     def do_size_allocate(self, width, height, baseline):
         Gtk.ApplicationWindow.do_size_allocate(self, width, height, baseline)
+        tight = width < self.TIGHT_BELOW if not self._tight else width < self.TIGHT_BELOW + 60
+        if tight != self._tight:
+            self._tight = tight
+            GLib.idle_add(lambda: (self._set_tight(tight), False)[1])
         # some room either side, so a window right at the edge doesn't flip back and forth
         narrow = width < ui_style.AUTO_COMPACT_BELOW if not self._narrow else width < ui_style.AUTO_COMPACT_BELOW + 60
         if narrow != self._narrow:
@@ -354,7 +361,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         title.append(logo)
         title.append(label(_("Iridia"), ("app-title",)))
         hb.pack_start(title)
+        self._app_title = title.get_last_child()
         hb.set_title_widget(Gtk.Box())
+        # Our own minimize, maximize and close (Material icons), on the side and in the order the
+        # desktop asks for (gtk-decoration-layout); Settings can hide them.
+        hb.set_show_title_buttons(False)
+        self._winbtns = self._window_buttons(hb)
         self._chip = Chip(_("Connecting…"))
         hb.pack_end(self._chip)
         self._freeze_btn = button(_("Freeze colors"), "ac_unit", "tonal small", self._toggle_freeze)
@@ -376,8 +388,27 @@ class IridiaWindow(Gtk.ApplicationWindow):
         bar = hbox(2)
         bar.add_css_class("tabbar")
         bar.set_halign(Gtk.Align.START)
+        # tabs scroll sideways (with arrows) when the window is too narrow for them
+        self._tab_scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
+                                              vscrollbar_policy=Gtk.PolicyType.NEVER, hexpand=True,
+                                              propagate_natural_width=True, propagate_natural_height=True)
+        self._tab_scroll.set_child(bar)
+        self._tab_arrows = []
+        tabrow = hbox(4)
+        for step, ico in ((-1, "chevron_left"), (1, "chevron_right")):
+            a = button(icon_name=ico, style="text small", cb=lambda st=step: self._scroll_tabs(st))
+            a.set_valign(Gtk.Align.CENTER)
+            a.set_visible(False)
+            self._tab_arrows.append(a)
+        tabrow.append(self._tab_arrows[0])
+        tabrow.append(self._tab_scroll)
+        tabrow.append(self._tab_arrows[1])
+        adj = self._tab_scroll.get_hadjustment()
+        for sig in ("changed", "value-changed"):
+            adj.connect(sig, lambda *_a: self._update_tab_arrows())
         self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.CROSSFADE,
                                 transition_duration=180)
+        self._stack.set_hhomogeneous(False)      # only the page on show sets how narrow the window can be
         self._tabs = {}
         first = None
         for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
@@ -385,6 +416,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                ("settings", _("Settings"), "settings"), ("service", _("Service"), "build")):
             b = Gtk.ToggleButton()
             b.set_child(hbox(8, icon(ico), Gtk.Label(label=text)))
+            b.set_tooltip_text(text)
             if first is None:
                 first = b
             else:
@@ -392,7 +424,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             b.connect("toggled", self._tab_toggled, key)
             bar.append(b)
             self._tabs[key] = b
-        root.append(bar)
+        root.append(tabrow)
 
         self._layout_tab = LayoutTab(self)
         pages = {}
@@ -409,12 +441,17 @@ class IridiaWindow(Gtk.ApplicationWindow):
         root.append(self._stack)
 
         bot = hbox(8)
-        bot.append(button(_("Refresh"), "refresh", "tonal", self._do_refresh))
-        bot.append(button(_("Restart daemon"), "restart_alt", "tonal", self._do_restart))
-        bot.append(button(_("Config folder"), "folder_open", "text", lambda: self._xdg_open("~/.config/iridia")))
-        bot.append(button(_("Log folder"), "description", "text", lambda: self._xdg_open("~/.local/share/iridia")))
+        self._bottom_btns = [button(_("Refresh"), "refresh", "tonal", self._do_refresh),
+                             button(_("Restart daemon"), "restart_alt", "tonal", self._do_restart),
+                             button(_("Config folder"), "folder_open", "text",
+                                    lambda: self._xdg_open("~/.config/iridia")),
+                             button(_("Log folder"), "description", "text",
+                                    lambda: self._xdg_open("~/.local/share/iridia")),
+                             button(_("Quit"), "power_settings_new", "danger", self.close)]
+        for b in self._bottom_btns[:-1]:
+            bot.append(b)
         bot.append(Gtk.Box(hexpand=True))
-        bot.append(button(_("Quit"), "power_settings_new", "danger", self.close))
+        bot.append(self._bottom_btns[-1])
         root.append(bot)
 
         overlay.set_child(root)
@@ -427,6 +464,47 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._build_settings()
         self._build_service()
         self._tabs["status"].set_active(True)
+
+    def _window_buttons(self, hb):
+        """Minimize, maximize and close as Material icons, laid out like the desktop's own buttons."""
+        layout = ""
+        settings = Gtk.Settings.get_default()
+        if settings is not None:
+            layout = settings.get_property("gtk-decoration-layout") or ""
+        left, _sep, right = layout.partition(":")
+        known = ("minimize", "maximize", "close")
+        on_left = [b for b in left.split(",") if b in known]
+        order = on_left or [b for b in right.split(",") if b in known] or list(known)
+        box = hbox(2)
+        box.add_css_class("winctl")
+        box.set_valign(Gtk.Align.CENTER)
+        acts = {"minimize": ("minimize", _("Minimize"), self.minimize),
+                "maximize": ("crop_square", _("Maximize"),
+                             lambda: self.unmaximize() if self.is_maximized() else self.maximize()),
+                "close": ("close", _("Close"), self.close)}
+        for name in order:
+            ico, tip, cb = acts[name]
+            b = button(icon_name=ico, style="text", cb=cb, tooltip=tip)
+            b.add_css_class(name)
+            box.append(b)
+            if name == "maximize":
+                self._max_btn = b
+        self.connect("notify::maximized", lambda *_a: self._max_icon())
+        (hb.pack_start if on_left else hb.pack_end)(box)
+        box.set_visible(bool(self.prefs.get("window_buttons", True)))
+        return box
+
+    def _max_icon(self):
+        b = getattr(self, "_max_btn", None)
+        if b is not None:
+            m = self.is_maximized()
+            b.get_child().set_label(fonts.codepoint("filter_none" if m else "crop_square"))
+            b.set_tooltip_text(_("Restore") if m else _("Maximize"))
+
+    def _set_window_buttons(self, on):
+        self.prefs["window_buttons"] = on
+        save_prefs(self.prefs)
+        self._winbtns.set_visible(on)
 
     def _scroll_page(self):
         sc = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.NEVER, vexpand=True)
@@ -442,6 +520,46 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._stack.set_transition_duration(180 if widgets.motion() else 0)
         self._stack.set_visible_child_name(key)
         self._layout_tab.set_visible_tab(key == "layout")
+        GLib.idle_add(lambda: (self._show_tab(b), False)[1])
+
+    # ---- narrow windows: tabs scroll, buttons drop their words
+    def _scroll_tabs(self, step):
+        adj = self._tab_scroll.get_hadjustment()
+        adj.set_value(adj.get_value() + step * max(120.0, adj.get_page_size() * 0.6))
+
+    def _show_tab(self, b):
+        ok, rect = b.compute_bounds(self._tab_scroll.get_child())
+        if not ok:
+            return
+        adj = self._tab_scroll.get_hadjustment()
+        x, w, v, page = rect.get_x(), rect.get_width(), adj.get_value(), adj.get_page_size()
+        if x < v:
+            adj.set_value(x)
+        elif x + w > v + page:
+            adj.set_value(x + w - page)
+
+    def _update_tab_arrows(self):
+        adj = self._tab_scroll.get_hadjustment()
+        over = adj.get_upper() - adj.get_page_size() > 1
+        self._tab_arrows[0].set_visible(over)
+        self._tab_arrows[1].set_visible(over)
+        self._tab_arrows[0].set_sensitive(adj.get_value() > 0.5)
+        self._tab_arrows[1].set_sensitive(adj.get_value() < adj.get_upper() - adj.get_page_size() - 0.5)
+
+    def _set_tight(self, tight):
+        """Below TIGHT_BELOW pixels: icon-only tabs and buttons (the words become tooltips)."""
+        def words(btn, show):
+            box = btn.get_child()
+            c = box.get_first_child() if isinstance(box, Gtk.Box) else None
+            while c is not None:
+                if isinstance(c, Gtk.Label) and not c.has_css_class("icon"):
+                    c.set_visible(show)
+                    if not btn.get_tooltip_text():
+                        btn.set_tooltip_text(c.get_label())
+                c = c.get_next_sibling()
+        for b in list(self._tabs.values()) + self._bottom_btns + [self._freeze_btn]:
+            words(b, not tight)
+        self._app_title.set_visible(not tight)
 
     def _xdg_open(self, path):
         path = os.path.expanduser(path)
@@ -785,6 +903,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(r)
         c.append(label(_("Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, "
                          "Ctrl+0 goes back to Automatic."), ("small", "faint")))
+        row, _u = switch_row(_("Window buttons"), bool(self.prefs.get("window_buttons", True)),
+                             self._set_window_buttons)
+        c.append(row)
+        c.append(label(_("Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."),
+                       ("small", "faint")))
         r = hbox(10)
         # Never translated, so this row can be found again from any language.
         r.append(icon("language", classes=("dim",)))
@@ -841,7 +964,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._setup_dd = Dropdown([], None, placeholder=_("No setups yet"))
         r1.append(self._setup_dd)
         c.append(r1)
-        r2 = hbox(6)
+        r2 = wrap_row(6)
         for text, ico, cb, style in ((_("Save current as…"), "save", self._setup_save, "filled"),
                                      (_("Load"), "upload", self._setup_load, "tonal"),
                                      (_("Rename"), "edit", self._setup_rename, "tonal"),
@@ -890,6 +1013,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
                           ("material", _("Material: prominent colors from the image (needs material-color-utilities)")),
                           ("pillow", _("Pillow: median-cut dominant colors, no extra dependencies"))):
             cb = Gtk.CheckButton(label=desc, active=cur == val)
+            if isinstance(cb.get_last_child(), Gtk.Label):
+                cb.get_last_child().set_wrap(True)          # long text mustn't make the window wide
             if group is None:
                 group = cb
             else:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:43+0000\n"
+"POT-Creation-Date: 2026-10-17 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -120,6 +120,18 @@ msgstr "Oui"
 
 msgid "Quit"
 msgstr "Camembert"
+
+msgid "Minimize"
+msgstr "Petit"
+
+msgid "Maximize"
+msgstr "Grand"
+
+msgid "Close"
+msgstr "Bonne nuit"
+
+msgid "Restore"
+msgstr "Santé !"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -305,6 +317,12 @@ msgid ""
 "Automatic."
 msgstr "Le croissant est petit. Ctrl+moins et Ctrl+plus, oh là là. Ctrl+0, bonsoir."
 
+msgid "Window buttons"
+msgstr "Les boutons"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Petit, grand et au revoir. Non : bonsoir."
+
 msgid "Reduce motion"
 msgstr "Bof"
 
@@ -366,9 +384,6 @@ msgstr "La baguette est trop longue"
 
 msgid "No backups yet"
 msgstr "Pardon ?"
-
-msgid "Restore"
-msgstr "Santé !"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Je ne sais quoi. Qui a mangé mon fromage."
@@ -1209,9 +1224,6 @@ msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
 
 msgid "Resize failed"
 msgstr "Oh là là"
-
-msgid "Close"
-msgstr "Bonne nuit"
 
 msgid "Breathing"
 msgstr "La sieste"

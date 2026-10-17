@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-16 23:43+0000\n"
+"POT-Creation-Date: 2026-10-17 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -120,6 +120,18 @@ msgstr "Captain's log"
 
 msgid "Quit"
 msgstr "Abandon ship"
+
+msgid "Minimize"
+msgstr "Stow it"
+
+msgid "Maximize"
+msgstr "Hoist it"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Restore"
+msgstr "Dig it up"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -314,6 +326,12 @@ msgstr ""
 "Automatic be a Dinghy in a narrow window. Ctrl+minus an' Ctrl+plus change it, Ctrl+0 sails back "
 "to Automatic."
 
+msgid "Window buttons"
+msgstr "Porthole buttons"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Stow, hoist an' scuttle up top. Off: use yer desktop's own keys or menu."
+
 msgid "Reduce motion"
 msgstr "Calm the seas"
 
@@ -377,9 +395,6 @@ msgstr "Automatic buried treasure"
 
 msgid "No backups yet"
 msgstr "Nothin' buried yet"
-
-msgid "Restore"
-msgstr "Dig it up"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Diggin' up a chart first buries what ye have now, so ye can always sail back."
@@ -1277,9 +1292,6 @@ msgstr "OpenRGB ain't hailed, so the strip can't light up right now."
 
 msgid "Resize failed"
 msgstr "Resize ran aground"
-
-msgid "Close"
-msgstr "Close"
 
 msgid "Breathing"
 msgstr "Heavin' breath"

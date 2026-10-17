@@ -20,7 +20,7 @@ Open **Iridia** from your app launcher. The chip in the header says whether Open
 | **Devices** | The *Everything* card (changes all zones at once) and one card per zone: pattern, colors, strip preview, brightness, color correction, strip type. |
 | **Layout** | Your strips drawn where they are in the room, live, to arrange, bend and paint. |
 | **Keybinds** | Builds commands for keyboard shortcuts and the line for your desktop's config. |
-| **Settings** | Appearance (font, size, language, reduce motion), night mode and sleep, setups and backups, color calibration, color extraction, logging. |
+| **Settings** | Appearance (font, size, window buttons, language, reduce motion), night mode and sleep, setups and backups, color calibration, color extraction, logging. |
 | **Service** | The background daemon, starting at login, the OpenRGB connection, diagnostics, uninstalling. |
 
 Changes apply right away and are saved on their own; there's no Save button. The **Freeze colors**

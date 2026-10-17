@@ -13,7 +13,7 @@ from iridia.colors import resolve_colors
 from iridia.i18n import _, ngettext
 from iridia.ui import effects as fx
 from iridia.ui.widgets import (Dropdown, Group, SectionStrip, Swatch, SwatchPicker, button, card, hbox, label,
-                               set_button_text, vbox)
+                               set_button_text, vbox, wrap_row)
 
 KIND_NAMES = {"same": _("Same as the strip"), "pattern": _("Its own pattern"), "effect": _("Its own effect"),
               "off": _("Off")}
@@ -42,12 +42,12 @@ class SectionsPanel(Gtk.Box):
         self.strip = SectionStrip(on_drag=self._dragging, on_moved=self._moved, on_led=self._on_led)
         box.append(self.strip)
 
-        r = hbox(8)
+        r = wrap_row(8)
         r.append(button(_("Add divider"), "add", "tonal small", self._add_divider))
         self._even_btn = button(_("Space evenly"), "linear_scale", "tonal small", self._space_evenly)
         r.append(self._even_btn)
         self._sizes = label("", ("small", "dim"), wrap=True)
-        self._sizes.set_hexpand(True)
+        self._sizes.set_valign(Gtk.Align.CENTER)
         r.append(self._sizes)
         box.append(r)
         self._warn = label("", ("small", "warn-text"), wrap=True)
@@ -57,7 +57,7 @@ class SectionsPanel(Gtk.Box):
 
         # single LEDs
         box.append(label(_("Single LEDs"), ("subheading",)))
-        r = hbox(8)
+        r = wrap_row(8)
         self._pick_btn = button(_("Set LEDs"), "colorize", "tonal small", self._toggle_pick)
         r.append(self._pick_btn)
         self._tools = Group([("color", _("Color")), ("off", _("Off")), ("clear", _("Back to normal"))],
@@ -66,7 +66,7 @@ class SectionsPanel(Gtk.Box):
         self._well = Swatch(self.paint, 30, on_click=self._pick_paint, tooltip=_("Color for single LEDs"))
         r.append(self._well)
         self._ov_lbl = label("", ("small", "dim"))
-        self._ov_lbl.set_hexpand(True)
+        self._ov_lbl.set_valign(Gtk.Align.CENTER)
         r.append(self._ov_lbl)
         self._clear_btn = button(_("Clear all"), "delete", "text small", self._clear_overrides)
         r.append(self._clear_btn)

@@ -12,7 +12,7 @@ from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
 from iridia.ui.sections_panel import SectionsPanel
 from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
-                               button, card, hbox, icon, label, set_button_text, switch_row, vbox)
+                               button, card, hbox, icon, label, set_button_text, switch_row, vbox, wrap_row)
 
 ZONE_FIELDS_DEFAULT = {
     "enabled": True, "led_count": 20, "pattern": "solid", "mode": "full",
@@ -249,20 +249,18 @@ class ZoneCard(Gtk.Box):
         self._hw_note = label("", ("small", "accent"), wrap=True)
         self._hw_note.set_visible(False)
         d.append(self._hw_note)
-        row = hbox(10)
+        row = wrap_row(10)
         if not self.global_mode:
-            row.append(label(_("LEDs"), ("small", "dim")))
             self._led_spin = Spin(1, 1000, self.cfg.get("led_count", 20), self._on_led_change)
-            row.append(self._led_spin)
+            row.append(hbox(10, label(_("LEDs"), ("small", "dim")), self._led_spin))
         else:
             self._led_spin = None
+        # label, kind and menu stay together when the row wraps
         self._pattern_lbl = label(_("Pattern"), ("small", "dim"))
-        row.append(self._pattern_lbl)
         self._kind = Group([("static", _("Static")), ("animated", _("Animated"))],
                            "animated" if self._anim else "static", self._on_kind)
-        row.append(self._kind)
         self._pattern = Dropdown(self._menu_items(), self._menu_value(), self._on_pattern_change)
-        row.append(self._pattern)
+        row.append(hbox(10, self._pattern_lbl, self._kind, self._pattern))
         d.append(row)
         self._fx = fx.EffectControls(self._on_effect_params, show_sync=self.global_mode)
         self._fx.set_effect(self._anim)
@@ -285,6 +283,7 @@ class ZoneCard(Gtk.Box):
         d.append(self._picker)
 
         self._strip = StripEditor(render=self._render_with_stops, on_stops=self._on_stops, on_paint=self._on_paint)
+        self._strip.set_ruler(not self.global_mode)
         d.append(self._strip)
         self._layout_row = hbox(14)
         self._layout_btn = button(_("Edit layout"), "tune", "text small", self._toggle_layout)

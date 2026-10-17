@@ -6,8 +6,16 @@
   10% smaller than before and Large is the old size; Automatic is Compact in a window narrower than
   900 pixels. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to Automatic. Text shrinks less
   than the rest and never below 10 pixels.
-- The window buttons (minimize, maximize, close) are flat icons now, with a round highlight under the
-  pointer; close turns red.
+- **Window buttons** in the same Material icons as the rest of the window: a round highlight under the
+  pointer, close turns red, maximize turns into restore. They follow your desktop's button layout
+  (side and order), and Settings, Appearance, *Window buttons* hides them.
+- **Narrow windows.** Only the tab on show sets how narrow the window can be, long help text wraps,
+  and rows of buttons wrap onto a second line. Below 760 pixels the tabs and the bottom buttons show
+  only their icons (the words become tooltips), and if the tabs still don't fit they scroll sideways
+  with arrows. The window now goes down to about 600 pixels wide.
+- **LED numbers** under every strip preview (1, every few LEDs, and the last LED, which is the strip's
+  real count), so you can see which LED is which.
+- Popups no longer show a black frame on X11 without a compositor.
 - **Split a strip into parts.** *Advanced: split this strip, set single LEDs* on a zone card: add
   dividers (drag them, they snap to whole LEDs) and let each part show the strip's own look, a static
   pattern of its own, an animated effect of its own, or nothing. A static strip can have one animated

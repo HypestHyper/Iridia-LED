@@ -4,6 +4,7 @@ Every file the daemon touches lives under a temporary HOME, so these never read
 or change your real settings, and nothing talks to hardware.
 """
 import json
+import os
 
 import pytest
 
@@ -618,3 +619,21 @@ def test_sensor_cli(d, monkeypatch, capsys):
                      "background=dim"]) == 0
     out = capsys.readouterr().out
     assert "2. LEDs 6-10: sensor cpu_temp as both, 30 to 85, flashing above 80" in out
+
+
+def test_a_daemon_started_in_a_session_stops_when_it_ends(d, tmp_path, monkeypatch):
+    sessions = tmp_path / "sessions"
+    sessions.mkdir()
+    d._sessions_dir = str(sessions)
+    monkeypatch.setenv("XDG_SESSION_ID", "4")
+    monkeypatch.delenv("INVOCATION_ID", raising=False)
+    monkeypatch.delenv("SYSTEMD_EXEC_PID", raising=False)
+    assert not d._session_over()                        # no session file yet: nothing to go by
+    (sessions / "4").write_text("UID=1000\nSTATE=active\n")
+    assert not d._session_over()
+    (sessions / "4").write_text("UID=1000\nSTATE=closing\n")
+    assert d._session_over()
+    (sessions / "4").unlink()
+    assert d._session_over()                            # seen before, gone now
+    monkeypatch.setenv("SYSTEMD_EXEC_PID", str(os.getpid()))
+    assert not d._session_over()                        # systemd stops its own services

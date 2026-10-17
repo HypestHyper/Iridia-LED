@@ -171,7 +171,7 @@ class Daemon:
         self.running = False
         self.config = Config()
         self.started_by = openrgb_server.started_by()
-        if not os.environ.get("INVOCATION_ID") and not self.config.is_set("logging.enabled"):
+        if not openrgb_server.run_by_systemd() and not self.config.is_set("logging.enabled"):
             # Started outside systemd (a compositor line, XDG autostart...): there is no
             # journal, so keep a log file unless you've turned it off yourself.
             self.config.set("logging.enabled", True)
@@ -212,6 +212,7 @@ class Daemon:
         self.sleepwatch = None
         self.sessionwatch = None
         self._stopping = threading.Event()  # set when the daemon shuts down
+        self._sessions_dir = "/run/systemd/sessions"
         self._sensor_zones = set()          # zones to redraw for a new sensor reading
         from iridia.sensors import SensorHub
         self.sensors = SensorHub()          # read only while a strip shows a sensor
@@ -1099,6 +1100,28 @@ class Daemon:
             self.logger.warning("IPC thread died, restarting...")
             self.ipc = IPCServer(self._socket_path, self)
             self.ipc.start()
+        if self._session_over():
+            self.logger.info("The login session this daemon was started in has ended: stopping, so the next "
+                             "login's daemon can start")
+            self.running = False
+
+    def _session_over(self) -> bool:
+        """Started by a compositor or a terminal (not systemd, which stops it itself) and its logind
+        session is closing or gone. Otherwise it would outlive the logout and block the next login's copy.
+        logind and elogind both keep /run/systemd/sessions/<id>."""
+        sid = os.environ.get("XDG_SESSION_ID")
+        if not sid or openrgb_server.run_by_systemd() or "/" in sid:
+            return False
+        path = os.path.join(self._sessions_dir, sid)
+        try:
+            with open(path, encoding="utf-8") as f:
+                state = next((ln[6:].strip() for ln in f if ln.startswith("STATE=")), "")
+            self._session_seen = True
+            return state == "closing"
+        except FileNotFoundError:
+            return getattr(self, "_session_seen", False)
+        except OSError:
+            return False
 
     def _detect_wallpaper(self):
         if self._frozen:
@@ -2610,7 +2633,7 @@ class Daemon:
             "config_path": self.config.path,
             "socket_path": self._socket_path,
             "pid": os.getpid(),
-            "managed_by": "systemd" if os.environ.get("INVOCATION_ID") else "other",
+            "managed_by": "systemd" if openrgb_server.run_by_systemd() else "other",
             "animations": dict(self._anim_settings(), paused=self._anim_hold, running=self._animator.running(),
                                zones=sorted(self._anim_keys), clock=self._animator.clock, rate=self._animator.rate,
                                time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed,

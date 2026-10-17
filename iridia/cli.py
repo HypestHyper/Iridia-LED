@@ -939,14 +939,14 @@ def _service_install(how=None, openrgb=None):
 Description=Iridia Daemon
 After=graphical-session.target
 PartOf=graphical-session.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart={python_bin} -m iridia.daemon
+ExecStart="{python_bin.replace("%", "%%")}" -m iridia.daemon
 Restart=on-failure
 RestartSec=5
-StartLimitIntervalSec=60
-StartLimitBurst=5
 Environment=\"PYTHONUNBUFFERED=1\"
 StandardOutput=journal
 StandardError=journal
@@ -997,6 +997,13 @@ StartupWMClass={assets.APP_ID}
     if how == "systemd" and not _has_user_systemd():
         print("No systemd user session here, so the daemon starts through XDG autostart instead.")
         how = "xdg"
+    if how == "systemd":
+        from iridia import openrgb_server
+        if openrgb_server.graphical_session_active() is False:
+            # the unit would never start at login here: use what this session does run
+            how = "compositor" if autostart.detect_compositor() else "xdg"
+            print("Your session doesn't start graphical-session.target, so a systemd service wouldn't start "
+                  f"the daemon at login; using {how} instead.")
     _openrgb_setup(openrgb)
     if how == "systemd":
         _systemctl("daemon-reload")
@@ -1016,8 +1023,8 @@ StartupWMClass={assets.APP_ID}
                 print(f"The daemon starts at login through {path}.")
             except OSError as e:
                 print(f"The autostart entry couldn't be written: {e}")
-            print("Compositors that don't read ~/.config/autostart (Hyprland, Sway, niri, river, ...) need a line "
-                  "in their own config instead: see `iridia autostart`.")
+            print("Compositors that don't read ~/.config/autostart (Hyprland and Sway without UWSM, river, labwc, "
+                  "Wayfire, i3, bspwm, ...) need a line in their own config instead: see `iridia autostart`.")
         elif how == "compositor":
             from iridia import openrgb_server
             snip = autostart.snippet(autostart.detect_compositor())
@@ -1171,8 +1178,11 @@ def cmd_daemon(args):
         if _daemon_running():
             print("Daemon is already running")
             return 0
-        unit = SERVICE_PATH
-        if os.path.exists(unit) and _has_user_systemd():
+        from iridia import openrgb_server
+        # through systemd only when that's how it starts at login (and the session has the target);
+        # otherwise run it here, so it gets this session's environment
+        if _has_user_systemd() and openrgb_server.unit_state(SERVICE_NAME)[0] == "enabled" \
+                and openrgb_server.graphical_session_active() is not False:
             _systemctl("start", SERVICE_NAME)
         else:
             from iridia import autostart

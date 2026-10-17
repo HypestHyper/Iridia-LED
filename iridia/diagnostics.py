@@ -158,7 +158,7 @@ def daemon_login_checks(status: dict) -> List[Check]:
                          "Start the daemon from your compositor instead (see: iridia autostart), and disable the "
                          "service: systemctl --user disable iridia-daemon.service"))
     if not starters:
-        out.append(Check("Daemon at login", None, "nothing found that starts the daemon at login",
+        out.append(Check("Daemon at login", False, "nothing found that starts the daemon at login",
                          "Set one up: iridia service install, or a line from: iridia autostart"))
     elif len(starters) > 1:
         out.append(Check("Daemon at login", None, f"set up in {len(starters)} places: {', '.join(starters)}. "

@@ -21,6 +21,16 @@
 - **Backups restore exactly:** loading a setup or backup removes files and calibration profiles that
   didn't exist when it was saved; two backups in the same second no longer overwrite each other.
 - Screen lockers whose process name is longer than 15 characters are recognised.
+- **Start at login, on more desktops:** the river line no longer uses `riverctl` (river 0.4 refuses
+  to start when its init file contains it); Wayfire gets its own line; i3 gets its own (with
+  `--no-startup-id`); river, bspwm and dwm started from a TTY or startx are recognised by their
+  process. Choosing systemd on a session that never reaches `graphical-session.target` (XFCE,
+  Cinnamon, MATE, i3, Hyprland without UWSM, ...) now sets up what does start there, and
+  `iridia daemon start` only goes through systemd when that's how it starts at login. A daemon a
+  compositor started stops when you log out, so it can't block the next login's. Paths with spaces
+  work in the autostart entry and the service; the service's restart limit is in the right section.
+  `iridia doctor` shows the fix when nothing starts the daemon at login, and no longer says
+  "started by systemd" for programs a UWSM- or niri-session-started compositor launched.
 
 - **Sensors.** A part of a strip (or the whole strip) can show CPU or GPU temperature and load,
   memory use, disk temperature or any other temperature sensor: as a level bar, as a color, or as a

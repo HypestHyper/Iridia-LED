@@ -559,3 +559,14 @@ def test_a_slow_controller_never_builds_a_backlog(env, monkeypatch, tmp_path):
     finally:
         d._animator.stop()
         d.ipc.stop()
+
+
+def test_run_by_systemd_is_the_service_itself_not_its_children(monkeypatch):
+    monkeypatch.setenv("INVOCATION_ID", "abc")
+    monkeypatch.setenv("SYSTEMD_EXEC_PID", str(os.getpid()))
+    assert osrv.run_by_systemd()
+    monkeypatch.setenv("SYSTEMD_EXEC_PID", "1")         # a compositor under UWSM passed it on
+    assert not osrv.run_by_systemd()
+    monkeypatch.delenv("SYSTEMD_EXEC_PID")
+    monkeypatch.delenv("INVOCATION_ID")
+    assert not osrv.run_by_systemd()

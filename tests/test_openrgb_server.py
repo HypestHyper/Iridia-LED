@@ -155,7 +155,7 @@ def test_waits_for_the_grace_then_starts_and_remembers_it(env):
     sup.tick("daemon", "127.0.0.1", False, "", env.port)
     time.sleep(0.3)
     assert env.starts() == []                       # login's own startup gets a chance first
-    clock.t += osrv.Supervisor.GRACE_SEC + 1
+    clock.t += osrv.Supervisor.QUICK_SEC + 0.5      # nothing else starts OpenRGB: no 10 s wait
     sup.tick("daemon", "127.0.0.1", False, "", env.port)
     assert wait_for(lambda: len(env.starts()) == 1)
     assert env.starts()[0].endswith(f"--server --server-port {env.port}")

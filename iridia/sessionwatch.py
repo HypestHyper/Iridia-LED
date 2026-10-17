@@ -132,56 +132,104 @@ def _prop(path: str, iface: str, name: str) -> Optional[str]:
 
 
 class SessionWatcher:
-    """Follows lock state in the background; idle_seconds() asks for the idle time when needed."""
+    """Follows lock state and idle time in the background, but only what's switched on: with both
+    lock and idle set to "keep" nothing is watched, no process runs and nothing is polled."""
 
     POLL_SEC = 5.0
+    LOCKER_SEC = 2.0
 
     def __init__(self, on_change: Callable[[], None]):
         self._on_change = on_change
         self._stop = False
+        self._mutex = threading.Lock()
         self._procs: List[subprocess.Popen] = []
+        self._lock_gen = 0                           # bumped to stop the lock watchers
+        self.watching_lock = False
+        self._idle_wanted = threading.Event()
+        self._idle_started = False
+        self.idle_checked = False                    # looked for a way to read the idle time
         self.session_path: Optional[str] = None
         self._said_locked = False                    # the desktop says the screen is locked
         self._locker_running = False                 # a screen locker (hyprlock, swaylock, ...) runs
         self._poke = threading.Event()
         self.lock_method: Optional[str] = None       # what reported the lock state, for the window
         self.idle_method: Optional[str] = None
-        self.want_idle = False                       # only ask for the idle time when it's used
         self.idle: Optional[float] = None            # seconds without input, POLL_SEC old at most
 
     @property
     def locked(self) -> bool:
-        return self._said_locked or self._locker_running
+        return self.watching_lock and (self._said_locked or self._locker_running)
+
+    @property
+    def want_idle(self) -> bool:
+        return self._idle_wanted.is_set()
 
     # ---- start / stop
     def start(self):
-        threading.Thread(target=self._setup, daemon=True, name="sessionwatch").start()
+        """Nothing to do until set_needs() asks for something."""
+
+    def set_needs(self, lock: bool, idle: bool):
+        """Watch locking and/or idle time; called every tick, cheap when nothing changes."""
+        with self._mutex:
+            if lock and not self.watching_lock and not self._stop:
+                self.watching_lock = True
+                self._lock_gen += 1
+                threading.Thread(target=self._start_lock, args=(self._lock_gen,), daemon=True,
+                                 name="sessionwatch").start()
+            elif not lock and self.watching_lock:
+                self.watching_lock = False
+                self._lock_gen += 1
+                self._kill_procs()
+                self._said_locked = self._locker_running = False
+                self._poke.set()
+        if idle and not self._idle_wanted.is_set():
+            self._idle_wanted.set()
+            if not self._idle_started:
+                self._idle_started = True
+                threading.Thread(target=self._start_idle, daemon=True, name="sessionwatch-idle").start()
+        elif not idle and self._idle_wanted.is_set():
+            self._idle_wanted.clear()
+            self.idle = None
 
     def stop(self):
         self._stop = True
+        self._idle_wanted.set()                     # let the idle thread see _stop
+        with self._mutex:
+            self._lock_gen += 1
+            self._kill_procs()
+        self._poke.set()
+
+    def _kill_procs(self):
         for p in self._procs:
             if p.poll() is None:
                 p.terminate()
+        self._procs = []
 
-    def _setup(self):
-        self.session_path = self._find_session()
+    def _start_lock(self, gen):
+        if self.session_path is None:
+            self.session_path = self._find_session()
+        if gen != self._lock_gen:
+            return
         if self.session_path:
             hint = parse_bool(_prop(self.session_path, "org.freedesktop.login1.Session", "LockedHint") or "")
-            if hint is not None:
-                self._said_locked = hint
-                if hint:
-                    self.lock_method = "logind"
+            if hint:
+                self._said_locked = True
+                self.lock_method = "logind"
+                self._on_change()
             if shutil.which("gdbus"):
                 self._watch(["gdbus", "monitor", "--system", "--dest", LOGIND, "--object-path", self.session_path],
-                            "logind")
+                            "logind", gen)
         if shutil.which("dbus-monitor"):
-            self._watch(["dbus-monitor", "--session", "type='signal',member='ActiveChanged'"], "screensaver")
-        threading.Thread(target=self._watch_lockers, daemon=True, name="sessionwatch-lockers").start()
+            self._watch(["dbus-monitor", "--session", "type='signal',member='ActiveChanged'"], "screensaver", gen)
+        threading.Thread(target=self._watch_lockers, args=(gen,), daemon=True, name="sessionwatch-lockers").start()
+        logger.info("Watching for the screen lock (logind, ScreenSaver signals and screen lockers)")
+
+    def _start_idle(self):
         self.idle_method = self._find_idle_method()
+        self.idle_checked = True
+        logger.info(f"Idle time from: {self.idle_method or 'nothing here (use iridia idle on|off)'}")
         if self.idle_method:
-            threading.Thread(target=self._poll_idle, daemon=True, name="sessionwatch-idle").start()
-        logger.info(f"Lock detection: {self.lock_method or 'logind/ScreenSaver signals, or iridia lock on|off'}; "
-                    f"idle time: {self.idle_method or 'not available (use iridia idle on|off)'}")
+            self._poll_idle()
 
     @staticmethod
     def _find_session() -> Optional[str]:
@@ -193,20 +241,23 @@ class SessionWatcher:
                           "auto")
         return parse_object_path(out or "")
 
-    def _watch(self, cmd, name):
+    def _watch(self, cmd, name, gen):
         def loop():
             backoff = 2.0
-            while not self._stop:
+            while not self._stop and gen == self._lock_gen:
                 start = time.monotonic()
-                try:
-                    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                         stdin=subprocess.DEVNULL, text=True, bufsize=1)
-                except OSError:
-                    return
-                self._procs.append(p)
+                with self._mutex:
+                    if gen != self._lock_gen:
+                        return
+                    try:
+                        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                             stdin=subprocess.DEVNULL, text=True, bufsize=1)
+                    except OSError:
+                        return
+                    self._procs.append(p)
                 pending = None
                 for line in p.stdout:
-                    if self._stop:
+                    if self._stop or gen != self._lock_gen:
                         break
                     ev, pending = lock_event(line, pending)
                     if ev in ("locked", "unlocked"):
@@ -216,31 +267,35 @@ class SessionWatcher:
                             self._on_change()
                     elif ev in ("lock", "unlock"):
                         self._poke.set()            # look for the screen locker now
-                if self._stop:
+                if self._stop or gen != self._lock_gen:
                     return
                 backoff = 2.0 if time.monotonic() - start > 30 else min(120.0, backoff * 2)
                 time.sleep(backoff)
         threading.Thread(target=loop, daemon=True, name=f"sessionwatch-{name}").start()
 
-    def _watch_lockers(self):
+    def _watch_lockers(self, gen):
         """Screen lockers that tell nobody (hyprlock, swaylock, ...): the screen is locked while one runs."""
         import os
         uid = os.getuid()
-        while not self._stop:
+        while not self._stop and gen == self._lock_gen:
             running = find_locker("/proc", uid) is not None
+            if gen != self._lock_gen:
+                return
             if running != self._locker_running:
                 self._locker_running = running
                 if running:
                     self.lock_method = self.lock_method or "screen locker"
                 self._on_change()
-            self._poke.wait(2.0)
+            self._poke.wait(self.LOCKER_SEC)
             self._poke.clear()
 
     # ---- idle time
     def _poll_idle(self):
         while not self._stop:
-            if self.want_idle:
-                self.idle = self._idle_now(self.idle_method)
+            self._idle_wanted.wait()                 # sleeps for good while idle is "keep"
+            if self._stop:
+                return
+            self.idle = self._idle_now(self.idle_method)
             time.sleep(self.POLL_SEC)
 
     def _idle_now(self, method: str) -> Optional[float]:
@@ -278,4 +333,4 @@ class SessionWatcher:
 
     def idle_seconds(self) -> Optional[float]:
         """Seconds without input, POLL_SEC old at most; None when nothing here can tell."""
-        return self.idle if self.idle_method and self.want_idle else None
+        return self.idle if self.idle_method and self._idle_wanted.is_set() else None

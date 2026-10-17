@@ -589,11 +589,13 @@ class Supervisor:
     """Used by the daemon ("daemon" method): start OpenRGB when it can't be reached on this machine,
     remember it as ours, restart it if it exits (after 5 s, 15 s, 60 s, then give up and say so).
 
-    tick() runs on the daemon's tick (off the main thread when it might block). It waits GRACE_SEC
-    after the daemon starts so the login's own startup can win, never starts a second OpenRGB, and
-    leaves OpenRGB alone when something else is set up to start it."""
+    tick() runs on the daemon's tick (off the main thread when it might block). After the daemon
+    starts it waits QUICK_SEC, or GRACE_SEC when something else is set up to start OpenRGB, so the
+    login's own startup can win; it never starts a second OpenRGB, and leaves OpenRGB alone when
+    something else is set up to start it."""
 
     GRACE_SEC = 10.0
+    QUICK_SEC = 2.0             # nothing else starts OpenRGB: no reason to keep the LEDs waiting
     BACKOFF = (5.0, 15.0, 60.0)
     STABLE_SEC = 120.0          # alive this long: earlier crashes are forgiven
     OTHERS_TTL = 60.0           # how long the (slow-ish) other-starter scan is trusted
@@ -660,7 +662,9 @@ class Supervisor:
             return
         if self.pid or reachable:
             return
-        if now - self._born < self.GRACE_SEC:
+        if now - self._born < self.QUICK_SEC:
+            return
+        if now - self._born < self.GRACE_SEC and (self._others_now(now) or running()):
             return
         if self.gave_up:
             return

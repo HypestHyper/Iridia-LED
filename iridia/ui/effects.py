@@ -319,14 +319,33 @@ _tickers: Dict[object, Callable[[], bool]] = {}
 _tick_job = None
 
 
+_hidden = False                # the window is minimized: previews wait
+
+
 def tick(owner, fn: Callable[[], bool]):
     """Call fn on the window's one preview clock until it returns False. Every preview (zone cards,
     the Layout tab) shares it, so the window repaints once per tick instead of once per preview."""
-    global _tick_job
     _tickers[owner] = fn
-    if _tick_job is None:
+    _start()
+
+
+def _start():
+    global _tick_job
+    if _tick_job is None and _tickers and not _hidden:
         # below everything else, so animated previews never hold back status updates or clicks
         _tick_job = GLib.timeout_add(PREVIEW_MS, _run_ticks, priority=GLib.PRIORITY_LOW)
+
+
+def set_hidden(hidden: bool):
+    """No preview frames while nobody can see them (the window is minimized); they carry on
+    where they are when it comes back."""
+    global _hidden, _tick_job
+    _hidden = hidden
+    if hidden and _tick_job is not None:
+        GLib.source_remove(_tick_job)
+        _tick_job = None
+    elif not hidden:
+        _start()
 
 
 def _run_ticks():

@@ -32,6 +32,7 @@ def test_lock_events_from_monitors():
 
 def test_locked_combines_what_the_desktop_says_and_the_locker():
     w = W.SessionWatcher(lambda: None)
+    w.watching_lock = True
     assert not w.locked
     w._locker_running = True
     assert w.locked
@@ -48,3 +49,33 @@ def test_finds_a_screen_locker_in_proc(tmp_path):
     assert W.find_locker(str(tmp_path), os.getuid()) == "hyprlock"
     assert W.find_locker(str(tmp_path), os.getuid() + 1) is None       # someone else's
     assert W.find_locker(str(tmp_path / "missing"), os.getuid()) is None
+
+
+def test_nothing_runs_until_something_is_switched_on(monkeypatch):
+    import threading
+    started = []
+    real = threading.Thread
+
+    class Spy(real):
+        def start(self):
+            started.append(self.name)
+            super().start()
+    monkeypatch.setattr(W.threading, "Thread", Spy)
+    monkeypatch.setattr(W.shutil, "which", lambda exe: None)              # no gdbus, no dbus-monitor
+    monkeypatch.setattr(W.SessionWatcher, "_find_session", staticmethod(lambda: None))
+    changes = []
+    w = W.SessionWatcher(lambda: changes.append(1))
+    w.start()
+    w.set_needs(lock=False, idle=False)
+    assert started == [] and not w.watching_lock and not w.want_idle
+    w.set_needs(lock=True, idle=False)
+    assert w.watching_lock and started[0] == "sessionwatch"
+    w.set_needs(lock=True, idle=False)                                    # no second start
+    assert started.count("sessionwatch") == 1
+    w._locker_running = True
+    w.set_needs(lock=False, idle=True)                                    # lock off: forgets it, idle on
+    assert not w.locked and not w._locker_running and w.want_idle
+    assert "sessionwatch-idle" in started
+    w.set_needs(lock=False, idle=False)
+    assert not w.want_idle and w.idle_seconds() is None
+    w.stop()

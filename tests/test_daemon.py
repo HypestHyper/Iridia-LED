@@ -587,8 +587,9 @@ def test_a_sensor_part_shows_the_reading(d):
                 sections=[{"start": 0, "type": "sensor", "sensor": "ram", "show": "both", "palette": "colors",
                            "colors": ["ffffff"]}])["ok"]
     d._update_sensors()
-    assert d.sensors.wanted == {"ram"} and d._needs_update
-    d._update_all_devices()
+    assert d.sensors.wanted == {"ram"} and d._sensor_zones == {("Strip", "")}
+    d._update_sensor_zones()
+    assert not d._sensor_zones
     assert d.openrgb.last("Strip") == ["ffffff"] * 2 + ["000000"] * 2
     d.sensors.vals["ram"] = 100.0
     d._update_all_devices()

@@ -19,6 +19,7 @@ from iridia.calibration import DEFAULT_NAME, valid_name  # noqa: E402
 from iridia.client import Client  # noqa: E402
 from iridia.config import Config  # noqa: E402
 from iridia.ui import dialogs, fonts, widgets  # noqa: E402
+from iridia.ui import effects as fx  # noqa: E402
 from iridia.ui.calibration_editor import ProfileEditor  # noqa: E402
 from iridia.ui.colorpicker import pick_color as _pick_color  # noqa: E402
 from iridia.ui.layout_tab import LayoutTab  # noqa: E402
@@ -185,6 +186,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 ctl.connect("key-pressed", lambda *_a: (self.note_activity(), False)[1])
             self.add_controller(ctl)
         self.connect("close-request", self._on_close)
+        self._in_front = True
+        self._poll_wake = threading.Event()
+        self.connect("notify::is-active", lambda *_a: self._front_changed())
+        self.connect("realize", lambda *_a: self._watch_surface())
         threading.Thread(target=self._poll_loop, daemon=True).start()
 
     # ============================================================ helpers for children
@@ -1122,16 +1127,24 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _apply_session(self, s):
         if not s or not hasattr(self, "_sess_lbl"):
             return
+        w = s.get("watching") or {}
         state = {"active": _("in use"), "idle": _("away"), "locked": _("locked")}.get(s.get("state"), "")
-        how_lock = s.get("lock_method") or _("logind, ScreenSaver or a screen locker, once one shows up")
-        how_idle = {"gnome": "GNOME", "screensaver": "ScreenSaver", "xprintidle": "xprintidle",
-                    "logind": "logind"}.get(s.get("idle_method"), _("nothing here"))
-        txt = _("Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}.").format(
-            state=state, lock=how_lock, idle=how_idle)
+        parts = [_("Right now: {state}.").format(state=state)]
+        if w.get("lock"):
+            parts.append(_("Locking seen through: {lock}.").format(
+                lock=s.get("lock_method") or _("logind, ScreenSaver or a screen locker, once one shows up")))
+        if w.get("idle"):
+            parts.append(_("Idle time from: {idle}.").format(
+                idle={"gnome": "GNOME", "screensaver": "ScreenSaver", "xprintidle": "xprintidle",
+                      "logind": "logind"}.get(s.get("idle_method"), _("nothing here"))))
+        if not w.get("lock") and not w.get("idle"):
+            parts.append(_("Nothing is watched while both are Keep."))
         if (s.get("hooks") or {}).get("idle"):
-            txt += " " + _("Your idle daemon says you're away.")
-        self._sess_lbl.set_label(txt)
-        self._sess_hooks.set_visible(not s.get("idle_method"))
+            parts.append(_("Your idle daemon says you're away."))
+        txt = " ".join(parts)
+        if self._sess_lbl.get_label() != txt:
+            self._sess_lbl.set_label(txt)
+        self._sess_hooks.set_visible(bool(w.get("idle") and w.get("idle_checked") and not s.get("idle_method")))
 
     def _save_night(self):
         req = {"enabled": self._night_sw.get_active(), "start": self._night_start.get_text().strip(),
@@ -1771,7 +1784,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 st = {"_error": "daemon not running"}
             # above the animated previews, so a busy window still shows the daemon's state at once
             GLib.idle_add(self._apply_status, st, priority=GLib.PRIORITY_DEFAULT)
-            time.sleep(2)
+            # every 2 s while you use the window, every 6 s while it's in the background (and at
+            # once when it comes back to the front)
+            self._poll_wake.wait(2 if self._in_front else 6)
+            self._poll_wake.clear()
 
     def _apply_status(self, st):
         if self._pause_n == 0:
@@ -1898,7 +1914,26 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
     def _on_close(self, *_a):
         self._running = False
+        self._poll_wake.set()
         return False
+
+    def _front_changed(self):
+        self._in_front = self.is_active()
+        if self._in_front:
+            self._poll_wake.set()           # fresh state as soon as you come back
+
+    def _watch_surface(self):
+        """Minimized (or, GTK 4.12+, suspended by the compositor): no preview frames."""
+        surface = self.get_surface()
+        if surface is None or not hasattr(surface, "get_state"):
+            return
+        hidden_bits = 0
+        for name in ("MINIMIZED", "SUSPENDED"):
+            hidden_bits |= int(getattr(Gdk.ToplevelState, name, 0))
+
+        def changed(*_a):
+            fx.set_hidden(bool(int(surface.get_state()) & hidden_bits))
+        surface.connect("notify::state", changed)
 
 
 class IridiaApp(Gtk.Application):

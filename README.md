@@ -145,7 +145,7 @@ its `iridia-openrgb.service`, which could start OpenRGB too early at boot (see t
 | Distribution | Command |
 | --- | --- |
 | Arch, CachyOS, EndeavourOS, Manjaro | `sudo pacman -S --needed python gtk4 python-gobject python-cairo openrgb ddcutil` |
-| Debian, Ubuntu, Mint, Pop!_OS | `sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo openrgb ddcutil` |
+| Debian, Ubuntu, Mint, Pop!_OS | `sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo ddcutil libglib2.0-bin` |
 | Fedora | `sudo dnf install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil` |
 | openSUSE | `sudo zypper install python3 typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo OpenRGB ddcutil` |
 | Void | `sudo xbps-install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil` |

@@ -1118,9 +1118,13 @@ def _install_icon():
             d = os.path.join(base, f"{n}x{n}", "apps")
             os.makedirs(d, exist_ok=True)
             shutil.copyfile(assets.icon_png_for(n), os.path.join(d, f"{assets.ICON_NAME}.png"))
-        if shutil.which("gtk-update-icon-cache"):
-            subprocess.run(["gtk-update-icon-cache", "-f", "-t", base],
-                            check=False, capture_output=True)
+        # No icon cache of our own in the user's theme folder: GTK would trust it and miss icons other
+        # apps add there later. A newer folder time makes running apps look again.
+        try:
+            os.remove(os.path.join(base, "icon-theme.cache"))
+        except OSError:
+            pass
+        os.utime(base, None)
     except OSError as e:
         print(f"Warning: could not install icon: {e}")
 

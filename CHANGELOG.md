@@ -21,6 +21,17 @@
 - **Backups restore exactly:** loading a setup or backup removes files and calibration profiles that
   didn't exist when it was saved; two backups in the same second no longer overwrite each other.
 - Screen lockers whose process name is longer than 15 characters are recognised.
+- **Installer, on more distributions:** picks a Python 3.8 or newer (openSUSE Leap's python3 is 3.6:
+  it uses Python 3.11 there), reads the distribution from `/etc/os-release` (a `pacman` game on Debian
+  is no longer taken for Arch), knows Gentoo, explains Fedora Atomic, openSUSE Aeon/Kalpa and NixOS
+  instead of failing, accepts OpenRGB from Flathub, only asks apt for OpenRGB where it's packaged,
+  installs `gdbus` where it's separate (Debian, Ubuntu, openSUSE), skips the I2C group and rule when
+  ddcutil's own rules already give you the bus, works with `doas`, and says what to run as root when
+  sudo isn't set up. Running it again upgrades in place (quicker; a failed download leaves the old
+  version working, and the daemon comes back), and rebuilds the environment when a distribution
+  upgrade changed Python. `sh install.sh` hands over to bash; `sudo bash install.sh` is refused
+  (it would install for root). Pillow 9.1 or newer is required: with Ubuntu 22.04's 9.0 every
+  wallpaper gave the same color.
 - **Start at login, on more desktops:** the river line no longer uses `riverctl` (river 0.4 refuses
   to start when its init file contains it); Wayfire gets its own line; i3 gets its own (with
   `--no-startup-id`); river, bspwm and dwm started from a TTY or startx are recognised by their

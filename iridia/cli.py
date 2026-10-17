@@ -602,6 +602,62 @@ def cmd_split(args):
     return _report(req, _split_text)
 
 
+HOOKS = """Locking is seen by itself: logind and ScreenSaver signals (GNOME, KDE, ...) and screen lockers
+like hyprlock, swaylock or gtklock while they run. Idle time is too on GNOME, KDE and X11. Elsewhere
+(Hyprland, Sway, ...) let your idle daemon tell Iridia:
+
+hypridle (~/.config/hypr/hypridle.conf):
+    listener {
+        timeout = 300                      # 5 minutes, or what you like
+        on-timeout = iridia idle on
+        on-resume = iridia idle off
+    }
+
+swayidle (in your Sway config):
+    exec swayidle -w timeout 300 'iridia idle on' resume 'iridia idle off'
+
+Iridia then uses that instead of its own minutes. 'iridia lock on|off' does the same for a locker
+Iridia doesn't know. Settings, Lock and idle (or iridia session --lock/--idle) decides what the
+LEDs do."""
+
+
+def _session_text(r):
+    s = r.get("session") or {}
+    acts = {"keep": "stay as they are", "dim": f"dim to {s.get('dim')}%", "off": "turn off"}
+    idle = s.get("idle_seconds")
+    lines = [f"Now: {s.get('state', '?')}" + (f", {idle // 60} min {idle % 60} s without input" if idle else ""),
+             f"When the screen locks: {acts.get(s.get('lock'), '?')}",
+             f"After {s.get('idle_minutes'):g} min without input: {acts.get(s.get('idle'), '?')}",
+             f"Lock seen through: {s.get('lock_method') or 'nothing yet (logind, ScreenSaver, or iridia lock on|off)'}",
+             f"Idle time from: {s.get('idle_method') or 'nothing here (use iridia idle on|off from hypridle/swayidle)'}"]
+    hooks = [k for k, v in (s.get("hooks") or {}).items() if v]
+    if hooks:
+        lines.append("Set by a hook right now: " + ", ".join(hooks))
+    return "\n".join(lines)
+
+
+def cmd_hook(args):
+    """iridia lock on|off, iridia idle on|off: for hypridle, swayidle and the like."""
+    return _report({"cmd": "session", f"{args.command}_hook": args.state == "on"},
+                   lambda r: f"{args.command.capitalize()} {args.state}.")
+
+
+def cmd_session(args):
+    if args.action == "hooks":
+        print(HOOKS)
+        return 0
+    req = {"cmd": "session"}
+    for k in ("lock", "idle", "dim"):
+        if getattr(args, k) is not None:
+            req[k] = getattr(args, k)
+    if args.idle_minutes is not None:
+        req["idle_minutes"] = args.idle_minutes
+    if args.action == "test":
+        req["test"] = 5
+        return _report(req, lambda r: "Acting as if the screen were locked for 5 seconds.")
+    return _report(req, _session_text)
+
+
 def cmd_animations(args):
     """iridia animations pause | resume | toggle | status."""
     if args.action == "status":
@@ -1158,6 +1214,21 @@ def main(argv=None):
     sp_parser.add_argument("target", help="a strip name or Device/Zone ('iridia zone list' shows them)")
     sp_parser.add_argument("words", nargs="*", help="even N | at LED... | part K same|off|pattern NAME [COLORS]|"
                                                     "effect NAME [COLORS] | led N COLOR|off|normal | join | clear-leds")
+    for name, what in (("lock", "the screen is locked"), ("idle", "you're away")):
+        hp = subparsers.add_parser(name, help=f"Tell the daemon {what} (for hypridle, swayidle, ...)",
+                                   description=f"'iridia {name} on' when {what}, 'iridia {name} off' when not. "
+                                               "Only needed where Iridia can't see it by itself; "
+                                               "'iridia session hooks' shows ready-made lines.")
+        hp.add_argument("state", choices=["on", "off"])
+    ses_parser = subparsers.add_parser("session", help="What the LEDs do when the screen locks or you're away",
+                                       description="Show or change it. Examples:  iridia session   "
+                                                   "iridia session --lock off --idle dim --idle-minutes 10 --dim 20   "
+                                                   "iridia session test   iridia session hooks")
+    ses_parser.add_argument("action", nargs="?", choices=["show", "test", "hooks"], default="show")
+    ses_parser.add_argument("--lock", choices=["keep", "dim", "off"])
+    ses_parser.add_argument("--idle", choices=["keep", "dim", "off"])
+    ses_parser.add_argument("--idle-minutes", type=float)
+    ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
@@ -1196,7 +1267,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

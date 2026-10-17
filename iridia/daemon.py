@@ -194,6 +194,11 @@ class Daemon:
         self._wake = threading.Event()    # wakes the main loop early
         self._night_active = False
         self.sleepwatch = None
+        self.sessionwatch = None
+        self._hooks = {"lock": False, "idle": False}     # iridia lock|idle on (hypridle, swayidle, ...)
+        self._sess_test_until = 0.0                     # Settings, Try it: act as if locked until then
+        self._sess_ramp = (1.0, 1.0, 0.0, 0.0)          # brightness factor (from, to, start, seconds)
+        self._sess_state = "active"
         self._frozen = bool(self.config.get("color.frozen", False))
         self.calibration = Profiles()
         self.calibration.ensure_default()
@@ -285,6 +290,7 @@ class Daemon:
         self._setup_watchers()
         self._detect_wallpaper()
         self._start_sleepwatch()
+        self._start_sessionwatch()
 
         while self.running:
             try:
@@ -305,6 +311,96 @@ class Daemon:
         from iridia.sleepwatch import SleepWatcher
         self.sleepwatch = SleepWatcher(self._on_sleep, self._on_wake)
         self.sleepwatch.start()
+
+    # ------------------------------------------------------------- lock and idle
+    SESSION_ACTIONS = ("keep", "dim", "off")
+    FADE_OUT_SEC = 2.0
+    FADE_IN_SEC = 0.5
+
+    def _start_sessionwatch(self):
+        from iridia.sessionwatch import SessionWatcher
+        self.sessionwatch = SessionWatcher(self._wake.set)
+        self.sessionwatch.start()
+
+    def _session_settings(self) -> dict:
+        c = self.config.get("session", {})
+        c = c if isinstance(c, dict) else {}
+
+        def pick(v):
+            return v if v in self.SESSION_ACTIONS else "keep"
+        return {"lock": pick(c.get("lock")), "idle": pick(c.get("idle")),
+                "idle_minutes": _num(c.get("idle_minutes", 10), 10, 1, 240),
+                "dim": int(_num(c.get("dim", 20), 20, 0, 100))}
+
+    def _session_factor(self, now: Optional[float] = None) -> float:
+        frm, to, t0, dur = self._sess_ramp
+        now = time.monotonic() if now is None else now
+        if dur <= 0 or now - t0 >= dur:
+            return to
+        return frm + (to - frm) * (now - t0) / dur
+
+    def _update_session(self):
+        """Work out locked / idle and fade the LEDs to what Settings asks for."""
+        s = self._session_settings()
+        w = self.sessionwatch
+        if w is not None:
+            w.want_idle = s["idle"] != "keep"
+        test = time.monotonic() < self._sess_test_until
+        locked = self._hooks["lock"] or bool(w and w.locked) or test
+        idle_s = w.idle_seconds() if w is not None else None
+        idle = self._hooks["idle"] or (idle_s is not None and idle_s >= s["idle_minutes"] * 60)
+        lock_act = s["lock"] if not test or s["lock"] != "keep" else "off"     # a test always shows something
+        target = 1.0
+        for on, act in ((locked, lock_act), (idle, s["idle"])):
+            if on and act != "keep":
+                target = min(target, 0.0 if act == "off" else s["dim"] / 100.0)
+        state = "locked" if locked else "idle" if idle else "active"
+        if state != self._sess_state:
+            self.logger.info(f"Screen {state}" + (f": LEDs to {int(target * 100)}% brightness"
+                                                  if target != self._sess_ramp[1] else ""))
+            self._sess_state = state
+        now = time.monotonic()
+        cur = self._session_factor(now)
+        if target != self._sess_ramp[1]:
+            dur = self.FADE_OUT_SEC if target < cur else self.FADE_IN_SEC
+            self._sess_ramp = (cur, target, now, dur * abs(target - cur))
+        if now - self._sess_ramp[2] < self._sess_ramp[3] + 0.1:
+            self._glide_active = True       # still fading: keep sending
+
+    def _cmd_session(self, req: dict) -> dict:
+        """Hooks (lock_hook, idle_hook: true/false), a test (test: seconds), settings (lock, idle:
+        keep/dim/off, idle_minutes, dim) and the current state."""
+        for k in ("lock_hook", "idle_hook"):
+            if k in req:
+                self._hooks[k.split("_")[0]] = bool(req[k])
+        if "test" in req:
+            self._sess_test_until = time.monotonic() + _num(req["test"], 5, 0, 60)
+        new = {}
+        for k in ("lock", "idle"):
+            if k in req:
+                if req[k] not in self.SESSION_ACTIONS:
+                    return {"ok": False, "error": f"{k} must be keep, dim or off"}
+                new[k] = req[k]
+        if "idle_minutes" in req:
+            new["idle_minutes"] = _num(req["idle_minutes"], 10, 1, 240)
+        if "dim" in req:
+            new["dim"] = int(_num(req["dim"], 20, 0, 100))
+        if new:
+            cur = self.config.get("session", {})
+            self.config.set("session", dict(cur if isinstance(cur, dict) else {}, **new))
+        self._update_session()
+        self._needs_update = True
+        self._wake.set()
+        return dict(self._session_status(), ok=True)
+
+    def _session_status(self) -> dict:
+        w = self.sessionwatch
+        idle = w.idle_seconds() if w is not None else None
+        return {"session": dict(self._session_settings(), state=self._sess_state,
+                                factor=round(self._sess_ramp[1], 2), hooks=dict(self._hooks),
+                                lock_method=w.lock_method if w else None,
+                                idle_method=w.idle_method if w else None,
+                                idle_seconds=None if idle is None else int(idle))}
 
     def _on_sleep(self):
         """Called from the watcher thread: dark LEDs, then let the PC sleep."""
@@ -383,6 +479,8 @@ class Daemon:
         self.logger.info("Shutting down")
         if self.sleepwatch:
             self.sleepwatch.stop()
+        if self.sessionwatch:
+            self.sessionwatch.stop()
         self.ipc.stop()
         if self._observer:
             self._observer.stop()
@@ -536,6 +634,7 @@ class Daemon:
         self._detect_wallpaper()
         self._read_brightness()
 
+        self._update_session()
         self._refresh_animations(connected)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
@@ -1399,6 +1498,8 @@ class Daemon:
             if co not in COLOR_ORDERS:
                 return {"ok": False, "error": f"color order must be one of {', '.join(COLOR_ORDERS)}"}
             changes["color_order"] = co
+        if "session_ignore" in req:            # stays lit when the screen locks or you're away
+            changes["session_ignore"] = True if req["session_ignore"] else None
         for key, lo, hi in (("leds_per_pixel", 1, 20), ("power_limit", 0, 100), ("ma_per_led", 1, 500)):
             if key in req:
                 try:
@@ -1745,6 +1846,12 @@ class Daemon:
         return key in self._anim_keys and not self._anim_blocked(device, zone, key)
 
     def _brightness_now(self, key: str, zcfg: dict) -> float:
+        """The zone's brightness, faded down while the screen is locked or you're away (unless the
+        zone ignores that)."""
+        b = self._brightness_glide(key, zcfg)
+        return b if zcfg.get("session_ignore") else b * self._session_factor()
+
+    def _brightness_glide(self, key: str, zcfg: dict) -> float:
         """The zone's brightness (monitor or manual, range, invert, night cap), gliding to a new
         value over GLIDE_SEC instead of jumping."""
         target = float(self._get_zone_brightness(zcfg))
@@ -2185,6 +2292,8 @@ class Daemon:
             return self._cmd_freeze(req)
         if cmd == "set_zone_strip":
             return self._cmd_set_zone_strip(req)
+        if cmd == "session":
+            return self._cmd_session(req)
         if cmd == "set_zone_sections":
             return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":
@@ -2314,6 +2423,7 @@ class Daemon:
             "lights_off": self._lights_off,
             "asleep": self._asleep,
             "night": dict(self._night_settings(), active=self._night_active),
+            **self._session_status(),
             "sleep_watch": bool(self.sleepwatch and self.sleepwatch.available),
             "sleep_lights_off": bool(self.config.get("sleep.lights_off", True)),
             "identify": ({"device": ident[0], "zone": ident[1]} if ident else None),

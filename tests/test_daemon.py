@@ -485,3 +485,69 @@ def test_split_cli(d, monkeypatch, capsys):
     assert run("part", "9", "off") == 2 and run("led", "11", "ffffff") == 1
     assert run("join") == 0 and run("clear-leds") == 0
     assert "one part (10 LEDs), not split" in capsys.readouterr().out
+
+
+# ----------------------------------------------------------------- lock and idle
+
+def test_lock_and_idle_fade_the_leds(d, monkeypatch):
+    clock = [1000.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    r = _cmd(d, "session", lock="off", idle="dim", dim=50, idle_minutes=5)
+    assert r["ok"] and r["session"]["lock"] == "off" and r["session"]["state"] == "active"
+    assert not _cmd(d, "session", lock="sometimes")["ok"]
+    _cmd(d, "session", idle_hook=True)                      # hypridle: iridia idle on
+    assert d._sess_state == "idle"
+    clock[0] += 0.5                                          # fading: part of the way down
+    d._last_sent = {}
+    d._update_all_devices()
+    mid = d.openrgb.last("Strip")[0]
+    assert "7f0000" < mid < "ff0000"
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["7f0000"] * 4        # dimmed to 50%
+    _cmd(d, "session", lock_hook=True)                      # locked wins: off
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    # a zone set to ignore it stays lit
+    assert _cmd(d, "set_zone_strip", device="Hub v1.0", zone="A", session_ignore=True)["ok"]
+    d._update_all_devices()
+    zoned = [c for dev, c, cfg in d.openrgb.sent if dev == "Hub v1.0" and set(cfg) == {"A"}]
+    assert zoned[-1] == ["00ff00"] * 2
+    _cmd(d, "session", lock_hook=False, idle_hook=False)
+    assert d._sess_state == "active"
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+
+
+def test_try_it_shows_off_even_when_lock_is_keep(d, monkeypatch):
+    clock = [50.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    r = _cmd(d, "session", test=5)
+    assert r["session"]["state"] == "locked" and r["session"]["factor"] == 0.0
+    clock[0] += 6
+    d._update_session()
+    assert d._sess_state == "active"
+
+
+def test_session_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    assert cli.main(["session", "--lock", "off", "--idle", "dim", "--dim", "30", "--idle-minutes", "15"]) == 0
+    out = capsys.readouterr().out
+    assert "When the screen locks: turn off" in out and "After 15 min without input: dim to 30%" in out
+    assert cli.main(["idle", "on"]) == 0 and d._hooks["idle"] is True
+    assert cli.main(["session"]) == 0 and "Now: idle" in capsys.readouterr().out
+    assert cli.main(["idle", "off"]) == 0 and cli.main(["lock", "on"]) == 0 and d._hooks == {"lock": True,
+                                                                                         "idle": False}
+    assert cli.main(["session", "hooks"]) == 0 and "on-timeout = iridia idle on" in capsys.readouterr().out

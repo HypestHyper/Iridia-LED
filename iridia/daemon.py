@@ -126,6 +126,22 @@ class _WallpaperHandler(FileSystemEventHandler):
             self.daemon.on_wallpaper_file_changed(event.dest_path)
 
 
+class _SettingsFileHandler(FileSystemEventHandler):
+    """A desktop's own settings file (dconf, Plasma's appletsrc, ...) changed: ask the wallpaper
+    backend again now. Other files in the same folder are ignored."""
+
+    def __init__(self, daemon, files):
+        self.daemon = daemon
+        self.files = set(files)
+
+    def on_any_event(self, event):
+        for p in (getattr(event, "src_path", ""), getattr(event, "dest_path", "")):
+            if p in self.files:
+                self.daemon.detector.invalidate()
+                self.daemon._wake.set()
+                return
+
+
 class _ConfigHandler(FileSystemEventHandler):
     def __init__(self, daemon):
         self.daemon = daemon
@@ -614,9 +630,19 @@ class Daemon:
         noctalia_dir = os.path.join(state, "noctalia")
         if os.path.isdir(noctalia_dir):
             watches.append((_WallpaperHandler(self), noctalia_dir))
+        settings = self.detector.watch_files()
+        folders = {}
+        for f in settings:
+            if os.path.isdir(os.path.dirname(f)):
+                folders.setdefault(os.path.dirname(f), []).append(f)
+        for folder, files in folders.items():
+            watches.append((_SettingsFileHandler(self, files), folder))
+        watched_settings = 0
         for handler, folder in watches:
             try:
                 self._observer.schedule(handler, folder, recursive=False)
+                if isinstance(handler, _SettingsFileHandler):
+                    watched_settings += 1
             except OSError as e:
                 # inotify watch limit reached, a folder on a network share, ...: wallpaper
                 # changes are still found by the regular check, just a little later.
@@ -624,7 +650,9 @@ class Daemon:
         try:
             self._observer.start()
         except OSError as e:
+            watched_settings = 0
             self.logger.warning(f"File watching unavailable ({e}); wallpaper changes are found by polling")
+        self.detector.set_watched(watched_settings > 0)
 
     def on_wallpaper_file_changed(self, path: str):
         # Noctalia's state dir also holds busy files (screen_time.json,

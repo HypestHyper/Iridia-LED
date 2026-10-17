@@ -169,6 +169,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         self._narrow = False
         self._tight = False
+        self._layout_folded = False
         widgets.STYLE = Style(self._seed, self.prefs.get("font", ""), bool(self.prefs.get("reduce_motion", False)),
                               self._ui_scale())
         dialogs.PAUSE = self.pause
@@ -231,9 +232,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
         return True
 
     TIGHT_BELOW = 760
+    FOLD_LAYOUT_BELOW = 960        # the Layout tab's side panel moves under the canvas
 
     def do_size_allocate(self, width, height, baseline):
         Gtk.ApplicationWindow.do_size_allocate(self, width, height, baseline)
+        fold = width < self.FOLD_LAYOUT_BELOW if not self._layout_folded else width < self.FOLD_LAYOUT_BELOW + 60
+        if fold != self._layout_folded:
+            self._layout_folded = fold
+            GLib.idle_add(lambda: (self._layout_tab.set_folded(fold), False)[1])
         tight = width < self.TIGHT_BELOW if not self._tight else width < self.TIGHT_BELOW + 60
         if tight != self._tight:
             self._tight = tight

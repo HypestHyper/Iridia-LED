@@ -13,6 +13,7 @@
   and rows of buttons wrap onto a second line. Below 760 pixels the tabs and the bottom buttons show
   only their icons (the words become tooltips), and if the tabs still don't fit they scroll sideways
   with arrows. The window now goes down to about 600 pixels wide.
+  Below 960 pixels the Layout tab's side panel moves under the canvas.
 - **LED numbers** under every strip preview (1, every few LEDs, and the last LED, which is the strip's
   real count), so you can see which LED is which.
 - Popups no longer show a black frame on X11 without a compositor.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:12+0000\n"
+"POT-Creation-Date: 2026-10-17 00:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -124,7 +124,7 @@ msgstr ""
 msgid "Keybinds"
 msgstr ""
 
-#: iridia/ui/app.py:422 iridia/ui/sections_panel.py:212
+#: iridia/ui/app.py:422 iridia/ui/sections_panel.py:237
 msgid "Settings"
 msgstr ""
 
@@ -287,7 +287,8 @@ msgstr ""
 msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
 msgstr ""
 
-#: iridia/ui/app.py:737 iridia/ui/keybinds_tab.py:128 iridia/ui/sections_panel.py:63
+#: iridia/ui/app.py:737 iridia/ui/keybinds_tab.py:128 iridia/ui/sections_panel.py:66
+#: iridia/ui/sections_panel.py:377
 msgid "Color"
 msgstr ""
 
@@ -431,11 +432,11 @@ msgstr ""
 msgid "Dim the LEDs at night, and turn them off while the PC sleeps."
 msgstr ""
 
-#: iridia/ui/app.py:942
+#: iridia/ui/app.py:942 iridia/ui/sections_panel.py:381
 msgid "From"
 msgstr ""
 
-#: iridia/ui/app.py:942
+#: iridia/ui/app.py:942 iridia/ui/sections_panel.py:381
 msgid "to"
 msgstr ""
 
@@ -579,7 +580,7 @@ msgstr ""
 msgid "Lines"
 msgstr ""
 
-#: iridia/ui/app.py:1055
+#: iridia/ui/app.py:1055 iridia/ui/sections_panel.py:376
 msgid "Show"
 msgstr ""
 
@@ -609,12 +610,12 @@ msgstr ""
 msgid "Keep"
 msgstr ""
 
-#: iridia/ui/app.py:1076 iridia/ui/effects.py:74
+#: iridia/ui/app.py:1076 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:399
 msgid "Dim"
 msgstr ""
 
 #: iridia/ui/app.py:1076 iridia/ui/app.py:1850 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:19
-#: iridia/ui/sections_panel.py:63
+#: iridia/ui/sections_panel.py:66 iridia/ui/sections_panel.py:399
 msgid "Off"
 msgstr ""
 
@@ -1400,7 +1401,7 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
-#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:386 iridia/ui/sections_panel.py:311
+#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:386 iridia/ui/sections_panel.py:425
 #: iridia/ui/zonecard.py:900
 msgid "Done"
 msgstr ""
@@ -1795,7 +1796,7 @@ msgstr ""
 msgid "Flicker"
 msgstr ""
 
-#: iridia/ui/effects.py:54
+#: iridia/ui/effects.py:54 iridia/ui/sections_panel.py:393
 msgid "Colors"
 msgstr ""
 
@@ -1884,7 +1885,7 @@ msgstr ""
 msgid "Fire"
 msgstr ""
 
-#: iridia/ui/effects.py:77
+#: iridia/ui/effects.py:77 iridia/ui/sections_panel.py:394
 msgid "Picked colors"
 msgstr ""
 
@@ -1977,7 +1978,7 @@ msgstr ""
 msgid "Turn on"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:122 iridia/ui/keybinds_tab.py:459 iridia/ui/sections_panel.py:63
+#: iridia/ui/keybinds_tab.py:122 iridia/ui/keybinds_tab.py:459 iridia/ui/sections_panel.py:66
 msgid "Back to normal"
 msgstr ""
 
@@ -1993,7 +1994,7 @@ msgstr ""
 msgid "Static pattern"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:141 iridia/ui/sections_panel.py:286
+#: iridia/ui/keybinds_tab.py:141 iridia/ui/sections_panel.py:327
 msgid "Effect"
 msgstr ""
 
@@ -2465,7 +2466,7 @@ msgstr ""
 msgid "Count LEDs"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1127 iridia/ui/sections_panel.py:272 iridia/ui/zonecard.py:259
+#: iridia/ui/layout_tab.py:1127 iridia/ui/sections_panel.py:313 iridia/ui/zonecard.py:259
 msgid "Pattern"
 msgstr ""
 
@@ -2604,87 +2605,173 @@ msgstr ""
 msgid "Its own effect"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:38
+#: iridia/ui/sections_panel.py:19
+msgid "A sensor"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:20
+msgid "CPU temperature"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:20
+msgid "CPU load"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:20
+msgid "GPU temperature"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:21
+msgid "GPU load"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:21
+msgid "Second GPU temperature"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:22
+msgid "Second GPU load"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:22
+msgid "Memory use"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:22
+msgid "Disk temperature"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:41
 msgid "Advanced: split this strip, set single LEDs"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:46
+#: iridia/ui/sections_panel.py:49
 msgid "Add divider"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:47 iridia/ui/zonecard.py:300
+#: iridia/ui/sections_panel.py:50 iridia/ui/zonecard.py:300
 msgid "Space evenly"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:59
+#: iridia/ui/sections_panel.py:62
 msgid "Single LEDs"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:61 iridia/ui/sections_panel.py:311
+#: iridia/ui/sections_panel.py:64 iridia/ui/sections_panel.py:425
 msgid "Set LEDs"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:66 iridia/ui/sections_panel.py:326
+#: iridia/ui/sections_panel.py:69 iridia/ui/sections_panel.py:440
 msgid "Color for single LEDs"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:71
+#: iridia/ui/sections_panel.py:74
 msgid "Clear all"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:74
+#: iridia/ui/sections_panel.py:77
 msgid ""
 "Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
 "everything else, like a fixed LED between two bars."
 msgstr ""
 
-#: iridia/ui/sections_panel.py:218
+#: iridia/ui/sections_panel.py:244
 msgid "Remove this part (it joins the one before it)"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:225
+#: iridia/ui/sections_panel.py:253
+msgid "The whole strip"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:255
 #, python-brace-format
 msgid "LEDs {first} to {last}  ({n})"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:226
+#: iridia/ui/sections_panel.py:256
 #, python-brace-format
 msgid "LED {first}"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:232 iridia/ui/zonecard.py:651
+#: iridia/ui/sections_panel.py:269 iridia/ui/zonecard.py:651
 #, python-brace-format
 msgid "{leds} LEDs: {sizes}"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:233
+#: iridia/ui/sections_panel.py:270
 msgid "Add a divider to split this strip into parts."
 msgstr ""
 
-#: iridia/ui/sections_panel.py:237 iridia/ui/zonecard.py:657
+#: iridia/ui/sections_panel.py:274 iridia/ui/zonecard.py:657
 #, python-brace-format
 msgid "The parts are {n} LED apart. Space evenly makes them match."
 msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/sections_panel.py:240 iridia/ui/zonecard.py:660
+#: iridia/ui/sections_panel.py:277 iridia/ui/zonecard.py:660
 #, python-brace-format
 msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
 msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/sections_panel.py:248
+#: iridia/ui/sections_panel.py:285
 #, python-brace-format
 msgid "{n} LED set"
 msgid_plural "{n} LEDs set"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/sections_panel.py:257
+#: iridia/ui/sections_panel.py:294
 #, python-brace-format
 msgid "Part {n}"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:302
+msgid "Finding sensors…"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:359
+msgid "(not found here)"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:372
+msgid "Sensor"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:374
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr ""
+
+#: iridia/ui/sections_panel.py:377
+msgid "Level"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:377
+msgid "Both"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:379
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr ""
+
+#: iridia/ui/sections_panel.py:394
+msgid "Cool to hot"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:398
+msgid "Rest of the bar"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:405
+msgid "Flash above"
+msgstr ""
+
+#: iridia/ui/sections_panel.py:408
+msgid "From the other end"
 msgstr ""
 
 #: iridia/ui/widgets.py:625

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:12+0000\n"
+"POT-Creation-Date: 2026-10-17 00:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2141,6 +2141,33 @@ msgstr "A pattern of its own"
 msgid "Its own effect"
 msgstr "An effect of its own"
 
+msgid "A sensor"
+msgstr "An instrument"
+
+msgid "CPU temperature"
+msgstr "Processor temperature"
+
+msgid "CPU load"
+msgstr "Processor exertion"
+
+msgid "GPU temperature"
+msgstr "Graphics temperature"
+
+msgid "GPU load"
+msgstr "Graphics exertion"
+
+msgid "Second GPU temperature"
+msgstr "Second graphics temperature"
+
+msgid "Second GPU load"
+msgstr "Second graphics exertion"
+
+msgid "Memory use"
+msgstr "Memory in use"
+
+msgid "Disk temperature"
+msgstr "Disk temperature"
+
 msgid "Advanced: split this strip, set single LEDs"
 msgstr "Advanced: apportion this strip, attend to single lamps"
 
@@ -2171,6 +2198,9 @@ msgstr ""
 
 msgid "Remove this part (it joins the one before it)"
 msgstr "Remove this portion (it joins the one before it)"
+
+msgid "The whole strip"
+msgstr "The entire strip"
 
 #, python-brace-format
 msgid "LEDs {first} to {last}  ({n})"
@@ -2208,6 +2238,45 @@ msgstr[1] "{n} lamps attended to"
 #, python-brace-format
 msgid "Part {n}"
 msgstr "Portion {n}"
+
+msgid "Finding sensors…"
+msgstr "Consulting the instruments…"
+
+msgid "(not found here)"
+msgstr "(not present here)"
+
+msgid "Sensor"
+msgstr "Instrument"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr ""
+"NVIDIA readings come by way of nvidia-smi, which keeps a laptop's graphics awake while a strip "
+"displays them."
+
+msgid "Level"
+msgstr "Level"
+
+msgid "Both"
+msgstr "Both"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr ""
+"Level fills the portion like a gauge, Colour shows the reading as a single colour, Both is a "
+"gauge in the reading's colour."
+
+msgid "Cool to hot"
+msgstr "Cool to warm"
+
+msgid "Rest of the bar"
+msgstr "Remainder of the gauge"
+
+msgid "Flash above"
+msgstr "Flash beyond"
+
+msgid "From the other end"
+msgstr "From the far end"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

@@ -997,3 +997,5 @@ class ZoneCard(Gtk.Box):
             self._mirror.set_value(bool(new_params.get("mirror")))
             self._apply_color_limit()
             self._update_preview()
+        elif self._sections is not None and self._sections.has_sensors() and not self._preview_wanted():
+            self._update_preview()          # new sensor readings came with this status

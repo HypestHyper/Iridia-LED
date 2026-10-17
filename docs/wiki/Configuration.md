@@ -127,7 +127,7 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
 | `power_limit` | Amps, `0` for none |
 | `animation` | An animated effect, or missing/`null` for the static pattern: `{"effect": "breathing", "speed": 4, "min": 10, "max": 100, ...}`. Every effect's settings are listed in [Animations](Animations.md); values out of range are clamped, unknown ones ignored |
 | `ma_per_led` | Current per LED at full white for the power estimate (default 60) |
-| `sections` | The strip's parts, missing or `[]` when it isn't split: `[{"start": 0, "type": "same"}, {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"], "params": {"stops": [...]}}, {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]}, {"start": 70, "type": "off"}]`. `start` is the part's first LED, counted from 0 |
+| `sections` | The strip's parts, missing or `[]` when it isn't split: `[{"start": 0, "type": "same"}, {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"], "params": {"stops": [...]}}, {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]}, {"start": 70, "type": "off"}, {"start": 75, "type": "sensor", "sensor": "cpu_temp", "show": "level", "min": 30, "max": 90, "palette": "heat", "colors": [0], "background": "dim", "flash_above": 85}]`. `start` is the part's first LED, counted from 0. Sensor IDs come from `iridia sensors`; `show` is `level`, `color` or `both`; `palette` is `heat` or `colors` |
 | `session_ignore` | `true`: the strip stays lit when the screen locks or you're away |
 | `led_overrides` | Single LEDs set by hand, over everything else: `{"26": "ffffff", "53": "000000"}` (LED counted from 0, `000000` is off) |
 

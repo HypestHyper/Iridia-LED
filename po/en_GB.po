@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:12+0000\n"
+"POT-Creation-Date: 2026-10-17 00:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -2121,6 +2121,33 @@ msgstr "Its own pattern"
 msgid "Its own effect"
 msgstr "Its own effect"
 
+msgid "A sensor"
+msgstr "A sensor"
+
+msgid "CPU temperature"
+msgstr "CPU temperature"
+
+msgid "CPU load"
+msgstr "CPU load"
+
+msgid "GPU temperature"
+msgstr "GPU temperature"
+
+msgid "GPU load"
+msgstr "GPU load"
+
+msgid "Second GPU temperature"
+msgstr "Second GPU temperature"
+
+msgid "Second GPU load"
+msgstr "Second GPU load"
+
+msgid "Memory use"
+msgstr "Memory use"
+
+msgid "Disk temperature"
+msgstr "Disk temperature"
+
 msgid "Advanced: split this strip, set single LEDs"
 msgstr "Advanced: split this strip, set single LEDs"
 
@@ -2151,6 +2178,9 @@ msgstr ""
 
 msgid "Remove this part (it joins the one before it)"
 msgstr "Remove this part (it joins the one before it)"
+
+msgid "The whole strip"
+msgstr "The whole strip"
 
 #, python-brace-format
 msgid "LEDs {first} to {last}  ({n})"
@@ -2188,6 +2218,43 @@ msgstr[1] "{n} LEDs set"
 #, python-brace-format
 msgid "Part {n}"
 msgstr "Part {n}"
+
+msgid "Finding sensors…"
+msgstr "Finding sensors…"
+
+msgid "(not found here)"
+msgstr "(not found here)"
+
+msgid "Sensor"
+msgstr "Sensor"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+
+msgid "Level"
+msgstr "Level"
+
+msgid "Both"
+msgstr "Both"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr ""
+"Level fills the part like a bar, Colour shows the reading as one colour, Both is a bar in the "
+"reading's colour."
+
+msgid "Cool to hot"
+msgstr "Cool to hot"
+
+msgid "Rest of the bar"
+msgstr "Rest of the bar"
+
+msgid "Flash above"
+msgstr "Flash above"
+
+msgid "From the other end"
+msgstr "From the other end"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

@@ -12,11 +12,14 @@ from iridia import sections as S
 from iridia.colors import resolve_colors
 from iridia.i18n import _, ngettext
 from iridia.ui import effects as fx
-from iridia.ui.widgets import (Dropdown, Group, SectionStrip, Swatch, SwatchPicker, button, card, hbox, label,
-                               set_button_text, vbox, wrap_row)
+from iridia.ui.widgets import (Dropdown, Group, SectionStrip, Spin, Swatch, SwatchPicker, button, card, hbox, label,
+                               set_button_text, switch_row, vbox, wrap_row)
 
 KIND_NAMES = {"same": _("Same as the strip"), "pattern": _("Its own pattern"), "effect": _("Its own effect"),
-              "off": _("Off")}
+              "sensor": _("A sensor"), "off": _("Off")}
+SENSOR_NAMES = {"cpu_temp": _("CPU temperature"), "cpu_load": _("CPU load"), "gpu_temp": _("GPU temperature"),
+                "gpu_load": _("GPU load"), "gpu2_temp": _("Second GPU temperature"),
+                "gpu2_load": _("Second GPU load"), "ram": _("Memory use"), "disk_temp": _("Disk temperature")}
 KIND_KEYS = {v: k for k, v in KIND_NAMES.items()}
 PART_PATTERNS = ["solid", "gradient", "segments", "center_out", "edges_in", "alternating"]
 
@@ -82,7 +85,20 @@ class SectionsPanel(Gtk.Box):
         return bool(self.secs or self.ov)
 
     def animated(self) -> bool:
-        return S.has_effects(self.secs)
+        """Parts that move between status updates: effects, and sensor parts that can blink."""
+        return S.has_effects(self.secs) or any(s["type"] == "sensor" and s.get("flash_above") is not None
+                                               for s in self.secs)
+
+    def has_sensors(self) -> bool:
+        return any(s["type"] == "sensor" for s in self.secs)
+
+    def sensor_value(self, sid):
+        st = self.card.app._status if isinstance(self.card.app._status, dict) else {}
+        return (st.get("sensors") or {}).get(sid)
+
+    def _parts(self) -> List[dict]:
+        """The parts to list: the whole strip is one part until it's split."""
+        return self.secs or [{"start": 0, "type": "same"}]
 
     def set_config(self, zcfg):
         """New settings from the daemon (only when nothing is being edited)."""
@@ -106,8 +122,11 @@ class SectionsPanel(Gtk.Box):
         return resolve_colors(entries, self.card.extracted)
 
     def compose(self, base: List[str]) -> List[str]:
-        return S.compose_static(base, self.secs, self.ov, self._resolve, self.card.patterns) if self.active() \
-            else list(base)
+        if not self.active():
+            return list(base)
+        return S.compose_static(base, self.secs, self.ov, self._resolve, self.card.patterns, self.sensor_value,
+                                fx.anim_clock(self.card.app._status if isinstance(self.card.app._status, dict)
+                                              else {}))
 
     def frame(self, base: List[str], status: dict) -> List[str]:
         """An animated frame: base with the parts drawn on top, as the daemon draws them."""
@@ -118,7 +137,8 @@ class SectionsPanel(Gtk.Box):
         sig = repr((self.secs, self.ov, len(base), self.card.extracted, seed))
         if sig != self._comp_sig:
             self._comp_sig = sig
-            self._comp = S.Composer(self.secs, self.ov, len(base), self._resolve, seed, self.card.patterns)
+            self._comp = S.Composer(self.secs, self.ov, len(base), self._resolve, seed, self.card.patterns,
+                                    self.sensor_value)
         out = self._comp.frame([animations.hex_to_rgb(c) for c in base], fx.anim_clock(status))
         return [animations.rgb_to_hex(c) for c in out]
 
@@ -128,6 +148,7 @@ class SectionsPanel(Gtk.Box):
         cols = shown if shown is not None else self.compose(base)
         self.strip.set_state(self.n, cols, [s["start"] for s in self.secs[1:]], self.ov.keys())
         self._update_sizes()
+        self._update_row_labels()
 
     # ------------------------------------------------------------ dividers
     def _starts(self) -> List[int]:
@@ -179,12 +200,15 @@ class SectionsPanel(Gtk.Box):
 
     def _set_kind(self, k, name):
         kind = KIND_KEYS.get(name, "same")
+        if not self.secs:
+            self.secs = [{"start": 0, "type": "same"}]          # the whole strip becomes part 1
         if kind == self.secs[k]["type"]:
             return
         old = self.secs[k]
         self.secs[k] = S.clean_section({"start": old["start"], "type": kind,
                                         "colors": old.get("colors") or list(self.card._picker.selected),
-                                        "pattern": old.get("pattern", "solid"), "animation": old.get("animation")})
+                                        "pattern": old.get("pattern", "solid"), "animation": old.get("animation"),
+                                        "sensor": old.get("sensor", "cpu_temp")})
         self.secs[k]["start"] = old["start"]
         if self.secs == [{"start": 0, "type": "same"}]:
             self.secs = []
@@ -198,7 +222,8 @@ class SectionsPanel(Gtk.Box):
             self._rows.remove(c)
             c = nxt
         self._row_labels = []
-        for k, (_a, _b, sec) in enumerate(S.spans(self.secs, self.n)):
+        parts = self._parts()
+        for k, (_a, _b, sec) in enumerate(S.spans(parts, self.n)):
             r = hbox(8)
             num = label(str(k + 1), ("subheading", "accent"))
             num.set_size_request(18, -1)
@@ -208,22 +233,34 @@ class SectionsPanel(Gtk.Box):
             self._row_labels.append(lbl)
             r.append(lbl)
             r.append(Dropdown(list(KIND_NAMES.values()), KIND_NAMES[sec["type"]], lambda v, k=k: self._set_kind(k, v)))
-            if sec["type"] in ("pattern", "effect"):
+            if sec["type"] in ("pattern", "effect", "sensor"):
                 b_set = button(_("Settings"), "tune", "text small")
                 b_set.connect("clicked", lambda w, k=k: self._settings(w, k))
                 r.append(b_set)
             spacer = Gtk.Box(hexpand=True)
             r.append(spacer)
-            r.append(button(icon_name="close", style="text small", cb=lambda k=k: self._remove(k),
-                            tooltip=_("Remove this part (it joins the one before it)")))
+            if len(parts) > 1:
+                r.append(button(icon_name="close", style="text small", cb=lambda k=k: self._remove(k),
+                                tooltip=_("Remove this part (it joins the one before it)")))
             self._rows.append(r)
         self._update_row_labels()
         self._update_sizes()
 
     def _update_row_labels(self):
-        for lbl, (a, b, _s) in zip(self._row_labels, S.spans(self.secs, self.n)):
-            lbl.set_label(_("LEDs {first} to {last}  ({n})").format(first=a + 1, last=b, n=b - a) if b - a > 1
-                          else _("LED {first}").format(first=a + 1))
+        parts = self._parts()
+        for lbl, (a, b, sec) in zip(self._row_labels, S.spans(parts, self.n)):
+            if len(parts) == 1:
+                txt = _("The whole strip")
+            else:
+                txt = _("LEDs {first} to {last}  ({n})").format(first=a + 1, last=b, n=b - a) if b - a > 1 \
+                    else _("LED {first}").format(first=a + 1)
+            if sec["type"] == "sensor":
+                v = self.sensor_value(sec["sensor"])
+                name = SENSOR_NAMES.get(sec["sensor"], sec["sensor"].replace("hwmon:", "").replace(":", " "))
+                from iridia.sensors import unit_of
+                txt += "\n" + name + (f": {v:g} {unit_of(sec['sensor'])}" if v is not None else "")
+            if lbl.get_label() != txt:
+                lbl.set_label(txt)
 
     def _update_sizes(self):
         split = len(self.secs) > 1
@@ -261,7 +298,11 @@ class SectionsPanel(Gtk.Box):
                                 lambda sel: self._set_part(k, colors=list(sel)), custom=self.card.custom,
                                 max_select=max_sel, size=28, hint=False)
         from iridia.ui.zonecard import PATTERN_NAMES
-        if sec["type"] == "pattern":
+        if sec["type"] == "sensor":
+            box.append(label(_("Finding sensors…"), ("small", "dim")))
+            self.card.app.bg(lambda: self.card.client.sensors(),
+                             lambda r: self._sensor_settings(box, k, r.get("sensors") or [] if r.get("ok") else []))
+        elif sec["type"] == "pattern":
             names = [PATTERN_NAMES[p] for p in PART_PATTERNS]
             holder = vbox(6)
 
@@ -296,6 +337,78 @@ class SectionsPanel(Gtk.Box):
         pop.connect("closed", lambda p: GLib.idle_add(lambda: (p.unparent(), False)[1]))
         pop.popup()
 
+    def _sensor_settings(self, box, k, found):
+        """The sensor popover, once the daemon said which sensors there are."""
+        if k >= len(self.secs):
+            return
+        sec = self.secs[k]
+        title = box.get_first_child()
+        c = title.get_next_sibling()
+        while c:                                    # drop "Finding sensors…"
+            nxt = c.get_next_sibling()
+            box.remove(c)
+            c = nxt
+        from iridia.sensors import default_range, unit_of
+        names = {}
+        for f in found:
+            nm = SENSOR_NAMES.get(f["id"], f["name"])
+            if f.get("value") is not None:
+                nm += f"  ({f['value']:g} {f['unit']})"
+            names[nm] = f["id"]
+        if sec["sensor"] not in names.values():
+            names[SENSOR_NAMES.get(sec["sensor"], sec["sensor"]) + "  " + _("(not found here)")] = sec["sensor"]
+        cur = next(n for n, i in names.items() if i == sec["sensor"])
+        unit = unit_of(sec["sensor"])
+        lo_spin = Spin(-50, 200, sec["min"], lambda v: self._set_part(k, min=float(v)))
+        hi_spin = Spin(-50, 200, sec["max"], lambda v: self._set_part(k, max=float(v)))
+
+        def on_sensor(name):
+            sid = names.get(name)
+            if sid and sid != self.secs[k]["sensor"]:
+                lo, hi = default_range(sid)
+                self._set_part(k, sensor=sid, min=lo, max=hi)
+                lo_spin.set_quiet(lo)
+                hi_spin.set_quiet(hi)
+        box.append(hbox(8, label(_("Sensor"), ("small", "dim")), Dropdown(list(names), cur, on_sensor)))
+        if any(f.get("wakes_gpu") and f["id"] == sec["sensor"] for f in found):
+            box.append(label(_("NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a "
+                               "strip shows them."), ("tiny", "faint")))
+        box.append(hbox(8, label(_("Show"), ("small", "dim")),
+                        Group([("level", _("Level")), ("color", _("Color")), ("both", _("Both"))], sec["show"],
+                              lambda v: self._set_part(k, show=v))))
+        box.append(label(_("Level fills the part like a bar, Color shows the reading as one color, Both is a bar in "
+                           "the reading's color."), ("tiny", "faint")))
+        box.append(hbox(8, label(_("From"), ("small", "dim")), lo_spin, label(_("to"), ("small", "dim")), hi_spin,
+                        label(unit, ("small", "dim"))))
+        holder = vbox(6)
+
+        def show_picker(pal):
+            _swap(holder, SwatchPicker(self.card.extracted, list(self.secs[k].get("colors") or [0]),
+                                       lambda sel: self._set_part(k, colors=list(sel)), custom=self.card.custom,
+                                       max_select=8, size=28, hint=False) if pal == "colors" else Gtk.Box())
+
+        def on_palette(pal):
+            self._set_part(k, palette=pal)
+            show_picker(pal)
+        box.append(hbox(8, label(_("Colors"), ("small", "dim")),
+                        Group([("heat", _("Cool to hot")), ("colors", _("Picked colors"))], sec["palette"],
+                              on_palette)))
+        box.append(holder)
+        show_picker(sec["palette"])
+        box.append(hbox(8, label(_("Rest of the bar"), ("small", "dim")),
+                        Group([("off", _("Off")), ("dim", _("Dim"))], sec["background"],
+                              lambda v: self._set_part(k, background=v))))
+        fl = sec.get("flash_above")
+        fl_spin = Spin(-50, 200, fl if fl is not None else sec["max"] - 5,
+                       lambda v: self._set_part(k, flash_above=float(v)) if self.secs[k].get("flash_above")
+                       is not None else None)
+        row, _sw = switch_row(_("Flash above"), fl is not None,
+                              lambda on: self._set_part(k, flash_above=float(fl_spin.get_value()) if on else None))
+        box.append(hbox(8, row, fl_spin, label(unit, ("small", "dim"))))
+        row, _sw = switch_row(_("From the other end"), bool((sec.get("params") or {}).get("reverse")),
+                              lambda on: self._set_part(k, params={"reverse": True} if on else {}))
+        box.append(row)
+
     def _set_part(self, k, **fields):
         if k >= len(self.secs):
             return
@@ -303,6 +416,7 @@ class SectionsPanel(Gtk.Box):
         start = merged["start"]
         self.secs[k] = dict(S.clean_section(merged), start=start)
         self._changed()
+        self._update_row_labels()
 
     # ------------------------------------------------------------ single LEDs
     def _toggle_pick(self):

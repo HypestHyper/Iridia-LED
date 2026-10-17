@@ -520,6 +520,9 @@ def _split_text(r):
                 what = f"pattern {sec['pattern']}, colors {' '.join(map(str, sec['colors']))}"
             elif sec["type"] == "effect":
                 what = f"effect {sec['animation']['effect']}, colors {' '.join(map(str, sec['colors']))}"
+            elif sec["type"] == "sensor":
+                what = (f"sensor {sec['sensor']} as {sec['show']}, {sec['min']:g} to {sec['max']:g}"
+                        + (f", flashing above {sec['flash_above']:g}" if sec.get("flash_above") is not None else ""))
             lines.append(f"  {k + 1}. LEDs {a + 1}-{b}: {what}")
         note = S.split_note(S.sizes(secs, n), n)
         if note and note[0] == "near":
@@ -577,6 +580,16 @@ def cmd_split(args):
             secs = secs or [{"start": 0, "type": "same"}]
             if kind in ("same", "off"):
                 secs[k] = {"start": secs[k]["start"], "type": kind}
+            elif kind == "sensor" and len(rest) > 2:
+                new = {"start": secs[k]["start"], "type": "sensor", "sensor": rest[2],
+                       "show": rest[3] if len(rest) > 3 else "level"}
+                for opt in rest[4:]:
+                    key, _eq, val = opt.partition("=")
+                    if key in ("min", "max", "flash"):
+                        new["flash_above" if key == "flash" else key] = float(val)
+                    elif key in ("background", "palette"):
+                        new[key] = val
+                secs[k] = new
             elif kind in ("pattern", "effect") and len(rest) > 2:
                 colors = [int(c) - 1 if c.isdigit() else c for c in rest[3:]] or [0]
                 new = {"start": secs[k]["start"], "type": kind, "colors": colors}
@@ -586,8 +599,9 @@ def cmd_split(args):
                     new["animation"] = {"effect": rest[2]}
                 secs[k] = new
             else:
-                return bad("part K same | off | pattern NAME [COLORS] | effect NAME [COLORS]; COLORS are hex "
-                           "colors or wallpaper color numbers (1 = the first).")
+                return bad("part K same | off | pattern NAME [COLORS] | effect NAME [COLORS] | sensor ID "
+                           "[color|level|both] [min=N] [max=N] [flash=N] [background=dim]; COLORS are hex colors or "
+                           "wallpaper color numbers (1 = the first). 'iridia sensors' lists the sensor IDs.")
             req["sections"] = secs
         elif verb == "led":
             i = int(rest[0]) - 1
@@ -656,6 +670,20 @@ def cmd_session(args):
         req["test"] = 5
         return _report(req, lambda r: "Acting as if the screen were locked for 5 seconds.")
     return _report(req, _session_text)
+
+
+def cmd_sensors(args):
+    def text(r):
+        rows = r.get("sensors") or []
+        if not rows:
+            return "No sensors found."
+        out = ["Sensors (the ID is what 'iridia split NAME part K sensor ID' takes):"]
+        for s in rows:
+            v = "-" if s.get("value") is None else f"{s['value']:g} {s['unit']}"
+            note = "  (read only while shown: it wakes the GPU)" if s.get("wakes_gpu") else ""
+            out.append(f"  {s['id']:<28} {s['name']:<32} {v}{note}")
+        return "\n".join(out)
+    return _report({"cmd": "sensors"}, text)
 
 
 def cmd_animations(args):
@@ -1209,6 +1237,7 @@ def main(argv=None):
                     "hand. LED and part numbers start at 1. Examples:  iridia split Desk   iridia split Desk even 3   "
                     "iridia split Desk at 28 55   iridia split Desk part 2 pattern gradient ff0000 0000ff   "
                     "iridia split Desk part 3 effect comet 1   iridia split Desk part 1 off   "
+                    "iridia split Desk part 4 sensor cpu_temp level max=85 flash=80   "
                     "iridia split Desk led 27 ffffff   iridia split Desk led 27 normal   iridia split Desk join   "
                     "iridia split Desk clear-leds")
     sp_parser.add_argument("target", help="a strip name or Device/Zone ('iridia zone list' shows them)")
@@ -1229,6 +1258,7 @@ def main(argv=None):
     ses_parser.add_argument("--idle", choices=["keep", "dim", "off"])
     ses_parser.add_argument("--idle-minutes", type=float)
     ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
+    subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
@@ -1267,7 +1297,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

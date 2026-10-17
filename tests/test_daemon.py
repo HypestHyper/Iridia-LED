@@ -551,3 +551,69 @@ def test_session_cli(d, monkeypatch, capsys):
     assert cli.main(["idle", "off"]) == 0 and cli.main(["lock", "on"]) == 0 and d._hooks == {"lock": True,
                                                                                          "idle": False}
     assert cli.main(["session", "hooks"]) == 0 and "on-timeout = iridia idle on" in capsys.readouterr().out
+
+
+# ----------------------------------------------------------------- sensors
+
+class FakeSensors:
+    def __init__(self):
+        self.wanted, self.vals = set(), {}
+
+    def set_wanted(self, ids):
+        self.wanted = set(ids)
+
+    def update(self, now=None):
+        return True
+
+    def value(self, sid):
+        return self.vals.get(sid)
+
+    def values(self):
+        return {k: self.vals.get(k) for k in sorted(self.wanted)}
+
+    def listing(self):
+        return [{"id": "ram", "name": "Memory use", "unit": "%", "value": self.vals.get("ram"), "min": 0,
+                 "max": 100, "wakes_gpu": False}]
+
+    def stop(self):
+        pass
+
+
+def test_a_sensor_part_shows_the_reading(d):
+    d.sensors = FakeSensors()
+    d.sensors.vals["ram"] = 50.0
+    d.config.set(("devices", "Strip", "led_count"), 4)
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="",
+                sections=[{"start": 0, "type": "sensor", "sensor": "ram", "show": "both", "palette": "colors",
+                           "colors": ["ffffff"]}])["ok"]
+    d._update_sensors()
+    assert d.sensors.wanted == {"ram"} and d._needs_update
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ffffff"] * 2 + ["000000"] * 2
+    d.sensors.vals["ram"] = 100.0
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ffffff"] * 4
+    st = _cmd(d, "status")
+    assert st["sensors"] == {"ram": 100.0}
+    assert _cmd(d, "sensors")["sensors"][0]["id"] == "ram"
+    _cmd(d, "set_zone_enabled", device="Strip", zone="", enabled=False)       # nobody shows it: not read
+    d._update_sensors()
+    assert d.sensors.wanted == set()
+
+
+def test_sensor_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    d.sensors = FakeSensors()
+    d.sensors.vals["ram"] = 42.0
+    assert cli.main(["sensors"]) == 0 and "Memory use" in capsys.readouterr().out
+    d.config.set(("devices", "Strip", "led_count"), 10)
+    assert cli.main(["split", "Strip", "even", "2"]) == 0
+    assert cli.main(["split", "Strip", "part", "2", "sensor", "cpu_temp", "both", "max=85", "flash=80",
+                     "background=dim"]) == 0
+    out = capsys.readouterr().out
+    assert "2. LEDs 6-10: sensor cpu_temp as both, 30 to 85, flashing above 80" in out

@@ -1,6 +1,5 @@
 import os
 import stat
-import time
 
 from iridia.ipc import IPCClient, IPCServer
 
@@ -15,10 +14,7 @@ class FakeDaemon:
 def _start(path):
     server = IPCServer(path, FakeDaemon())
     server.start()
-    for _ in range(100):
-        if os.path.exists(path):
-            break
-        time.sleep(0.01)
+    assert server.ready.wait(5)         # the file appears at bind(), connections work after listen()
     return server
 
 

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Sensors.** A part of a strip (or the whole strip) can show CPU or GPU temperature and load,
+  memory use, disk temperature or any other temperature sensor: as a level bar, as a color, or as a
+  bar in the reading's color, cool to hot or in your colors, with an optional flash above a reading.
+  Several sensors fit on one strip as separate parts. Only sensors a strip shows are read, once a
+  second, straight from the kernel, and smoothed; NVIDIA readings use one `nvidia-smi` process only
+  while shown. `iridia sensors` lists them; `iridia split NAME part 2 sensor cpu_temp` sets one.
+
 - **Lock and idle.** Settings, *Lock and idle*: keep, dim or turn off the LEDs when the screen locks,
   and after a number of minutes without input. They fade out over 2 seconds and back in half a second;
   *Try it* shows it for 5 seconds, and a strip can stay lit (*Stay lit when the screen locks or you're

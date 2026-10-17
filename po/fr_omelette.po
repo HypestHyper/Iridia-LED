@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:12+0000\n"
+"POT-Creation-Date: 2026-10-17 00:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -2012,6 +2012,33 @@ msgstr "Sa propre baguette"
 msgid "Its own effect"
 msgstr "Son propre croissant"
 
+msgid "A sensor"
+msgstr "Un thermomètre"
+
+msgid "CPU temperature"
+msgstr "Chaleur du croissant"
+
+msgid "CPU load"
+msgstr "Travail du croissant"
+
+msgid "GPU temperature"
+msgstr "Chaleur de la baguette"
+
+msgid "GPU load"
+msgstr "Travail de la baguette"
+
+msgid "Second GPU temperature"
+msgstr "Deuxième baguette chaude"
+
+msgid "Second GPU load"
+msgstr "Deuxième baguette au travail"
+
+msgid "Memory use"
+msgstr "Fromage utilisé"
+
+msgid "Disk temperature"
+msgstr "Chaleur du camembert"
+
 msgid "Advanced: split this strip, set single LEDs"
 msgstr "Avancé : couper la baguette"
 
@@ -2040,6 +2067,9 @@ msgstr "Clique sur les bisous. Oh là là, un bisou entre deux baguettes."
 
 msgid "Remove this part (it joins the one before it)"
 msgstr "Manger ce morceau"
+
+msgid "The whole strip"
+msgstr "Toute la baguette"
 
 #, python-brace-format
 msgid "LEDs {first} to {last}  ({n})"
@@ -2077,6 +2107,41 @@ msgstr[1] "{n} bisous"
 #, python-brace-format
 msgid "Part {n}"
 msgstr "Morceau {n}"
+
+msgid "Finding sensors…"
+msgstr "On cherche…"
+
+msgid "(not found here)"
+msgstr "(pas ici)"
+
+msgid "Sensor"
+msgstr "Thermomètre"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr "nvidia-smi, oh là là."
+
+msgid "Level"
+msgstr "Niveau"
+
+msgid "Both"
+msgstr "Les deux"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr "Niveau, couleur, les deux. Voilà."
+
+msgid "Cool to hot"
+msgstr "Froid à chaud"
+
+msgid "Rest of the bar"
+msgstr "Le reste"
+
+msgid "Flash above"
+msgstr "Clignoter au-dessus"
+
+msgid "From the other end"
+msgstr "De l'autre côté"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

@@ -195,6 +195,8 @@ class Daemon:
         self._night_active = False
         self.sleepwatch = None
         self.sessionwatch = None
+        from iridia.sensors import SensorHub
+        self.sensors = SensorHub()          # read only while a strip shows a sensor
         self._hooks = {"lock": False, "idle": False}     # iridia lock|idle on (hypridle, swayidle, ...)
         self._sess_test_until = 0.0                     # Settings, Try it: act as if locked until then
         self._sess_ramp = (1.0, 1.0, 0.0, 0.0)          # brightness factor (from, to, start, seconds)
@@ -311,6 +313,31 @@ class Daemon:
         from iridia.sleepwatch import SleepWatcher
         self.sleepwatch = SleepWatcher(self._on_sleep, self._on_wake)
         self.sleepwatch.start()
+
+    # ------------------------------------------------------------- sensors
+    def _sensor_parts(self) -> list:
+        """Sensor parts of enabled strips, straight from the config (cleaned one by one)."""
+        from iridia.sensors import valid_id
+        out = []
+        for dev, _zn, zc in self._iter_zone_targets(self.config.devices):
+            if not isinstance(zc, dict) or not zc.get("enabled", True) or \
+                    not self.config.devices.get(dev, {}).get("enabled", True):
+                continue
+            for sec in zc.get("sections") or []:
+                if isinstance(sec, dict) and sec.get("type") == "sensor" and valid_id(sec.get("sensor")):
+                    out.append(zone_sections.clean_section(sec))
+        return out
+
+    def _update_sensors(self):
+        parts = self._sensor_parts()
+        self.sensors.set_wanted({p["sensor"] for p in parts})
+        if self.sensors.update():
+            self._needs_update = True
+        if parts and zone_sections.has_flash(parts, self.sensors.value):
+            self._needs_update = True       # a part over its flash level blinks
+
+    def _cmd_sensors(self, req: dict) -> dict:
+        return {"ok": True, "sensors": self.sensors.listing(), "values": self.sensors.values()}
 
     # ------------------------------------------------------------- lock and idle
     SESSION_ACTIONS = ("keep", "dim", "off")
@@ -481,6 +508,7 @@ class Daemon:
             self.sleepwatch.stop()
         if self.sessionwatch:
             self.sessionwatch.stop()
+        self.sensors.stop()
         self.ipc.stop()
         if self._observer:
             self._observer.stop()
@@ -635,6 +663,7 @@ class Daemon:
         self._read_brightness()
 
         self._update_session()
+        self._update_sensors()
         self._refresh_animations(connected)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
@@ -1764,7 +1793,8 @@ class Daemon:
                 if self._strip_type(device_name, zone_name, zcfg) != "single":
                     final_colors = zone_sections.compose_static(
                         final_colors, zcfg["sections"], zcfg["led_overrides"],
-                        lambda e: resolve_colors(e, self._extracted_colors), self.patterns)
+                        lambda e: resolve_colors(e, self._extracted_colors), self.patterns,
+                        self.sensors.value, time.monotonic())
 
         if not exact:
             brightness = int(round(self._brightness_now(key, zcfg)))
@@ -1986,7 +2016,8 @@ class Daemon:
         parts = None
         if zc["sections"] or zc["led_overrides"]:
             parts = zone_sections.Composer(zc["sections"], zc["led_overrides"], n,
-                                           lambda e: resolve_colors(e, self._extracted_colors), seed, self.patterns)
+                                           lambda e: resolve_colors(e, self._extracted_colors), seed, self.patterns,
+                                           self.sensors.value)
         if anim is None:
             # only parts of the strip move: the rest shows its static pattern
             correct = self._rgb_corrector(zc)
@@ -2294,6 +2325,8 @@ class Daemon:
             return self._cmd_set_zone_strip(req)
         if cmd == "session":
             return self._cmd_session(req)
+        if cmd == "sensors":
+            return self._cmd_sensors(req)
         if cmd == "set_zone_sections":
             return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":
@@ -2424,6 +2457,7 @@ class Daemon:
             "asleep": self._asleep,
             "night": dict(self._night_settings(), active=self._night_active),
             **self._session_status(),
+            "sensors": self.sensors.values(),
             "sleep_watch": bool(self.sleepwatch and self.sleepwatch.available),
             "sleep_lights_off": bool(self.config.get("sleep.lights_off", True)),
             "identify": ({"device": ident[0], "zone": ident[1]} if ident else None),

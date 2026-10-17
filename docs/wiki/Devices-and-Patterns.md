@@ -112,6 +112,7 @@ Open **Advanced: split this strip, set single LEDs** on a zone card (it stays cl
   - **Its own pattern**: any static pattern with its own colors, drawn over just that part.
   - **Its own effect**: any animated effect with its own colors and settings, over just that part.
     The rest of the strip stays as it is, static or animated.
+  - **A sensor**: a system reading (see below).
   - **Off**.
   **Settings** next to a part opens its pattern or effect and colors; **✕** removes a part (it joins
   the one before it).
@@ -119,6 +120,29 @@ Open **Advanced: split this strip, set single LEDs** on a zone card (it stays cl
   or **Back to normal**, then click or drag over LEDs on the strip. A set LED shows its color over
   everything else, for example one white LED between two bars. A dot under the strip marks them;
   **Clear all** removes them.
+
+### Sensors
+
+A part can show **CPU temperature**, **CPU load**, **GPU temperature**, **GPU load**, **memory use**,
+**disk temperature**, or any other temperature sensor your machine has. Several parts make several
+bars on one strip (CPU, GPU and memory side by side, a white single LED between them). Without
+dividers, the whole strip can be one sensor. In the part's **Settings**:
+
+| Setting | What it does |
+| --- | --- |
+| **Show** | **Level**: fills the part like a bar. **Color**: the whole part in the reading's color. **Both**: a bar in the reading's color |
+| **From / to** | The range: 30 to 90 °C for temperatures and 0 to 100 % for the rest, unless you change it |
+| **Colors** | **Cool to hot** (blue, green, amber, red) or **Picked colors** (low to high, in order) |
+| **Rest of the bar** | **Off**, or **Dim**: the unlit part glows faintly so you see the whole bar |
+| **Flash above** | Blink once a second over this reading |
+| **From the other end** | The bar fills from the part's last LED |
+
+Readings are taken once a second, only for sensors a strip shows, and smoothed over a few seconds so
+a short spike doesn't make the bar jump. They come straight from the kernel (`/proc`, `/sys/class/hwmon`,
+AMD's `gpu_busy_percent`), so nothing extra runs, with one exception: NVIDIA's proprietary driver only
+reports through `nvidia-smi`, which Iridia keeps running (one process) while a strip shows an NVIDIA
+reading. On laptops that keeps the NVIDIA GPU awake, so pick it only if you want it. `iridia sensors`
+lists everything Iridia found, with the current reading.
 
 Changing the LED count moves the dividers along with it; single LEDs keep their number. Brightness and
 color correction apply to the whole strip, parts included. The same is possible from the command line

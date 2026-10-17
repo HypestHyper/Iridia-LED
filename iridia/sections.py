@@ -6,7 +6,9 @@ Stored per zone in config.json:
                  {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"],
                   "params": {"stops": [...], "reverse": false, "mirror": false}},
                  {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]},
-                 {"start": 70, "type": "off"}]
+                 {"start": 70, "type": "off"},
+                 {"start": 75, "type": "sensor", "sensor": "cpu_temp", "show": "level", "min": 30, "max": 90,
+                  "palette": "heat", "colors": [0], "background": "dim", "flash_above": 85}]
     "led_overrides": {"26": "ffffff", "53": "000000"}
 
 `start` is the first LED of the part (0 based); a part runs to the next one's start. Types:
@@ -14,6 +16,8 @@ Stored per zone in config.json:
     pattern  a static pattern of its own, drawn over just that part
     effect   an animated effect of its own, over just that part
     off      dark
+    sensor   a system reading (iridia/sensors.py) as a color, a level bar, or a bar in the reading's
+             color; min/max default to 30-90 °C or 0-100 %
 `colors` are entries like a zone's pattern_colors (a wallpaper color's index or a hex).
 led_overrides set single LEDs to one color over everything else ("000000" is off).
 
@@ -22,11 +26,13 @@ Everything here is pure: the daemon and the window share it, so the preview is w
 
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
-from iridia import animations
+from iridia import animations, sensors
 from iridia.colors import normalize_hex
 from iridia.patterns import PatternGenerator
 
-TYPES = ("same", "pattern", "effect", "off")
+TYPES = ("same", "pattern", "effect", "off", "sensor")
+SHOWS = ("color", "level", "both")
+HEAT = ["2060ff", "20d070", "ffb000", "ff2020"]          # cool to hot
 MAX_SECTIONS = 32
 MAX_OVERRIDES = 512
 OFF = "000000"
@@ -73,7 +79,31 @@ def clean_section(raw) -> dict:
         out["animation"] = animations.clean(raw.get("animation")) or animations.defaults("breathing")
         out["colors"] = _colors(raw.get("colors"))
         out["params"] = _params(raw.get("params"))
+    elif kind == "sensor":
+        sid = raw.get("sensor")
+        out["sensor"] = sid if sensors.valid_id(sid) else "cpu_temp"
+        out["show"] = raw.get("show") if raw.get("show") in SHOWS else "level"
+        lo, hi = sensors.default_range(out["sensor"])
+        out["min"], out["max"] = _num(raw.get("min"), lo), _num(raw.get("max"), hi)
+        if out["max"] == out["min"]:
+            out["max"] = out["min"] + 1
+        out["palette"] = "colors" if raw.get("palette") == "colors" else "heat"
+        out["colors"] = _colors(raw.get("colors"))
+        out["background"] = "dim" if raw.get("background") == "dim" else "off"
+        fa = raw.get("flash_above")
+        out["flash_above"] = None if fa is None or isinstance(fa, bool) else _num(fa, None)
+        out["params"] = {"reverse": True} if (raw.get("params") or {}).get("reverse") else {}
     return out
+
+
+def _num(v, default):
+    if isinstance(v, bool):
+        return default
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return default
+    return v if v == v and abs(v) < 1e6 else default
 
 
 def clean(raw, led_count: int) -> List[dict]:
@@ -135,6 +165,20 @@ def has_effects(sections: Sequence[dict]) -> bool:
     return any(s["type"] == "effect" for s in sections)
 
 
+def sensor_ids(sections: Sequence[dict]) -> List[str]:
+    return sorted({s["sensor"] for s in sections if s["type"] == "sensor"})
+
+
+def has_flash(sections: Sequence[dict], sensor: Callable[[str], Optional[float]]) -> bool:
+    """A sensor part is over its flash level right now (it blinks, so it needs redrawing)."""
+    for s in sections:
+        if s["type"] == "sensor" and s.get("flash_above") is not None:
+            v = sensor(s["sensor"])
+            if v is not None and v >= s["flash_above"]:
+                return True
+    return False
+
+
 def rescale(sections: Sequence[dict], overrides: Dict[int, str], old_n: int, new_n: int):
     """Keep parts where they were, in proportion, when the strip's LED count changes. Single LEDs keep
     their number (they mark a real LED) and are dropped past the new end."""
@@ -185,8 +229,70 @@ def _section_colors(sec: dict, resolve: Resolve) -> List[str]:
     return resolve(sec.get("colors", [0])) or ["642107"]
 
 
-def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[PatternGenerator] = None) -> \
-        Optional[List[str]]:
+Sensor = Callable[[str], Optional[float]]
+
+
+def _ramp(cols: List[str], x: float) -> Tuple[int, int, int]:
+    rgb = [animations.hex_to_rgb(c) for c in cols] or [(255, 255, 255)]
+    if len(rgb) == 1:
+        return rgb[0]
+    x = min(1.0, max(0.0, x)) * (len(rgb) - 1)
+    i = min(int(x), len(rgb) - 2)
+    f = x - i
+    a, b = rgb[i], rgb[i + 1]
+    return (int(a[0] + (b[0] - a[0]) * f), int(a[1] + (b[1] - a[1]) * f), int(a[2] + (b[2] - a[2]) * f))
+
+
+def _scale(c, k):
+    return (int(c[0] * k), int(c[1] * k), int(c[2] * k))
+
+
+def sensor_level(sec: dict, value: Optional[float]) -> Optional[float]:
+    """How full the part is, 0 to 1, or None without a reading."""
+    if value is None:
+        return None
+    return min(1.0, max(0.0, (value - sec["min"]) / (sec["max"] - sec["min"])))
+
+
+def sensor_part(sec: dict, length: int, value: Optional[float], resolve: Resolve, t: float = 0.0) -> List[tuple]:
+    """A sensor part as (r, g, b): the reading's color, a level bar, or a bar in the reading's color.
+    Over flash_above the LEDs blink once a second. No reading: one dim LED, so the part isn't
+    mistaken for "0"."""
+    if length <= 0:
+        return []
+    level = sensor_level(sec, value)
+    cols = HEAT if sec.get("palette") != "colors" else _section_colors(sec, resolve)
+    if level is None:
+        out = [(0, 0, 0)] * length
+        out[0] = _scale(_ramp(cols, 0.0), 0.15)
+        return out
+    now_col = _ramp(cols, level)
+    flash = sec.get("flash_above") is not None and value >= sec["flash_above"] and int(t * 2) % 2 == 1
+    show = sec.get("show", "level")
+    if show == "color":
+        out = [now_col] * length
+    else:
+        lit = level * length
+        out = []
+        for i in range(length):
+            c = now_col if show == "both" else _ramp(cols, (i + 0.5) / length)
+            if i + 1 <= lit:
+                out.append(c)
+            elif i < lit:
+                out.append(_scale(c, lit - i))           # the LED at the tip, partly on: smooth movement
+            elif sec.get("background") == "dim":
+                out.append(_scale(c, 0.08))
+            else:
+                out.append((0, 0, 0))
+    if flash:
+        out = [_scale(c, 0.15) for c in out]
+    if (sec.get("params") or {}).get("reverse"):
+        out.reverse()
+    return out
+
+
+def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[PatternGenerator] = None,
+                sensor: Optional[Sensor] = None, t: float = 0.0) -> Optional[List[str]]:
     """A part's hex colors when it doesn't move (an effect shows its first color, as a paused zone
     does); None for "same"."""
     kind = sec["type"]
@@ -194,6 +300,9 @@ def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[Pat
         return None
     if kind == "off":
         return [OFF] * length
+    if kind == "sensor":
+        v = sensor(sec["sensor"]) if sensor is not None else None
+        return [animations.rgb_to_hex(c) for c in sensor_part(sec, length, v, resolve, t)]
     cols = _section_colors(sec, resolve)
     if kind == "effect":
         return [cols[0]] * length
@@ -202,12 +311,13 @@ def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[Pat
 
 
 def compose_static(base: List[str], sections: Sequence[dict], overrides: Dict[int, str], resolve: Resolve,
-                   patterns: Optional[PatternGenerator] = None) -> List[str]:
+                   patterns: Optional[PatternGenerator] = None, sensor: Optional[Sensor] = None,
+                   t: float = 0.0) -> List[str]:
     """The whole strip's hex colors: base (what the strip shows) with each part and single LED on top."""
     out = list(base)
     n = len(out)
     for a, b, sec in spans(sections, n):
-        part = static_part(sec, b - a, resolve, patterns)
+        part = static_part(sec, b - a, resolve, patterns, sensor, t)
         if part is not None:
             out[a:b] = part
     for i, h in overrides.items():
@@ -221,12 +331,17 @@ class Composer:
     effect parts are drawn every frame over their own length. Works on (r, g, b) tuples."""
 
     def __init__(self, sections: Sequence[dict], overrides: Dict[int, str], n: int, resolve: Resolve,
-                 seed: int = 0, patterns: Optional[PatternGenerator] = None):
+                 seed: int = 0, patterns: Optional[PatternGenerator] = None, sensor: Optional[Sensor] = None):
         self.n = n
         self.fixed: List[Tuple[int, int, list]] = []
         self.moving = []
+        self.readings = []                  # sensor parts: drawn every frame from the latest value
+        self._sensor = sensor
+        self._resolve = resolve
         for k, (a, b, sec) in enumerate(spans(sections, n)):
-            if sec["type"] == "effect":
+            if sec["type"] == "sensor":
+                self.readings.append((a, b, sec))
+            elif sec["type"] == "effect":
                 p = sec.get("params") or {}
                 cols = [animations.hex_to_rgb(c) for c in _section_colors(sec, resolve)]
                 pos = animations.strip_positions(b - a, bool(p.get("reverse")), bool(p.get("mirror")))
@@ -243,6 +358,9 @@ class Composer:
             out[a:b] = part
         for a, b, anim, cols, pos, seed in self.moving:
             out[a:b] = animations.render(anim["effect"], anim, b - a, t, cols, seed, pos)
+        for a, b, sec in self.readings:
+            v = self._sensor(sec["sensor"]) if self._sensor is not None else None
+            out[a:b] = sensor_part(sec, b - a, v, self._resolve, t)
         for i, c in self.single:
             out[i] = c
         return out

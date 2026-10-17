@@ -100,6 +100,14 @@ Saved settings, like the *Advanced* part of a zone card. LED and part numbers st
 | `iridia split NAME led 27 ffffff` / `off` / `normal` | Set one LED, turn it off, or give it back |
 | `iridia split NAME join` / `clear-leds` | One part again / no single LEDs |
 
+## Updates
+
+| Command | What it does |
+| --- | --- |
+| `iridia update --check` | Is there a new version? |
+| `iridia update [--yes]` | Back up your settings and install it (no password needed); see [Updates](Updates.md) |
+| `iridia update --rollback` | Back to the version before the last update |
+
 ## Setups
 
 | Command | What it does |

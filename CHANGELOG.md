@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it
+  starts (at most every few hours), shows one desktop notification per new version, and installs
+  it on a click: the download is checked against GitHub's SHA-256, your settings are backed up,
+  the current version is kept, and no password is needed. If the install fails, the previous
+  version is put back by itself; *Go back* (or `iridia update --rollback`) returns to it any time.
+  `install.sh --update` is the quiet, no-questions mode it uses.
+- **Wallpaper detection fixed on KDE Plasma** (it read a file name Plasma doesn't use), **XFCE**
+  (real monitor names), **MATE** (the right settings schema), and for **GNOME, Cinnamon and MATE
+  slideshows** (the default backgrounds on Ubuntu and Fedora). New: **COSMIC** and **LXQt**.
+  Desktops that keep the wallpaper in a settings file are watched instead of asked every 3 seconds.
+- **Lighter in the background.** Nothing watches the lock screen or idle time while both are *Keep*;
+  the daemon wakes once a second instead of twice when nothing is going on; sensor readings only
+  redraw the strips that show them; the window polls less while it's in the background and pauses
+  its previews while minimized. At rest the daemon now uses about a third of the CPU it did.
+- **Quicker start:** the daemon starts OpenRGB after 2 seconds instead of 10 when nothing else is set
+  up to start it.
+- **Backups restore exactly:** loading a setup or backup removes files and calibration profiles that
+  didn't exist when it was saved; two backups in the same second no longer overwrite each other.
+- Screen lockers whose process name is longer than 15 characters are recognised.
+
 - **Sensors.** A part of a strip (or the whole strip) can show CPU or GPU temperature and load,
   memory use, disk temperature or any other temperature sensor: as a level bar, as a color, or as a
   bar in the reading's color, cool to hot or in your colors, with an optional flash above a reading.

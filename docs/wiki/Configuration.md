@@ -63,6 +63,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `night.enabled`, `night.start`, `night.end`, `night.cap` | `false`, `23:00`, `07:00`, `20` | Night mode |
 | `sleep.lights_off` | `true` | LEDs off while the PC sleeps |
 | `session.lock`, `session.idle` | `keep`, `keep` | When the screen locks / after `session.idle_minutes` without input: `keep`, `dim` or `off` |
+| `updates.check`, `updates.notify`, `updates.prerelease`, `updates.skip` | `true`, `true`, `false`, `""` | Look for new versions at start, notify, include test versions, a version to skip |
 | `session.idle_minutes`, `session.dim` | `10`, `20` | Minutes without input; brightness in percent for `dim` |
 | `animations.enabled` | `true` | Run animated effects (off: animated zones show their first color) |
 | `animations.fps` | `30` | Frames per second: 15, 30 or 60 |

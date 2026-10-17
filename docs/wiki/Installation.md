@@ -214,7 +214,10 @@ or for fish: `fish_add_path ~/.local/bin`.
 
 ## Updating
 
-Get the new version (`git pull`, or unpack the new release) and run the installer again:
+The **Updates** tab in the window (or `iridia update`) does it for you: it checks the download, backs up
+your settings, keeps the old version so you can go back, and needs no password. See [Updates](Updates.md).
+
+By hand: get the new version (`git pull`, or unpack the new release) and run the installer again:
 
 ```bash
 bash install.sh --yes

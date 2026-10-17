@@ -92,6 +92,10 @@ LOCKERS = ("hyprlock", "swaylock", "gtklock", "waylock", "i3lock", "xsecurelock"
            "betterlockscreen", "light-locker")
 
 
+# The kernel keeps only the first 15 characters of a process name (betterlockscreen -> betterlockscree).
+_LOCKER_COMMS = {n[:15] for n in LOCKERS}
+
+
 def find_locker(proc: str, uid: int) -> Optional[str]:
     """The name of a running screen locker of this user, from /proc (no process started for it)."""
     import os
@@ -103,7 +107,7 @@ def find_locker(proc: str, uid: int) -> Optional[str]:
         try:
             with open(os.path.join(proc, pid, "comm")) as f:
                 name = f.read().strip()
-            if name in LOCKERS and os.stat(os.path.join(proc, pid)).st_uid == uid:
+            if name in _LOCKER_COMMS and os.stat(os.path.join(proc, pid)).st_uid == uid:
                 return name
         except OSError:
             continue

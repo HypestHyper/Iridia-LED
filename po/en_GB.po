@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:31+0000\n"
+"POT-Creation-Date: 2026-10-17 08:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -105,6 +105,9 @@ msgstr "Settings"
 
 msgid "Service"
 msgstr "Service"
+
+msgid "Updates"
+msgstr "Updates"
 
 msgid "Refresh"
 msgstr "Refresh"
@@ -477,6 +480,142 @@ msgstr "Log copied"
 msgid "Press Show to load the latest lines."
 msgstr "Press Show to load the latest lines."
 
+msgid "New versions of Iridia come from its releases on GitHub."
+msgstr "New versions of Iridia come from its releases on GitHub."
+
+msgid "Check now"
+msgstr "Check now"
+
+msgid "Update now"
+msgstr "Update now"
+
+msgid "Skip this version"
+msgstr "Skip this version"
+
+msgid "What's new"
+msgstr "What's new"
+
+msgid ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+msgstr ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+
+msgid "Checking"
+msgstr "Checking"
+
+msgid "Look for updates when Iridia starts"
+msgstr "Look for updates when Iridia starts"
+
+msgid "Show a notification when there's a new version"
+msgstr "Show a notification when there's a new version"
+
+msgid "Include test versions"
+msgstr "Include test versions"
+
+msgid ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+msgstr ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+
+msgid "Go back"
+msgstr "Go back"
+
+msgid "The version before the last update is kept, so you can undo an update."
+msgstr "The version before the last update is kept, so you can undo an update."
+
+#, python-brace-format
+msgid "Iridia {v}"
+msgstr "Iridia {v}"
+
+#, python-brace-format
+msgid "Couldn't check: {err}"
+msgstr "Couldn't check: {err}"
+
+#, python-brace-format
+msgid "Iridia {v} is available"
+msgstr "Iridia {v} is available"
+
+#, python-brace-format
+msgid "You have {cur}. Released {date}."
+msgstr "You have {cur}. Released {date}."
+
+msgid "You have the latest version."
+msgstr "You have the latest version."
+
+msgid "Not checked yet."
+msgstr "Not checked yet."
+
+msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+msgstr "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+
+#, python-brace-format
+msgid "What's new in {v}"
+msgstr "What's new in {v}"
+
+#, python-brace-format
+msgid "Kept from before the last update: Iridia {v}."
+msgstr "Kept from before the last update: Iridia {v}."
+
+msgid "Nothing kept yet: the version you have now is kept when you update."
+msgstr "Nothing kept yet: the version you have now is kept when you update."
+
+#, python-brace-format
+msgid "Go back to {v}"
+msgstr "Go back to {v}"
+
+msgid "Checking…"
+msgstr "Checking…"
+
+msgid "Couldn't check for updates"
+msgstr "Couldn't check for updates"
+
+#, python-brace-format
+msgid "Iridia {v} skipped. Newer versions still show up."
+msgstr "Iridia {v} skipped. Newer versions still show up."
+
+#, python-brace-format
+msgid "Install Iridia {v}?"
+msgstr "Install Iridia {v}?"
+
+msgid ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+msgstr ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+
+#, python-brace-format
+msgid "Updating to {v}…"
+msgstr "Updating to {v}…"
+
+msgid "Update"
+msgstr "Update"
+
+#, python-brace-format
+msgid "Go back to Iridia {v}?"
+msgstr "Go back to Iridia {v}?"
+
+msgid ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+msgstr ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+
+#, python-brace-format
+msgid "Going back to {v}…"
+msgstr "Going back to {v}…"
+
+msgid "Done: restarting the window…"
+msgstr "Done: restarting the window…"
+
+msgid "That didn't work: see the output below. Nothing of yours was changed."
+msgstr "That didn't work: see the output below. Nothing of yours was changed."
+
 msgid "Lock and idle"
 msgstr "Lock and idle"
 
@@ -543,15 +682,26 @@ msgstr "away"
 msgid "locked"
 msgstr "locked"
 
+#, python-brace-format
+msgid "Right now: {state}."
+msgstr "Right now: {state}."
+
+#, python-brace-format
+msgid "Locking seen through: {lock}."
+msgstr "Locking seen through: {lock}."
+
 msgid "logind, ScreenSaver or a screen locker, once one shows up"
 msgstr "logind, ScreenSaver or a screen locker, once one shows up"
+
+#, python-brace-format
+msgid "Idle time from: {idle}."
+msgstr "Idle time from: {idle}."
 
 msgid "nothing here"
 msgstr "nothing here"
 
-#, python-brace-format
-msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
-msgstr "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
+msgid "Nothing is watched while both are Keep."
+msgstr "Nothing is watched while both are Keep."
 
 msgid "Your idle daemon says you're away."
 msgstr "Your idle daemon says you're away."
@@ -721,9 +871,6 @@ msgid ""
 msgstr ""
 "The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
 "keeps working when this window is closed. This window only changes its settings."
-
-msgid "Checking…"
-msgstr "Checking…"
 
 msgid "Kill daemon"
 msgstr "Kill daemon"

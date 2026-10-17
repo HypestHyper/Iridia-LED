@@ -43,10 +43,10 @@ def test_locked_combines_what_the_desktop_says_and_the_locker():
 
 def test_finds_a_screen_locker_in_proc(tmp_path):
     import os
-    for pid, name in (("12", "bash"), ("40", "hyprlock"), ("abc", "swaylock")):
+    for pid, name in (("12", "bash"), ("40", "hyprlock"), ("abc", "swaylock"), ("7", "betterlockscree")):
         (tmp_path / pid).mkdir()
         (tmp_path / pid / "comm").write_text(name + "\n")
-    assert W.find_locker(str(tmp_path), os.getuid()) == "hyprlock"
+    assert W.find_locker(str(tmp_path), os.getuid()) in ("hyprlock", "betterlockscree")
     assert W.find_locker(str(tmp_path), os.getuid() + 1) is None       # someone else's
     assert W.find_locker(str(tmp_path / "missing"), os.getuid()) is None
 

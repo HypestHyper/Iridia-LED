@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 00:31+0000\n"
+"POT-Creation-Date: 2026-10-17 08:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -105,6 +105,9 @@ msgstr "Oh là là"
 
 msgid "Service"
 msgstr "Allez !"
+
+msgid "Updates"
+msgstr "Mises à jour"
 
 msgid "Refresh"
 msgstr "Oui"
@@ -460,6 +463,134 @@ msgstr "Macaron"
 msgid "Press Show to load the latest lines."
 msgstr "Le béret de mon grand-père"
 
+msgid "New versions of Iridia come from its releases on GitHub."
+msgstr "Les nouvelles baguettes viennent de GitHub."
+
+msgid "Check now"
+msgstr "Vérifier"
+
+msgid "Update now"
+msgstr "Mettre à jour"
+
+msgid "Skip this version"
+msgstr "Pas celle-ci"
+
+msgid "What's new"
+msgstr "Quoi de neuf"
+
+msgid ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+msgstr "Pas de mot de passe. Les fromages sont sauvegardés. Voilà."
+
+msgid "Checking"
+msgstr "Vérification"
+
+msgid "Look for updates when Iridia starts"
+msgstr "Vérifier au démarrage"
+
+msgid "Show a notification when there's a new version"
+msgstr "Une notification, oh là là"
+
+msgid "Include test versions"
+msgstr "Versions de test"
+
+msgid ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+msgstr "GitHub, parfois. Rien sur toi."
+
+msgid "Go back"
+msgstr "Revenir"
+
+msgid "The version before the last update is kept, so you can undo an update."
+msgstr "On garde l'ancienne baguette."
+
+#, python-brace-format
+msgid "Iridia {v}"
+msgstr "Iridia {v}"
+
+#, python-brace-format
+msgid "Couldn't check: {err}"
+msgstr "Pas possible : {err}"
+
+#, python-brace-format
+msgid "Iridia {v} is available"
+msgstr "Iridia {v} est là"
+
+#, python-brace-format
+msgid "You have {cur}. Released {date}."
+msgstr "Tu as {cur}. Sortie le {date}."
+
+msgid "You have the latest version."
+msgstr "Tu as la dernière baguette."
+
+msgid "Not checked yet."
+msgstr "Pas encore vérifié."
+
+msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+msgstr "Mets à jour avec git pull, puis bash install.sh."
+
+#, python-brace-format
+msgid "What's new in {v}"
+msgstr "Quoi de neuf dans {v}"
+
+#, python-brace-format
+msgid "Kept from before the last update: Iridia {v}."
+msgstr "Gardée : Iridia {v}."
+
+msgid "Nothing kept yet: the version you have now is kept when you update."
+msgstr "Rien de gardé."
+
+#, python-brace-format
+msgid "Go back to {v}"
+msgstr "Revenir à {v}"
+
+msgid "Checking…"
+msgstr "Oui"
+
+msgid "Couldn't check for updates"
+msgstr "Pas possible de vérifier"
+
+#, python-brace-format
+msgid "Iridia {v} skipped. Newer versions still show up."
+msgstr "Iridia {v} ignorée."
+
+#, python-brace-format
+msgid "Install Iridia {v}?"
+msgstr "Installer Iridia {v} ?"
+
+msgid ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+msgstr "Les fromages sont sauvegardés, la fenêtre redémarre. Bonsoir."
+
+#, python-brace-format
+msgid "Updating to {v}…"
+msgstr "Mise à jour vers {v}…"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+#, python-brace-format
+msgid "Go back to Iridia {v}?"
+msgstr "Revenir à Iridia {v} ?"
+
+msgid ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+msgstr "On garde les deux. Voilà."
+
+#, python-brace-format
+msgid "Going back to {v}…"
+msgstr "Retour à {v}…"
+
+msgid "Done: restarting the window…"
+msgstr "Fini : la fenêtre redémarre…"
+
+msgid "That didn't work: see the output below. Nothing of yours was changed."
+msgstr "Raté. Rien n'a changé."
+
 msgid "Lock and idle"
 msgstr "Dodo"
 
@@ -520,15 +651,26 @@ msgstr "en vacances"
 msgid "locked"
 msgstr "Bisou"
 
+#, python-brace-format
+msgid "Right now: {state}."
+msgstr "Maintenant : {state}."
+
+#, python-brace-format
+msgid "Locking seen through: {lock}."
+msgstr "Porte : {lock}."
+
 msgid "logind, ScreenSaver or a screen locker, once one shows up"
 msgstr "logind ou un croissant"
+
+#, python-brace-format
+msgid "Idle time from: {idle}."
+msgstr "Sieste : {idle}."
 
 msgid "nothing here"
 msgstr "rien du tout"
 
-#, python-brace-format
-msgid "Right now: {state}. Locking seen through: {lock}. Idle time from: {idle}."
-msgstr "Maintenant : {state}. Porte : {lock}. Sieste : {idle}."
+msgid "Nothing is watched while both are Keep."
+msgstr "Rien ne bouge, tout est Garder."
 
 msgid "Your idle daemon says you're away."
 msgstr "Tu es en vacances."
@@ -694,9 +836,6 @@ msgid ""
 "The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
 "keeps working when this window is closed. This window only changes its settings."
 msgstr "Le chat est sous la table. Une grenouille dans mon café. Les lapins sont dans la cuisine."
-
-msgid "Checking…"
-msgstr "Oui"
 
 msgid "Kill daemon"
 msgstr "Baguette"

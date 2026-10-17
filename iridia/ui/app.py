@@ -1333,7 +1333,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         tv.get_buffer().set_text(HOOK_LINES)
         hb.append(tv)
         hb.append(button(_("Copy"), "content_copy", "tonal small",
-                         lambda: (self.get_clipboard().set(HOOK_LINES), self.toast(_("Copied")))))
+                         lambda: (widgets.copy_text(self, HOOK_LINES), self.toast(_("Copied")))))
         self._sess_hooks.set_child(hb)
         self._sess_hooks.set_visible(False)
         c.append(self._sess_hooks)

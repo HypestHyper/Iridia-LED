@@ -13,6 +13,7 @@
 - [Keybinds](Keybinds.md)
 - [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md)
 - [Setups and backups](Setups-and-Backups.md)
+- [Updates](Updates.md)
 - [Start at login](Start-at-Login.md)
 
 **Reference**

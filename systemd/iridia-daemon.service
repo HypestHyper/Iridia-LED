@@ -2,14 +2,14 @@
 Description=Iridia Daemon
 After=graphical-session.target
 PartOf=graphical-session.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple
 ExecStart=%h/.local/share/iridia-venv/bin/python3 -m iridia.daemon
 Restart=on-failure
 RestartSec=5
-StartLimitIntervalSec=60
-StartLimitBurst=5
 Environment="PYTHONUNBUFFERED=1"
 StandardOutput=journal
 StandardError=journal

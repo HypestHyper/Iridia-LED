@@ -67,23 +67,45 @@ sudo pacman -S --needed python gtk4 python-gobject python-cairo openrgb ddcutil
 
 **Debian, Ubuntu, Linux Mint, Pop!_OS**
 ```bash
-sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo openrgb ddcutil
+sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo ddcutil libglib2.0-bin
 ```
-If your release has no `openrgb` package, install the `.deb` from [openrgb.org](https://openrgb.org/).
+OpenRGB is packaged from Ubuntu 25.10 and Debian testing on (`sudo apt install openrgb`). On older
+releases use the `.deb` from [openrgb.org](https://openrgb.org/) or the Flatpak
+(`flatpak install flathub org.openrgb.OpenRGB`; it needs OpenRGB's udev rules on the system, see below).
 
 **Fedora**
 ```bash
 sudo dnf install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil
 ```
 
-**openSUSE**
+**openSUSE Tumbleweed**
 ```bash
 sudo zypper install python3 typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo OpenRGB ddcutil
 ```
 
+**openSUSE Leap 15** (its `python3` is 3.6; Iridia needs 3.8 or newer, so it uses Python 3.11)
+```bash
+sudo zypper install python311 typelib-1_0-Gtk-4_0 python311-gobject python311-gobject-cairo python311-pycairo ddcutil
+```
+
+**Gentoo**
+```bash
+sudo emerge --noreplace gui-libs/gtk dev-python/pygobject dev-python/pycairo app-misc/openrgb app-misc/ddcutil
+```
+
+**Fedora Atomic (Silverblue, Kinoite, Bazzite)**: layer the system parts, reboot, then run the installer
+with `--no-deps`; OpenRGB from Flathub:
+```bash
+sudo rpm-ostree install --idempotent gtk4 python3-gobject python3-cairo ddcutil
+flatpak install flathub org.openrgb.OpenRGB
+```
+
+**NixOS**: the installer prints what to put in `configuration.nix` (`hardware.i2c.enable`,
+`services.hardware.openrgb.enable`) and the `nix-shell` command to run it from.
+
 **Void**
 ```bash
-sudo xbps-install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil
+sudo xbps-install -S python3 gtk4 python3-gobject python3-cairo openrgb ddcutil
 ```
 
 **Alpine**
@@ -214,7 +236,10 @@ or for fish: `fish_add_path ~/.local/bin`.
 
 ## Updating
 
-Get the new version (`git pull`, or unpack the new release) and run the installer again:
+The **Updates** tab in the window (or `iridia update`) does it for you: it checks the download, backs up
+your settings, keeps the old version so you can go back, and needs no password. See [Updates](Updates.md).
+
+By hand: get the new version (`git pull`, or unpack the new release) and run the installer again:
 
 ```bash
 bash install.sh --yes

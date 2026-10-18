@@ -4,6 +4,7 @@ Every file the daemon touches lives under a temporary HOME, so these never read
 or change your real settings, and nothing talks to hardware.
 """
 import json
+import os
 
 import pytest
 
@@ -409,3 +410,230 @@ def test_brightness_glides_instead_of_jumping(d):
     assert 10 < mid < 90
     _t.sleep(d.GLIDE_SEC)
     assert d._brightness_now("Strip|", zc) == 0
+
+
+# ----------------------------------------------------------------- sections and single LEDs
+
+def test_sections_and_single_leds_on_a_static_strip(d):
+    d.config.set(("devices", "Strip", "led_count"), 8)
+    r = _cmd(d, "set_zone_sections", device="Strip", zone="",
+             sections=[{"start": 3, "type": "pattern", "pattern": "solid", "colors": ["0000ff"]},
+                       {"start": 5, "type": "off"}, {"start": 6, "type": "same"}],
+             led_overrides={"7": "ffffff", "40": "ffffff"})
+    assert r["ok"]
+    assert d.config.get(("devices", "Strip", "led_overrides")) == {"7": "ffffff"}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 3 + ["0000ff"] * 2 + ["000000", "ff0000", "ffffff"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[0, "00ff00"])["ok"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[7, None])["ok"]
+    assert not _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[8, "00ff00"])["ok"]
+    assert not _cmd(d, "set_zone_sections", device="Strip", zone="", set_led=[1, "nope"])["ok"]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] + ["ff0000"] * 2 + ["0000ff"] * 2 + ["000000", "ff0000", "ff0000"]
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[])["ok"]   # joined again
+    assert d.config.get(("devices", "Strip", "sections")) == []
+    # a new LED count moves the dividers with it
+    _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[{"start": 4, "type": "off"}])
+    _cmd(d, "set_zone_led_count", device="Strip", zone="", count=16)
+    assert [s["start"] for s in d.config.get(("devices", "Strip", "sections"))] == [0, 8]
+
+
+def test_an_effect_part_animates_a_static_strip(d):
+    d.config.set(("devices", "Strip", "led_count"), 6)
+    _cmd(d, "set_zone_sections", device="Strip", zone="",
+         sections=[{"start": 2, "type": "effect", "animation": {"effect": "rainbow"}, "colors": ["00ff00"]},
+                   {"start": 4, "type": "same"}])
+    jobs = _jobs(d)
+    assert "Strip|" in jobs
+    a, b = jobs["Strip|"].frame(0.0), jobs["Strip|"].frame(1.0)
+    assert a[:2] == a[4:] == [(255, 0, 0)] * 2 and a[2:4] != b[2:4]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") is None                  # the animator sends it
+    _cmd(d, "animations", action="pause")
+    d._update_all_devices()                                 # paused: the effect part shows its first color
+    assert d.openrgb.last("Strip") == ["ff0000"] * 2 + ["00ff00"] * 2 + ["ff0000"] * 2
+
+
+def test_an_effect_strip_keeps_its_static_parts(d):
+    d.config.set(("devices", "Strip", "led_count"), 6)
+    _animate(d, effect="rainbow")
+    _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[{"start": 3, "type": "off"}],
+         led_overrides={"0": "0000ff"})
+    f = _jobs(d)["Strip|"].frame(2.0)
+    assert f[0] == (0, 0, 255) and f[3:] == [(0, 0, 0)] * 3 and f[1] != (0, 0, 0)
+
+
+def test_split_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    d.config.set(("devices", "Strip", "led_count"), 10)
+
+    def run(*words):
+        return cli.main(["split", "Strip", *words])
+    assert run("even", "3") == 0
+    assert "3 parts, 10 LEDs (4 + 3 + 3)" in capsys.readouterr().out
+    assert run("part", "2", "pattern", "gradient", "ff0000", "1") == 0
+    assert run("part", "3", "off") == 0
+    assert run("led", "1", "ffffff") == 0 and run("led", "2", "off") == 0
+    out = capsys.readouterr().out
+    assert "2. LEDs 5-7: pattern gradient, colors ff0000 0" in out and "3. LEDs 8-10: off" in out
+    assert "Single LEDs: 1=ffffff, 2=off" in out
+    assert run("at", "3") == 0 and "2 parts" in capsys.readouterr().out
+    assert run("part", "9", "off") == 2 and run("led", "11", "ffffff") == 1
+    assert run("join") == 0 and run("clear-leds") == 0
+    assert "one part (10 LEDs), not split" in capsys.readouterr().out
+
+
+# ----------------------------------------------------------------- lock and idle
+
+def test_lock_and_idle_fade_the_leds(d, monkeypatch):
+    clock = [1000.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    r = _cmd(d, "session", lock="off", idle="dim", dim=50, idle_minutes=5)
+    assert r["ok"] and r["session"]["lock"] == "off" and r["session"]["state"] == "active"
+    assert not _cmd(d, "session", lock="sometimes")["ok"]
+    _cmd(d, "session", idle_hook=True)                      # hypridle: iridia idle on
+    assert d._sess_state == "idle"
+    clock[0] += 0.5                                          # fading: part of the way down
+    d._last_sent = {}
+    d._update_all_devices()
+    mid = d.openrgb.last("Strip")[0]
+    assert "7f0000" < mid < "ff0000"
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["7f0000"] * 4        # dimmed to 50%
+    _cmd(d, "session", lock_hook=True)                      # locked wins: off
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    # a zone set to ignore it stays lit
+    assert _cmd(d, "set_zone_strip", device="Hub v1.0", zone="A", session_ignore=True)["ok"]
+    d._update_all_devices()
+    zoned = [c for dev, c, cfg in d.openrgb.sent if dev == "Hub v1.0" and set(cfg) == {"A"}]
+    assert zoned[-1] == ["00ff00"] * 2
+    _cmd(d, "session", lock_hook=False, idle_hook=False)
+    assert d._sess_state == "active"
+    clock[0] += 5
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+
+
+def test_try_it_shows_off_even_when_lock_is_keep(d, monkeypatch):
+    clock = [50.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    r = _cmd(d, "session", test=5)
+    assert r["session"]["state"] == "locked" and r["session"]["factor"] == 0.0
+    clock[0] += 6
+    d._update_session()
+    assert d._sess_state == "active"
+
+
+def test_session_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    assert cli.main(["session", "--lock", "off", "--idle", "dim", "--dim", "30", "--idle-minutes", "15"]) == 0
+    out = capsys.readouterr().out
+    assert "When the screen locks: turn off" in out and "After 15 min without input: dim to 30%" in out
+    assert cli.main(["idle", "on"]) == 0 and d._hooks["idle"] is True
+    assert cli.main(["session"]) == 0 and "Now: idle" in capsys.readouterr().out
+    assert cli.main(["idle", "off"]) == 0 and cli.main(["lock", "on"]) == 0 and d._hooks == {"lock": True,
+                                                                                         "idle": False}
+    assert cli.main(["session", "hooks"]) == 0 and "on-timeout = iridia idle on" in capsys.readouterr().out
+
+
+# ----------------------------------------------------------------- sensors
+
+class FakeSensors:
+    def __init__(self):
+        self.wanted, self.vals = set(), {}
+
+    def set_wanted(self, ids):
+        self.wanted = set(ids)
+
+    def update(self, now=None):
+        return True
+
+    def value(self, sid):
+        return self.vals.get(sid)
+
+    def values(self):
+        return {k: self.vals.get(k) for k in sorted(self.wanted)}
+
+    def listing(self):
+        return [{"id": "ram", "name": "Memory use", "unit": "%", "value": self.vals.get("ram"), "min": 0,
+                 "max": 100, "wakes_gpu": False}]
+
+    def stop(self):
+        pass
+
+
+def test_a_sensor_part_shows_the_reading(d):
+    d.sensors = FakeSensors()
+    d.sensors.vals["ram"] = 50.0
+    d.config.set(("devices", "Strip", "led_count"), 4)
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="",
+                sections=[{"start": 0, "type": "sensor", "sensor": "ram", "show": "both", "palette": "colors",
+                           "colors": ["ffffff"]}])["ok"]
+    d._update_sensors()
+    assert d.sensors.wanted == {"ram"} and d._sensor_zones == {("Strip", "")}
+    d._update_sensor_zones()
+    assert not d._sensor_zones
+    assert d.openrgb.last("Strip") == ["ffffff"] * 2 + ["000000"] * 2
+    d.sensors.vals["ram"] = 100.0
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ffffff"] * 4
+    st = _cmd(d, "status")
+    assert st["sensors"] == {"ram": 100.0}
+    assert _cmd(d, "sensors")["sensors"][0]["id"] == "ram"
+    _cmd(d, "set_zone_enabled", device="Strip", zone="", enabled=False)       # nobody shows it: not read
+    d._update_sensors()
+    assert d.sensors.wanted == set()
+
+
+def test_sensor_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    d.sensors = FakeSensors()
+    d.sensors.vals["ram"] = 42.0
+    assert cli.main(["sensors"]) == 0 and "Memory use" in capsys.readouterr().out
+    d.config.set(("devices", "Strip", "led_count"), 10)
+    assert cli.main(["split", "Strip", "even", "2"]) == 0
+    assert cli.main(["split", "Strip", "part", "2", "sensor", "cpu_temp", "both", "max=85", "flash=80",
+                     "background=dim"]) == 0
+    out = capsys.readouterr().out
+    assert "2. LEDs 6-10: sensor cpu_temp as both, 30 to 85, flashing above 80" in out
+
+
+def test_a_daemon_started_in_a_session_stops_when_it_ends(d, tmp_path, monkeypatch):
+    sessions = tmp_path / "sessions"
+    sessions.mkdir()
+    d._sessions_dir = str(sessions)
+    monkeypatch.setenv("XDG_SESSION_ID", "4")
+    monkeypatch.delenv("INVOCATION_ID", raising=False)
+    monkeypatch.delenv("SYSTEMD_EXEC_PID", raising=False)
+    assert not d._session_over()                        # no session file yet: nothing to go by
+    (sessions / "4").write_text("UID=1000\nSTATE=active\n")
+    assert not d._session_over()
+    (sessions / "4").write_text("UID=1000\nSTATE=closing\n")
+    assert d._session_over()
+    (sessions / "4").unlink()
+    assert d._session_over()                            # seen before, gone now
+    monkeypatch.setenv("SYSTEMD_EXEC_PID", str(os.getpid()))
+    assert not d._session_over()                        # systemd stops its own services

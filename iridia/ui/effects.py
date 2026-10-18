@@ -173,10 +173,11 @@ class Dial(Gtk.DrawingArea):
 class EffectControls(Gtk.Box):
     """The settings of one effect. on_change(params) fires about 100 ms after the last change."""
 
-    def __init__(self, on_change: Callable[[dict], None], show_sync: bool = False):
+    def __init__(self, on_change: Callable[[dict], None], show_sync: bool = False, show_layout: bool = True):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self._on_change = on_change
         self._show_sync = show_sync
+        self._show_layout = show_layout
         self.params: Dict = {}
         self._job = None
         self._effect = None
@@ -247,7 +248,7 @@ class EffectControls(Gtk.Box):
                 t, u, st = _LABELS[key]
                 self._slider(key, t, s, u, st)
         # moving effects can run through the room, following the Layout tab
-        if e in ("comet", "fill", "rainbow", "rainbow_vomit", "embers"):
+        if self._show_layout and e in ("comet", "fill", "rainbow", "rainbow_vomit", "embers"):
             r = hbox(14)
             row, sw = switch_row(_LABELS["follow_layout"][0], bool(p["follow_layout"]), self._on_follow)
             self._widgets["follow_layout"] = sw
@@ -318,14 +319,33 @@ _tickers: Dict[object, Callable[[], bool]] = {}
 _tick_job = None
 
 
+_hidden = False                # the window is minimized: previews wait
+
+
 def tick(owner, fn: Callable[[], bool]):
     """Call fn on the window's one preview clock until it returns False. Every preview (zone cards,
     the Layout tab) shares it, so the window repaints once per tick instead of once per preview."""
-    global _tick_job
     _tickers[owner] = fn
-    if _tick_job is None:
+    _start()
+
+
+def _start():
+    global _tick_job
+    if _tick_job is None and _tickers and not _hidden:
         # below everything else, so animated previews never hold back status updates or clicks
         _tick_job = GLib.timeout_add(PREVIEW_MS, _run_ticks, priority=GLib.PRIORITY_LOW)
+
+
+def set_hidden(hidden: bool):
+    """No preview frames while nobody can see them (the window is minimized); they carry on
+    where they are when it comes back."""
+    global _hidden, _tick_job
+    _hidden = hidden
+    if hidden and _tick_job is not None:
+        GLib.source_remove(_tick_job)
+        _tick_job = None
+    elif not hidden:
+        _start()
 
 
 def _run_ticks():

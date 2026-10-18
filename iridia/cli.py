@@ -31,7 +31,8 @@ def cmd_status(args):
     print(f"Wallpaper: {resp.get('wallpaper', 'N/A')}")
     print(f"Extracted colors: {', '.join(resp.get('extracted_colors', [])[:4])}")
     print(f"Brightness: {resp.get('brightness', 'N/A')}%")
-    print(f"DDC available: {resp.get('ddc_available', False)}")
+    print(f"DDC available: {resp.get('ddc_available', False)}"
+          + (" (following the screen's backlight)" if resp.get("ddc_source") == "backlight" else ""))
     proto = resp.get("openrgb_protocol")
     print(f"OpenRGB connected: {resp.get('openrgb_connected', False)}"
           + (" (SDK protocol 6)" if proto == 6 else " (OpenRGB before 1.0, openrgb-python)" if proto is not None else ""))
@@ -504,6 +505,250 @@ def cmd_zone(args):
                    lambda r: r.get("message", "Done."))
 
 
+def _split_text(r):
+    """What `iridia split` prints: the parts and the LEDs set by hand."""
+    from iridia import sections as S
+    n, secs = r.get("led_count", 0), r.get("sections") or []
+    where = f"{r['device']}/{r['zone']}" if r.get("zone") else r.get("device", "")
+    lines = []
+    if not secs:
+        lines.append(f"{where}: one part ({n} LEDs), not split.")
+    else:
+        lines.append(f"{where}: {len(secs)} parts, {n} LEDs ({' + '.join(map(str, S.sizes(secs, n)))})")
+        for k, (a, b, sec) in enumerate(S.spans(secs, n)):
+            what = {"same": "same as the strip", "off": "off"}.get(sec["type"])
+            if sec["type"] == "pattern":
+                what = f"pattern {sec['pattern']}, colors {' '.join(map(str, sec['colors']))}"
+            elif sec["type"] == "effect":
+                what = f"effect {sec['animation']['effect']}, colors {' '.join(map(str, sec['colors']))}"
+            elif sec["type"] == "sensor":
+                what = (f"sensor {sec['sensor']} as {sec['show']}, {sec['min']:g} to {sec['max']:g}"
+                        + (f", flashing above {sec['flash_above']:g}" if sec.get("flash_above") is not None else ""))
+            lines.append(f"  {k + 1}. LEDs {a + 1}-{b}: {what}")
+        note = S.split_note(S.sizes(secs, n), n)
+        if note and note[0] == "near":
+            lines.append(f"  The parts are {note[1]} LED(s) apart: 'even' makes them match.")
+    ov = r.get("led_overrides") or {}
+    if ov:
+        lines.append("Single LEDs: " + ", ".join(f"{int(i) + 1}={'off' if h == '000000' else h}"
+                                                for i, h in sorted(ov.items(), key=lambda x: int(x[0]))))
+    return "\n".join(lines)
+
+
+def cmd_split(args):
+    """iridia split STRIP [even N | at LED... | part K same|off|pattern NAME COLORS|effect NAME COLORS |
+    led N COLOR|off|normal | join | clear-leds]."""
+    from iridia import sections as S
+    req = {"cmd": "set_zone_sections", "target": args.target}
+    w = list(args.words)
+    if not w:
+        return _report(req, _split_text)
+    try:
+        cur = _client().send(dict(req))
+    except Exception as e:                  # noqa: BLE001
+        print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
+        return 1
+    if not cur.get("ok"):
+        print(f"Failed: {cur.get('error')}", file=sys.stderr)
+        return 1
+    n, secs = cur["led_count"], cur.get("sections") or []
+    verb, rest = w[0].lower(), w[1:]
+
+    def bad(msg):
+        print(msg, file=sys.stderr)
+        return 2
+    try:
+        if verb == "even":
+            parts = int(rest[0]) if rest else max(2, len(secs))
+            if not 1 <= parts <= min(n, S.MAX_SECTIONS):
+                return bad(f"Between 1 and {min(n, S.MAX_SECTIONS)} parts.")
+            old = secs or [{"start": 0, "type": "same"}]
+            old = old + [{"type": "same"}] * (parts - len(old))
+            req["sections"] = [dict(o, start=st) for o, st in zip(old, S.even_starts(parts, n))]
+        elif verb == "at":
+            starts = sorted({int(x) - 1 for x in rest})
+            if not starts or starts[0] < 1 or starts[-1] >= n:
+                return bad(f"Give the LED numbers where new parts start, from 2 to {n}.")
+            old = {s["start"]: s for s in secs}
+            req["sections"] = [dict(old.get(st, {"type": "same"}), start=st) for st in [0] + starts]
+        elif verb == "join":
+            req["sections"] = []
+        elif verb == "part":
+            k = int(rest[0]) - 1
+            if not 0 <= k < max(1, len(secs)):
+                return bad(f"There are {max(1, len(secs))} parts.")
+            kind = rest[1].lower() if len(rest) > 1 else ""
+            secs = secs or [{"start": 0, "type": "same"}]
+            if kind in ("same", "off"):
+                secs[k] = {"start": secs[k]["start"], "type": kind}
+            elif kind == "sensor" and len(rest) > 2:
+                new = {"start": secs[k]["start"], "type": "sensor", "sensor": rest[2],
+                       "show": rest[3] if len(rest) > 3 else "level"}
+                for opt in rest[4:]:
+                    key, _eq, val = opt.partition("=")
+                    if key in ("min", "max", "flash"):
+                        new["flash_above" if key == "flash" else key] = float(val)
+                    elif key in ("background", "palette"):
+                        new[key] = val
+                secs[k] = new
+            elif kind in ("pattern", "effect") and len(rest) > 2:
+                colors = [int(c) - 1 if c.isdigit() else c for c in rest[3:]] or [0]
+                new = {"start": secs[k]["start"], "type": kind, "colors": colors}
+                if kind == "pattern":
+                    new["pattern"] = rest[2]
+                else:
+                    new["animation"] = {"effect": rest[2]}
+                secs[k] = new
+            else:
+                return bad("part K same | off | pattern NAME [COLORS] | effect NAME [COLORS] | sensor ID "
+                           "[color|level|both] [min=N] [max=N] [flash=N] [background=dim]; COLORS are hex colors or "
+                           "wallpaper color numbers (1 = the first). 'iridia sensors' lists the sensor IDs.")
+            req["sections"] = secs
+        elif verb == "led":
+            i = int(rest[0]) - 1
+            val = rest[1].lower()
+            req["set_led"] = [i, None if val == "normal" else "000000" if val == "off" else val]
+        elif verb == "clear-leds":
+            req["led_overrides"] = {}
+        else:
+            return bad("Use: even N | at LED... | part K ... | led N COLOR|off|normal | join | clear-leds")
+    except (IndexError, ValueError):
+        return bad("Missing or wrong number. 'iridia split --help' has examples.")
+    return _report(req, _split_text)
+
+
+HOOKS = """Locking is seen by itself: logind and ScreenSaver signals (GNOME, KDE, ...) and screen lockers
+like hyprlock, swaylock or gtklock while they run. Idle time is too on GNOME, KDE and X11. Elsewhere
+(Hyprland, Sway, ...) let your idle daemon tell Iridia:
+
+hypridle (~/.config/hypr/hypridle.conf):
+    listener {
+        timeout = 300                      # 5 minutes, or what you like
+        on-timeout = iridia idle on
+        on-resume = iridia idle off
+    }
+
+swayidle (in your Sway config):
+    exec swayidle -w timeout 300 'iridia idle on' resume 'iridia idle off'
+
+Iridia then uses that instead of its own minutes. 'iridia lock on|off' does the same for a locker
+Iridia doesn't know. Settings, Lock and idle (or iridia session --lock/--idle) decides what the
+LEDs do."""
+
+
+def _session_text(r):
+    s = r.get("session") or {}
+    acts = {"keep": "stay as they are", "dim": f"dim to {s.get('dim')}%", "off": "turn off"}
+    idle = s.get("idle_seconds")
+    lines = [f"Now: {s.get('state', '?')}" + (f", {idle // 60} min {idle % 60} s without input" if idle else ""),
+             f"When the screen locks: {acts.get(s.get('lock'), '?')}",
+             f"After {s.get('idle_minutes'):g} min without input: {acts.get(s.get('idle'), '?')}",
+             f"Lock seen through: {s.get('lock_method') or 'nothing yet (logind, ScreenSaver, or iridia lock on|off)'}",
+             f"Idle time from: {s.get('idle_method') or 'nothing here (use iridia idle on|off from hypridle/swayidle)'}"]
+    hooks = [k for k, v in (s.get("hooks") or {}).items() if v]
+    if hooks:
+        lines.append("Set by a hook right now: " + ", ".join(hooks))
+    return "\n".join(lines)
+
+
+def cmd_hook(args):
+    """iridia lock on|off, iridia idle on|off: for hypridle, swayidle and the like."""
+    return _report({"cmd": "session", f"{args.command}_hook": args.state == "on"},
+                   lambda r: f"{args.command.capitalize()} {args.state}.")
+
+
+def cmd_session(args):
+    if args.action == "hooks":
+        print(HOOKS)
+        return 0
+    req = {"cmd": "session"}
+    for k in ("lock", "idle", "dim"):
+        if getattr(args, k) is not None:
+            req[k] = getattr(args, k)
+    if args.idle_minutes is not None:
+        req["idle_minutes"] = args.idle_minutes
+    if args.action == "test":
+        req["test"] = 5
+        return _report(req, lambda r: "Acting as if the screen were locked for 5 seconds.")
+    return _report(req, _session_text)
+
+
+def cmd_update(args):
+    """iridia update [--check] [--rollback] [--yes]"""
+    from iridia import get_version, updater
+    from iridia.setups import Setups
+    current = get_version()
+
+    def confirm(q):
+        if args.yes:
+            return True
+        try:
+            return input(f"{q} [y/N] ").strip().lower() in ("y", "yes")
+        except EOFError:
+            return False
+    if args.rollback:
+        prev = updater.prev_version()
+        if not prev:
+            print("There's no previous version to go back to.")
+            return 1
+        if not confirm(f"Go back from Iridia {current} to {prev}?"):
+            return 1
+        try:
+            updater.rollback(log=print)
+        except (updater.UpdateError, OSError) as e:
+            print(f"Couldn't go back: {e}", file=sys.stderr)
+            return 1
+        return 0
+    s = {}
+    try:
+        s = _client().send({"cmd": "updates"}).get("settings") or {}
+    except Exception:                       # noqa: BLE001 - the daemon isn't needed to update
+        pass
+    res = updater.check(current, bool(s.get("prerelease") or args.prerelease))
+    if res["error"]:
+        print(f"Couldn't check: {res['error']}", file=sys.stderr)
+        return 1
+    info = res["latest"]
+    if not res["available"]:
+        print(f"Iridia {current} is the latest version.")
+        return 0
+    print(f"Iridia {info['version']} is available (this is {current}, released {info['published']}).")
+    if info.get("notes"):
+        print("\n" + info["notes"] + "\n")
+    if args.check:
+        return 0
+    if updater.install_kind() != "venv":
+        print("This Iridia isn't the install.sh install (a git checkout or your own venv): update it the way you "
+              "installed it, for example: git pull && bash install.sh")
+        return 1
+    if not confirm(f"Install Iridia {info['version']} now? Your settings are backed up first and the current "
+                   "version is kept, so you can go back."):
+        return 1
+    try:
+        bid = Setups(version=current).backup(f"before updating to {info['version']}")
+        print(f"Settings backed up ({bid}).")
+        updater.apply(info, log=print)
+    except (updater.UpdateError, OSError) as e:
+        print(f"Update failed: {e}", file=sys.stderr)
+        return 1
+    print("Done. If the window is open, it restarts by itself; otherwise open it again.")
+    return 0
+
+
+def cmd_sensors(args):
+    def text(r):
+        rows = r.get("sensors") or []
+        if not rows:
+            return "No sensors found."
+        out = ["Sensors (the ID is what 'iridia split NAME part K sensor ID' takes):"]
+        for s in rows:
+            v = "-" if s.get("value") is None else f"{s['value']:g} {s['unit']}"
+            note = "  (read only while shown: it wakes the GPU)" if s.get("wakes_gpu") else ""
+            out.append(f"  {s['id']:<28} {s['name']:<32} {v}{note}")
+        return "\n".join(out)
+    return _report({"cmd": "sensors"}, text)
+
+
 def cmd_animations(args):
     """iridia animations pause | resume | toggle | status."""
     if args.action == "status":
@@ -669,6 +914,18 @@ def default_autostart() -> str:
     return "compositor" if autostart.detect_compositor() else "xdg"
 
 
+def current_autostart() -> str:
+    """How the daemon is set up to start at login right now (what an update keeps)."""
+    from iridia import autostart, openrgb_server
+    if _has_user_systemd() and openrgb_server.unit_state(SERVICE_NAME)[0] == "enabled":
+        return "systemd"
+    if autostart.xdg_installed():
+        return "xdg"
+    if openrgb_server._startup_mentions(openrgb_server._starts_daemon):
+        return "compositor"
+    return "none"
+
+
 def _service_install(how=None, openrgb=None):
     bin_dir = _venv_bin_dir()
     python_bin = os.path.join(bin_dir, "python3")
@@ -683,14 +940,14 @@ def _service_install(how=None, openrgb=None):
 Description=Iridia Daemon
 After=graphical-session.target
 PartOf=graphical-session.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
 
 [Service]
 Type=simple
-ExecStart={python_bin} -m iridia.daemon
+ExecStart="{python_bin.replace("%", "%%")}" -m iridia.daemon
 Restart=on-failure
 RestartSec=5
-StartLimitIntervalSec=60
-StartLimitBurst=5
 Environment=\"PYTHONUNBUFFERED=1\"
 StandardOutput=journal
 StandardError=journal
@@ -734,10 +991,20 @@ StartupWMClass={assets.APP_ID}
         subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
     print(f"Launcher: {desktop_path}")
     from iridia import autostart
+    if how == "keep":
+        how = current_autostart()
+        print(f"Keeping how the daemon starts at login: {how}")
     how = how or default_autostart()
     if how == "systemd" and not _has_user_systemd():
         print("No systemd user session here, so the daemon starts through XDG autostart instead.")
         how = "xdg"
+    if how == "systemd":
+        from iridia import openrgb_server
+        if openrgb_server.graphical_session_active() is False:
+            # the unit would never start at login here: use what this session does run
+            how = "compositor" if autostart.detect_compositor() else "xdg"
+            print("Your session doesn't start graphical-session.target, so a systemd service wouldn't start "
+                  f"the daemon at login; using {how} instead.")
     _openrgb_setup(openrgb)
     if how == "systemd":
         _systemctl("daemon-reload")
@@ -757,8 +1024,8 @@ StartupWMClass={assets.APP_ID}
                 print(f"The daemon starts at login through {path}.")
             except OSError as e:
                 print(f"The autostart entry couldn't be written: {e}")
-            print("Compositors that don't read ~/.config/autostart (Hyprland, Sway, niri, river, ...) need a line "
-                  "in their own config instead: see `iridia autostart`.")
+            print("Compositors that don't read ~/.config/autostart (Hyprland and Sway without UWSM, river, labwc, "
+                  "Wayfire, i3, bspwm, ...) need a line in their own config instead: see `iridia autostart`.")
         elif how == "compositor":
             from iridia import openrgb_server
             snip = autostart.snippet(autostart.detect_compositor())
@@ -852,9 +1119,13 @@ def _install_icon():
             d = os.path.join(base, f"{n}x{n}", "apps")
             os.makedirs(d, exist_ok=True)
             shutil.copyfile(assets.icon_png_for(n), os.path.join(d, f"{assets.ICON_NAME}.png"))
-        if shutil.which("gtk-update-icon-cache"):
-            subprocess.run(["gtk-update-icon-cache", "-f", "-t", base],
-                            check=False, capture_output=True)
+        # No icon cache of our own in the user's theme folder: GTK would trust it and miss icons other
+        # apps add there later. A newer folder time makes running apps look again.
+        try:
+            os.remove(os.path.join(base, "icon-theme.cache"))
+        except OSError:
+            pass
+        os.utime(base, None)
     except OSError as e:
         print(f"Warning: could not install icon: {e}")
 
@@ -912,8 +1183,11 @@ def cmd_daemon(args):
         if _daemon_running():
             print("Daemon is already running")
             return 0
-        unit = SERVICE_PATH
-        if os.path.exists(unit) and _has_user_systemd():
+        from iridia import openrgb_server
+        # through systemd only when that's how it starts at login (and the session has the target);
+        # otherwise run it here, so it gets this session's environment
+        if _has_user_systemd() and openrgb_server.unit_state(SERVICE_NAME)[0] == "enabled" \
+                and openrgb_server.graphical_session_active() is not False:
             _systemctl("start", SERVICE_NAME)
         else:
             from iridia import autostart
@@ -988,7 +1262,7 @@ def _service_restart():
     print("Service restarted")
     return 0
 
-def main():
+def main(argv=None):
     from iridia import get_version
     parser = argparse.ArgumentParser(prog="iridia", description="Iridia CLI")
     parser.add_argument("--version", action="version", version=f"iridia {get_version()}")
@@ -1049,6 +1323,42 @@ def main():
     z_parser.add_argument("--max", type=int, help="breathing: highest brightness in percent")
     z_parser.add_argument("--param", action="append", metavar="KEY=VALUE",
                           help="any other effect setting, e.g. --param tail=20 --param bounce=yes")
+    sp_parser = subparsers.add_parser(
+        "split", help="Split a strip into parts, or set single LEDs (saved)",
+        description="Split a strip into parts that each show something of their own, and set single LEDs by "
+                    "hand. LED and part numbers start at 1. Examples:  iridia split Desk   iridia split Desk even 3   "
+                    "iridia split Desk at 28 55   iridia split Desk part 2 pattern gradient ff0000 0000ff   "
+                    "iridia split Desk part 3 effect comet 1   iridia split Desk part 1 off   "
+                    "iridia split Desk part 4 sensor cpu_temp level max=85 flash=80   "
+                    "iridia split Desk led 27 ffffff   iridia split Desk led 27 normal   iridia split Desk join   "
+                    "iridia split Desk clear-leds")
+    sp_parser.add_argument("target", help="a strip name or Device/Zone ('iridia zone list' shows them)")
+    sp_parser.add_argument("words", nargs="*", help="even N | at LED... | part K same|off|pattern NAME [COLORS]|"
+                                                    "effect NAME [COLORS] | led N COLOR|off|normal | join | clear-leds")
+    for name, what in (("lock", "the screen is locked"), ("idle", "you're away")):
+        hp = subparsers.add_parser(name, help=f"Tell the daemon {what} (for hypridle, swayidle, ...)",
+                                   description=f"'iridia {name} on' when {what}, 'iridia {name} off' when not. "
+                                               "Only needed where Iridia can't see it by itself; "
+                                               "'iridia session hooks' shows ready-made lines.")
+        hp.add_argument("state", choices=["on", "off"])
+    ses_parser = subparsers.add_parser("session", help="What the LEDs do when the screen locks or you're away",
+                                       description="Show or change it. Examples:  iridia session   "
+                                                   "iridia session --lock off --idle dim --idle-minutes 10 --dim 20   "
+                                                   "iridia session test   iridia session hooks")
+    ses_parser.add_argument("action", nargs="?", choices=["show", "test", "hooks"], default="show")
+    ses_parser.add_argument("--lock", choices=["keep", "dim", "off"])
+    ses_parser.add_argument("--idle", choices=["keep", "dim", "off"])
+    ses_parser.add_argument("--idle-minutes", type=float)
+    ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
+    subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
+    up_parser = subparsers.add_parser("update", help="Look for a new version and install it (or go back)",
+                                      description="Checks GitHub for a newer release, backs up your settings, "
+                                                  "installs it (no password needed) and keeps the current version "
+                                                  "so 'iridia update --rollback' can go back.")
+    up_parser.add_argument("--check", action="store_true", help="only say whether there's a new version")
+    up_parser.add_argument("--rollback", action="store_true", help="go back to the version before the last update")
+    up_parser.add_argument("--prerelease", action="store_true", help="include test versions")
+    up_parser.add_argument("-y", "--yes", action="store_true", help="don't ask")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")
@@ -1074,12 +1384,12 @@ def main():
     d_parser.add_argument("action", choices=["start", "stop", "status"])
     svc_parser = subparsers.add_parser("service", help="Manage systemd service")
     svc_parser.add_argument("action", choices=["install", "remove", "status", "start", "stop", "restart"])
-    svc_parser.add_argument("--autostart", choices=["systemd", "xdg", "compositor", "none"],
+    svc_parser.add_argument("--autostart", choices=["systemd", "xdg", "compositor", "none", "keep"],
                             help="install: how the daemon starts at login (default: systemd when your session "
                                  "reaches graphical-session.target, else your compositor's line or XDG autostart)")
     svc_parser.add_argument("--openrgb", choices=["daemon", "systemd", "off"],
                             help="install: how OpenRGB's server is started (default: keep the current setting)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if not args.command:
         parser.print_help()
         return 1
@@ -1087,7 +1397,7 @@ def main():
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

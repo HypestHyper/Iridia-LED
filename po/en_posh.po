@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-18 02:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -21,6 +21,18 @@ msgstr ""
 #, python-brace-format
 msgid "Iridia {version}"
 msgstr "Iridia {version}, at your service"
+
+msgid "Automatic"
+msgstr "Automatic"
+
+msgid "Compact"
+msgstr "Petite"
+
+msgid "Default"
+msgstr "Customary"
+
+msgid "Large"
+msgstr "Generous"
 
 msgid "Target"
 msgstr "Intended"
@@ -96,6 +108,9 @@ msgstr "Preferences"
 msgid "Service"
 msgstr "Household"
 
+msgid "Updates"
+msgstr "Updates"
+
 msgid "Refresh"
 msgstr "Refresh"
 
@@ -110,6 +125,18 @@ msgstr "Ledger cabinet"
 
 msgid "Quit"
 msgstr "Take leave"
+
+msgid "Minimize"
+msgstr "Retire to the dock"
+
+msgid "Maximize"
+msgstr "Fill the screen"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Restore"
+msgstr "Restore"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -298,6 +325,22 @@ msgstr "Google Sans Flex (of the house)"
 msgid "System font"
 msgstr "The system's typeface"
 
+msgid "Size"
+msgstr "Proportions"
+
+msgid ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
+msgstr ""
+"Automatic becomes Petite in a slender window. Ctrl+minus and Ctrl+plus adjust it, and Ctrl+0 "
+"restores Automatic."
+
+msgid "Window buttons"
+msgstr "Window controls"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Retire, enlarge and dismiss at the top. Off: rely upon your desktop's own keys or menu."
+
 msgid "Reduce motion"
 msgstr "Restrain all motion"
 
@@ -361,9 +404,6 @@ msgstr "Automatic safekeeping"
 
 msgid "No backups yet"
 msgstr "Nothing kept as yet"
-
-msgid "Restore"
-msgstr "Restore"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Recalling an arrangement first keeps your present state in safekeeping, so you may always return."
@@ -445,6 +485,233 @@ msgstr "Ledger transcribed"
 
 msgid "Press Show to load the latest lines."
 msgstr "Pray press Show to read the latest lines."
+
+msgid "New versions of Iridia come from its releases on GitHub."
+msgstr "New editions of Iridia arrive from its releases on GitHub."
+
+msgid "Check now"
+msgstr "Enquire now"
+
+msgid "Update now"
+msgstr "Update forthwith"
+
+msgid "Skip this version"
+msgstr "Pass over this edition"
+
+msgid "What's new"
+msgstr "What is new"
+
+msgid ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+msgstr ""
+"Updating requires no password: the new edition installs as the old one did, within your home "
+"folder. Your settings are preserved first (Settings, Setups and backups)."
+
+msgid "Checking"
+msgstr "Enquiries"
+
+msgid "Look for updates when Iridia starts"
+msgstr "Enquire about updates when Iridia starts"
+
+msgid "Show a notification when there's a new version"
+msgstr "Send word when a new edition is available"
+
+msgid "Include test versions"
+msgstr "Include trial editions"
+
+msgid ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+msgstr ""
+"Iridia consults GitHub at most once every few hours, when the daemon or this window starts, and "
+"shares nothing about you."
+
+msgid "Go back"
+msgstr "Return"
+
+msgid "The version before the last update is kept, so you can undo an update."
+msgstr "The edition before the last update is retained, so an update may be undone."
+
+#, python-brace-format
+msgid "Iridia {v}"
+msgstr "Iridia {v}"
+
+#, python-brace-format
+msgid "Couldn't check: {err}"
+msgstr "One could not enquire: {err}"
+
+#, python-brace-format
+msgid "Iridia {v} is available"
+msgstr "Iridia {v} is available"
+
+#, python-brace-format
+msgid "You have {cur}. Released {date}."
+msgstr "You have {cur}. Released {date}."
+
+msgid "You have the latest version."
+msgstr "You have the very latest edition."
+
+msgid "Not checked yet."
+msgstr "Not yet enquired."
+
+msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+msgstr "This Iridia runs from its source folder: kindly update it there (git pull, then bash install.sh)."
+
+#, python-brace-format
+msgid "What's new in {v}"
+msgstr "What is new in {v}"
+
+#, python-brace-format
+msgid "Kept from before the last update: Iridia {v}."
+msgstr "Retained from before the last update: Iridia {v}."
+
+msgid "Nothing kept yet: the version you have now is kept when you update."
+msgstr "Nothing retained as yet: the present edition is retained when you update."
+
+#, python-brace-format
+msgid "Go back to {v}"
+msgstr "Return to {v}"
+
+msgid "Checking…"
+msgstr "Making enquiries…"
+
+msgid "Couldn't check for updates"
+msgstr "One could not enquire about updates"
+
+#, python-brace-format
+msgid "Iridia {v} skipped. Newer versions still show up."
+msgstr "Iridia {v} passed over. Newer editions shall still appear."
+
+#, python-brace-format
+msgid "Install Iridia {v}?"
+msgstr "Install Iridia {v}?"
+
+msgid ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+msgstr ""
+"Your settings are preserved first, and the present edition is retained so you may return. The "
+"lamps pause for a few seconds whilst the daemon restarts, and this window restarts once it is "
+"done."
+
+#, python-brace-format
+msgid "Updating to {v}…"
+msgstr "Updating to {v}…"
+
+msgid "Update"
+msgstr "Update"
+
+#, python-brace-format
+msgid "Go back to Iridia {v}?"
+msgstr "Return to Iridia {v}?"
+
+msgid ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+msgstr ""
+"The present edition is retained in its place, so you may switch again. Your settings remain as "
+"they are."
+
+#, python-brace-format
+msgid "Going back to {v}…"
+msgstr "Returning to {v}…"
+
+msgid "Done: restarting the window…"
+msgstr "Done: restarting the window…"
+
+msgid "That didn't work: see the output below. Nothing of yours was changed."
+msgstr "That did not succeed: kindly see the output below. Nothing of yours was altered."
+
+msgid "Lock and idle"
+msgstr "Lock and repose"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr ""
+"Dim or extinguish the lamps when the screen is locked or one has stepped away. Strips may remain "
+"lit: see Brightness on each strip."
+
+msgid "Keep"
+msgstr "Leave be"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Off"
+msgstr "At rest"
+
+msgid "When the screen locks"
+msgstr "Upon locking the screen"
+
+msgid "After"
+msgstr "After"
+
+msgid "minutes without input"
+msgstr "minutes of repose"
+
+msgid "Dim to"
+msgstr "Dim to"
+
+msgid "Try it"
+msgstr "Make an attempt"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Behaving as though the screen were locked for 5 seconds."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr ""
+"The lamps fade over 2 seconds and return in half a second. Try it shows the lock setting (or "
+"darkness, should that be Leave be) for 5 seconds."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "One cannot see the idle time here: lines for hypridle or swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr ""
+"Add these to your idle daemon's configuration, and Iridia shall know when you have stepped away "
+"(it then heeds that daemon's timeout rather than the minutes above)."
+
+msgid "Copied"
+msgstr "Transcribed"
+
+msgid "in use"
+msgstr "in use"
+
+msgid "away"
+msgstr "away"
+
+msgid "locked"
+msgstr "secured"
+
+#, python-brace-format
+msgid "Right now: {state}."
+msgstr "At present: {state}."
+
+#, python-brace-format
+msgid "Locking seen through: {lock}."
+msgstr "Locking observed through: {lock}."
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind, ScreenSaver or a screen locker, once one appears"
+
+#, python-brace-format
+msgid "Idle time from: {idle}."
+msgstr "Idle time from: {idle}."
+
+msgid "nothing here"
+msgstr "nothing whatsoever"
+
+msgid "Nothing is watched while both are Keep."
+msgstr "Nothing is observed whilst both are Leave be."
+
+msgid "Your idle daemon says you're away."
+msgstr "Your idle daemon reports that you have stepped away."
 
 msgid "Saved."
 msgstr "Preserved."
@@ -615,9 +882,6 @@ msgstr ""
 "background and carries on when this window is closed. This window merely adjusts its "
 "instructions."
 
-msgid "Checking…"
-msgstr "Making enquiries…"
-
 msgid "Kill daemon"
 msgstr "Dismiss the daemon"
 
@@ -660,9 +924,6 @@ msgstr ""
 
 msgid "Environment"
 msgstr "Surroundings"
-
-msgid "Copied"
-msgstr "Transcribed"
 
 msgid "Install XDG autostart"
 msgstr "Install XDG autostart"
@@ -971,6 +1232,9 @@ msgstr "In correspondence"
 msgid "Not connected"
 msgstr "Not in correspondence"
 
+msgid "Following the screen's backlight"
+msgstr "Following the screen's own backlight"
+
 msgid "Available"
 msgstr "At hand"
 
@@ -985,9 +1249,6 @@ msgstr "Preserved (changes of wallpaper are disregarded)"
 
 msgid "Following the wallpaper"
 msgstr "Following the wallpaper"
-
-msgid "Off"
-msgstr "At rest"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1273,9 +1534,6 @@ msgstr "OpenRGB is not in correspondence, so the strip cannot be lit at present.
 msgid "Resize failed"
 msgstr "The resizing failed"
 
-msgid "Close"
-msgstr "Close"
-
 msgid "Breathing"
 msgstr "Respiration"
 
@@ -1416,9 +1674,6 @@ msgstr "Smooth"
 msgid "Sharp"
 msgstr "Sharp"
 
-msgid "Dim"
-msgstr "Dim"
-
 msgid "Second color"
 msgstr "Second colour"
 
@@ -1484,6 +1739,11 @@ msgstr "~/.config/hypr/hyprland.conf (or a file it summons)"
 msgid "~/.config/niri/config.kdl, inside binds { }"
 msgstr "~/.config/niri/config.kdl, within binds { }"
 
+msgid "river 0.4 and later leave keys to your window manager: bind this command in its config:"
+msgstr ""
+"river 0.4 and later leave keys to one's window manager: kindly bind this command in its "
+"configuration:"
+
 msgid ""
 "System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
 " press your key:"
@@ -1547,9 +1807,6 @@ msgstr "Command"
 
 msgid "Copy command"
 msgstr "Transcribe the command"
-
-msgid "Try it"
-msgstr "Make an attempt"
 
 msgid "Add it to your desktop"
 msgstr "Add it to your desktop"
@@ -1762,9 +2019,6 @@ msgstr[1] "{n} lamps"
 
 msgid "clone"
 msgstr "twin"
-
-msgid "locked"
-msgstr "secured"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "This strip is secured. Release it (side panel or the lock) to move or bend it."
@@ -2034,6 +2288,152 @@ msgstr ""
 "A name for this twin of {strip}. It appears only on the Layout tab. Leave it empty to use the "
 "strip's own name."
 
+msgid "Same as the strip"
+msgstr "As the rest of the strip"
+
+msgid "Its own pattern"
+msgstr "A pattern of its own"
+
+msgid "Its own effect"
+msgstr "An effect of its own"
+
+msgid "A sensor"
+msgstr "An instrument"
+
+msgid "CPU temperature"
+msgstr "Processor temperature"
+
+msgid "CPU load"
+msgstr "Processor exertion"
+
+msgid "GPU temperature"
+msgstr "Graphics temperature"
+
+msgid "GPU load"
+msgstr "Graphics exertion"
+
+msgid "Second GPU temperature"
+msgstr "Second graphics temperature"
+
+msgid "Second GPU load"
+msgstr "Second graphics exertion"
+
+msgid "Memory use"
+msgstr "Memory in use"
+
+msgid "Disk temperature"
+msgstr "Disk temperature"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Advanced: apportion this strip, attend to single lamps"
+
+msgid "Add divider"
+msgstr "Introduce a divider"
+
+msgid "Space evenly"
+msgstr "Apportion fairly"
+
+msgid "Single LEDs"
+msgstr "Individual lamps"
+
+msgid "Set LEDs"
+msgstr "Attend to lamps"
+
+msgid "Color for single LEDs"
+msgstr "Colour for individual lamps"
+
+msgid "Clear all"
+msgstr "Dismiss all"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr ""
+"Choose Attend to lamps, then click or drag across the lamps above. Such a lamp shows its colour "
+"above all else, rather like a fixed lamp between two bars."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Remove this portion (it joins the one before it)"
+
+msgid "The whole strip"
+msgstr "The entire strip"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Lamps {first} to {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Lamp {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} lamps: {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Introduce a divider to apportion this strip."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The portions differ by {n} lamp. Apportion fairly to make them match."
+msgstr[1] "The portions differ by {n} lamps. Apportion fairly to make them match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} lamps do not divide into {parts} evenly, so the first portion receives 1 more lamp."
+msgstr[1] "{leds} lamps do not divide into {parts} evenly, so the first {extra} portions receive 1 more lamp."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} lamp attended to"
+msgstr[1] "{n} lamps attended to"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Portion {n}"
+
+msgid "Finding sensors…"
+msgstr "Consulting the instruments…"
+
+msgid "(not found here)"
+msgstr "(not present here)"
+
+msgid "Sensor"
+msgstr "Instrument"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr ""
+"NVIDIA readings come by way of nvidia-smi, which keeps a laptop's graphics awake while a strip "
+"displays them."
+
+msgid "Level"
+msgstr "Level"
+
+msgid "Both"
+msgstr "Both"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr ""
+"Level fills the portion like a gauge, Colour shows the reading as a single colour, Both is a "
+"gauge in the reading's colour."
+
+msgid "Cool to hot"
+msgstr "Cool to warm"
+
+msgid "Rest of the bar"
+msgstr "Remainder of the gauge"
+
+msgid "Flash above"
+msgstr "Flash beyond"
+
+msgid "From the other end"
+msgstr "From the far end"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click for the first colour, right-click for the second"
@@ -2104,9 +2504,6 @@ msgstr "Alternating"
 
 msgid "Painted"
 msgstr "Painted"
-
-msgid "Automatic"
-msgstr "Automatic"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"
@@ -2197,6 +2594,9 @@ msgstr "Invert (for bias lighting)"
 
 msgid "Gamma correction"
 msgstr "Gamma correction"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Remain lit when the screen locks or one steps away"
 
 msgid "Strip type and wiring"
 msgstr "Strip type and wiring"

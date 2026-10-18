@@ -1,5 +1,97 @@
 # Changelog
 
+## 1.3.0
+
+- **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it
+  starts (at most every few hours), shows one desktop notification per new version, and installs
+  it on a click: the download is checked against GitHub's SHA-256, your settings are backed up,
+  the current version is kept, and no password is needed. If the install fails, the previous
+  version is put back by itself; *Go back* (or `iridia update --rollback`) returns to it any time.
+  `install.sh --update` is the quiet, no-questions mode it uses.
+- **Wallpaper detection fixed on KDE Plasma** (it read a file name Plasma doesn't use), **XFCE**
+  (real monitor names), **MATE** (the right settings schema), and for **GNOME, Cinnamon and MATE
+  slideshows** (the default backgrounds on Ubuntu and Fedora). New: **COSMIC** and **LXQt**.
+  Desktops that keep the wallpaper in a settings file are watched instead of asked every 3 seconds.
+- **Lighter in the background.** Nothing watches the lock screen or idle time while both are *Keep*;
+  the daemon wakes once a second instead of twice when nothing is going on; sensor readings only
+  redraw the strips that show them; the window polls less while it's in the background and pauses
+  its previews while minimized. At rest the daemon now uses about a third of the CPU it did.
+- **Quicker start:** the daemon starts OpenRGB after 2 seconds instead of 10 when nothing else is set
+  up to start it.
+- **Backups restore exactly:** loading a setup or backup removes files and calibration profiles that
+  didn't exist when it was saved; two backups in the same second no longer overwrite each other.
+- Screen lockers whose process name is longer than 15 characters are recognised.
+- **Installer, on more distributions:** picks a Python 3.8 or newer (openSUSE Leap's python3 is 3.6:
+  it uses Python 3.11 there), reads the distribution from `/etc/os-release` (a `pacman` game on Debian
+  is no longer taken for Arch), knows Gentoo, explains Fedora Atomic, openSUSE Aeon/Kalpa and NixOS
+  instead of failing, accepts OpenRGB from Flathub, only asks apt for OpenRGB where it's packaged,
+  installs `gdbus` where it's separate (Debian, Ubuntu, openSUSE), skips the I2C group and rule when
+  ddcutil's own rules already give you the bus, works with `doas`, and says what to run as root when
+  sudo isn't set up. Running it again upgrades in place (quicker; a failed download leaves the old
+  version working, and the daemon comes back), and rebuilds the environment when a distribution
+  upgrade changed Python. `sh install.sh` hands over to bash; `sudo bash install.sh` is refused
+  (it would install for root). Pillow 9.1 or newer is required: with Ubuntu 22.04's 9.0 every
+  wallpaper gave the same color.
+- **Monitor brightness on Ubuntu and Debian:** ddcutil 1.x (Ubuntu 22.04 and 24.04, Debian 12) refused
+  an option Iridia passed, so brightness never followed the monitor there. Laptops without a DDC/CI
+  monitor now follow the built-in screen's backlight.
+- **Sensors on more machines:** with an integrated and a dedicated AMD GPU, the dedicated one is shown;
+  two drives of the same kind each get their own sensor; with several NVIDIA GPUs the first is read;
+  Intel Arc (xe) temperatures are found.
+- **Start at login, on more desktops:** the river line no longer uses `riverctl` (river 0.4 refuses
+  to start when its init file contains it); Wayfire gets its own line; i3 gets its own (with
+  `--no-startup-id`); river, bspwm and dwm started from a TTY or startx are recognised by their
+  process. Choosing systemd on a session that never reaches `graphical-session.target` (XFCE,
+  Cinnamon, MATE, i3, Hyprland without UWSM, ...) now sets up what does start there, and
+  `iridia daemon start` only goes through systemd when that's how it starts at login. A daemon a
+  compositor started stops when you log out, so it can't block the next login's. Paths with spaces
+  work in the autostart entry and the service; the service's restart limit is in the right section.
+  `iridia doctor` shows the fix when nothing starts the daemon at login, and no longer says
+  "started by systemd" for programs a UWSM- or niri-session-started compositor launched.
+
+- **Sensors.** A part of a strip (or the whole strip) can show CPU or GPU temperature and load,
+  memory use, disk temperature or any other temperature sensor: as a level bar, as a color, or as a
+  bar in the reading's color, cool to hot or in your colors, with an optional flash above a reading.
+  Several sensors fit on one strip as separate parts. Only sensors a strip shows are read, once a
+  second, straight from the kernel, and smoothed; NVIDIA readings use one `nvidia-smi` process only
+  while shown. `iridia sensors` lists them; `iridia split NAME part 2 sensor cpu_temp` sets one.
+
+- **Lock and idle.** Settings, *Lock and idle*: keep, dim or turn off the LEDs when the screen locks,
+  and after a number of minutes without input. They fade out over 2 seconds and back in half a second;
+  *Try it* shows it for 5 seconds, and a strip can stay lit (*Stay lit when the screen locks or you're
+  away*, under its Brightness). Iridia sees locking through logind, ScreenSaver signals and screen
+  lockers such as hyprlock and swaylock, and idle time on GNOME, KDE and X11, with nothing to set up.
+  For Hyprland, Sway and the like, `iridia idle on|off` from hypridle or swayidle (the window and
+  `iridia session hooks` have the lines). `iridia session` shows and changes it all.
+
+- **Window size.** Settings, Appearance, Size: Compact, Default, Large or Automatic. Default is about
+  10% smaller than before and Large is the old size; Automatic is Compact in a window narrower than
+  900 pixels. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to Automatic. Text shrinks less
+  than the rest and never below 10 pixels.
+- **Window buttons** in the same Material icons as the rest of the window: a round highlight under the
+  pointer, close turns red, maximize turns into restore. They follow your desktop's button layout
+  (side and order), and Settings, Appearance, *Window buttons* hides them.
+- **Narrow windows.** Only the tab on show sets how narrow the window can be, long help text wraps,
+  and rows of buttons wrap onto a second line. Below 760 pixels the tabs and the bottom buttons show
+  only their icons (the words become tooltips), and if the tabs still don't fit they scroll sideways
+  with arrows. The window now goes down to about 600 pixels wide.
+  Below 960 pixels the Layout tab's side panel moves under the canvas.
+- **LED numbers** under every strip preview (1, every few LEDs, and the last LED, which is the strip's
+  real count), so you can see which LED is which.
+- Popups no longer show a black frame on X11 without a compositor.
+- **Split a strip into parts.** *Advanced: split this strip, set single LEDs* on a zone card: add
+  dividers (drag them, they snap to whole LEDs) and let each part show the strip's own look, a static
+  pattern of its own, an animated effect of its own, or nothing. A static strip can have one animated
+  part, and an animated strip can keep static parts. **Space evenly** splits the parts in whole LEDs
+  with the same notes and warnings as below. Changing the LED count moves the dividers along.
+- **Single LEDs.** Set any LED to a color or off, over everything else (a fixed LED between two bars):
+  click or drag over the strip in the same panel.
+- `iridia split NAME ...` does both from the command line (`even 3`, `at 28 55`, `part 2 effect comet`,
+  `led 27 ffffff`, `join`, ...).
+- **Space evenly** for the Segments pattern: the layout editor shows how many LEDs each color gets,
+  splits them evenly in whole LEDs, says when the count doesn't divide evenly, and warns when parts are
+  only 1 or 2 LEDs apart.
+
 ## 1.2.1
 
 **Iridia's own OpenRGB client.** With OpenRGB 1.0, Iridia now talks to OpenRGB entirely with SDK

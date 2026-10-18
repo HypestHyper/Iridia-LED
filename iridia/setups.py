@@ -7,6 +7,10 @@ palette.json, gui.json (window font and motion) and every calibration profile.
 
 Loading a setup first saves the current state as an automatic backup
 (setups/.backups/, the newest few are kept), so a wrong load can be undone.
+
+A setup saved by this version is marked "complete": loading it puts the folder back exactly as it
+was, so files and calibration profiles that didn't exist then are removed. Older setup files only
+write what they hold.
 """
 
 import json
@@ -37,6 +41,13 @@ def _atomic_write(path: str, data):
         except OSError:
             pass
         raise
+
+
+def _remove(path: str):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
 
 
 def _read_json(path: str):
@@ -72,7 +83,7 @@ class Setups:
         except OSError:
             pass
         return {"iridia_setup": 1, "name": name, "saved": time.strftime("%Y-%m-%d %H:%M"),
-                "app_version": self.version, "files": files, "calibration": cal}
+                "app_version": self.version, "complete": True, "files": files, "calibration": cal}
 
     def restore(self, data: dict) -> Optional[str]:
         """Write a captured setup back to the config folder."""
@@ -81,12 +92,25 @@ class Setups:
         files = data["files"]
         if "config.json" in files and not isinstance(files["config.json"], dict):
             return "The setup's config is damaged."
+        exact = data.get("complete") is True and "config.json" in files
         for fn in FILES:
+            path = os.path.join(self.config_dir, fn)
             if fn in files:
-                _atomic_write(os.path.join(self.config_dir, fn), files[fn])
-        for name, prof in (data.get("calibration") or {}).items():
-            if valid_name(name) and isinstance(prof, dict):
-                _atomic_write(os.path.join(self.config_dir, "calibration", f"{name}.json"), prof)
+                _atomic_write(path, files[fn])
+            elif exact:
+                _remove(path)               # didn't exist when the setup was saved
+        cal = {n: p for n, p in (data.get("calibration") or {}).items() if valid_name(n) and isinstance(p, dict)}
+        cal_dir = os.path.join(self.config_dir, "calibration")
+        for name, prof in cal.items():
+            _atomic_write(os.path.join(cal_dir, f"{name}.json"), prof)
+        if exact:
+            try:
+                extra = [f for f in os.listdir(cal_dir) if f.endswith(".json") and f[:-5] not in cal
+                         and valid_name(f[:-5])]
+            except OSError:
+                extra = []
+            for f in extra:
+                _remove(os.path.join(cal_dir, f))
         return None
 
     # ------------------------------------------------------------ named setups
@@ -126,7 +150,11 @@ class Setups:
         return None
 
     def backup(self, reason: str) -> str:
-        bid = time.strftime("auto-%Y%m%d-%H%M%S")
+        bid = base = time.strftime("auto-%Y%m%d-%H%M%S")
+        n = 2
+        while os.path.exists(os.path.join(self.backups, f"{bid}.json")):
+            bid = f"{base}-{n}"             # two in the same second must not overwrite each other
+            n += 1
         data = self.capture(bid)
         data["reason"] = reason
         _atomic_write(os.path.join(self.backups, f"{bid}.json"), data)

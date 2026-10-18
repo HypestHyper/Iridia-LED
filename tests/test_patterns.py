@@ -1,4 +1,6 @@
-from iridia.patterns import PatternGenerator, even_boundaries, even_positions
+import pytest
+
+from iridia.patterns import PatternGenerator, even_boundaries, even_positions, led_even_boundaries, segment_sizes
 
 gen = PatternGenerator()
 R, G, B = "ff0000", "00ff00", "0000ff"
@@ -54,3 +56,23 @@ def test_stop_helpers():
     assert PatternGenerator.handle_count("gradient", 3) == 3
     assert PatternGenerator.handle_count("segments", 3) == 2
     assert PatternGenerator.handle_count("solid", 3) == 0
+
+
+def test_space_evenly_counts_whole_leds():
+    for leds, parts, want in ((80, 3, [27, 27, 26]), (30, 4, [8, 8, 7, 7]), (40, 5, [8] * 5), (5, 3, [2, 2, 1])):
+        stops = led_even_boundaries(parts, leds)
+        assert segment_sizes(stops, parts, leds) == want
+        drawn = PatternGenerator().generate("segments", [f"{k:06x}" for k in range(parts)], leds, params={"stops": stops})
+        assert [drawn.count(f"{k:06x}") for k in range(parts)] == want
+    assert segment_sizes([0.3, 0.62], 3, 20) == [6, 6, 8]
+    assert segment_sizes(None, 2, 7) == [3, 4]
+
+
+def test_window_sizes_scale_the_stylesheet():
+    style = pytest.importorskip("iridia.ui.style")
+    css = "a { min-height: 40px; border: 1px solid; margin: -12px 2px; border-radius: 999px; font-size: 14px; }"
+    assert style.scale_px(css, 1) == css
+    assert style.scale_px(css, 0.8) == ("a { min-height: 32px; border: 1px solid; margin: -9.6px 2px; "
+                                        "border-radius: 999px; font-size: 12.3px; }")
+    assert "font-size: 10px" in style.scale_px("x { font-size: 11px; }", 0.5)      # text never below 10px
+    assert style.scale_px("x { font-size: 9px; }", 0.5) == "x { font-size: 9px; }"

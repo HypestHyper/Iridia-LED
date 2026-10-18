@@ -42,10 +42,31 @@ FLATPAK_ID = "org.openrgb.OpenRGB"
 OTHER_USER_UNITS = ("openrgb-server.service", "openrgb.service")
 SYSTEM_UNITS = ("openrgb.service",)
 # compositor and desktop startup files that may start OpenRGB (or the Iridia daemon) themselves
-STARTUP_FILES = ("~/.config/hypr/*.conf", "~/.config/hypr/*.lua", "~/.config/hypr/**/*.conf",
-                 "~/.config/hypr/**/*.lua", "~/.config/sway/config", "~/.config/sway/config.d/*",
-                 "~/.config/niri/config.kdl", "~/.config/river/init", "~/.config/labwc/autostart",
-                 "~/.config/i3/config", "~/.config/bspwm/bspwmrc", "~/.xinitrc", "~/.xprofile")
+# compositor and X11 startup files that can hold a line starting the daemon or OpenRGB ("@" is the
+# config folder: $XDG_CONFIG_HOME or ~/.config)
+STARTUP_FILES = ("@/hypr/*.conf", "@/hypr/*.lua", "@/hypr/**/*.conf", "@/hypr/**/*.lua", "@/sway/config",
+                 "@/sway/config.d/*", "@/niri/config.kdl", "@/river/init", "@/labwc/autostart",
+                 "@/openbox/autostart", "@/wayfire.ini", "@/i3/config", "@/i3/config.d/*", "~/.i3/config",
+                 "@/bspwm/bspwmrc", "~/.xinitrc", "~/.xprofile")
+
+
+def _config_home() -> str:
+    return os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+
+
+def run_by_systemd() -> bool:
+    """This process is a systemd service itself, not a child of something systemd runs (compositors
+    started through UWSM or niri-session pass INVOCATION_ID on to everything they start)."""
+    pid = os.environ.get("SYSTEMD_EXEC_PID")             # systemd 248+
+    if pid:
+        return pid == str(os.getpid())
+    if not os.environ.get("INVOCATION_ID"):
+        return False
+    try:
+        with open(f"/proc/{os.getppid()}/comm", encoding="utf-8") as f:
+            return f.read().strip() == "systemd"
+    except OSError:
+        return False
 LOCAL_HOSTS = ("127.0.0.1", "localhost", "::1", "")
 
 
@@ -404,7 +425,7 @@ def _starts_openrgb(line: str) -> bool:
     """A config line that starts OpenRGB at startup (not a comment, not a key binding that opens
     its window)."""
     s = line.strip().lower()
-    if not s or s.startswith(("#", "--", "//", ";")) or "openrgb" not in s or "iridia" in s:
+    if not s or s.startswith(("#", "--", "//", ";", "/-")) or "openrgb" not in s or "iridia" in s:
         return False
     if s.startswith(("bind", "hl.bind", "bindsym", "bindcode", "super", "mod")):
         return False
@@ -465,7 +486,8 @@ def _startup_mentions(pred=_starts_openrgb) -> list:
     """Compositor and session startup files with a line matching pred."""
     found, seen = [], set()
     for pattern in STARTUP_FILES:
-        for path in glob.glob(os.path.expanduser(pattern), recursive=True):
+        pattern = _config_home() + pattern[1:] if pattern.startswith("@") else os.path.expanduser(pattern)
+        for path in glob.glob(pattern, recursive=True):
             if path in seen or not os.path.isfile(path):
                 continue
             seen.add(path)
@@ -501,7 +523,7 @@ def others() -> list:
 
 def _starts_daemon(line: str) -> bool:
     s = line.strip().lower()
-    return bool(s) and not s.startswith(("#", "--", "//", ";")) and "iridia-daemon" in s \
+    return bool(s) and not s.startswith(("#", "--", "//", ";", "/-")) and "iridia-daemon" in s \
         and not s.startswith(("bind", "hl.bind", "bindsym", "bindcode"))
 
 
@@ -509,7 +531,8 @@ def daemon_starters() -> list:
     """Everything set up to start the Iridia daemon at login, as short descriptions."""
     out = []
     en, _ac = unit_state("iridia-daemon.service")
-    if en == "enabled":
+    # an enabled unit only starts at login when the session reaches graphical-session.target
+    if en == "enabled" and graphical_session_active() is not False:
         out.append("iridia-daemon.service (systemd)")
     xdg = os.path.join(_autostart_dir(), "iridia-daemon.desktop")
     if os.path.exists(xdg) and not _hidden([ln.strip() for ln in _unit_text_of(xdg).splitlines()]):
@@ -520,7 +543,7 @@ def daemon_starters() -> list:
 
 def started_by() -> str:
     """How this process was started: "systemd (UNIT)", "XDG autostart", or the parent's name."""
-    if os.environ.get("INVOCATION_ID"):
+    if run_by_systemd():
         unit = ""
         try:
             with open("/proc/self/cgroup", encoding="utf-8") as f:
@@ -589,11 +612,13 @@ class Supervisor:
     """Used by the daemon ("daemon" method): start OpenRGB when it can't be reached on this machine,
     remember it as ours, restart it if it exits (after 5 s, 15 s, 60 s, then give up and say so).
 
-    tick() runs on the daemon's tick (off the main thread when it might block). It waits GRACE_SEC
-    after the daemon starts so the login's own startup can win, never starts a second OpenRGB, and
-    leaves OpenRGB alone when something else is set up to start it."""
+    tick() runs on the daemon's tick (off the main thread when it might block). After the daemon
+    starts it waits QUICK_SEC, or GRACE_SEC when something else is set up to start OpenRGB, so the
+    login's own startup can win; it never starts a second OpenRGB, and leaves OpenRGB alone when
+    something else is set up to start it."""
 
     GRACE_SEC = 10.0
+    QUICK_SEC = 2.0             # nothing else starts OpenRGB: no reason to keep the LEDs waiting
     BACKOFF = (5.0, 15.0, 60.0)
     STABLE_SEC = 120.0          # alive this long: earlier crashes are forgiven
     OTHERS_TTL = 60.0           # how long the (slow-ish) other-starter scan is trusted
@@ -660,7 +685,9 @@ class Supervisor:
             return
         if self.pid or reachable:
             return
-        if now - self._born < self.GRACE_SEC:
+        if now - self._born < self.QUICK_SEC:
+            return
+        if now - self._born < self.GRACE_SEC and (self._others_now(now) or running()):
             return
         if self.gave_up:
             return

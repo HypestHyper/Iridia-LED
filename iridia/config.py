@@ -56,6 +56,12 @@ DEFAULT_CONFIG = {
         "night_pause": False,       # night mode: stop animations
         "night_slow": False         # night mode: run them at half speed
     },
+    "updates": {
+        "check": True,              # look for a new version when the daemon or the window starts
+        "notify": True,             # desktop notification when there is one
+        "prerelease": False,        # include test versions
+        "skip": ""                  # a version you said to skip
+    },
     "devices": {},
     "custom_colors": [],
     "profiles": {
@@ -85,6 +91,9 @@ class Config:
         self._lock = threading.RLock()
         self._data = {}
         self._file_keys = set()     # "section.key" paths present in the file itself
+        self._version = 0           # bumped on every change; devices_view is rebuilt after one
+        self._view = None
+        self._view_version = -1
         self._load()
 
     def _load(self):
@@ -118,6 +127,7 @@ class Config:
             else:
                 self._data = copy.deepcopy(DEFAULT_CONFIG)
                 self._save()
+            self._version += 1
 
     @staticmethod
     def _migrate(loaded: dict):
@@ -202,6 +212,7 @@ class Config:
 
     def _save(self):
         with self._lock:
+            self._version += 1
             try:
                 os.makedirs(os.path.dirname(self.path), exist_ok=True)
                 # Write to a temp file and rename into place rather than
@@ -259,7 +270,8 @@ class Config:
                 if not isinstance(target.get(key), dict):
                     target[key] = {}
                 target = target[key]
-            target[keys[-1]] = value
+            # a copy: whoever passed the value may keep changing it, and it may come from devices_view
+            target[keys[-1]] = copy.deepcopy(value) if isinstance(value, (dict, list)) else value
             if len(keys) == 2:
                 self._file_keys.add(".".join(keys))
             self._save()
@@ -273,6 +285,17 @@ class Config:
     def devices(self):
         with self._lock:
             return copy.deepcopy(self._data.get("devices", {}))
+
+    @property
+    def devices_view(self):
+        """The devices section for READING ONLY, shared between callers and rebuilt only after a
+        change: cheap enough for every tick and every status request. Never modify it (use
+        devices, which is a private copy, to build a change)."""
+        with self._lock:
+            if self._view_version != self._version:
+                self._view = copy.deepcopy(self._data.get("devices", {}))
+                self._view_version = self._version
+            return self._view
 
     @property
     def timing(self):

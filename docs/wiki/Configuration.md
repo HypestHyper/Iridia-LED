@@ -14,7 +14,7 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 | `calibration/*.json` | Calibration profiles, one file each (`WS2812B.json`, `Neutral.json`, your own) |
 | `custom_colors.json` | Your saved colors, and which colors are exact |
 | `wallpaper_colors.json` | Extracted colors per wallpaper (a cache) and your color picks per wallpaper and zone |
-| `gui.json` | Window preferences: font, reduce motion, language, recently used colors |
+| `gui.json` | Window preferences: font, size, window buttons, reduce motion, language, recently used colors |
 | `setups/` | Saved setups; automatic backups in `setups/.backups/` |
 | `detection_cache.json` | Which wallpaper tool was found last |
 
@@ -23,6 +23,18 @@ in `~/.config/iridia/` if you want to read, back up or edit them by hand. The da
 `"language"` picks the window's language. Leave it out (or set `""`) for the default, British spelling
 (`"en_GB"`); `"en"` gives American English. The same choice is in Settings, Appearance, Language; it
 applies when the window restarts. The command line and the log always use American spelling.
+
+### gui.json: ui_size
+
+`"ui_size"` is the window's size: `"auto"` (default: `"default"`, or `"compact"` in a window narrower
+than 900 pixels), `"compact"`, `"default"` or `"large"`. Settings, Appearance, Size, and Ctrl+minus,
+Ctrl+plus and Ctrl+0 in the window, change it.
+
+### gui.json: window_buttons
+
+`"window_buttons": false` hides the window's own minimize, maximize and close buttons (Settings,
+Appearance, Window buttons). They're shown by default, on the side and in the order your desktop's
+`gtk-decoration-layout` asks for (GNOME's default shows only close).
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
 `$XDG_RUNTIME_DIR/iridia-UID.sock`.
@@ -50,6 +62,9 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `ddc.fallback_brightness` | `100` | Brightness used when no monitor answers |
 | `night.enabled`, `night.start`, `night.end`, `night.cap` | `false`, `23:00`, `07:00`, `20` | Night mode |
 | `sleep.lights_off` | `true` | LEDs off while the PC sleeps |
+| `session.lock`, `session.idle` | `keep`, `keep` | When the screen locks / after `session.idle_minutes` without input: `keep`, `dim` or `off` |
+| `updates.check`, `updates.notify`, `updates.prerelease`, `updates.skip` | `true`, `true`, `false`, `""` | Look for new versions at start, notify, include test versions, a version to skip |
+| `session.idle_minutes`, `session.dim` | `10`, `20` | Minutes without input; brightness in percent for `dim` |
 | `animations.enabled` | `true` | Run animated effects (off: animated zones show their first color) |
 | `animations.fps` | `30` | Frames per second: 15, 30 or 60 |
 | `animations.night_pause`, `animations.night_slow` | `false`, `false` | Pause or slow (half speed) animations in night mode |
@@ -113,6 +128,9 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
 | `power_limit` | Amps, `0` for none |
 | `animation` | An animated effect, or missing/`null` for the static pattern: `{"effect": "breathing", "speed": 4, "min": 10, "max": 100, ...}`. Every effect's settings are listed in [Animations](Animations.md); values out of range are clamped, unknown ones ignored |
 | `ma_per_led` | Current per LED at full white for the power estimate (default 60) |
+| `sections` | The strip's parts, missing or `[]` when it isn't split: `[{"start": 0, "type": "same"}, {"start": 27, "type": "pattern", "pattern": "gradient", "colors": [0, "ff0000"], "params": {"stops": [...]}}, {"start": 54, "type": "effect", "animation": {"effect": "comet", ...}, "colors": [1]}, {"start": 70, "type": "off"}, {"start": 75, "type": "sensor", "sensor": "cpu_temp", "show": "level", "min": 30, "max": 90, "palette": "heat", "colors": [0], "background": "dim", "flash_above": 85}]`. `start` is the part's first LED, counted from 0. Sensor IDs come from `iridia sensors`; `show` is `level`, `color` or `both`; `palette` is `heat` or `colors` |
+| `session_ignore` | `true`: the strip stays lit when the screen locks or you're away |
+| `led_overrides` | Single LEDs set by hand, over everything else: `{"26": "ffffff", "53": "000000"}` (LED counted from 0, `000000` is off) |
 
 New devices are added automatically the first time OpenRGB reports them. Zones OpenRGB reports with no
 size yet are added switched off and switch on once they have a size.

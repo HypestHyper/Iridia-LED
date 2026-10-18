@@ -5,6 +5,8 @@ colour only swaps the CSS (optionally blended over a few frames), so the window
 recolours in place without rebuilding anything.
 """
 
+import re
+
 from gi.repository import Gdk, GLib, Gtk
 
 from iridia import theme
@@ -19,8 +21,21 @@ window.iridia, window.iridia-dialog {{ background: {SURFACE_DIM}; color: {ON_SUR
 window.iridia-dialog {{ background: {SURFACE_CONTAINER}; }}
 headerbar {{ background: {SURFACE_DIM}; box-shadow: none; border: none; min-height: 64px; padding: 0 12px; }}
 headerbar > windowhandle > box button.small {{ margin-top: 12px; margin-bottom: 12px; }}
-headerbar windowcontrols button {{ min-height: 28px; min-width: 28px; padding: 2px; background: {SURFACE_CONTAINER_HIGH};
+/* window buttons: flat icons, a round highlight only under the pointer; close turns red */
+headerbar windowcontrols button {{ min-height: 28px; min-width: 28px; padding: 0; margin: 0 2px; border-radius: 14px;
+  background: transparent; color: {ON_SURFACE_VARIANT}; }}
+headerbar windowcontrols button:hover {{ background: alpha({ON_SURFACE}, 0.10); color: {ON_SURFACE}; }}
+headerbar windowcontrols button:active {{ background: alpha({ON_SURFACE}, 0.16); border-radius: 14px; }}
+headerbar windowcontrols button.close:hover {{ background: {ERROR_HOVER}; color: #ffffff; }}
+headerbar windowcontrols button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
+headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
+.winctl > button.circle {{ min-height: 32px; min-width: 32px; padding: 0; border-radius: 16px; background: transparent;
   color: {ON_SURFACE_VARIANT}; }}
+.winctl > button .icon {{ font-size: 18px; }}
+.winctl > button.circle:hover {{ background: alpha({ON_SURFACE}, 0.10); color: {ON_SURFACE}; }}
+.winctl > button.circle:active {{ background: alpha({ON_SURFACE}, 0.16); border-radius: 16px; }}
+.winctl > button.close:hover {{ background: {ERROR_HOVER}; color: #ffffff; }}
+.winctl > button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 .app-title {{ font-size: 24px; font-weight: 700; color: {ON_SURFACE}; }}
 .display {{ font-size: 28px; font-weight: 700; }}
 .title {{ font-size: 20px; font-weight: 700; }}
@@ -34,6 +49,7 @@ headerbar windowcontrols button {{ min-height: 28px; min-width: 28px; padding: 2
 .accent {{ color: {PRIMARY}; }}
 .ok-text {{ color: {PRIMARY}; }}
 .error-text {{ color: {ERROR}; }}
+.warn-text {{ color: {TERTIARY}; }}
 .mono {{ font-family: monospace; font-size: 12.5px; }}
 .icon {{ font-family: "{ICON}"; font-size: 20px; font-weight: 400; font-variation-settings: "FILL" 0, "wght" 400, "opsz" 24; }}
 .icon.fill {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
@@ -89,6 +105,8 @@ button.filter:checked {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY
   border-color: {SECONDARY_CONTAINER}; }}
 .group > button:checked .icon {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .group > button:active {{ border-radius: 4px; }}
+
+flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 0; }}
 
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}
@@ -170,14 +188,50 @@ tooltip * {{ color: {INVERSE_ON_SURFACE}; }}
 .snackbar label {{ color: {INVERSE_ON_SURFACE}; }}
 """
 
+# Window size settings, as a factor on the sizes written above ("large" is how 1.2 looked).
+SIZES = {"compact": 0.8, "default": 0.9, "large": 1.0}
+AUTO_COMPACT_BELOW = 900        # "auto" is default size, compact in a window narrower than this
+_PX = re.compile(r"(font-size: )?(?<![\w.])(\d+(?:\.\d+)?)px")
+
+
+def scale_px(css: str, factor: float) -> str:
+    """Scale every size in a stylesheet. Hairlines (2px and less) and 999px pills stay as they are, and
+    text shrinks less than the rest (never below 10px) so it stays readable."""
+    if factor == 1:
+        return css
+
+    def one(m):
+        font, v = m.group(1), float(m.group(2))
+        if v <= 2 or v >= 999:
+            return m.group(0)
+        if font:
+            return f"{font}{max(min(v, 10), round(v * (1 - (1 - factor) * 0.6), 1)):g}px"
+        return f"{round(v * factor, 1):g}px"
+    return _PX.sub(one, css)
+
+
+# Without a compositor (some X11 window managers) a popup can't be see-through, so the room GTK keeps
+# around it for the shadow shows up as a black frame: no shadows on popups there.
+NO_COMPOSITOR = """
+popover > contents, popover.menu > contents, tooltip { box-shadow: none; }
+"""
+
 MOTION_OFF = """
 * { transition: none; }
 """
 
 
+def _composited(display) -> bool:
+    try:
+        return bool(display.is_composited() and display.is_rgba())
+    except Exception:                       # noqa: BLE001  (older GTK: assume a compositor)
+        return True
+
+
 class Style:
-    def __init__(self, seed: str, font: str = "", reduce_motion: bool = False):
+    def __init__(self, seed: str, font: str = "", reduce_motion: bool = False, scale: float = SIZES["default"]):
         self.font = font
+        self.scale = scale
         self.reduce_motion = reduce_motion
         self.palette = theme.palette_for(seed)
         self._provider = Gtk.CssProvider()
@@ -186,6 +240,10 @@ class Style:
         display = Gdk.Display.get_default()
         Gtk.StyleContext.add_provider_for_display(display, self._provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         Gtk.StyleContext.add_provider_for_display(display, self._motion, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2)
+        if not _composited(display):
+            flat = Gtk.CssProvider()
+            load_css(flat, NO_COMPOSITOR)
+            Gtk.StyleContext.add_provider_for_display(display, flat, Gtk.STYLE_PROVIDER_PRIORITY_USER + 3)
         self._load(self.palette)
         self.set_reduce_motion(reduce_motion)
 
@@ -196,7 +254,12 @@ class Style:
 
     def _load(self, pal: dict):
         css = CSS.format(FONT=self.family(), ICON=fonts.ICON_FAMILY, EASE=EASE, EASE_STD=EASE_STD, **pal)
-        load_css(self._provider, css)
+        load_css(self._provider, scale_px(css, self.scale))
+
+    def set_scale(self, scale: float):
+        if scale != self.scale:
+            self.scale = scale
+            self._load(self.palette)
 
     def set_font(self, font: str):
         self.font = font

@@ -22,6 +22,7 @@ from iridia.calibration import Profiles, valid_name
 from iridia.palette import Palette
 from iridia.patterns import PatternGenerator
 from iridia import animations
+from iridia import sections as zone_sections
 from iridia.animator import Animator, Job
 from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
@@ -82,6 +83,8 @@ def clean_zone_cfg(z: dict) -> dict:
     out["power_limit"] = _num(z.get("power_limit", 0), 0, 0, 100)          # amps, 0 = no limit
     out["ma_per_led"] = _num(z.get("ma_per_led", 60), 60, 1, 500)          # mA at full white
     out["animation"] = animations.clean(z.get("animation"))               # None: a static pattern
+    out["sections"] = zone_sections.clean(z.get("sections"), out["led_count"])
+    out["led_overrides"] = zone_sections.clean_overrides(z.get("led_overrides"), out["led_count"])
     return out
 
 
@@ -123,6 +126,22 @@ class _WallpaperHandler(FileSystemEventHandler):
             self.daemon.on_wallpaper_file_changed(event.dest_path)
 
 
+class _SettingsFileHandler(FileSystemEventHandler):
+    """A desktop's own settings file (dconf, Plasma's appletsrc, ...) changed: ask the wallpaper
+    backend again now. Other files in the same folder are ignored."""
+
+    def __init__(self, daemon, files):
+        self.daemon = daemon
+        self.files = set(files)
+
+    def on_any_event(self, event):
+        for p in (getattr(event, "src_path", ""), getattr(event, "dest_path", "")):
+            if p in self.files:
+                self.daemon.detector.invalidate()
+                self.daemon._wake.set()
+                return
+
+
 class _ConfigHandler(FileSystemEventHandler):
     def __init__(self, daemon):
         self.daemon = daemon
@@ -152,7 +171,7 @@ class Daemon:
         self.running = False
         self.config = Config()
         self.started_by = openrgb_server.started_by()
-        if not os.environ.get("INVOCATION_ID") and not self.config.is_set("logging.enabled"):
+        if not openrgb_server.run_by_systemd() and not self.config.is_set("logging.enabled"):
             # Started outside systemd (a compositor line, XDG autostart...): there is no
             # journal, so keep a log file unless you've turned it off yourself.
             self.config.set("logging.enabled", True)
@@ -191,6 +210,16 @@ class Daemon:
         self._wake = threading.Event()    # wakes the main loop early
         self._night_active = False
         self.sleepwatch = None
+        self.sessionwatch = None
+        self._stopping = threading.Event()  # set when the daemon shuts down
+        self._sessions_dir = "/run/systemd/sessions"
+        self._sensor_zones = set()          # zones to redraw for a new sensor reading
+        from iridia.sensors import SensorHub
+        self.sensors = SensorHub()          # read only while a strip shows a sensor
+        self._hooks = {"lock": False, "idle": False}     # iridia lock|idle on (hypridle, swayidle, ...)
+        self._sess_test_until = 0.0                     # Settings, Try it: act as if locked until then
+        self._sess_ramp = (1.0, 1.0, 0.0, 0.0)          # brightness factor (from, to, start, seconds)
+        self._sess_state = "active"
         self._frozen = bool(self.config.get("color.frozen", False))
         self.calibration = Profiles()
         self.calibration.ensure_default()
@@ -282,6 +311,8 @@ class Daemon:
         self._setup_watchers()
         self._detect_wallpaper()
         self._start_sleepwatch()
+        self._start_sessionwatch()
+        threading.Thread(target=self._update_check, daemon=True, name="update-check").start()
 
         while self.running:
             try:
@@ -291,7 +322,7 @@ class Daemon:
             # Nothing animates any more, so there is never a reason to tick
             # faster than this; colours are sent only when they change.
             # brightness glides re-send static zones for a moment; otherwise nothing animates here
-            self._wake.wait(0.05 if self._glide_active else 0.5)
+            self._wake.wait(0.05 if self._glide_active else 0.5 if self._busy() else 1.0)
             self._wake.clear()
 
         self._shutdown()
@@ -302,6 +333,193 @@ class Daemon:
         from iridia.sleepwatch import SleepWatcher
         self.sleepwatch = SleepWatcher(self._on_sleep, self._on_wake)
         self.sleepwatch.start()
+
+    def _busy(self) -> bool:
+        """Something that needs a tick twice a second (sensor readings and blinks, identify, LED
+        counting, test colors, a color preview). Otherwise once a second is plenty: commands,
+        lock changes and fades wake the loop themselves."""
+        return bool(self.sensors.values() or self._identify or self._probe or self._rgbtest or self._preview_hex)
+
+    # ------------------------------------------------------------- updates
+    UPDATE_DELAY_SEC = 60           # after the daemon starts: the login has other things to do first
+    UPDATE_MIN_GAP_SEC = 6 * 3600   # a daemon restarted often doesn't ask GitHub every time
+
+    def _update_settings(self) -> dict:
+        u = self.config.get("updates", {})
+        u = u if isinstance(u, dict) else {}
+        return {"check": u.get("check", True) is not False, "notify": u.get("notify", True) is not False,
+                "prerelease": u.get("prerelease") is True, "skip": str(u.get("skip") or "")}
+
+    def _update_check(self):
+        """Once per start: look for a new version and, if there is one you haven't been told about,
+        show a desktop notification. Network trouble: try again a little later, three times at most."""
+        from iridia import get_version, updater
+        if self._stopping.wait(self.UPDATE_DELAY_SEC):
+            return
+        for attempt in range(3):
+            s = self._update_settings()
+            if not s["check"]:
+                return
+            last = (updater.load_state().get("last") or {})
+            if time.time() - float(last.get("checked") or 0) < self.UPDATE_MIN_GAP_SEC and not last.get("error"):
+                res = last
+            else:
+                res = updater.check(get_version(), s["prerelease"])
+            if res.get("error"):
+                self.logger.info(f"Update check: {res['error']}")
+                if self._stopping.wait(600 * (attempt + 1)):
+                    return
+                continue
+            info = res.get("latest") or {}
+            v = info.get("version")
+            if res.get("available") and v:
+                self.logger.info(f"Iridia {v} is available (this is {get_version()}); see the window's Updates tab")
+                state = updater.load_state()
+                if s["notify"] and v != s["skip"] and state.get("notified") != v:
+                    if updater.notify(f"Iridia {v} is available",
+                                      "Open Iridia, Updates, to see what's new and install it."):
+                        updater.save_state(notified=v)
+            return
+
+    def _cmd_updates(self, req: dict) -> dict:
+        """Update settings (check, notify, prerelease, skip) and what the last check found."""
+        from iridia import get_version, updater
+        new = {k: req[k] for k in ("check", "notify", "prerelease") if isinstance(req.get(k), bool)}
+        if "skip" in req:
+            new["skip"] = str(req["skip"] or "")
+        if new:
+            cur = self.config.get("updates", {})
+            self.config.set("updates", dict(cur if isinstance(cur, dict) else {}, **new))
+        return {"ok": True, "settings": self._update_settings(), "version": get_version(),
+                "last": updater.load_state().get("last"), "previous": updater.prev_version(),
+                "kind": updater.install_kind()}
+
+    # ------------------------------------------------------------- sensors
+    def _sensor_parts(self):
+        """(sensor parts of enabled strips, the zones they're on), straight from the config."""
+        from iridia.sensors import valid_id
+        out, zones = [], set()
+        devices = self.config.devices_view
+        for dev, zn, zc in self._iter_zone_targets(devices):
+            if not isinstance(zc, dict) or not zc.get("enabled", True) or not devices.get(dev, {}).get("enabled", True):
+                continue
+            for sec in zc.get("sections") or []:
+                if isinstance(sec, dict) and sec.get("type") == "sensor" and valid_id(sec.get("sensor")):
+                    out.append(zone_sections.clean_section(sec))
+                    zones.add((dev, zn))
+        return out, zones
+
+    def _update_sensors(self):
+        parts, zones = self._sensor_parts()
+        self.sensors.set_wanted({p["sensor"] for p in parts})
+        moved = self.sensors.update()
+        if moved or (parts and zone_sections.has_flash(parts, self.sensors.value)):
+            self._sensor_zones |= zones     # only these strips change: no need to redraw the others
+
+    def _update_sensor_zones(self):
+        zones, self._sensor_zones = self._sensor_zones, set()
+        devices = self.config.devices_view
+        for dev, zn, zc in self._iter_zone_targets(devices):
+            if (dev, zn) in zones and isinstance(zc, dict):
+                try:
+                    self._update_zone(dev, zn, clean_zone_cfg(zc), time.time() - self._start_time)
+                except Exception:           # noqa: BLE001 - the full update logs it properly
+                    self._needs_update = True
+
+    def _cmd_sensors(self, req: dict) -> dict:
+        return {"ok": True, "sensors": self.sensors.listing(), "values": self.sensors.values()}
+
+    # ------------------------------------------------------------- lock and idle
+    SESSION_ACTIONS = ("keep", "dim", "off")
+    FADE_OUT_SEC = 2.0
+    FADE_IN_SEC = 0.5
+
+    def _start_sessionwatch(self):
+        from iridia.sessionwatch import SessionWatcher
+        self.sessionwatch = SessionWatcher(self._wake.set)
+        self.sessionwatch.start()
+
+    def _session_settings(self) -> dict:
+        c = self.config.get("session", {})
+        c = c if isinstance(c, dict) else {}
+
+        def pick(v):
+            return v if v in self.SESSION_ACTIONS else "keep"
+        return {"lock": pick(c.get("lock")), "idle": pick(c.get("idle")),
+                "idle_minutes": _num(c.get("idle_minutes", 10), 10, 1, 240),
+                "dim": int(_num(c.get("dim", 20), 20, 0, 100))}
+
+    def _session_factor(self, now: Optional[float] = None) -> float:
+        frm, to, t0, dur = self._sess_ramp
+        now = time.monotonic() if now is None else now
+        if dur <= 0 or now - t0 >= dur:
+            return to
+        return frm + (to - frm) * (now - t0) / dur
+
+    def _update_session(self):
+        """Work out locked / idle and fade the LEDs to what Settings asks for."""
+        s = self._session_settings()
+        w = self.sessionwatch
+        if w is not None:
+            w.set_needs(lock=s["lock"] != "keep", idle=s["idle"] != "keep")
+        test = time.monotonic() < self._sess_test_until
+        locked = self._hooks["lock"] or bool(w and w.locked) or test
+        idle_s = w.idle_seconds() if w is not None else None
+        idle = self._hooks["idle"] or (idle_s is not None and idle_s >= s["idle_minutes"] * 60)
+        lock_act = s["lock"] if not test or s["lock"] != "keep" else "off"     # a test always shows something
+        target = 1.0
+        for on, act in ((locked, lock_act), (idle, s["idle"])):
+            if on and act != "keep":
+                target = min(target, 0.0 if act == "off" else s["dim"] / 100.0)
+        state = "locked" if locked else "idle" if idle else "active"
+        if state != self._sess_state:
+            self.logger.info(f"Screen {state}" + (f": LEDs to {int(target * 100)}% brightness"
+                                                  if target != self._sess_ramp[1] else ""))
+            self._sess_state = state
+        now = time.monotonic()
+        cur = self._session_factor(now)
+        if target != self._sess_ramp[1]:
+            dur = self.FADE_OUT_SEC if target < cur else self.FADE_IN_SEC
+            self._sess_ramp = (cur, target, now, dur * abs(target - cur))
+        if now - self._sess_ramp[2] < self._sess_ramp[3] + 0.1:
+            self._glide_active = True       # still fading: keep sending
+
+    def _cmd_session(self, req: dict) -> dict:
+        """Hooks (lock_hook, idle_hook: true/false), a test (test: seconds), settings (lock, idle:
+        keep/dim/off, idle_minutes, dim) and the current state."""
+        for k in ("lock_hook", "idle_hook"):
+            if k in req:
+                self._hooks[k.split("_")[0]] = bool(req[k])
+        if "test" in req:
+            self._sess_test_until = time.monotonic() + _num(req["test"], 5, 0, 60)
+        new = {}
+        for k in ("lock", "idle"):
+            if k in req:
+                if req[k] not in self.SESSION_ACTIONS:
+                    return {"ok": False, "error": f"{k} must be keep, dim or off"}
+                new[k] = req[k]
+        if "idle_minutes" in req:
+            new["idle_minutes"] = _num(req["idle_minutes"], 10, 1, 240)
+        if "dim" in req:
+            new["dim"] = int(_num(req["dim"], 20, 0, 100))
+        if new:
+            cur = self.config.get("session", {})
+            self.config.set("session", dict(cur if isinstance(cur, dict) else {}, **new))
+        self._update_session()
+        self._needs_update = True
+        self._wake.set()
+        return dict(self._session_status(), ok=True)
+
+    def _session_status(self) -> dict:
+        w = self.sessionwatch
+        idle = w.idle_seconds() if w is not None else None
+        return {"session": dict(self._session_settings(), state=self._sess_state,
+                                factor=round(self._sess_ramp[1], 2), hooks=dict(self._hooks),
+                                lock_method=w.lock_method if w else None,
+                                idle_method=w.idle_method if w else None,
+                                watching={"lock": bool(w and w.watching_lock), "idle": bool(w and w.want_idle),
+                                          "idle_checked": bool(w and w.idle_checked)},
+                                idle_seconds=None if idle is None else int(idle))}
 
     def _on_sleep(self):
         """Called from the watcher thread: dark LEDs, then let the PC sleep."""
@@ -376,10 +594,14 @@ class Daemon:
         return {"ok": True, "night": cur}
 
     def _shutdown(self):
+        self._stopping.set()
         self._animator.stop()
         self.logger.info("Shutting down")
         if self.sleepwatch:
             self.sleepwatch.stop()
+        if self.sessionwatch:
+            self.sessionwatch.stop()
+        self.sensors.stop()
         self.ipc.stop()
         if self._observer:
             self._observer.stop()
@@ -409,9 +631,19 @@ class Daemon:
         noctalia_dir = os.path.join(state, "noctalia")
         if os.path.isdir(noctalia_dir):
             watches.append((_WallpaperHandler(self), noctalia_dir))
+        settings = self.detector.watch_files()
+        folders = {}
+        for f in settings:
+            if os.path.isdir(os.path.dirname(f)):
+                folders.setdefault(os.path.dirname(f), []).append(f)
+        for folder, files in folders.items():
+            watches.append((_SettingsFileHandler(self, files), folder))
+        watched_settings = 0
         for handler, folder in watches:
             try:
                 self._observer.schedule(handler, folder, recursive=False)
+                if isinstance(handler, _SettingsFileHandler):
+                    watched_settings += 1
             except OSError as e:
                 # inotify watch limit reached, a folder on a network share, ...: wallpaper
                 # changes are still found by the regular check, just a little later.
@@ -419,7 +651,9 @@ class Daemon:
         try:
             self._observer.start()
         except OSError as e:
+            watched_settings = 0
             self.logger.warning(f"File watching unavailable ({e}); wallpaper changes are found by polling")
+        self.detector.set_watched(watched_settings > 0)
 
     def on_wallpaper_file_changed(self, path: str):
         # Noctalia's state dir also holds busy files (screen_time.json,
@@ -433,6 +667,7 @@ class Daemon:
         self._last_wallpaper_event = now
         self.logger.debug(f"Wallpaper file changed: {path}")
         self.detector.invalidate()        # re-run the slow (subprocess) backends right away
+        self._wake.set()
         try:
             if self._current_wallpaper and os.path.realpath(path) == self._current_wallpaper:
                 self._reextract = True
@@ -475,12 +710,14 @@ class Daemon:
             self.extractor = ColorExtractor(backend=new_backend)
             self._current_wallpaper = None   # next tick re-detects and re-extracts
         self._needs_update = True
+        self._wake.set()
 
     def on_palette_changed(self):
         self.logger.info("Palette changed on disk, reloading")
         self.palette._load()
         self._snap_cache = {}
         self._needs_update = True
+        self._wake.set()
 
     def _tick(self) -> None:
         """Run one daemon cycle.
@@ -533,12 +770,17 @@ class Daemon:
         self._detect_wallpaper()
         self._read_brightness()
 
+        self._update_session()
+        self._update_sensors()
         self._refresh_animations(connected)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
         if connected and (self._needs_update or self._force_refresh):
             self._glide_active = False
+            self._sensor_zones = set()
             self._update_all_devices()
+        elif connected and self._sensor_zones:
+            self._update_sensor_zones()
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
 
@@ -554,7 +796,7 @@ class Daemon:
             real_devs = {d["name"]: d for d in self.openrgb.list_devices()}
         except Exception:
             return
-        for name, dev_cfg in self.config.devices.items():
+        for name, dev_cfg in self.config.devices_view.items():
             zones = dev_cfg.get("zones") if isinstance(dev_cfg, dict) else None
             real = real_devs.get(name)
             if not isinstance(zones, dict) or not zones or not real:
@@ -656,7 +898,7 @@ class Daemon:
         """
         self._reconcile_zones()
         now = time.time()
-        configured = [name for name, cfg in self.config.devices.items() if cfg.get("enabled", True)]
+        configured = [name for name, cfg in self.config.devices_view.items() if cfg.get("enabled", True)]
         for name in configured:
             if name in self.openrgb.devices:
                 self._device_missing_since.pop(name, None)
@@ -858,6 +1100,28 @@ class Daemon:
             self.logger.warning("IPC thread died, restarting...")
             self.ipc = IPCServer(self._socket_path, self)
             self.ipc.start()
+        if self._session_over():
+            self.logger.info("The login session this daemon was started in has ended: stopping, so the next "
+                             "login's daemon can start")
+            self.running = False
+
+    def _session_over(self) -> bool:
+        """Started by a compositor or a terminal (not systemd, which stops it itself) and its logind
+        session is closing or gone. Otherwise it would outlive the logout and block the next login's copy.
+        logind and elogind both keep /run/systemd/sessions/<id>."""
+        sid = os.environ.get("XDG_SESSION_ID")
+        if not sid or openrgb_server.run_by_systemd() or "/" in sid:
+            return False
+        path = os.path.join(self._sessions_dir, sid)
+        try:
+            with open(path, encoding="utf-8") as f:
+                state = next((ln[6:].strip() for ln in f if ln.startswith("STATE=")), "")
+            self._session_seen = True
+            return state == "closing"
+        except FileNotFoundError:
+            return getattr(self, "_session_seen", False)
+        except OSError:
+            return False
 
     def _detect_wallpaper(self):
         if self._frozen:
@@ -986,7 +1250,7 @@ class Daemon:
         scaling and animation — the GUI uses it as its accent colour."""
         try:
             col, mode, pm = None, self.config.color_mode, self.config.palette_mode
-            for dev in self.config.devices.values():
+            for dev in self.config.devices_view.values():
                 if not dev.get("enabled", True):
                     continue
                 for z in (dev.get("zones") or {"": dev}).values():
@@ -1110,7 +1374,7 @@ class Daemon:
     def _zone_targets(self) -> List[dict]:
         """Every zone with the names you can call it by (for `iridia zone list`)."""
         out = []
-        for dev, zname, zcfg in self._iter_zone_targets(self.config.devices):
+        for dev, zname, zcfg in self._iter_zone_targets(self.config.devices_view):
             if not isinstance(zcfg, dict):
                 continue
             out.append({"key": self._zone_key(dev, zname), "device": dev, "zone": zname,
@@ -1396,6 +1660,8 @@ class Daemon:
             if co not in COLOR_ORDERS:
                 return {"ok": False, "error": f"color order must be one of {', '.join(COLOR_ORDERS)}"}
             changes["color_order"] = co
+        if "session_ignore" in req:            # stays lit when the screen locks or you're away
+            changes["session_ignore"] = True if req["session_ignore"] else None
         for key, lo, hi in (("leds_per_pixel", 1, 20), ("power_limit", 0, 100), ("ma_per_led", 1, 500)):
             if key in req:
                 try:
@@ -1569,7 +1835,7 @@ class Daemon:
             self._needs_update = True
 
     def _update_all_devices(self):
-        devices_cfg = self.config.devices
+        devices_cfg = self.config.devices_view
         if not devices_cfg:
             self.logger.debug("No devices configured")
             self._needs_update = False
@@ -1656,6 +1922,12 @@ class Daemon:
                 final_colors = self.patterns.generate(pattern, colors, led_count, params=params)
             if not final_colors:
                 return
+            if zcfg["sections"] or zcfg["led_overrides"]:
+                if self._strip_type(device_name, zone_name, zcfg) != "single":
+                    final_colors = zone_sections.compose_static(
+                        final_colors, zcfg["sections"], zcfg["led_overrides"],
+                        lambda e: resolve_colors(e, self._extracted_colors), self.patterns,
+                        self.sensors.value, time.monotonic())
 
         if not exact:
             brightness = int(round(self._brightness_now(key, zcfg)))
@@ -1737,6 +2009,12 @@ class Daemon:
         return key in self._anim_keys and not self._anim_blocked(device, zone, key)
 
     def _brightness_now(self, key: str, zcfg: dict) -> float:
+        """The zone's brightness, faded down while the screen is locked or you're away (unless the
+        zone ignores that)."""
+        b = self._brightness_glide(key, zcfg)
+        return b if zcfg.get("session_ignore") else b * self._session_factor()
+
+    def _brightness_glide(self, key: str, zcfg: dict) -> float:
         """The zone's brightness (monitor or manual, range, invert, night cap), gliding to a new
         value over GLIDE_SEC instead of jumping."""
         target = float(self._get_zone_brightness(zcfg))
@@ -1782,7 +2060,7 @@ class Daemon:
             real = {d["name"]: [z["name"] for z in d["zones"]] for d in self.openrgb.list_devices()}
             layout_groups: Dict[tuple, list] = {}
             plan = []
-            for dev, dev_cfg in self.config.devices.items():
+            for dev, dev_cfg in self.config.devices_view.items():
                 if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True) or dev not in real:
                     continue
                 zones = dev_cfg.get("zones")
@@ -1794,10 +2072,11 @@ class Daemon:
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
-                    if anim is None:
+                    if anim is None and not (zone_sections.has_effects(zc["sections"])
+                                             and self._strip_type(dev, zn, zc) != "single"):
                         continue
                     n = zc["led_count"]
-                    pts = self._layout_points(key, n) if anim["follow_layout"] else None
+                    pts = self._layout_points(key, n) if anim and anim["follow_layout"] else None
                     plan.append((dev, zn, key, zc, anim, pts))
                     if pts:
                         layout_groups.setdefault((anim["effect"], anim["angle"]), []).append(pts)
@@ -1807,7 +2086,7 @@ class Daemon:
                 xs = [p for pts, sp in items for p in animations.layout_positions(pts, g[1], sp)]
                 extents[g] = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
             for dev, zn, key, zc, anim, pts in plan:
-                ext = extents.get((anim["effect"], anim["angle"])) if pts else None
+                ext = extents.get((anim["effect"], anim["angle"])) if pts and anim else None
                 sig = repr((zc, anim, pts, ext, self._extracted_colors, sorted(self.custom_colors.exact_set()),
                             self.config.color_mode, self._real_zone_size(dev, zn)))
                 old = self._anim_jobs.get(key)
@@ -1864,12 +2143,30 @@ class Daemon:
         base_hex = self.patterns.generate(PatternGenerator.normalize(zc.get("pattern", "solid")), colors_hex, n,
                                           params=params) or [colors_hex[0]] * n
         base = [animations.hex_to_rgb(c) for c in base_hex]
+        import zlib
+        seed = zlib.crc32(key.encode()) ^ self._run_seed
+        # parts of the strip with their own pattern or effect, and single LEDs set by hand
+        parts = None
+        if zc["sections"] or zc["led_overrides"]:
+            parts = zone_sections.Composer(zc["sections"], zc["led_overrides"], n,
+                                           lambda e: resolve_colors(e, self._extracted_colors), seed, self.patterns,
+                                           self.sensors.value)
+        if anim is None:
+            # only parts of the strip move: the rest shows its static pattern
+            correct = self._rgb_corrector(zc)
+            real_n = self._real_zone_size(dev, zn) or n
+
+            def still(clock: float):
+                if self._anim_blocked(dev, zn, key):
+                    return None
+                ov = self._overlays.get(key) or {}
+                b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
+                return self._finish_rgb(key, dev, zn, zc, correct(parts.frame(base, clock), b))
+            return Job(key, dev, zn, real_n, still, f"{len(parts.moving)} animated part(s)")
         if pts:
             positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
         else:
             positions = animations.strip_positions(n, bool(params.get("reverse")), bool(params.get("mirror")))
-        import zlib
-        seed = zlib.crc32(key.encode()) ^ self._run_seed
         offset = 0.0 if anim["sync"] else (zlib.crc32(key.encode()) % 10000) / 100.0
         correct = self._rgb_corrector(zc)
         real_n = self._real_zone_size(dev, zn) or n
@@ -1889,6 +2186,8 @@ class Daemon:
                 raw = memo[1]
             else:
                 raw = animations.render(effect, anim, n, t, colors, seed, positions, base, extent)
+            if parts is not None:
+                raw = parts.frame(raw, clock)
             ov = self._overlays.get(key) or {}
             b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
             return self._finish_rgb(key, dev, zn, zc, correct(raw, b))
@@ -2157,6 +2456,14 @@ class Daemon:
             return self._cmd_freeze(req)
         if cmd == "set_zone_strip":
             return self._cmd_set_zone_strip(req)
+        if cmd == "session":
+            return self._cmd_session(req)
+        if cmd == "sensors":
+            return self._cmd_sensors(req)
+        if cmd == "updates":
+            return self._cmd_updates(req)
+        if cmd == "set_zone_sections":
+            return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":
             return self._cmd_set_zone_animation(req)
         if cmd == "animations":
@@ -2238,7 +2545,7 @@ class Daemon:
         (full brightness), so the Status tab can show the effect of the
         current colour correction."""
         zcfg = {}
-        for dev in self.config.devices.values():
+        for dev in self.config.devices_view.values():
             if not dev.get("enabled", True):
                 continue
             for z in (dev.get("zones") or {"": dev}).values():
@@ -2249,7 +2556,7 @@ class Daemon:
                 break
         mode = zcfg.get("mode", self.config.color_mode)
         modes = {z.get("mode", self.config.color_mode)
-                 for dev in self.config.devices.values() if dev.get("enabled", True)
+                 for dev in self.config.devices_view.values() if dev.get("enabled", True)
                  for z in (dev.get("zones") or {"": dev}).values() if z.get("enabled", True)}
         if len(modes) > 1:
             mode = "mixed"           # zones differ: show the colours as they are
@@ -2268,7 +2575,7 @@ class Daemon:
     def _cmd_status(self) -> Dict[str, Any]:
         ident, probe = self._identify, self._probe
         missing = [
-            name for name, cfg in self.config.devices.items()
+            name for name, cfg in self.config.devices_view.items()
             if cfg.get("enabled", True) and name in self._device_missing_since
         ]
         return {
@@ -2284,6 +2591,8 @@ class Daemon:
             "lights_off": self._lights_off,
             "asleep": self._asleep,
             "night": dict(self._night_settings(), active=self._night_active),
+            **self._session_status(),
+            "sensors": self.sensors.values(),
             "sleep_watch": bool(self.sleepwatch and self.sleepwatch.available),
             "sleep_lights_off": bool(self.config.get("sleep.lights_off", True)),
             "identify": ({"device": ident[0], "zone": ident[1]} if ident else None),
@@ -2300,6 +2609,7 @@ class Daemon:
             "rgb_test": ({"device": self._rgbtest[0], "zone": self._rgbtest[1]} if self._rgbtest else None),
             "brightness": self._current_brightness,
             "ddc_available": self.ddc.is_available(),
+            "ddc_source": getattr(self.ddc, "source", None),
             "ddc_last_error": self.ddc.last_error,
             "openrgb_connected": self.openrgb.client is not None,
             "openrgb_protocol": getattr(self.openrgb, "protocol", None) if self.openrgb.client is not None else None,
@@ -2316,7 +2626,7 @@ class Daemon:
             "devices": self.openrgb.list_devices(),
             "device_configs": {n: (dict(c, zones={zn: clean_zone_cfg(zc) for zn, zc in c["zones"].items()})
                                    if c.get("zones") else clean_zone_cfg(c))
-                               for n, c in self.config.devices.items()},
+                               for n, c in self.config.devices_view.items()},
             "mode": self.config.color_mode,
             "palette_mode": self.config.palette_mode,
             "color_backend": self.config.get("color.backend", "auto"),
@@ -2324,7 +2634,7 @@ class Daemon:
             "config_path": self.config.path,
             "socket_path": self._socket_path,
             "pid": os.getpid(),
-            "managed_by": "systemd" if os.environ.get("INVOCATION_ID") else "other",
+            "managed_by": "systemd" if openrgb_server.run_by_systemd() else "other",
             "animations": dict(self._anim_settings(), paused=self._anim_hold, running=self._animator.running(),
                                zones=sorted(self._anim_keys), clock=self._animator.clock, rate=self._animator.rate,
                                time=time.time(), measured=dict(self._animator.measured), seed=self._run_seed,
@@ -2374,6 +2684,7 @@ class Daemon:
         # through the same resolver the zone-scoped commands use so an
         # empty zone correctly falls back to the device-level field
         # instead of being a no-op that reports success.
+        self._rescale_sections(name, zone, count)
         self.config.set(self._zone_config_path(name, zone, "led_count"), count)
         self._needs_update = True
         return {"ok": True}
@@ -2712,9 +3023,70 @@ class Daemon:
         count = req.get("count")
         if dev not in self.config.devices:
             return {"ok": False, "error": f"device '{dev}' not found"}
+        self._rescale_sections(dev, zone, count)
         self.config.set(self._zone_config_path(dev, zone, "led_count"), count)
         self._needs_update = True
         return {"ok": True}
+
+    def _rescale_sections(self, dev: str, zone: str, count) -> None:
+        """A new LED count moves a split strip's dividers along with it."""
+        zc = self._zone_cfg(dev, zone)
+        if not (zc.get("sections") or zc.get("led_overrides")):
+            return
+        try:
+            new = int(count)
+        except (TypeError, ValueError):
+            return
+        old = clean_zone_cfg(zc)
+        secs, ov = zone_sections.rescale(old["sections"], old["led_overrides"], old["led_count"], new)
+        self.config.set(self._zone_config_path(dev, zone, "sections"), secs)
+        self.config.set(self._zone_config_path(dev, zone, "led_overrides"), zone_sections.overrides_for_config(ov))
+
+    def _cmd_set_zone_sections(self, req: dict) -> dict:
+        """sections: the zone's parts (see iridia/sections.py), [] to join them again; led_overrides:
+        {LED number: hex} replacing every single LED set, or set_led: [LED, hex or None] for one."""
+        dev, zone = req.get("device"), req.get("zone")
+        if req.get("target") is not None:
+            keys, err = self._resolve_target(req["target"])
+            if err:
+                return {"ok": False, "error": err}
+            if len(keys) != 1:
+                return {"ok": False, "error": "pick one strip, not several"}
+            dev, _sep, zone = keys[0].partition("|")
+        if dev not in self.config.devices:
+            return {"ok": False, "error": f"device '{dev}' not found"}
+        n = clean_zone_cfg(self._zone_cfg(dev, zone))["led_count"]
+        if "sections" in req:
+            if not isinstance(req["sections"], list):
+                return {"ok": False, "error": "sections must be a list"}
+            self.config.set(self._zone_config_path(dev, zone, "sections"), zone_sections.clean(req["sections"], n))
+        ov = None
+        if "led_overrides" in req:
+            if not isinstance(req["led_overrides"], dict):
+                return {"ok": False, "error": "led_overrides must be an object"}
+            ov = zone_sections.clean_overrides(req["led_overrides"], n)
+        if "set_led" in req:
+            try:
+                i, h = int(req["set_led"][0]), req["set_led"][1]
+            except (TypeError, ValueError, IndexError, KeyError):
+                return {"ok": False, "error": "set_led must be [LED, color or null]"}
+            if not 0 <= i < n:
+                return {"ok": False, "error": f"LED {i + 1} is past the end of the strip ({n} LEDs)"}
+            if h is not None and not normalize_hex(h):
+                return {"ok": False, "error": f"not a color: {h!r}"}
+            ov = dict(zone_sections.clean_overrides(self._zone_cfg(dev, zone).get("led_overrides"), n)
+                      if ov is None else ov)
+            if h is None:
+                ov.pop(i, None)
+            else:
+                ov[i] = normalize_hex(h)
+        if ov is not None:
+            self.config.set(self._zone_config_path(dev, zone, "led_overrides"), zone_sections.overrides_for_config(ov))
+        self._last_sent = {}
+        self._needs_update = True
+        now = clean_zone_cfg(self._zone_cfg(dev, zone))
+        return {"ok": True, "device": dev, "zone": zone or "", "led_count": now["led_count"],
+                "sections": now["sections"], "led_overrides": zone_sections.overrides_for_config(now["led_overrides"])}
 
     def _cmd_set_zone_brightness_sync(self, req: dict) -> dict:
         dev = req.get("device")

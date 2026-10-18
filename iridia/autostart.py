@@ -33,12 +33,21 @@ def xdg_desktop_entry(cmd: str = "") -> str:
 Type=Application
 Name=Iridia daemon
 Comment=Sync LED colors with the wallpaper (OpenRGB)
-Exec={cmd}
+Exec={_desktop_exec(cmd)}
 Icon=iridia
 Terminal=false
 X-GNOME-Autostart-enabled=true
 NoDisplay=true
 """
+
+
+def _desktop_exec(cmd: str) -> str:
+    """A command for a desktop entry's Exec= line: quoted when it has a space or a special character,
+    % doubled (the Desktop Entry spec)."""
+    q = cmd.replace("%", "%%")
+    if any(ch in q for ch in ' \t"\'\\$`'):
+        q = '"' + q.replace("\\", "\\\\").replace('"', '\\"').replace("`", "\\`").replace("$", "\\$") + '"'
+    return q
 
 
 def xdg_installed() -> bool:
@@ -70,10 +79,9 @@ def snippets(cmd: str = "") -> List[Dict[str, str]]:
             "file": "(managed for you)",
             "text": ("iridia service install\n"
                      "systemctl --user enable --now iridia-daemon.service\n\n"
-                     "# Starts with your graphical session (graphical-session.target).\n"
-                     "# Works out of the box on GNOME, KDE, Hyprland/Sway/niri started via UWSM or a display\n"
-                     "# manager that activates the target. If your compositor does not, add one of the lines\n"
-                     "# below as well - the daemon only ever runs once."),
+                     "# Starts with your graphical session (graphical-session.target): GNOME, KDE Plasma\n"
+                     "# 5.25 and later, COSMIC, niri started through niri-session, and compositors started\n"
+                     "# through UWSM. Other sessions never reach that target: use one of the lines below."),
         },
         {
             "id": "hyprland-lua", "title": "Hyprland (Lua config)",
@@ -95,15 +103,26 @@ def snippets(cmd: str = "") -> List[Dict[str, str]]:
             "text": f'spawn-at-startup "{cmd}"',
         },
         {
-            "id": "sway", "title": "Sway / i3",
-            "file": "~/.config/sway/config  |  ~/.config/i3/config",
-            "text": (f"# Sway\nexec {cmd}\n\n"
-                     f"# i3\nexec --no-startup-id {cmd}"),
+            "id": "sway", "title": "Sway",
+            "file": "~/.config/sway/config",
+            "text": f"exec {cmd}",
         },
         {
+            "id": "i3", "title": "i3",
+            "file": "~/.config/i3/config",
+            "text": f"exec --no-startup-id {cmd}",
+        },
+        {
+            # river 0.4 and later refuse to start when the init file contains the word riverctl,
+            # so a plain shell line it is (works with river-classic too)
             "id": "river", "title": "river",
             "file": "~/.config/river/init",
-            "text": f'riverctl spawn "{cmd}"',
+            "text": f"{cmd} &\n\n# Put it before the line that starts your window manager (exec ...), if there is one.",
+        },
+        {
+            "id": "wayfire", "title": "Wayfire",
+            "file": "~/.config/wayfire.ini",
+            "text": f"[autostart]\niridia = {cmd}",
         },
         {
             "id": "labwc", "title": "labwc / Openbox",
@@ -133,14 +152,46 @@ def detect_compositor() -> str:
         return "hyprland-lua" if os.path.exists(lua) else "hyprland-conf"
     if env.get("NIRI_SOCKET") or "niri" in desk:
         return "niri"
-    if env.get("SWAYSOCK") or env.get("I3SOCK") or "sway" in desk or "i3" in desk:
+    if env.get("SWAYSOCK") or "sway" in desk:
         return "sway"
+    if env.get("I3SOCK") or "i3" in desk:
+        return "i3"
     if "river" in desk:
         return "river"
+    if "wayfire" in desk:
+        return "wayfire"
     if "labwc" in desk or "openbox" in desk:
         return "labwc"
     if "bspwm" in desk or "dwm" in desk:
         return "bspwm"
+    if desk.strip(":"):
+        return ""                   # a desktop that says what it is (GNOME, KDE, XFCE, ...): XDG autostart
+    return _compositor_from_processes()
+
+
+# compositors and window managers that don't set XDG_CURRENT_DESKTOP when started from a TTY,
+# greetd or startx: found by their process instead
+_PROCESS_IDS = {"river": "river", "Hyprland": "hyprland-conf", "sway": "sway", "niri": "niri", "i3": "i3",
+                "labwc": "labwc", "openbox": "labwc", "wayfire": "wayfire", "bspwm": "bspwm", "dwm": "bspwm"}
+
+
+def _compositor_from_processes(proc: str = "/proc") -> str:
+    uid = os.getuid()
+    try:
+        pids = [p for p in os.listdir(proc) if p.isdigit()]
+    except OSError:
+        return ""
+    for pid in pids:
+        try:
+            with open(os.path.join(proc, pid, "comm"), encoding="utf-8") as f:
+                name = f.read().strip()
+            if name in _PROCESS_IDS and os.stat(os.path.join(proc, pid)).st_uid == uid:
+                sid = _PROCESS_IDS[name]
+                if sid == "hyprland-conf" and os.path.exists(os.path.expanduser("~/.config/hypr/hyprland.lua")):
+                    return "hyprland-lua"
+                return sid
+        except OSError:
+            continue
     return ""
 
 

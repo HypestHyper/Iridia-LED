@@ -47,3 +47,17 @@ def test_set_get_with_dotted_device_names(tmp_path):
     # get() returns copies, so callers can't mutate the config by accident
     cfg.get("devices")["Hub v1.0"]["led_count"] = 1
     assert cfg.get(("devices", "Hub v1.0", "led_count")) == 42
+
+
+def test_devices_view_is_shared_until_a_change(tmp_path):
+    from iridia.config import Config
+    c = Config(str(tmp_path / "config.json"))
+    c.set(("devices", "A"), {"zones": {"Z": {"led_count": 5}}})
+    v1 = c.devices_view
+    assert v1 is c.devices_view                         # no copy per call
+    mine = {"led_count": 9}
+    c.set(("devices", "A", "zones", "Z"), mine)
+    mine["led_count"] = 99                              # the caller's dict is not the config's
+    v2 = c.devices_view
+    assert v2 is not v1 and v2["A"]["zones"]["Z"]["led_count"] == 9
+    assert v1["A"]["zones"]["Z"]["led_count"] == 5      # an old view never changes under a reader

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-18 02:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -21,6 +21,18 @@ msgstr ""
 #, python-brace-format
 msgid "Iridia {version}"
 msgstr "Café"
+
+msgid "Automatic"
+msgstr "Bisou"
+
+msgid "Compact"
+msgstr "Petit pois"
+
+msgid "Default"
+msgstr "Baguette"
+
+msgid "Large"
+msgstr "Gros fromage"
 
 msgid "Target"
 msgstr "Fromage"
@@ -94,6 +106,9 @@ msgstr "Oh là là"
 msgid "Service"
 msgstr "Allez !"
 
+msgid "Updates"
+msgstr "Mises à jour"
+
 msgid "Refresh"
 msgstr "Oui"
 
@@ -108,6 +123,18 @@ msgstr "Oui"
 
 msgid "Quit"
 msgstr "Camembert"
+
+msgid "Minimize"
+msgstr "Petit"
+
+msgid "Maximize"
+msgstr "Grand"
+
+msgid "Close"
+msgstr "Bonne nuit"
+
+msgid "Restore"
+msgstr "Santé !"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -285,6 +312,20 @@ msgstr "Il était une fois un croissant"
 msgid "System font"
 msgstr "Bonsoir"
 
+msgid "Size"
+msgstr "Taille"
+
+msgid ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
+msgstr "Le croissant est petit. Ctrl+moins et Ctrl+plus, oh là là. Ctrl+0, bonsoir."
+
+msgid "Window buttons"
+msgstr "Les boutons"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Petit, grand et au revoir. Non : bonsoir."
+
 msgid "Reduce motion"
 msgstr "Bof"
 
@@ -346,9 +387,6 @@ msgstr "La baguette est trop longue"
 
 msgid "No backups yet"
 msgstr "Pardon ?"
-
-msgid "Restore"
-msgstr "Santé !"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Je ne sais quoi. Qui a mangé mon fromage."
@@ -424,6 +462,218 @@ msgstr "Macaron"
 
 msgid "Press Show to load the latest lines."
 msgstr "Le béret de mon grand-père"
+
+msgid "New versions of Iridia come from its releases on GitHub."
+msgstr "Les nouvelles baguettes viennent de GitHub."
+
+msgid "Check now"
+msgstr "Vérifier"
+
+msgid "Update now"
+msgstr "Mettre à jour"
+
+msgid "Skip this version"
+msgstr "Pas celle-ci"
+
+msgid "What's new"
+msgstr "Quoi de neuf"
+
+msgid ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+msgstr "Pas de mot de passe. Les fromages sont sauvegardés. Voilà."
+
+msgid "Checking"
+msgstr "Vérification"
+
+msgid "Look for updates when Iridia starts"
+msgstr "Vérifier au démarrage"
+
+msgid "Show a notification when there's a new version"
+msgstr "Une notification, oh là là"
+
+msgid "Include test versions"
+msgstr "Versions de test"
+
+msgid ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+msgstr "GitHub, parfois. Rien sur toi."
+
+msgid "Go back"
+msgstr "Revenir"
+
+msgid "The version before the last update is kept, so you can undo an update."
+msgstr "On garde l'ancienne baguette."
+
+#, python-brace-format
+msgid "Iridia {v}"
+msgstr "Iridia {v}"
+
+#, python-brace-format
+msgid "Couldn't check: {err}"
+msgstr "Pas possible : {err}"
+
+#, python-brace-format
+msgid "Iridia {v} is available"
+msgstr "Iridia {v} est là"
+
+#, python-brace-format
+msgid "You have {cur}. Released {date}."
+msgstr "Tu as {cur}. Sortie le {date}."
+
+msgid "You have the latest version."
+msgstr "Tu as la dernière baguette."
+
+msgid "Not checked yet."
+msgstr "Pas encore vérifié."
+
+msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+msgstr "Mets à jour avec git pull, puis bash install.sh."
+
+#, python-brace-format
+msgid "What's new in {v}"
+msgstr "Quoi de neuf dans {v}"
+
+#, python-brace-format
+msgid "Kept from before the last update: Iridia {v}."
+msgstr "Gardée : Iridia {v}."
+
+msgid "Nothing kept yet: the version you have now is kept when you update."
+msgstr "Rien de gardé."
+
+#, python-brace-format
+msgid "Go back to {v}"
+msgstr "Revenir à {v}"
+
+msgid "Checking…"
+msgstr "Oui"
+
+msgid "Couldn't check for updates"
+msgstr "Pas possible de vérifier"
+
+#, python-brace-format
+msgid "Iridia {v} skipped. Newer versions still show up."
+msgstr "Iridia {v} ignorée."
+
+#, python-brace-format
+msgid "Install Iridia {v}?"
+msgstr "Installer Iridia {v} ?"
+
+msgid ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+msgstr "Les fromages sont sauvegardés, la fenêtre redémarre. Bonsoir."
+
+#, python-brace-format
+msgid "Updating to {v}…"
+msgstr "Mise à jour vers {v}…"
+
+msgid "Update"
+msgstr "Mettre à jour"
+
+#, python-brace-format
+msgid "Go back to Iridia {v}?"
+msgstr "Revenir à Iridia {v} ?"
+
+msgid ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+msgstr "On garde les deux. Voilà."
+
+#, python-brace-format
+msgid "Going back to {v}…"
+msgstr "Retour à {v}…"
+
+msgid "Done: restarting the window…"
+msgstr "Fini : la fenêtre redémarre…"
+
+msgid "That didn't work: see the output below. Nothing of yours was changed."
+msgstr "Raté. Rien n'a changé."
+
+msgid "Lock and idle"
+msgstr "Dodo"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr "Les bisous dorment quand tu dors. Oh là là."
+
+msgid "Keep"
+msgstr "Garder"
+
+msgid "Dim"
+msgstr "Tamisé"
+
+msgid "Off"
+msgstr "Pardon ?"
+
+msgid "When the screen locks"
+msgstr "Quand on ferme la porte"
+
+msgid "After"
+msgstr "Après"
+
+msgid "minutes without input"
+msgstr "minutes de sieste"
+
+msgid "Dim to"
+msgstr "Baisser à"
+
+msgid "Try it"
+msgstr "Champagne"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Bonne nuit pour 5 secondes."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr "Doucement, doucement. Bonsoir."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "Pas de croissant ici : hypridle ou swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr "Mets ça dans ta baguette."
+
+msgid "Copied"
+msgstr "Bonne nuit"
+
+msgid "in use"
+msgstr "au travail"
+
+msgid "away"
+msgstr "en vacances"
+
+msgid "locked"
+msgstr "Bisou"
+
+#, python-brace-format
+msgid "Right now: {state}."
+msgstr "Maintenant : {state}."
+
+#, python-brace-format
+msgid "Locking seen through: {lock}."
+msgstr "Porte : {lock}."
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind ou un croissant"
+
+#, python-brace-format
+msgid "Idle time from: {idle}."
+msgstr "Sieste : {idle}."
+
+msgid "nothing here"
+msgstr "rien du tout"
+
+msgid "Nothing is watched while both are Keep."
+msgstr "Rien ne bouge, tout est Garder."
+
+msgid "Your idle daemon says you're away."
+msgstr "Tu es en vacances."
 
 msgid "Saved."
 msgstr "Santé !"
@@ -587,9 +837,6 @@ msgid ""
 "keeps working when this window is closed. This window only changes its settings."
 msgstr "Le chat est sous la table. Une grenouille dans mon café. Les lapins sont dans la cuisine."
 
-msgid "Checking…"
-msgstr "Oui"
-
 msgid "Kill daemon"
 msgstr "Baguette"
 
@@ -626,9 +873,6 @@ msgstr "Le béret de mon grand-père. La crêpe est tombée par terre."
 
 msgid "Environment"
 msgstr "Fromage"
-
-msgid "Copied"
-msgstr "Bonne nuit"
 
 msgid "Install XDG autostart"
 msgstr "Omelette du fromage"
@@ -907,6 +1151,9 @@ msgstr "Bonjour"
 msgid "Not connected"
 msgstr "Oui"
 
+msgid "Following the screen's backlight"
+msgstr "La lumière du croissant"
+
 msgid "Available"
 msgstr "Bof"
 
@@ -921,9 +1168,6 @@ msgstr "Il était une fois un croissant"
 
 msgid "Following the wallpaper"
 msgstr "J'ai une baguette"
-
-msgid "Off"
-msgstr "Pardon ?"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1190,9 +1434,6 @@ msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
 msgid "Resize failed"
 msgstr "Oh là là"
 
-msgid "Close"
-msgstr "Bonne nuit"
-
 msgid "Breathing"
 msgstr "La sieste"
 
@@ -1331,9 +1572,6 @@ msgstr "Lisse comme un œuf"
 msgid "Sharp"
 msgstr "Pointu comme un crayon"
 
-msgid "Dim"
-msgstr "Tamisé"
-
 msgid "Second color"
 msgstr "La deuxième chaussette"
 
@@ -1397,6 +1635,9 @@ msgstr "Un verre de vin rouge, merci"
 msgid "~/.config/niri/config.kdl, inside binds { }"
 msgstr "Le chat est sous la table"
 
+msgid "river 0.4 and later leave keys to your window manager: bind this command in its config:"
+msgstr "river 0.4 : mets ça dans ta baguette :"
+
 msgid ""
 "System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
 " press your key:"
@@ -1453,9 +1694,6 @@ msgstr "Bonjour"
 
 msgid "Copy command"
 msgstr "Café"
-
-msgid "Try it"
-msgstr "Champagne"
 
 msgid "Add it to your desktop"
 msgstr "Le poisson rouge est en vacances"
@@ -1658,9 +1896,6 @@ msgstr[1] "Bisou"
 
 msgid "clone"
 msgstr "Bonne nuit"
-
-msgid "locked"
-msgstr "Bisou"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "La crêpe est tombée par terre. J'ai une baguette."
@@ -1913,6 +2148,146 @@ msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
+msgid "Same as the strip"
+msgstr "Comme le fromage"
+
+msgid "Its own pattern"
+msgstr "Sa propre baguette"
+
+msgid "Its own effect"
+msgstr "Son propre croissant"
+
+msgid "A sensor"
+msgstr "Un thermomètre"
+
+msgid "CPU temperature"
+msgstr "Chaleur du croissant"
+
+msgid "CPU load"
+msgstr "Travail du croissant"
+
+msgid "GPU temperature"
+msgstr "Chaleur de la baguette"
+
+msgid "GPU load"
+msgstr "Travail de la baguette"
+
+msgid "Second GPU temperature"
+msgstr "Deuxième baguette chaude"
+
+msgid "Second GPU load"
+msgstr "Deuxième baguette au travail"
+
+msgid "Memory use"
+msgstr "Fromage utilisé"
+
+msgid "Disk temperature"
+msgstr "Chaleur du camembert"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Avancé : couper la baguette"
+
+msgid "Add divider"
+msgstr "Ajouter un couteau"
+
+msgid "Space evenly"
+msgstr "Égalité"
+
+msgid "Single LEDs"
+msgstr "Bisous seuls"
+
+msgid "Set LEDs"
+msgstr "Bisou"
+
+msgid "Color for single LEDs"
+msgstr "Couleur du bisou"
+
+msgid "Clear all"
+msgstr "Au revoir"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr "Clique sur les bisous. Oh là là, un bisou entre deux baguettes."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Manger ce morceau"
+
+msgid "The whole strip"
+msgstr "Toute la baguette"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Bisous {first} à {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Bisou {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} bisous : {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Ajoute un couteau pour couper la baguette."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "Il manque {n} bisou. Égalité, fraternité."
+msgstr[1] "Il manque {n} bisous. Égalité, fraternité."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} bisous pour {parts} amis. Le premier mange un bisou de plus."
+msgstr[1] "{leds} bisous pour {parts} amis. Les {extra} premiers mangent un bisou de plus."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} bisou"
+msgstr[1] "{n} bisous"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Morceau {n}"
+
+msgid "Finding sensors…"
+msgstr "On cherche…"
+
+msgid "(not found here)"
+msgstr "(pas ici)"
+
+msgid "Sensor"
+msgstr "Thermomètre"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr "nvidia-smi, oh là là."
+
+msgid "Level"
+msgstr "Niveau"
+
+msgid "Both"
+msgstr "Les deux"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr "Niveau, couleur, les deux. Voilà."
+
+msgid "Cool to hot"
+msgstr "Froid à chaud"
+
+msgid "Rest of the bar"
+msgstr "Le reste"
+
+msgid "Flash above"
+msgstr "Clignoter au-dessus"
+
+msgid "From the other end"
+msgstr "De l'autre côté"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "Joyeux anniversaire"
@@ -1981,9 +2356,6 @@ msgstr "Oh là là"
 
 msgid "Painted"
 msgstr "Santé !"
-
-msgid "Automatic"
-msgstr "Bisou"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Je suis une baguette"
@@ -2064,6 +2436,9 @@ msgstr "Le pamplemousse est dans le jardin"
 
 msgid "Gamma correction"
 msgstr "Bonsoir"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Toujours allumé, même en vacances"
 
 msgid "Strip type and wiring"
 msgstr "Ceci n'est pas une pipe"

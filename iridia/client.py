@@ -130,11 +130,28 @@ class Client:
         power_limit (A, 0 = none), ma_per_led."""
         return self._ipc.send(dict(fields, cmd="set_zone_strip", device=device, zone=zone))
 
+    def set_zone_sections(self, device: str, zone: str, **fields) -> dict:
+        """sections (a list, [] joins the strip again), led_overrides ({LED: hex}) and/or
+        set_led ([LED, hex or None]); see iridia/sections.py."""
+        return self._ipc.send(dict(fields, cmd="set_zone_sections", device=device, zone=zone))
+
     def test_colors(self, device: str, zone: str, off: bool = False) -> dict:
         return self._ipc.send({"cmd": "test_colors", "device": device, "zone": zone, "off": off})
 
     def set_night(self, **kw) -> dict:
         return self._ipc.send(dict(kw, cmd="set_night"))
+
+    def updates(self, **kw) -> dict:
+        """Update settings (check, notify, prerelease, skip) and what the last check found."""
+        return self._ipc.send(dict(kw, cmd="updates"))
+
+    def sensors(self) -> dict:
+        """Every sensor a strip can show, with a fresh reading."""
+        return self._ipc.send({"cmd": "sensors"})
+
+    def session(self, **kw) -> dict:
+        """Lock and idle: lock, idle (keep/dim/off), idle_minutes, dim, test (seconds), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="session"))
 
     def set_sleep(self, lights_off: bool) -> dict:
         return self._ipc.send({"cmd": "set_sleep", "lights_off": lights_off})

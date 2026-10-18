@@ -8,7 +8,7 @@ A **setup** is everything Iridia knows, saved under a name:
 - calibration profiles and the palette
 - your color picks for each wallpaper
 - your saved colors (and which ones are exact)
-- window preferences (font, reduce motion)
+- window preferences (font, size, reduce motion)
 
 Use setups to switch between looks ("Gaming", "Work"), to experiment safely, or to move your settings to
 another PC.
@@ -18,9 +18,13 @@ another PC.
 **Settings, Setups and backups**: *Save current as…*, then pick a setup to **Load**, **Rename**,
 **Export** (to a file) or **Delete**, or **Import** a file.
 
-**Automatic backups:** loading a setup, or restoring a backup, first saves what you have now as an
-automatic backup. The newest five are kept. Pick one under *Automatic backups* and click **Restore** to
-go back.
+**Automatic backups:** loading a setup, restoring a backup, or updating Iridia first saves what you
+have now as an automatic backup. The newest five are kept. Pick one under *Automatic backups* and click
+**Restore** to go back.
+
+Loading puts everything back exactly as it was when it was saved: files that didn't exist then (a
+layout made later, a calibration profile added later) are removed. Setups saved by Iridia 1.2 and older
+only write back what they hold.
 
 ## From the command line
 

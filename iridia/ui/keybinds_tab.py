@@ -7,6 +7,7 @@ config. Strip commands are temporary and switch back when run again.
 
 import os
 import shlex
+import shutil
 import sys
 from typing import List, Optional
 
@@ -61,10 +62,13 @@ def bind_line(desktop: str, mods: List[str], key: str, args: List[str]) -> tuple
     if desktop == "niri":
         q = " ".join('"' + a.replace("\\", "\\\\").replace('"', '\\"') + '"' for a in [exe] + args)
         return _("~/.config/niri/config.kdl, inside binds { }"), f"{'+'.join(mods + [key])} {{ spawn {q}; }}"
-    if desktop == "river":
+    if desktop == "river" and shutil.which("riverctl"):     # river-classic (0.3); 0.4 dropped riverctl
         return ("~/.config/river/init",
                 f"riverctl map normal {'+'.join(mods) or 'None'} {key} spawn "
                 + (f'"{cmd}"' if not any(ch in cmd for ch in '"$`\\') else shlex.quote(cmd)))
+    if desktop == "river":
+        return (_("river 0.4 and later leave keys to your window manager: bind this command in its "
+                  "config:"), cmd)
     if desktop == "KDE Plasma":
         return (_("System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the "
                   "command, then press your key:"), cmd)

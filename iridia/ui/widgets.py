@@ -73,6 +73,8 @@ def icon(name: str, fill: bool = False, classes=()) -> Gtk.Label:
 def label(text: str = "", classes=(), wrap: bool = False, xalign: float = 0.0, selectable: bool = False,
           chars: int = 0, ellipsize: bool = False) -> Gtk.Label:
     lbl = Gtk.Label(label=text, xalign=xalign)
+    # A long line of help text wraps instead of holding the window wide.
+    wrap = wrap or (len(text) > 60 and not ellipsize and not chars and bool({"small", "tiny", "faint"} & set(classes)))
     lbl.set_wrap(wrap)
     if wrap:
         lbl.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
@@ -91,6 +93,17 @@ def hbox(spacing=8, *children, **kw) -> Gtk.Box:
     for c in children:
         b.append(c)
     return b
+
+
+def wrap_row(spacing=6, *children) -> Gtk.FlowBox:
+    """A row of buttons that wraps onto a second line in a narrow window instead of making it wide."""
+    fb = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=False, column_spacing=spacing,
+                     row_spacing=spacing, min_children_per_line=1, max_children_per_line=24,
+                     halign=Gtk.Align.FILL, hexpand=True)
+    fb.add_css_class("wrap-row")
+    for c in children:
+        fb.append(c)
+    return fb
 
 
 def vbox(spacing=8, *children, **kw) -> Gtk.Box:
@@ -743,8 +756,33 @@ def _mix_hex(c1: str, c2: str, t: float) -> str:
     return "%02x%02x%02x" % tuple(int(round(x + (y - x) * t)) for x, y in zip(a, b))
 
 
+RULER_H = 15
+
+
+def _ruler(cr, x0, x1, n, y):
+    """LED numbers under a strip: 1, every few LEDs (as many as fit) and the last one, which is the
+    strip's real LED count."""
+    cw = (x1 - x0) / max(1, n)
+    step = next((s for s in (1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000) if s * cw >= 30), 1000)
+    marks = [1] + [k for k in range(step, n, step) if (n - k) * cw >= 22] + ([n] if n > 1 else [])
+    cr.select_font_face(fonts.TEXT_FAMILY, 0, 0)
+    cr.set_font_size(10)
+    for k in marks:
+        cx = x0 + (k - 0.5) * cw
+        cr.set_source_rgb(*rgb("OUTLINE_VARIANT"))
+        cr.rectangle(cx - 0.5, y, 1, 3)
+        cr.fill()
+        txt = str(k)
+        ext = cr.text_extents(txt)
+        tx = min(max(cx - ext.width / 2 - ext.x_bearing, x0 - 4), x1 + 4 - ext.width)
+        cr.set_source_rgb(*rgb("ON_SURFACE" if k == n else "OUTLINE"))
+        cr.move_to(tx, y + 13)
+        cr.show_text(txt)
+
+
 class StripEditor(Gtk.DrawingArea):
-    """Full-width LED strip: shows the colours, layout handles for stops, and painting."""
+    """Full-width LED strip: shows the colours, layout handles for stops, painting, and LED numbers
+    under it."""
 
     STRIP_H = 28
     HANDLE_H = 22
@@ -770,7 +808,8 @@ class StripEditor(Gtk.DrawingArea):
         self._drag = None
         self._painting = False
         self._x0 = 0.0
-        self.set_content_height(self.STRIP_H + 8)
+        self.ruler = RULER_H                  # 0: no LED numbers (a preview that isn't a real strip)
+        self.set_content_height(self.STRIP_H + 8 + RULER_H)
         self.set_draw_func(self._draw)
         g = Gtk.GestureDrag()
         g.connect("drag-begin", self._begin)
@@ -791,10 +830,14 @@ class StripEditor(Gtk.DrawingArea):
     def _twin(self):
         return self.pattern in ("center_out", "edges_in") or self.mirror
 
+    def set_ruler(self, on):
+        self.ruler = RULER_H if on else 0
+        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if self.layout_mode else 0) + self.ruler)
+
     def set_layout(self, on, stops):
         self.layout_mode = on
         self.stops = list(stops)
-        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if on else 0))
+        self.set_content_height(self.STRIP_H + 8 + (self.HANDLE_H if on else 0) + self.ruler)
         self.queue_draw()
 
     def set_paint(self, on, paint):
@@ -862,6 +905,8 @@ class StripEditor(Gtk.DrawingArea):
             r = min(4.0, cw / 2.5)
             _rounded(cr, x0 + i * cw, y0, max(1.0, cw - gap), self.STRIP_H, r)
             cr.fill()
+        if self.ruler:
+            _ruler(cr, x0, x1, n, h - RULER_H)
         if self.layout_mode and not self.paint_mode:
             for v in self.stops:
                 x = self._v_to_x(v)
@@ -953,6 +998,152 @@ class StripEditor(Gtk.DrawingArea):
         self.queue_draw()
         if self._on_paint:
             self._on_paint(list(self.paint))
+
+
+class SectionStrip(Gtk.DrawingArea):
+    """A strip split into parts: the LEDs, each part's number above it, a handle under every divider
+    (drag it, it snaps to whole LEDs) and a dot under LEDs set by hand. In pick mode, clicking or
+    dragging over LEDs calls on_led(index) for each one."""
+
+    STRIP_H = 26
+    NUM_H = 16
+    HANDLE_H = 18
+
+    def __init__(self, on_drag=None, on_moved=None, on_led=None):
+        super().__init__()
+        themed(self)
+        self.set_hexpand(True)
+        self.n = 20
+        self.colors = ["000000"] * 20
+        self.starts: List[int] = []           # first LED of every part but the first
+        self.marked = set()                   # LEDs set by hand
+        self.pick_mode = False
+        self._on_drag, self._on_moved, self._on_led = on_drag, on_moved, on_led
+        self._drag = None
+        self._last_led = None
+        self.set_content_height(self.NUM_H + self.STRIP_H + self.HANDLE_H + 6 + RULER_H)
+        self.set_draw_func(self._draw)
+        g = Gtk.GestureDrag()
+        g.connect("drag-begin", self._begin)
+        g.connect("drag-update", self._update)
+        g.connect("drag-end", self._end)
+        self.add_controller(g)
+
+    def set_state(self, n, colors, starts, marked):
+        self.n = max(1, n)
+        self.colors = list(colors)
+        if self._drag is None:
+            self.starts = list(starts)
+        self.marked = set(marked)
+        self.queue_draw()
+
+    def set_pick(self, on):
+        self.pick_mode = on
+        self.set_cursor(Gdk.Cursor.new_from_name("crosshair") if on else None)
+
+    def _xr(self):
+        return 8.0, max(60.0, self.get_width() - 8.0)
+
+    def _x_of(self, led):
+        x0, x1 = self._xr()
+        return x0 + led * (x1 - x0) / self.n
+
+    def _led_at(self, x):
+        x0, x1 = self._xr()
+        return max(0, min(self.n - 1, int((x - x0) / (x1 - x0) * self.n)))
+
+    def _draw(self, _a, cr, w, h):
+        x0, x1 = self._xr()
+        n = self.n
+        cw = (x1 - x0) / n
+        gap = 1.0 if cw >= 5 else 0.0
+        y0 = self.NUM_H + 2
+        cr.set_source_rgb(*rgb("SURFACE_CONTAINER_HIGHEST"))
+        _rounded(cr, x0 - 4, y0 - 2, (x1 - x0) + 8, self.STRIP_H + 4, 10)
+        cr.fill()
+        for i in range(n):
+            c = self.colors[i] if i < len(self.colors) else "000000"
+            cr.set_source_rgb(*theme.hex_rgb(c or "000000"))
+            _rounded(cr, x0 + i * cw, y0, max(1.0, cw - gap), self.STRIP_H, min(4.0, cw / 2.5))
+            cr.fill()
+        # part numbers
+        cr.select_font_face(fonts.TEXT_FAMILY, 0, 1)
+        cr.set_font_size(11)
+        edges = [0] + list(self.starts) + [n]
+        for k in range(len(edges) - 1):
+            mid = (self._x_of(edges[k]) + self._x_of(edges[k + 1])) / 2
+            txt = str(k + 1)
+            ext = cr.text_extents(txt)
+            cr.set_source_rgb(*rgb("ON_SURFACE_VARIANT"))
+            cr.move_to(mid - ext.width / 2 - ext.x_bearing, self.NUM_H - 4)
+            cr.show_text(txt)
+        # LEDs set by hand
+        cr.set_source_rgb(*rgb("ON_SURFACE"))
+        for i in self.marked:
+            if 0 <= i < n:
+                cr.arc(x0 + (i + 0.5) * cw, y0 + self.STRIP_H + 4, 2.2, 0, 2 * math.pi)
+                cr.fill()
+        _ruler(cr, x0, x1, n, h - RULER_H)
+        # dividers
+        for k, s in enumerate(self.starts):
+            x = self._x_of(s)
+            cr.set_source_rgba(1, 1, 1, 0.9)
+            cr.set_line_width(2)
+            cr.move_to(x, y0 - 3)
+            cr.line_to(x, y0 + self.STRIP_H + 3)
+            cr.stroke()
+            cr.set_source_rgb(*rgb("PRIMARY" if self._drag == k else "OUTLINE"))
+            _rounded(cr, x - 4, y0 + self.STRIP_H + 7, 8, self.HANDLE_H - 6, 4)
+            cr.fill()
+
+    def _nearest(self, x):
+        best, bd = None, 12
+        for k, s in enumerate(self.starts):
+            d = abs(self._x_of(s) - x)
+            if d < bd:
+                best, bd = k, d
+        return best
+
+    def _begin(self, g, x, y):
+        self._start = (x, y)
+        on_handles = y >= self.NUM_H + self.STRIP_H
+        self._drag = self._nearest(x) if (on_handles or not self.pick_mode) else None
+        if self._drag is None and self.pick_mode:
+            self._last_led = self._led_at(x)
+            if self._on_led:
+                self._on_led(self._last_led)
+        self.queue_draw()
+
+    def _update(self, g, ox, oy):
+        x = self._start[0] + ox
+        if self._drag is None:
+            if self.pick_mode and self._last_led is not None:
+                i = self._led_at(x)
+                if i != self._last_led and self._on_led:
+                    for j in range(min(i, self._last_led), max(i, self._last_led) + 1):
+                        if j != self._last_led:
+                            self._on_led(j)
+                    self._last_led = i
+            return
+        x0, x1 = self._xr()
+        led = int(round((x - x0) / (x1 - x0) * self.n))
+        k = self._drag
+        lo = self.starts[k - 1] + 1 if k > 0 else 1
+        hi = self.starts[k + 1] - 1 if k + 1 < len(self.starts) else self.n - 1
+        led = max(lo, min(hi, led))
+        if led != self.starts[k]:
+            self.starts[k] = led
+            if self._on_drag:
+                self._on_drag(list(self.starts))
+        self.queue_draw()
+
+    def _end(self, g, ox, oy):
+        self._last_led = None
+        if self._drag is not None:
+            self._drag = None
+            self.queue_draw()
+            if self._on_moved:
+                self._on_moved(list(self.starts))
 
 
 def _rounded(cr, x, y, w, h, r):

@@ -10,6 +10,7 @@ class IPCServer(threading.Thread):
         self.daemon = daemon
         self.server = None
         self._running = False
+        self.ready = threading.Event()      # set once the socket accepts connections
 
     def run(self):
         self._running = True
@@ -28,6 +29,7 @@ class IPCServer(threading.Thread):
             os.umask(old_umask)
         self.server.listen(5)
         os.chmod(self.socket_path, 0o600)
+        self.ready.set()
         while self._running:
             try:
                 self.server.settimeout(1.0)

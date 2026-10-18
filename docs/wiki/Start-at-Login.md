@@ -37,8 +37,10 @@ If your session never activates `graphical-session.target`, the service is enabl
 
 ## Your compositor's autostart
 
-If your compositor doesn't activate `graphical-session.target` (Hyprland started from a TTY without
-UWSM, for example), add one line to its config. `iridia autostart` prints the right line for each, with
+If your compositor doesn't activate `graphical-session.target` (Hyprland or Sway without UWSM, river,
+labwc, Wayfire, i3, bspwm, ...), add one line to its config. Picking *systemd* there sets this up
+instead by itself, since the service would never start. A daemon started this way stops when you log
+out, so the next login's one can start. `iridia autostart` prints the right line for each, with
 the real path; the *Service* tab shows the same.
 
 | Compositor | File | Line |
@@ -49,7 +51,8 @@ the real path; the *Service* tab shows the same.
 | Sway | `~/.config/sway/config` | `exec ~/.local/share/iridia-venv/bin/iridia-daemon` |
 | i3 | `~/.config/i3/config` | `exec --no-startup-id ~/.local/share/iridia-venv/bin/iridia-daemon` |
 | niri | `~/.config/niri/config.kdl` | `spawn-at-startup "/home/you/.local/share/iridia-venv/bin/iridia-daemon"` |
-| river | `~/.config/river/init` | `riverctl spawn "~/.local/share/iridia-venv/bin/iridia-daemon"` |
+| river | `~/.config/river/init` | `~/.local/share/iridia-venv/bin/iridia-daemon &` (before the line that starts your window manager; river 0.4 and later refuse an init file containing `riverctl`) |
+| Wayfire | `~/.config/wayfire.ini` | `[autostart]` section: `iridia = ~/.local/share/iridia-venv/bin/iridia-daemon` |
 | labwc, Openbox | `~/.config/labwc/autostart`, `~/.config/openbox/autostart` | `~/.local/share/iridia-venv/bin/iridia-daemon &` |
 | bspwm, dwm, X11 | `bspwmrc`, `~/.xinitrc`, `~/.xprofile` | `~/.local/share/iridia-venv/bin/iridia-daemon &` |
 

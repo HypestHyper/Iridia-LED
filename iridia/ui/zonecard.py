@@ -7,11 +7,12 @@ from gi.repository import GLib, Gtk
 from iridia.i18n import _, ngettext, pgettext  # noqa: F401
 from iridia import animations
 from iridia.colors import resolve_colors
-from iridia.patterns import PatternGenerator
+from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
 from iridia.ui import effects as fx
 from iridia.ui import fonts, serial
+from iridia.ui.sections_panel import SectionsPanel
 from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
-                               button, card, hbox, icon, label, set_button_text, switch_row, vbox)
+                               button, card, hbox, icon, label, set_button_text, switch_row, vbox, wrap_row)
 
 ZONE_FIELDS_DEFAULT = {
     "enabled": True, "led_count": 20, "pattern": "solid", "mode": "full",
@@ -153,6 +154,7 @@ class ZoneCard(Gtk.Box):
         self._anim = animations.clean(zone_cfg.get("animation"))
         self._last_effect = self._anim["effect"] if self._anim else "breathing"
         self._preview_last = None
+        self._sections = None
         self._build_header(expanded)
         self._build_details()
         self._refresh_summary()
@@ -247,20 +249,18 @@ class ZoneCard(Gtk.Box):
         self._hw_note = label("", ("small", "accent"), wrap=True)
         self._hw_note.set_visible(False)
         d.append(self._hw_note)
-        row = hbox(10)
+        row = wrap_row(10)
         if not self.global_mode:
-            row.append(label(_("LEDs"), ("small", "dim")))
             self._led_spin = Spin(1, 1000, self.cfg.get("led_count", 20), self._on_led_change)
-            row.append(self._led_spin)
+            row.append(hbox(10, label(_("LEDs"), ("small", "dim")), self._led_spin))
         else:
             self._led_spin = None
+        # label, kind and menu stay together when the row wraps
         self._pattern_lbl = label(_("Pattern"), ("small", "dim"))
-        row.append(self._pattern_lbl)
         self._kind = Group([("static", _("Static")), ("animated", _("Animated"))],
                            "animated" if self._anim else "static", self._on_kind)
-        row.append(self._kind)
         self._pattern = Dropdown(self._menu_items(), self._menu_value(), self._on_pattern_change)
-        row.append(self._pattern)
+        row.append(hbox(10, self._pattern_lbl, self._kind, self._pattern))
         d.append(row)
         self._fx = fx.EffectControls(self._on_effect_params, show_sync=self.global_mode)
         self._fx.set_effect(self._anim)
@@ -283,6 +283,7 @@ class ZoneCard(Gtk.Box):
         d.append(self._picker)
 
         self._strip = StripEditor(render=self._render_with_stops, on_stops=self._on_stops, on_paint=self._on_paint)
+        self._strip.set_ruler(not self.global_mode)
         d.append(self._strip)
         self._layout_row = hbox(14)
         self._layout_btn = button(_("Edit layout"), "tune", "text small", self._toggle_layout)
@@ -292,6 +293,15 @@ class ZoneCard(Gtk.Box):
         self._layout_row.append(self._rev_row)
         self._layout_row.append(self._mir_row)
         d.append(self._layout_row)
+        # segments: how many LEDs each colour gets, and a button to split them evenly
+        self._split_row = hbox(10)
+        self._split_lbl = label("", ("small", "dim"), wrap=True)
+        self._split_lbl.set_hexpand(True)
+        self._split_btn = button(_("Space evenly"), "linear_scale", "tonal small", self._space_evenly)
+        self._split_row.append(self._split_lbl)
+        self._split_row.append(self._split_btn)
+        self._split_warn = label("", ("small", "warn-text"), wrap=True)
+        d.append(vbox(2, self._split_row, self._split_warn))
         self._chips = hbox(4)
         d.append(self._chips)
         self._paint_bar = hbox(6)
@@ -299,6 +309,9 @@ class ZoneCard(Gtk.Box):
         if not self.global_mode:
             self._build_paint_bar()
         d.append(self._paint_box)
+        if not self.global_mode:
+            self._sections = SectionsPanel(self)
+            d.append(self._sections)
 
         # brightness
         br = card(inner=True)
@@ -325,6 +338,10 @@ class ZoneCard(Gtk.Box):
         r3.append(row3)
         r3.append(self._gamma_row)
         br.append(r3)
+        if not self.global_mode:
+            row5, self._sess_ignore = switch_row(_("Stay lit when the screen locks or you're away"),
+                                                 bool(self.cfg.get("session_ignore")), self._on_session_ignore)
+            br.append(row5)
         r4 = hbox(10)
         r4.set_margin_top(6)
         r4.append(label(_("Color correction"), ("small", "dim")))
@@ -476,8 +493,9 @@ class ZoneCard(Gtk.Box):
         if need:
             self._rgbw_lbl.set_label(_('For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark.').format(n=self.cfg.get('led_count', 0), need=need))
         # one-colour strips: no patterns, painting or stops
-        for w in (self._pattern_lbl, self._pattern, self._strip, self._count_btn):
-            w.set_visible(not single)
+        for w in (self._pattern_lbl, self._pattern, self._strip, self._count_btn, self._sections):
+            if w is not None:
+                w.set_visible(not single)
         self._update_preview()
         self._apply_color_limit()
 
@@ -544,8 +562,13 @@ class ZoneCard(Gtk.Box):
         if self._anim is not None:
             self._ensure_preview()
         painted = pat == "paint" and not self.global_mode
-        self._strip.set_state(count, self.patterns.generate(pat, self._current_colors(), count, params=self._params),
-                              pat)
+        base = self.patterns.generate(pat, self._current_colors(), count, params=self._params)
+        shown = base
+        if self._sections is not None:
+            if self._sections.active() and not self._layout_open and not painted:
+                shown = self._sections.compose(base)
+            self._sections.refresh(base, shown)
+        self._strip.set_state(count, shown, pat)
         editable = pat in PatternGenerator.EDITABLE and PatternGenerator.handle_count(pat, len(self._current_colors())) > 0
         can_rev = pat in ("gradient", "segments", "alternating")
         self._layout_row.set_visible(editable or can_rev)
@@ -562,6 +585,7 @@ class ZoneCard(Gtk.Box):
             self._layout_open = False
             editable = False
         self._strip.set_layout(self._layout_open and editable, self._stops_for_edit() if editable else [])
+        self._update_split()
         self._rebuild_chips()
         self._paint_box.set_visible(painted)
         self._strip.base_color = self._current_colors()[0]
@@ -607,6 +631,44 @@ class ZoneCard(Gtk.Box):
     def _on_stops(self, stops):
         self._params["stops"] = stops
         self._save_params({"stops": stops})
+        self._update_split()
+
+    def _split_leds(self) -> int:
+        """LEDs the segments are spread over: half the strip when it's mirrored."""
+        n = self._count()
+        return (n + 1) // 2 if self._params.get("mirror") and n > 1 else n
+
+    def _update_split(self):
+        cols = len(self._current_colors())
+        show = self._layout_open and self._anim is None and self._pattern_key() == "segments" and cols > 1
+        self._split_row.set_visible(show)
+        self._split_warn.set_visible(False)
+        if not show:
+            return
+        leds = self._split_leds()
+        sizes = segment_sizes(self._stops_for_edit(), cols, leds)
+        even = segment_sizes(led_even_boundaries(cols, leds), cols, leds)
+        self._split_lbl.set_text(_("{leds} LEDs: {sizes}").format(leds=leds, sizes=" + ".join(map(str, sizes))))
+        self._split_btn.set_sensitive(sizes != even)
+        spread = max(sizes) - min(sizes)
+        warn = ""
+        if sizes != even and 0 < spread <= 2:
+            # close enough to look even, but not: easy to miss on the strip itself
+            warn = ngettext("The parts are {n} LED apart. Space evenly makes them match.",
+                            "The parts are {n} LEDs apart. Space evenly makes them match.", spread).format(n=spread)
+        elif sizes == even and leds % cols:
+            warn = ngettext("{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED.",
+                            "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED.",
+                            leds % cols).format(leds=leds, parts=cols, extra=leds % cols)
+        self._split_warn.set_text(warn)
+        self._split_warn.set_visible(bool(warn))
+
+    def _space_evenly(self):
+        stops = led_even_boundaries(len(self._current_colors()), self._split_leds())
+        self._strip.set_layout(True, stops)
+        self._strip.queue_draw()
+        self._on_stops(stops)
+        self._update_preview()
 
     def _on_paint(self, paint):
         self._params["paint"] = paint
@@ -675,6 +737,8 @@ class ZoneCard(Gtk.Box):
         count = int(v)
         self._call(self.client.set_zone_led_count, self.device_name, self.zone_name, count)
         self.cfg = dict(self.cfg, led_count=count)
+        if self._sections is not None:
+            self._sections.rescale(count)
         self._refresh_summary()
         self._update_preview()
 
@@ -706,7 +770,12 @@ class ZoneCard(Gtk.Box):
         self._update_preview()
 
     def _preview_wanted(self) -> bool:
-        return self._anim is not None and self.expanded and self.get_mapped()
+        moving = self._anim is not None or (self._sections is not None and self._sections.animated())
+        return moving and self.expanded and self.get_mapped()
+
+    def _after_sections_change(self):
+        self._update_preview()
+        self._ensure_preview()
 
     def _tick_preview(self):
         if not self._preview_wanted():
@@ -717,11 +786,20 @@ class ZoneCard(Gtk.Box):
                                       self._current_colors(), count, params=params)
         pos = animations.strip_positions(count, bool(params.get("reverse")), bool(params.get("mirror")))
         key = f"{self.device_name}|{self.zone_name}"
-        frame = fx.preview(self.app._status if isinstance(self.app._status, dict) else {}, key, self._anim,
-                           self._current_colors(), base, count, positions=pos)
+        status = self.app._status if isinstance(self.app._status, dict) else {}
+        if self._anim is not None:
+            frame = fx.preview(status, key, self._anim, self._current_colors(), base, count, positions=pos)
+        else:
+            frame = base                        # only parts of the strip move
+        own = frame
+        if self._sections is not None and self._sections.active():
+            frame = self._sections.frame(frame, status)
         if frame != self._preview_last or self._strip.led_count != count:
             self._preview_last = frame          # slow effects often show the same frame: no repaint
-            self._strip.set_state(count, frame, "solid")
+            if not self._layout_open:
+                self._strip.set_state(count, frame, "solid" if self._anim is not None else self._pattern_key())
+            if self._sections is not None:
+                self._sections.refresh(own, frame)
         return True
 
     def _ensure_preview(self):
@@ -808,6 +886,9 @@ class ZoneCard(Gtk.Box):
         self._call(self.client.set_zone_brightness_range, self.device_name, self.zone_name, self._range.lo,
                    self._range.hi)
 
+    def _on_session_ignore(self, v):
+        self._strip_set(session_ignore=bool(v))
+
     def _on_invert(self, v):
         self._call(self.client.set_zone_invert, self.device_name, self.zone_name, v)
 
@@ -862,6 +943,8 @@ class ZoneCard(Gtk.Box):
                 self._plimit.set_quiet(zcfg.get("power_limit", 0))
         if not holding:
             self._enabled.set_value(zcfg.get("enabled", True))
+            if self._sections is not None:
+                self._sections.set_config(zcfg)
             if self._led_spin is not None and not self._led_spin.busy():
                 self._led_spin.set_quiet(zcfg.get("led_count", 20))
             anim = animations.clean(zcfg.get("animation"))
@@ -897,6 +980,8 @@ class ZoneCard(Gtk.Box):
             self._range.set(br[0], br[1])
         self._invert.set_value(zcfg.get("invert_brightness", False))
         self._gamma.set_value(zcfg.get("gamma_correction", False))
+        if hasattr(self, "_sess_ignore"):
+            self._sess_ignore.set_value(bool(zcfg.get("session_ignore")))
         mode = zcfg.get("mode", "full")
         self._profile.set_items(self.PROFILES, zcfg.get("calibration_profile", "WS2812B"))
         if mode != self._mode_val or self._mixed != getattr(self, "_shown_mixed", set()):
@@ -912,3 +997,5 @@ class ZoneCard(Gtk.Box):
             self._mirror.set_value(bool(new_params.get("mirror")))
             self._apply_color_limit()
             self._update_preview()
+        elif self._sections is not None and self._sections.has_sensors() and not self._preview_wanted():
+            self._update_preview()          # new sensor readings came with this status

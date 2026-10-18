@@ -36,6 +36,11 @@ Click **Edit layout** to drag the color stops along the preview (or drag the dia
 tab). **Reverse** flips the pattern end for end; **Mirror** draws it on the first half and mirrors it
 onto the second, for a symmetric look.
 
+While you edit a **Segments** layout, Iridia shows how many LEDs each color gets ("80 LEDs: 27 + 27 +
+26"). **Space evenly** splits them as evenly as whole LEDs allow; when the LED count doesn't divide
+evenly, the first parts get one LED more, and Iridia says so. When the parts are only 1 or 2 LEDs apart
+(easy to miss on the strip), it points that out too.
+
 ## Choosing colors
 
 - **Wallpaper colors** are the colors Iridia found in your current wallpaper, the most important first.
@@ -91,6 +96,57 @@ tools, with more room, are on the [Layout](Layout.md) tab.
 | **Gamma correction** | Makes dim levels look more even on strips with a harsh response. Not used in Calibrated mode. |
 
 Night mode can cap the brightness on top of this; see [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md).
+
+## Splitting a strip into parts, and single LEDs
+
+Open **Advanced: split this strip, set single LEDs** on a zone card (it stays closed until you need it).
+
+- **Add divider** splits the biggest part in two. Drag the handle under a divider to move it; it snaps
+  to whole LEDs. The numbers above the strip are the part numbers.
+- **Space evenly** gives every part the same number of LEDs, as far as whole LEDs allow. "80 LEDs:
+  27 + 27 + 26" shows the sizes; when the count doesn't divide evenly Iridia says which parts get one
+  more, and when parts are only 1 or 2 LEDs apart (easy to miss on the strip) it warns you.
+- Each part shows one of:
+  - **Same as the strip**: whatever the strip shows there (its pattern or effect, wallpaper colors
+    and all). A part in the middle can keep the strip's look while the parts around it do something else.
+  - **Its own pattern**: any static pattern with its own colors, drawn over just that part.
+  - **Its own effect**: any animated effect with its own colors and settings, over just that part.
+    The rest of the strip stays as it is, static or animated.
+  - **A sensor**: a system reading (see below).
+  - **Off**.
+  **Settings** next to a part opens its pattern or effect and colors; **✕** removes a part (it joins
+  the one before it).
+- **Single LEDs**: click **Set LEDs**, pick **Color** (and the color in the well next to it), **Off**
+  or **Back to normal**, then click or drag over LEDs on the strip. A set LED shows its color over
+  everything else, for example one white LED between two bars. A dot under the strip marks them;
+  **Clear all** removes them.
+
+### Sensors
+
+A part can show **CPU temperature**, **CPU load**, **GPU temperature**, **GPU load**, **memory use**,
+**disk temperature**, or any other temperature sensor your machine has. Several parts make several
+bars on one strip (CPU, GPU and memory side by side, a white single LED between them). Without
+dividers, the whole strip can be one sensor. In the part's **Settings**:
+
+| Setting | What it does |
+| --- | --- |
+| **Show** | **Level**: fills the part like a bar. **Color**: the whole part in the reading's color. **Both**: a bar in the reading's color |
+| **From / to** | The range: 30 to 90 °C for temperatures and 0 to 100 % for the rest, unless you change it |
+| **Colors** | **Cool to hot** (blue, green, amber, red) or **Picked colors** (low to high, in order) |
+| **Rest of the bar** | **Off**, or **Dim**: the unlit part glows faintly so you see the whole bar |
+| **Flash above** | Blink once a second over this reading |
+| **From the other end** | The bar fills from the part's last LED |
+
+Readings are taken once a second, only for sensors a strip shows, and smoothed over a few seconds so
+a short spike doesn't make the bar jump. They come straight from the kernel (`/proc`, `/sys/class/hwmon`,
+AMD's `gpu_busy_percent`), so nothing extra runs, with one exception: NVIDIA's proprietary driver only
+reports through `nvidia-smi`, which Iridia keeps running (one process) while a strip shows an NVIDIA
+reading. On laptops that keeps the NVIDIA GPU awake, so pick it only if you want it. `iridia sensors`
+lists everything Iridia found, with the current reading.
+
+Changing the LED count moves the dividers along with it; single LEDs keep their number. Brightness and
+color correction apply to the whole strip, parts included. The same is possible from the command line
+with `iridia split` (see [Command line](Command-Line.md)).
 
 ## Other tools on a zone card
 

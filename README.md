@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version 1.2.0" src="https://img.shields.io/badge/version-1.2.0-7c5cff">
+  <img alt="Version 1.3.0" src="https://img.shields.io/badge/version-1.3.0-7c5cff">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
@@ -53,7 +53,8 @@ correction). Patterns are static by default; animated effects are there when you
 **Wallpaper**
 
 - Finds the wallpaper on Hyprland (hyprpaper, swww/awww, swaybg), Sway, niri, GNOME, KDE, XFCE,
-  Cinnamon, MATE, feh, nitrogen, xwallpaper, waypaper, Caelestia and Noctalia, or uses a watched folder.
+  Cinnamon, MATE, COSMIC, LXQt, feh, nitrogen, xwallpaper, waypaper, Caelestia and Noctalia, or uses a
+  watched folder.
 - Three color extraction methods (Caelestia's scheme, Material Color Utilities, Pillow).
 - Color picks are stored per wallpaper and restored when that wallpaper is used again.
 
@@ -67,6 +68,10 @@ correction). Patterns are static by default; animated effects are there when you
   With OpenRGB 1.0 each frame waits until the controller has shown the one before, so a slow
   controller never falls behind.
 - An *Everything* card that changes all zones at once.
+- Split a strip into parts, each with the strip's own look, a pattern or effect of its own, a sensor,
+  or nothing; set single LEDs by hand ([Devices and patterns](docs/wiki/Devices-and-Patterns.md)).
+- Sensors: CPU and GPU temperature and load, memory use and disk temperature as a bar or a color,
+  several on one strip.
 
 **Layout**
 
@@ -79,8 +84,10 @@ correction). Patterns are static by default; animated effects are there when you
 
 **Brightness and time**
 
-- Brightness from the monitor (DDC/CI) or set manually, with a range and an inverted mode.
-- Night mode (a brightness cap between two times), LEDs off during suspend.
+- Brightness from the monitor (DDC/CI), a laptop's screen backlight, or set manually, with a range and
+  an inverted mode.
+- Night mode (a brightness cap between two times), LEDs off during suspend, dim or off when the screen
+  locks or you're away.
 - Freeze: ignore wallpaper changes until unfrozen.
 
 **Strip types and correction**
@@ -97,6 +104,8 @@ correction). Patterns are static by default; animated effects are there when you
 - Starts OpenRGB's server inside your session, keeps exactly one running, and restarts it when it
   comes up without devices. Or leave it to systemd, or to yourself.
 - `iridia doctor` for diagnostics, and a log viewer in the window.
+- Updates from the window (checked download, settings backed up, one click back), no password needed.
+- Light in the background: about 0.1% of one CPU core and 30 MB of memory with static colors.
 
 **Languages**
 
@@ -145,7 +154,7 @@ its `iridia-openrgb.service`, which could start OpenRGB too early at boot (see t
 | Distribution | Command |
 | --- | --- |
 | Arch, CachyOS, EndeavourOS, Manjaro | `sudo pacman -S --needed python gtk4 python-gobject python-cairo openrgb ddcutil` |
-| Debian, Ubuntu, Mint, Pop!_OS | `sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo openrgb ddcutil` |
+| Debian, Ubuntu, Mint, Pop!_OS | `sudo apt install python3 python3-venv gir1.2-gtk-4.0 python3-gi python3-gi-cairo ddcutil libglib2.0-bin` |
 | Fedora | `sudo dnf install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil` |
 | openSUSE | `sudo zypper install python3 typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo OpenRGB ddcutil` |
 | Void | `sudo xbps-install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil` |

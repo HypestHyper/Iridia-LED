@@ -199,7 +199,8 @@ class ColorExtractor:
                 img = img.convert("RGB")
             img = img.resize((200, 200))
 
-            quantized = img.quantize(colors=16, method=Image.Quantize.MEDIANCUT)
+            # Image.Quantize is Pillow 9.1+; older ones (Ubuntu 22.04's 9.0) have Image.MEDIANCUT
+            quantized = img.quantize(colors=16, method=getattr(Image, "Quantize", Image).MEDIANCUT)
             palette = quantized.getpalette()
             colors = []
             if palette:

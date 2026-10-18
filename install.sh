@@ -1,4 +1,6 @@
 #!/bin/bash
+# `sh install.sh` on Debian/Ubuntu runs dash, which can't read the rest: hand over to bash first.
+[ -n "${BASH_VERSION:-}" ] || exec bash "$0" "$@"
 set -e
 # Work from the project folder, wherever the script was started from.
 cd "$(dirname "$(readlink -f "$0")")"
@@ -11,18 +13,22 @@ echo "============================================"
 
 ASSUME_YES=0
 SKIP_DEPS=0
+UPDATE=0
 OPENRGB_METHOD=""
 AUTOSTART=""
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) ASSUME_YES=1 ;;
         --no-deps) SKIP_DEPS=1 ;;
+        --update) UPDATE=1; ASSUME_YES=1; SKIP_DEPS=1 ;;
         --openrgb=*) OPENRGB_METHOD="${arg#*=}" ;;
         --autostart=*) AUTOSTART="${arg#*=}" ;;
         -h|--help)
             echo "Usage: bash install.sh [--yes] [--no-deps] [--openrgb=METHOD] [--autostart=METHOD]"
             echo "  --yes                 don't ask: install missing system packages, use the defaults below"
             echo "  --no-deps             never touch system packages"
+            echo "  --update              update an installed Iridia: no questions, no system packages (so no"
+            echo "                        password), keep how OpenRGB and the daemon start (the Updates tab uses this)"
             echo "  --openrgb=daemon      the Iridia daemon starts OpenRGB's server (default)"
             echo "  --openrgb=systemd     a systemd user service starts it with your graphical session"
             echo "  --openrgb=off         you start OpenRGB yourself"
@@ -37,18 +43,63 @@ for arg in "$@"; do
     esac
 done
 case "$OPENRGB_METHOD" in ""|daemon|systemd|off) ;; *) echo "--openrgb must be daemon, systemd or off"; exit 1 ;; esac
-case "$AUTOSTART" in ""|systemd|xdg|compositor|none) ;; *) echo "--autostart must be systemd, xdg, compositor or none"; exit 1 ;; esac
+if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER:-}" ]; then
+    echo "Run this as your normal user, without sudo: bash install.sh"
+    echo "(Iridia installs into your home folder, and the installer asks for sudo itself when it needs it.)"
+    exit 1
+fi
+OS_ID=""; OS_LIKE=""
+if [ -r /etc/os-release ]; then
+    # shellcheck disable=SC1091
+    OS_ID=$(. /etc/os-release && echo "${ID:-}")
+    # shellcheck disable=SC1091
+    OS_LIKE=$(. /etc/os-release && echo "${ID_LIKE:-}")
+fi
+if [ -e /etc/NIXOS ] || [ "$OS_ID" = nixos ]; then
+    cat <<'NIX'
+NixOS: install.sh can't install system packages here, and a Python venv doesn't see Nix's GTK.
+Set up the system parts in configuration.nix:
+    hardware.i2c.enable = true;                  # monitor brightness (ddcutil)
+    services.hardware.openrgb.enable = true;     # OpenRGB's server as a system service
+    environment.systemPackages = with pkgs; [ ddcutil ];
+then run the installer from a shell with GTK 4 for Python, keeping OpenRGB's start to the service:
+    nix-shell -p gtk4 gobject-introspection 'python3.withPackages (p: [ p.pygobject3 p.pycairo ])' \
+      --run 'bash install.sh --no-deps --openrgb=off'
+The daemon works without GTK; the window needs that shell (or a Nix package of Iridia).
+NIX
+    if [ -z "${IN_NIX_SHELL:-}" ]; then exit 1; fi
+fi
+# Python 3.8 or newer (openSUSE Leap's python3 is 3.6; its newer Python is python3.11)
+PY3=""
+for c in python3 python3.13 python3.12 python3.11 python3.10 python3.9 python3.8; do
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null; then
+        PY3="$c"; break
+    fi
+done
+case "$AUTOSTART" in ""|systemd|xdg|compositor|none|keep) ;; *) echo "--autostart must be systemd, xdg, compositor or none"; exit 1 ;; esac
+if [ "$UPDATE" -eq 1 ]; then
+    [ -z "$AUTOSTART" ] && AUTOSTART=keep
+    if [ ! -x "$HOME/.local/share/iridia-venv/bin/python" ]; then
+        echo "--update needs an existing install; run bash install.sh first."; exit 1
+    fi
+fi
 
 # --- work out what is missing -------------------------------------------
-MISSING=()   # generic names: python openrgb ddcutil gtk venv
+MISSING=()   # generic names: python openrgb ddcutil gtk venv gdbus
 GTK_CHECK="import gi; gi.require_version('Gtk', '4.0'); from gi.repository import Gtk; import cairo; gi.require_foreign('cairo')"
-command -v python3 >/dev/null 2>&1 || MISSING+=(python)
-if command -v python3 >/dev/null 2>&1; then
-    python3 -c "$GTK_CHECK" >/dev/null 2>&1 || MISSING+=(gtk)
-    python3 -c "import venv, ensurepip" >/dev/null 2>&1 || MISSING+=(venv)
+[ -n "$PY3" ] || MISSING+=(python)
+if [ -n "$PY3" ]; then
+    "$PY3" -c "$GTK_CHECK" >/dev/null 2>&1 || MISSING+=(gtk)
+    "$PY3" -c "import venv, ensurepip" >/dev/null 2>&1 || MISSING+=(venv)
 fi
-command -v openrgb >/dev/null 2>&1 || MISSING+=(openrgb)
+# OpenRGB as a command, or from Flathub (Iridia starts either)
+have_openrgb() {
+    command -v openrgb >/dev/null 2>&1 \
+        || { command -v flatpak >/dev/null 2>&1 && flatpak info org.openrgb.OpenRGB >/dev/null 2>&1; }
+}
+have_openrgb || MISSING+=(openrgb)
 command -v ddcutil >/dev/null 2>&1 || MISSING+=(ddcutil)
+command -v gdbus >/dev/null 2>&1 || MISSING+=(gdbus)    # sleep and lock detection
 
 # --- map generic names to this distro's package manager -----------------
 PM=""; PKGS=(); INSTALL_CMD=()
@@ -60,22 +111,70 @@ pkgname() {
         apt:gtk)       echo gir1.2-gtk-4.0 python3-gi python3-gi-cairo ;;
         dnf:python)    echo python3 ;;     dnf:venv) ;;
         dnf:gtk)       echo gtk4 python3-gobject python3-cairo ;;
-        zypper:python) echo python3 ;;     zypper:venv) ;;
-        zypper:gtk)    echo typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo ;;
+        zypper:python) if [ "$OS_ID" = opensuse-leap ]; then echo python311; else echo python3; fi ;;
+        zypper:venv) ;;
+        zypper:gtk)    if [ "$OS_ID" = opensuse-leap ]; then
+                           echo typelib-1_0-Gtk-4_0 python311-gobject python311-gobject-cairo python311-pycairo
+                       else
+                           echo typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo
+                       fi ;;
+        emerge:python) echo dev-lang/python ;; emerge:venv) ;;
+        emerge:gtk)    echo gui-libs/gtk dev-python/pygobject dev-python/pycairo ;;
+        emerge:openrgb) echo app-misc/openrgb ;; emerge:ddcutil) echo app-misc/ddcutil ;;
+        apt:gdbus) echo libglib2.0-bin ;;  zypper:gdbus) echo glib2-tools ;;
+        *:gdbus) ;;
         xbps:python)   echo python3 ;;     xbps:venv) ;;
         xbps:gtk)      echo gtk4 python3-gobject python3-cairo ;;
         apk:python)    echo python3 ;;     apk:venv) ;;
         apk:gtk)       echo gtk4.0 py3-gobject3 py3-cairo ;;
         zypper:openrgb) echo OpenRGB ;;
+        # Ubuntu before 25.10 and Debian before 14 don't have it: openrgb.org's .deb or Flathub then
+        apt:openrgb) apt-cache show openrgb >/dev/null 2>&1 && echo openrgb ;;
         *:openrgb) echo openrgb ;;         *:ddcutil) echo ddcutil ;;
     esac
 }
-if   command -v pacman >/dev/null 2>&1; then PM=pacman; INSTALL_CMD=(sudo pacman -S --needed --noconfirm)
-elif command -v apt-get >/dev/null 2>&1; then PM=apt;    INSTALL_CMD=(sudo apt-get install -y)
-elif command -v dnf >/dev/null 2>&1;     then PM=dnf;    INSTALL_CMD=(sudo dnf install -y)
-elif command -v zypper >/dev/null 2>&1;  then PM=zypper; INSTALL_CMD=(sudo zypper install -y)
-elif command -v xbps-install >/dev/null 2>&1; then PM=xbps; INSTALL_CMD=(sudo xbps-install -y)
-elif command -v apk >/dev/null 2>&1;     then PM=apk;    INSTALL_CMD=(sudo apk add)
+# The distribution says which package manager is its own (a 'pacman' game on Debian is not Arch's).
+case " $OS_ID $OS_LIKE " in
+    *" arch "*)                PM=pacman ;;
+    *" debian "*|*" ubuntu "*) PM=apt ;;
+    *" fedora "*|*" rhel "*)   PM=dnf ;;
+    *suse*)                    PM=zypper ;;
+    *" void "*)                PM=xbps ;;
+    *" alpine "*)              PM=apk ;;
+    *" gentoo "*)              PM=emerge ;;
+esac
+if [ -z "$PM" ]; then
+    if   command -v pacman >/dev/null 2>&1 && pacman -V 2>/dev/null | grep -q 'Pacman v'; then PM=pacman
+    elif command -v apt-get >/dev/null 2>&1; then PM=apt
+    elif command -v dnf >/dev/null 2>&1;     then PM=dnf
+    elif command -v zypper >/dev/null 2>&1;  then PM=zypper
+    elif command -v xbps-install >/dev/null 2>&1; then PM=xbps
+    elif command -v apk >/dev/null 2>&1;     then PM=apk
+    elif command -v emerge >/dev/null 2>&1;  then PM=emerge
+    fi
+fi
+SUDO_CMD=sudo
+if ! command -v sudo >/dev/null 2>&1 && command -v doas >/dev/null 2>&1; then SUDO_CMD=doas; fi
+case "$PM" in
+    pacman) INSTALL_CMD=("$SUDO_CMD" pacman -S --needed --noconfirm) ;;
+    apt)    INSTALL_CMD=("$SUDO_CMD" apt-get install -y) ;;
+    dnf)    INSTALL_CMD=("$SUDO_CMD" dnf install -y) ;;
+    zypper) INSTALL_CMD=("$SUDO_CMD" zypper install -y) ;;
+    xbps)   INSTALL_CMD=("$SUDO_CMD" xbps-install -Sy) ;;
+    apk)    INSTALL_CMD=("$SUDO_CMD" apk add) ;;
+    emerge) INSTALL_CMD=("$SUDO_CMD" emerge --noreplace) ;;
+esac
+# Image-based systems: packages go into the next boot's image, so say what to run instead
+if [ -e /run/ostree-booted ]; then
+    PM=""
+    ATOMIC="Fedora Atomic (Silverblue, Kinoite, Bazzite): install the system parts with
+    sudo rpm-ostree install --idempotent gtk4 python3-gobject python3-cairo ddcutil
+  (OpenRGB: flatpak install flathub org.openrgb.OpenRGB), reboot, then run: bash install.sh --no-deps"
+elif command -v transactional-update >/dev/null 2>&1; then
+    PM=""
+    ATOMIC="openSUSE Aeon/Kalpa/MicroOS: install the system parts with
+    sudo transactional-update -n pkg install typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo ddcutil
+  (OpenRGB: flatpak install flathub org.openrgb.OpenRGB), reboot, then run: bash install.sh --no-deps"
 fi
 
 if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
@@ -84,9 +183,15 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
     done
     [ "$(id -u)" -eq 0 ] && INSTALL_CMD=("${INSTALL_CMD[@]:1}")   # already root: no sudo
     echo "Missing on this system: ${MISSING[*]}"
-    if [ -z "$PM" ]; then
+    if [ -n "${ATOMIC:-}" ]; then
+        echo "$ATOMIC"
+    elif [ -z "$PM" ]; then
         echo "Couldn't detect your package manager. Please install these yourself:"
-        echo "  python 3 (with venv), GTK 4 with PyGObject and pycairo, openrgb, ddcutil"
+        echo "  python 3.8+ (with venv), GTK 4 with PyGObject and pycairo, openrgb, ddcutil, gdbus (glib)"
+    elif [ "$(id -u)" -ne 0 ] && [ "${INSTALL_CMD[0]}" = sudo ] && ! sudo -v; then
+        echo "sudo isn't set up for $USER. As root, run:"
+        echo "  ${INSTALL_CMD[*]:1} ${PKGS[*]}"
+        echo "(for example: su -c '...'), then: bash install.sh --no-deps"
     elif [ ${#PKGS[@]} -gt 0 ]; then
         echo "Will run: ${INSTALL_CMD[*]} ${PKGS[*]}"
         reply="y"
@@ -111,18 +216,30 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
     fi
 fi
 
-if ! command -v python3 &> /dev/null; then
-    echo "ERROR: python3 not found."
+# the Python just installed (Leap: python3.11)
+if [ -z "$PY3" ]; then
+    for c in python3 python3.13 python3.12 python3.11 python3.10 python3.9 python3.8; do
+        if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null; then
+            PY3="$c"; break
+        fi
+    done
+fi
+if [ -z "$PY3" ]; then
+    echo "ERROR: Iridia needs Python 3.8 or newer, and none was found$(command -v python3 >/dev/null 2>&1 && echo " (python3 is $(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null))")."
     exit 1
 fi
-if ! python3 -c "$GTK_CHECK" >/dev/null 2>&1; then
-    echo "NOTE: GTK 4 for Python (PyGObject + pycairo) is missing for $(command -v python3),"
+if ! "$PY3" -c "$GTK_CHECK" >/dev/null 2>&1; then
+    echo "NOTE: GTK 4 for Python (PyGObject + pycairo) is missing for $(command -v "$PY3"),"
     echo "      so the Iridia window won't open until you install it. The daemon works without it."
 fi
-if ! command -v openrgb &> /dev/null; then
-    echo "NOTE: 'openrgb' is not installed (Iridia can't drive LEDs without it)."
-    echo "      If your distribution doesn't package it, get it from https://openrgb.org. Iridia starts its"
-    echo "      server (openrgb --server) by itself once it's installed."
+if ! have_openrgb; then
+    echo "NOTE: OpenRGB is not installed (Iridia can't drive LEDs without it)."
+    echo "      If your distribution doesn't package it: the .deb or AppImage from https://openrgb.org, or"
+    echo "      flatpak install flathub org.openrgb.OpenRGB. Iridia starts its server by itself once it's there."
+fi
+if ! command -v gdbus >/dev/null 2>&1; then
+    echo "NOTE: 'gdbus' (part of GLib's tools) is missing: the LEDs won't turn off on suspend, and the lock"
+    echo "      screen isn't seen. Debian/Ubuntu: libglib2.0-bin; openSUSE: glib2-tools."
 fi
 if ! command -v ddcutil &> /dev/null; then
     echo "NOTE: 'ddcutil' is not installed (optional: monitor-brightness-synced LEDs)."
@@ -136,13 +253,24 @@ I2C_USER="$USER"
 if command -v ddcutil >/dev/null 2>&1 && [ -n "$I2C_USER" ] && [ "$SKIP_DEPS" -eq 0 ]; then
     SUDO=(sudo); [ "$(id -u)" -eq 0 ] && SUDO=()
     I2C_TODO=()
-    getent group i2c >/dev/null 2>&1 || I2C_TODO+=("create the 'i2c' group")
-    id -nG "$I2C_USER" 2>/dev/null | grep -qw i2c || I2C_TODO+=("add $I2C_USER to it")
-    # a udev rule giving the group the i2c devices (ddcutil's own package often ships one)
-    if ! grep -qsE 'i2c.*GROUP="?i2c' /etc/udev/rules.d/*.rules /usr/lib/udev/rules.d/*.rules \
+    # ddcutil's own rules (60-ddcutil*.rules) often give the logged-in user the bus already (uaccess)
+    HAVE_I2C=0
+    for d in /dev/i2c-*; do
+        if [ -r "$d" ] && [ -w "$d" ]; then HAVE_I2C=1; break; fi
+    done
+    if grep -qsE 'i2c.*TAG\+="uaccess"' /etc/udev/rules.d/*.rules /usr/lib/udev/rules.d/*.rules \
             /lib/udev/rules.d/*.rules; then
-        I2C_TODO+=("give it the i2c devices (a udev rule)")
-        I2C_RULE=1
+        HAVE_I2C=1
+    fi
+    if [ "$HAVE_I2C" -eq 0 ]; then
+        getent group i2c >/dev/null 2>&1 || I2C_TODO+=("create the 'i2c' group")
+        id -nG "$I2C_USER" 2>/dev/null | tr ' ' '\n' | grep -qx i2c || I2C_TODO+=("add $I2C_USER to it")
+        # a udev rule giving the group the i2c devices (ddcutil's own package often ships one)
+        if ! grep -qsE 'i2c.*GROUP="?i2c' /etc/udev/rules.d/*.rules /usr/lib/udev/rules.d/*.rules \
+                /lib/udev/rules.d/*.rules; then
+            I2C_TODO+=("give it the i2c devices (a udev rule)")
+            I2C_RULE=1
+        fi
     fi
     # the i2c-dev module at boot (ddcutil's package sometimes does this already)
     if ! grep -qsxE 'i2c[-_]dev' /etc/modules-load.d/*.conf /usr/lib/modules-load.d/*.conf \
@@ -162,9 +290,11 @@ if command -v ddcutil >/dev/null 2>&1 && [ -n "$I2C_USER" ] && [ "$SKIP_DEPS" -e
             n|N|no|NO)
                 echo "Skipped. Monitor brightness may not work; see docs/wiki/Installation.md (Monitor brightness)." ;;
             *)
-                getent group i2c >/dev/null 2>&1 || "${SUDO[@]}" groupadd --system i2c \
-                    || echo "WARNING: couldn't create the i2c group."
-                if ! id -nG "$I2C_USER" | grep -qw i2c; then
+                if [ "$HAVE_I2C" -eq 0 ]; then
+                    getent group i2c >/dev/null 2>&1 || "${SUDO[@]}" groupadd --system i2c \
+                        || echo "WARNING: couldn't create the i2c group."
+                fi
+                if [ "$HAVE_I2C" -eq 0 ] && ! id -nG "$I2C_USER" | tr ' ' '\n' | grep -qx i2c; then
                     if "${SUDO[@]}" usermod -aG i2c "$I2C_USER"; then
                         I2C_RELOGIN=1
                     else
@@ -195,16 +325,37 @@ if [ -x "$VENV_DIR/bin/iridia" ]; then
     "$VENV_DIR/bin/iridia" daemon stop >/dev/null 2>&1 || true
 fi
 
-echo "Creating virtual environment..."
-# --system-site-packages: the window uses your distro's GTK 4 bindings (PyGObject),
-# which can't be built with pip without a full compiler toolchain.
-# --clear: start fresh, so files from older versions can't linger.
-python3 -m venv --system-site-packages --clear "$VENV_DIR"
-echo "Upgrading pip..."
-"$VENV_DIR/bin/pip" install --upgrade pip --quiet
 rm -rf build ./*.egg-info
-echo "Installing iridia..."
-"$VENV_DIR/bin/pip" install .
+# Upgrade in place whenever the installed environment still works: quicker, and a failed pip run
+# leaves the old Iridia working. Start fresh when there is none, or when Python changed underneath
+# it (a distribution upgrade from 3.12 to 3.13 leaves it unable to import anything).
+if [ "$UPDATE" -eq 0 ] && [ -x "$VENV_DIR/bin/python" ] \
+        && "$VENV_DIR/bin/python" -c 'import iridia, PIL' >/dev/null 2>&1 \
+        && [ "$("$VENV_DIR/bin/python" -c 'import sys; print(sys.version_info[:2])')" = "$("$PY3" -c 'import sys; print(sys.version_info[:2])')" ]; then
+    UPDATE=1
+elif [ "$UPDATE" -eq 1 ] && ! "$VENV_DIR/bin/python" -c 'import iridia, PIL' >/dev/null 2>&1; then
+    echo "Python changed since Iridia was installed: building its environment again."
+    UPDATE=0
+fi
+# if anything below fails, the daemon stopped above comes back
+trap '"$VENV_DIR/bin/iridia" daemon start >/dev/null 2>&1 || true' ERR
+if [ "$UPDATE" -eq 1 ]; then
+    # In place: the installed libraries stay (quicker, works offline when nothing new is needed),
+    # and pip replaces Iridia's own files cleanly.
+    echo "Updating iridia..."
+    "$VENV_DIR/bin/pip" install --upgrade --upgrade-strategy only-if-needed .
+else
+    echo "Creating virtual environment..."
+    # --system-site-packages: the window uses your distro's GTK 4 bindings (PyGObject),
+    # which can't be built with pip without a full compiler toolchain.
+    # --clear: start fresh, so files from older versions can't linger.
+    "$PY3" -m venv --system-site-packages --clear "$VENV_DIR"
+    echo "Upgrading pip..."
+    "$VENV_DIR/bin/pip" install --upgrade pip --quiet
+    echo "Installing iridia..."
+    "$VENV_DIR/bin/pip" install .
+fi
+trap - ERR
 
 echo "Creating config directory..."
 mkdir -p "$CONFIG_DIR"

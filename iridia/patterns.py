@@ -40,6 +40,31 @@ def even_positions(n_colors: int) -> List[float]:
     return [k / (n_colors - 1) for k in range(n_colors)] if n_colors > 1 else [0.0]
 
 
+def led_even_boundaries(n_colors: int, led_count: int) -> List[float]:
+    """Boundaries that split led_count LEDs into n_colors parts as evenly as whole LEDs allow (80 in 3 is
+    27 + 27 + 26: the first parts take the leftover LEDs)."""
+    if n_colors < 2 or led_count < 1:
+        return even_boundaries(n_colors)
+    base, extra = divmod(led_count, n_colors)
+    out, at = [], 0
+    for k in range(n_colors - 1):
+        at += base + (1 if k < extra else 0)
+        out.append(at / led_count)
+    return out
+
+
+def segment_sizes(stops, n_colors: int, led_count: int) -> List[int]:
+    """How many LEDs each colour of the segments pattern gets, as drawn by PatternGenerator."""
+    if n_colors < 1 or led_count < 1:
+        return []
+    b = _clean_stops(stops, n_colors - 1, even_boundaries(n_colors))
+    sizes = [0] * n_colors
+    for i in range(led_count):
+        pos = (i + 0.5) / led_count
+        sizes[min(sum(1 for x in b if pos >= x), n_colors - 1)] += 1
+    return sizes
+
+
 def _clean_stops(stops, want: int, default: List[float]) -> List[float]:
     try:
         vals = [min(1.0, max(0.0, float(x))) for x in (stops or [])]

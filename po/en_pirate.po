@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-15 20:17+0000\n"
+"POT-Creation-Date: 2026-10-18 02:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -21,6 +21,18 @@ msgstr ""
 #, python-brace-format
 msgid "Iridia {version}"
 msgstr "Iridia {version}, arr"
+
+msgid "Automatic"
+msgstr "Automatic"
+
+msgid "Compact"
+msgstr "Dinghy"
+
+msgid "Default"
+msgstr "Sloop"
+
+msgid "Large"
+msgstr "Galleon"
 
 msgid "Target"
 msgstr "Aimin' for"
@@ -94,6 +106,9 @@ msgstr "Ship's Articles"
 msgid "Service"
 msgstr "Below Decks"
 
+msgid "Updates"
+msgstr "New charts"
+
 msgid "Refresh"
 msgstr "Look again"
 
@@ -108,6 +123,18 @@ msgstr "Captain's log"
 
 msgid "Quit"
 msgstr "Abandon ship"
+
+msgid "Minimize"
+msgstr "Stow it"
+
+msgid "Maximize"
+msgstr "Hoist it"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Restore"
+msgstr "Dig it up"
 
 #, python-brace-format
 msgid "Couldn't open a file manager. The folder is {path}"
@@ -292,6 +319,22 @@ msgstr "Google Sans Flex (ship's own)"
 msgid "System font"
 msgstr "The system's lettering"
 
+msgid "Size"
+msgstr "Size o' the ship"
+
+msgid ""
+"Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, Ctrl+0 goes back to "
+"Automatic."
+msgstr ""
+"Automatic be a Dinghy in a narrow window. Ctrl+minus an' Ctrl+plus change it, Ctrl+0 sails back "
+"to Automatic."
+
+msgid "Window buttons"
+msgstr "Porthole buttons"
+
+msgid "Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."
+msgstr "Stow, hoist an' scuttle up top. Off: use yer desktop's own keys or menu."
+
 msgid "Reduce motion"
 msgstr "Calm the seas"
 
@@ -355,9 +398,6 @@ msgstr "Automatic buried treasure"
 
 msgid "No backups yet"
 msgstr "Nothin' buried yet"
-
-msgid "Restore"
-msgstr "Dig it up"
 
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr "Diggin' up a chart first buries what ye have now, so ye can always sail back."
@@ -439,6 +479,232 @@ msgstr "Log copied"
 
 msgid "Press Show to load the latest lines."
 msgstr "Press Show to read the latest lines."
+
+msgid "New versions of Iridia come from its releases on GitHub."
+msgstr "New charts for Iridia come from its releases on GitHub."
+
+msgid "Check now"
+msgstr "Check the horizon"
+
+msgid "Update now"
+msgstr "Hoist the new sails"
+
+msgid "Skip this version"
+msgstr "Let this one sail by"
+
+msgid "What's new"
+msgstr "What be new"
+
+msgid ""
+"Updating needs no password: the new version installs like the old one, into your home folder. "
+"Your settings are backed up first (Settings, Setups and backups)."
+msgstr ""
+"Updatin' needs no password: the new version lands like the old one, in yer home port. Yer "
+"settings be stowed first (Settings, Setups and backups)."
+
+msgid "Checking"
+msgstr "Lookout"
+
+msgid "Look for updates when Iridia starts"
+msgstr "Look fer new charts when Iridia starts"
+
+msgid "Show a notification when there's a new version"
+msgstr "Fire a flare when there be a new version"
+
+msgid "Include test versions"
+msgstr "Include test voyages"
+
+msgid ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
+" nothing about you."
+msgstr ""
+"Iridia asks GitHub at most once every few hours, when the daemon or this window starts, an' tells"
+" 'em nothin' about ye."
+
+msgid "Go back"
+msgstr "Sail back"
+
+msgid "The version before the last update is kept, so you can undo an update."
+msgstr "The version afore the last update be kept, so ye can undo an update."
+
+#, python-brace-format
+msgid "Iridia {v}"
+msgstr "Iridia {v}"
+
+#, python-brace-format
+msgid "Couldn't check: {err}"
+msgstr "Couldn't check: {err}"
+
+#, python-brace-format
+msgid "Iridia {v} is available"
+msgstr "Iridia {v} be in port"
+
+#, python-brace-format
+msgid "You have {cur}. Released {date}."
+msgstr "Ye have {cur}. Released {date}."
+
+msgid "You have the latest version."
+msgstr "Ye have the latest version."
+
+msgid "Not checked yet."
+msgstr "Not checked yet."
+
+msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
+msgstr "This Iridia sails from its source folder: update it there (git pull, then bash install.sh)."
+
+#, python-brace-format
+msgid "What's new in {v}"
+msgstr "What be new in {v}"
+
+#, python-brace-format
+msgid "Kept from before the last update: Iridia {v}."
+msgstr "Kept from afore the last update: Iridia {v}."
+
+msgid "Nothing kept yet: the version you have now is kept when you update."
+msgstr "Nothin' kept yet: the version ye have now be kept when ye update."
+
+#, python-brace-format
+msgid "Go back to {v}"
+msgstr "Sail back to {v}"
+
+msgid "Checking…"
+msgstr "Checkin'…"
+
+msgid "Couldn't check for updates"
+msgstr "Couldn't check fer new charts"
+
+#, python-brace-format
+msgid "Iridia {v} skipped. Newer versions still show up."
+msgstr "Iridia {v} sailed by. Newer versions still show up."
+
+#, python-brace-format
+msgid "Install Iridia {v}?"
+msgstr "Install Iridia {v}?"
+
+msgid ""
+"Your settings are backed up first, and the version you have now is kept so you can go back. The "
+"LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
+msgstr ""
+"Yer settings be stowed first, an' the version ye have now be kept so ye can sail back. The "
+"lanterns pause a few seconds while the daemon restarts, an' this window restarts when it be done."
+
+#, python-brace-format
+msgid "Updating to {v}…"
+msgstr "Updatin' to {v}…"
+
+msgid "Update"
+msgstr "Update"
+
+#, python-brace-format
+msgid "Go back to Iridia {v}?"
+msgstr "Sail back to Iridia {v}?"
+
+msgid ""
+"The version you have now is kept in its place, so you can switch again. Your settings stay as "
+"they are."
+msgstr ""
+"The version ye have now be kept in its place, so ye can switch again. Yer settings stay as they "
+"be."
+
+#, python-brace-format
+msgid "Going back to {v}…"
+msgstr "Sailin' back to {v}…"
+
+msgid "Done: restarting the window…"
+msgstr "Done: restartin' the window…"
+
+msgid "That didn't work: see the output below. Nothing of yours was changed."
+msgstr "That didn't work: see the output below. Nothin' o' yers was changed."
+
+msgid "Lock and idle"
+msgstr "Lock an' shore leave"
+
+msgid ""
+"Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
+"Brightness on each strip."
+msgstr ""
+"Dim or douse the lanterns when the hatch be locked or ye've gone ashore. Strips can stay lit: see"
+" Brightness on each strip."
+
+msgid "Keep"
+msgstr "Hold fast"
+
+msgid "Dim"
+msgstr "Dim"
+
+msgid "Off"
+msgstr "Doused"
+
+msgid "When the screen locks"
+msgstr "When the hatch be locked"
+
+msgid "After"
+msgstr "After"
+
+msgid "minutes without input"
+msgstr "minutes o' no hands on deck"
+
+msgid "Dim to"
+msgstr "Dim to"
+
+msgid "Try it"
+msgstr "Give it a go"
+
+msgid "Acting as if the screen were locked for 5 seconds."
+msgstr "Pretendin' the hatch be locked fer 5 seconds."
+
+msgid ""
+"The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
+"(or off, if that's Keep) for 5 seconds."
+msgstr ""
+"The lanterns fade over 2 seconds an' come back in half a second. Try it shows the lock settin' "
+"(or dark, if that be Hold fast) fer 5 seconds."
+
+msgid "Idle time can't be seen here: lines for hypridle or swayidle"
+msgstr "Can't see idle time on this ship: lines fer hypridle or swayidle"
+
+msgid ""
+"Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
+"daemon's timeout instead of the minutes above)."
+msgstr ""
+"Add these to yer idle daemon's config, an' Iridia knows when ye've gone ashore (it then uses that"
+" daemon's timeout instead o' the minutes above)."
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "in use"
+msgstr "on deck"
+
+msgid "away"
+msgstr "ashore"
+
+msgid "locked"
+msgstr "nailed down"
+
+#, python-brace-format
+msgid "Right now: {state}."
+msgstr "Right now: {state}."
+
+#, python-brace-format
+msgid "Locking seen through: {lock}."
+msgstr "Lockin' seen through: {lock}."
+
+msgid "logind, ScreenSaver or a screen locker, once one shows up"
+msgstr "logind, ScreenSaver or a screen locker, once one shows up"
+
+#, python-brace-format
+msgid "Idle time from: {idle}."
+msgstr "Idle time from: {idle}."
+
+msgid "nothing here"
+msgstr "nothin' here"
+
+msgid "Nothing is watched while both are Keep."
+msgstr "Nothin' be watched while both be Hold fast."
+
+msgid "Your idle daemon says you're away."
+msgstr "Yer idle daemon says ye've gone ashore."
 
 msgid "Saved."
 msgstr "Stashed."
@@ -606,9 +872,6 @@ msgstr ""
 "The bosun be the part o' Iridia that keeps yer lanterns in line. He works below decks and keeps "
 "at it when this window be closed. This window only gives him orders."
 
-msgid "Checking…"
-msgstr "Checkin'…"
-
 msgid "Kill daemon"
 msgstr "Make the bosun walk the plank"
 
@@ -649,9 +912,6 @@ msgstr ""
 
 msgid "Environment"
 msgstr "Waters"
-
-msgid "Copied"
-msgstr "Copied"
 
 msgid "Install XDG autostart"
 msgstr "Install XDG autostart"
@@ -955,6 +1215,9 @@ msgstr "Hailed"
 msgid "Not connected"
 msgstr "Not hailed"
 
+msgid "Following the screen's backlight"
+msgstr "Followin' the screen's lantern"
+
 msgid "Available"
 msgstr "Aboard"
 
@@ -969,9 +1232,6 @@ msgstr "Anchored (wallpaper changes be ignored)"
 
 msgid "Following the wallpaper"
 msgstr "Followin' the wallpaper"
-
-msgid "Off"
-msgstr "Doused"
 
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
@@ -1256,9 +1516,6 @@ msgstr "OpenRGB ain't hailed, so the strip can't light up right now."
 msgid "Resize failed"
 msgstr "Resize ran aground"
 
-msgid "Close"
-msgstr "Close"
-
 msgid "Breathing"
 msgstr "Heavin' breath"
 
@@ -1399,9 +1656,6 @@ msgstr "Smooth sailin'"
 msgid "Sharp"
 msgstr "Sharp"
 
-msgid "Dim"
-msgstr "Dim"
-
 msgid "Second color"
 msgstr "Second colour"
 
@@ -1467,6 +1721,9 @@ msgstr "~/.config/hypr/hyprland.conf (or a file it calls aboard)"
 msgid "~/.config/niri/config.kdl, inside binds { }"
 msgstr "~/.config/niri/config.kdl, inside binds { }"
 
+msgid "river 0.4 and later leave keys to your window manager: bind this command in its config:"
+msgstr "river 0.4 an' later leave keys to yer window manager: bind this command in its config:"
+
 msgid ""
 "System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
 " press your key:"
@@ -1529,9 +1786,6 @@ msgstr "Command"
 
 msgid "Copy command"
 msgstr "Copy the command"
-
-msgid "Try it"
-msgstr "Give it a go"
 
 msgid "Add it to your desktop"
 msgstr "Add it to yer desktop"
@@ -1744,9 +1998,6 @@ msgstr[1] "{n} lanterns"
 
 msgid "clone"
 msgstr "stowaway"
-
-msgid "locked"
-msgstr "nailed down"
 
 msgid "This strip is locked. Unlock it (side panel or the lock button) to move or bend it."
 msgstr "This strip be nailed down. Pry it loose (side panel or the lock) to move or bend it."
@@ -2016,6 +2267,150 @@ msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
 
+msgid "Same as the strip"
+msgstr "Same as the rest o' the ship"
+
+msgid "Its own pattern"
+msgstr "Its own pattern"
+
+msgid "Its own effect"
+msgstr "Its own jig"
+
+msgid "A sensor"
+msgstr "A spyglass"
+
+msgid "CPU temperature"
+msgstr "Engine heat"
+
+msgid "CPU load"
+msgstr "Engine toil"
+
+msgid "GPU temperature"
+msgstr "Cannon heat"
+
+msgid "GPU load"
+msgstr "Cannon toil"
+
+msgid "Second GPU temperature"
+msgstr "Second cannon heat"
+
+msgid "Second GPU load"
+msgstr "Second cannon toil"
+
+msgid "Memory use"
+msgstr "Hold filled"
+
+msgid "Disk temperature"
+msgstr "Cargo heat"
+
+msgid "Advanced: split this strip, set single LEDs"
+msgstr "Advanced: carve up this strip, rig single lanterns"
+
+msgid "Add divider"
+msgstr "Drop a divider"
+
+msgid "Space evenly"
+msgstr "Share the plunder"
+
+msgid "Single LEDs"
+msgstr "Single lanterns"
+
+msgid "Set LEDs"
+msgstr "Rig lanterns"
+
+msgid "Color for single LEDs"
+msgstr "Color fer single lanterns"
+
+msgid "Clear all"
+msgstr "Sweep 'em all"
+
+msgid ""
+"Set LEDs, then click or drag over LEDs on the strip above. A set LED shows its color over "
+"everything else, like a fixed LED between two bars."
+msgstr ""
+"Rig lanterns, then click or drag over the lanterns above. A rigged lantern shows its color over "
+"all else, like a fixed lantern between two bars."
+
+msgid "Remove this part (it joins the one before it)"
+msgstr "Scuttle this share (it joins the one afore it)"
+
+msgid "The whole strip"
+msgstr "The whole strip"
+
+#, python-brace-format
+msgid "LEDs {first} to {last}  ({n})"
+msgstr "Lanterns {first} to {last}  ({n})"
+
+#, python-brace-format
+msgid "LED {first}"
+msgstr "Lantern {first}"
+
+#, python-brace-format
+msgid "{leds} LEDs: {sizes}"
+msgstr "{leds} lanterns: {sizes}"
+
+msgid "Add a divider to split this strip into parts."
+msgstr "Drop a divider to carve this strip into shares."
+
+#, python-brace-format
+msgid "The parts are {n} LED apart. Space evenly makes them match."
+msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
+msgstr[0] "The shares be {n} lantern apart. Share the plunder to make 'em match."
+msgstr[1] "The shares be {n} lanterns apart. Share the plunder to make 'em match."
+
+#, python-brace-format
+msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
+msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
+msgstr[0] "{leds} lanterns don't split {parts} ways fair, so the first share gets 1 more lantern."
+msgstr[1] "{leds} lanterns don't split {parts} ways fair, so the first {extra} shares get 1 more lantern."
+
+#, python-brace-format
+msgid "{n} LED set"
+msgid_plural "{n} LEDs set"
+msgstr[0] "{n} lantern rigged"
+msgstr[1] "{n} lanterns rigged"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Share {n}"
+
+msgid "Finding sensors…"
+msgstr "Scannin' the horizon…"
+
+msgid "(not found here)"
+msgstr "(not aboard)"
+
+msgid "Sensor"
+msgstr "Spyglass"
+
+msgid "NVIDIA readings come from nvidia-smi, which keeps a laptop's GPU awake while a strip shows them."
+msgstr "NVIDIA readin's come from nvidia-smi, which keeps a laptop's cannon awake while a strip shows 'em."
+
+msgid "Level"
+msgstr "Level"
+
+msgid "Both"
+msgstr "Both"
+
+msgid ""
+"Level fills the part like a bar, Color shows the reading as one color, Both is a bar in the "
+"reading's color."
+msgstr ""
+"Level fills the share like a grog gauge, Color shows the readin' as one color, Both be a gauge in"
+" the readin's color."
+
+msgid "Cool to hot"
+msgstr "Cold seas to hot"
+
+msgid "Rest of the bar"
+msgstr "Rest o' the gauge"
+
+msgid "Flash above"
+msgstr "Flash above"
+
+msgid "From the other end"
+msgstr "From the other end"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click fer the first color, right-click fer the second"
@@ -2086,9 +2481,6 @@ msgstr "Alternatin'"
 
 msgid "Painted"
 msgstr "Painted"
-
-msgid "Automatic"
-msgstr "Automatic"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"
@@ -2177,6 +2569,9 @@ msgstr "Invert (bias lightin')"
 
 msgid "Gamma correction"
 msgstr "Gamma correction"
+
+msgid "Stay lit when the screen locks or you're away"
+msgstr "Stay lit when the hatch locks or ye go ashore"
 
 msgid "Strip type and wiring"
 msgstr "Strip type an' riggin'"

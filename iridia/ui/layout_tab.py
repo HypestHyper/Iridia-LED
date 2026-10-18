@@ -68,6 +68,18 @@ class LayoutTab(Gtk.Box):
         self._build()
 
     # ================================================================ UI
+    def set_folded(self, on: bool):
+        """Narrow windows: the side panel goes under the canvas instead of next to it."""
+        if on == self._folded:
+            return
+        self._folded = on
+        self._main.set_orientation(Gtk.Orientation.VERTICAL if on else Gtk.Orientation.HORIZONTAL)
+        self._side.set_size_request(-1, 280) if on else self._side.set_size_request(310, -1)
+        self._side.set_hexpand(on)
+        self._side.set_vexpand(not on)
+        self.cv.queue_draw()
+
+    # ================================================================ UI
     def _build(self):
         self._hint = label("", ("small", "faint"), wrap=True)
         self.append(self._hint)
@@ -119,6 +131,8 @@ class LayoutTab(Gtk.Box):
             getattr(self._panel, f"set_margin_{m}")(16)
         side.set_child(self._panel)
         self._side = side
+        self._main = main
+        self._folded = False
         main.append(side)
         self.append(main)
 

@@ -4,6 +4,56 @@ from urllib.parse import unquote
 
 logger = logging.getLogger("iridia")
 
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".tif", ".tiff", ".jxl", ".avif", ".heic")
+
+
+def _uri_path(value: str) -> str:
+    """'file:///home/me/My%20pic.png' or "'/home/me/pic.png'" (gsettings quotes) -> a plain path."""
+    v = (value or "").strip().strip("'\"")
+    if v.startswith("file://"):
+        v = unquote(v[7:])
+    return os.path.expanduser(v) if v else ""
+
+
+def _slideshow_image(path: str) -> str:
+    """GNOME/Cinnamon/MATE can point at an XML slideshow (the default backgrounds of Ubuntu, Fedora,
+    ...): use the first image in it that exists."""
+    if not path or not path.lower().endswith(".xml"):
+        return path or None
+    try:
+        import xml.etree.ElementTree as ET
+        root = ET.parse(path).getroot()
+    except (OSError, ValueError, SyntaxError):
+        return None
+    for el in root.iter():
+        text = (el.text or "").strip()
+        if el.tag in ("file", "size", "from", "to") and text.startswith("/") and os.path.isfile(text):
+            return text
+    return None
+
+
+def _kde_image(path: str) -> str:
+    """A Plasma wallpaper package (a folder with contents/images/WxH.png) -> its biggest image."""
+    if not path or not os.path.isdir(path):
+        return path
+    best, best_px = None, -1
+    for sub in ("contents/images", "contents/images_dark"):
+        folder = os.path.join(path, sub)
+        try:
+            names = os.listdir(folder)
+        except OSError:
+            continue
+        for n in names:
+            if not n.lower().endswith(IMAGE_EXTS):
+                continue
+            m = re.match(r"(\d+)x(\d+)", n)
+            px = int(m.group(1)) * int(m.group(2)) if m else 0
+            if px > best_px:
+                best, best_px = os.path.join(folder, n), px
+        if best:
+            return best
+    return None
+
 
 def fill_session_env():
     """Find the desktop session when we weren't started from inside it.
@@ -78,6 +128,24 @@ class WallpaperDetector:
         if self.cache_path:
             self._load_cache()
 
+    WATCHED_SLOW_SEC = 30.0     # backends whose settings file is watched: asked this often as a safety net
+
+    def watch_files(self):
+        """Files that change when the remembered backend's wallpaper changes. The daemon watches them
+        and calls invalidate(), so the backend's commands needn't run every few seconds."""
+        cfg = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+        dconf = [os.path.join(cfg, "dconf", "user")]
+        return {"gnome": dconf, "cinnamon": dconf, "mate": dconf,
+                "kde": [os.path.expanduser(f) for f in self.KDE_FILES],
+                "xfce": [os.path.join(cfg, "xfce4", "xfconf", "xfce-perchannel-xml", "xfce4-desktop.xml")],
+                "feh": [os.path.expanduser("~/.fehbg")],
+                "nitrogen": [os.path.join(cfg, "nitrogen", "bg-saved.cfg")],
+                }.get(self._sticky or "", [])
+
+    def set_watched(self, on: bool):
+        """The daemon watches watch_files(): slow backends are then only a safety net."""
+        self.slow_interval = self.WATCHED_SLOW_SEC if on else 3.0
+
     def invalidate(self):
         """Force the next detect() to re-run the slow backends (called when
         a file watcher says something wallpaper-related changed)."""
@@ -148,7 +216,7 @@ class WallpaperDetector:
     def _table(self):
         # waypaper last: its config keeps the old choice after you stop using it.
         names = ["caelestia", "noctalia", "hyprland", "sway", "gnome", "kde", "xfce", "cinnamon",
-                 "mate", "feh", "nitrogen", "xwallpaper", "waypaper"]
+                 "mate", "cosmic", "lxqt", "feh", "nitrogen", "xwallpaper", "waypaper"]
         t = {n: getattr(self, "_" + n) for n in names}
         t["watch_folder"] = self._watch_folder_latest
         return t
@@ -426,47 +494,89 @@ class WallpaperDetector:
         if "dark" in scheme:
             key = "picture-uri-dark"   # GNOME 42+ shows this one in dark mode
         out = self._run(["gsettings", "get", "org.gnome.desktop.background", key])
-        if out:
-            path = out.strip().strip("'")
-            if path.startswith("file://"):
-                return unquote(path[7:])
-        return None
+        if key == "picture-uri-dark" and not _uri_path(out):
+            out = self._run(["gsettings", "get", "org.gnome.desktop.background", "picture-uri"])
+        return _slideshow_image(_uri_path(out))
+
+    KDE_FILES = ("~/.config/plasma-org.kde.plasma.desktop-appletsrc",
+                 "~/.config/plasma-org.kde.desktop.appletsrc")
 
     def _kde(self):
-        kfile = os.path.expanduser("~/.config/plasma-org.kde.desktop.appletsrc")
-        if not os.path.exists(kfile):
-            return None
-        try:
-            with open(kfile) as f:
-                content = f.read()
-            m = re.search(r"Image=(.+)", content)
-            if m:
-                path = m.group(1).strip()
-                if path.startswith("file://"):
-                    path = unquote(path[7:])
-                return path
-        except OSError as e:
-            logger.debug(f"Couldn't read {kfile}: {e}")
+        """Plasma 5 and 6 keep each desktop's wallpaper under
+        [Containments][N][Wallpaper][org.kde.image][General] Image=... (a file, a file:// URL, or a
+        wallpaper package folder)."""
+        for name in self.KDE_FILES:
+            kfile = os.path.expanduser(name)
+            try:
+                with open(kfile, encoding="utf-8", errors="replace") as f:
+                    content = f.read()
+            except OSError:
+                continue
+            section = ""
+            for line in content.splitlines():
+                line = line.strip()
+                if line.startswith("["):
+                    section = line
+                    continue
+                if line.startswith("Image=") and "[Wallpaper][org.kde.image][General]" in section:
+                    path = _kde_image(_uri_path(line[6:]))
+                    if path and os.path.exists(path):
+                        return path
         return None
 
     def _xfce(self):
-        out = self._run(["xfconf-query", "-c", "xfce4-desktop", "-p", "/backdrop/screen0/monitor0/workspace0/last-image"])
-        if out and os.path.exists(out):
-            return out
+        """xfdesktop keeps one image per monitor and workspace: /backdrop/screen0/monitor<NAME>/
+        workspace<N>/last-image (monitor0 on old versions). The first workspace of the first monitor wins."""
+        props = [p for p in self._run(["xfconf-query", "-c", "xfce4-desktop", "-l"]).splitlines()
+                 if p.endswith("/last-image")]
+        props.sort(key=lambda p: ("workspace0" not in p, p))
+        for prop in props[:4]:
+            out = self._run(["xfconf-query", "-c", "xfce4-desktop", "-p", prop])
+            if out and os.path.exists(out):
+                return out
         return None
 
     def _cinnamon(self):
         out = self._run(["gsettings", "get", "org.cinnamon.desktop.background", "picture-uri"])
-        if out:
-            path = out.strip().strip("'")
-            if path.startswith("file://"):
-                return unquote(path[7:])
-        return None
+        return _slideshow_image(_uri_path(out))
 
     def _mate(self):
-        out = self._run(["gsettings", "get", "org.mate.desktop.background", "picture-filename"])
-        if out:
-            return out.strip().strip("'")
+        out = self._run(["gsettings", "get", "org.mate.background", "picture-filename"])
+        if not out:                 # older MATE schemas
+            out = self._run(["gsettings", "get", "org.mate.desktop.background", "picture-filename"])
+        return _slideshow_image(_uri_path(out))
+
+    def _cosmic(self):
+        """COSMIC: ~/.config/cosmic/com.system76.CosmicBackground/v1/all (or one file per output),
+        RON text with source: Path("/path/to/image")."""
+        folder = os.path.expanduser("~/.config/cosmic/com.system76.CosmicBackground/v1")
+        try:
+            names = sorted(os.listdir(folder), key=lambda n: (n != "all", n))
+        except OSError:
+            return None
+        for n in names:
+            try:
+                with open(os.path.join(folder, n), encoding="utf-8", errors="replace") as f:
+                    m = re.search(r'source:\s*Path\("((?:[^"\\]|\\.)*)"\)', f.read())
+            except OSError:
+                continue
+            if m and os.path.isfile(m.group(1)):
+                return m.group(1)
+        return None
+
+    def _lxqt(self):
+        """LXQt's desktop (pcmanfm-qt): Wallpaper= in its settings.conf."""
+        for prof in ("lxqt", "default"):
+            f = os.path.expanduser(f"~/.config/pcmanfm-qt/{prof}/settings.conf")
+            try:
+                with open(f, encoding="utf-8", errors="replace") as fh:
+                    for line in fh:
+                        if line.startswith("Wallpaper="):
+                            path = os.path.expanduser(line[10:].strip())
+                            if path and os.path.isfile(path):
+                                return path
+            except OSError:
+                continue
         return None
 
     def _feh(self):

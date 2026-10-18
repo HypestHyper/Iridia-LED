@@ -74,10 +74,39 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia lights on / off / toggle` | Every LED on or off |
 | `iridia night show` | Night mode settings |
 | `iridia night on / off / toggle [--start 23:00] [--end 07:00] [--cap 20]` | Night mode |
+| `iridia session` | Lock and idle: settings, what's happening now, and how Iridia sees it |
+| `iridia session --lock off --idle dim --idle-minutes 10 --dim 20` | Change them (`keep`, `dim`, `off`) |
+| `iridia session test` / `iridia session hooks` | Act as if locked for 5 seconds / lines for hypridle and swayidle |
+| `iridia idle on / off`, `iridia lock on / off` | For idle daemons and screen lockers Iridia can't see by itself |
 | `iridia zone list` | Strip names to use with `iridia zone` |
 | `iridia zone NAME[,NAME] [on/off] [color HEX] [bright N] [--set]` | Temporary strip changes; see [Keybinds](Keybinds.md) |
 | `iridia zone NAME normal` | Undo keybind changes |
 | `iridia identify DEVICE [-z ZONE] [-s SECONDS]` / `iridia identify off` | Light only one zone |
+
+## Parts and single LEDs
+
+Saved settings, like the *Advanced* part of a zone card. LED and part numbers start at 1.
+
+| Command | What it does |
+| --- | --- |
+| `iridia split NAME` | Show the strip's parts and single LEDs |
+| `iridia split NAME even 3` | Split into 3 parts as evenly as whole LEDs allow (keeps what the parts show) |
+| `iridia split NAME at 28 55` | New parts start at LEDs 28 and 55 |
+| `iridia split NAME part 2 pattern gradient ff0000 0000ff` | Part 2 gets its own pattern; colors are hex or wallpaper color numbers (1 = first) |
+| `iridia split NAME part 3 effect comet 1` | Part 3 gets its own effect |
+| `iridia split NAME part 1 same` / `off` | Part 1 shows the strip's own look, or nothing |
+| `iridia split NAME part 4 sensor cpu_temp level max=85 flash=80 background=dim` | Part 4 shows a sensor: `level`, `color` or `both`, optional `min=`, `max=`, `flash=`, `background=dim`, `palette=colors` |
+| `iridia sensors` | Every sensor Iridia found, with its ID and current reading |
+| `iridia split NAME led 27 ffffff` / `off` / `normal` | Set one LED, turn it off, or give it back |
+| `iridia split NAME join` / `clear-leds` | One part again / no single LEDs |
+
+## Updates
+
+| Command | What it does |
+| --- | --- |
+| `iridia update --check` | Is there a new version? |
+| `iridia update [--yes]` | Back up your settings and install it (no password needed); see [Updates](Updates.md) |
+| `iridia update --rollback` | Back to the version before the last update |
 
 ## Setups
 

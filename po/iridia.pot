@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 08:24+0000\n"
+"POT-Creation-Date: 2026-10-18 02:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,7 +120,7 @@ msgstr ""
 msgid "Layout"
 msgstr ""
 
-#: iridia/ui/app.py:426 iridia/ui/keybinds_tab.py:103
+#: iridia/ui/app.py:426 iridia/ui/keybinds_tab.py:107
 msgid "Keybinds"
 msgstr ""
 
@@ -291,7 +291,7 @@ msgstr ""
 msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
 msgstr ""
 
-#: iridia/ui/app.py:745 iridia/ui/keybinds_tab.py:128 iridia/ui/sections_panel.py:66
+#: iridia/ui/app.py:745 iridia/ui/keybinds_tab.py:132 iridia/ui/sections_panel.py:66
 #: iridia/ui/sections_panel.py:377
 msgid "Color"
 msgstr ""
@@ -466,11 +466,11 @@ msgid ""
 "and your saved colors) under a name, and load it again later."
 msgstr ""
 
-#: iridia/ui/app.py:978 iridia/ui/app.py:1390 iridia/ui/app.py:1399 iridia/ui/keybinds_tab.py:152
+#: iridia/ui/app.py:978 iridia/ui/app.py:1390 iridia/ui/app.py:1399 iridia/ui/keybinds_tab.py:156
 msgid "Setup"
 msgstr ""
 
-#: iridia/ui/app.py:979 iridia/ui/keybinds_tab.py:151
+#: iridia/ui/app.py:979 iridia/ui/keybinds_tab.py:155
 msgid "No setups yet"
 msgstr ""
 
@@ -783,7 +783,7 @@ msgstr ""
 msgid "Dim"
 msgstr ""
 
-#: iridia/ui/app.py:1299 iridia/ui/app.py:2084 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:19
+#: iridia/ui/app.py:1299 iridia/ui/app.py:2085 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:19
 #: iridia/ui/sections_panel.py:66 iridia/ui/sections_panel.py:399
 msgid "Off"
 msgstr ""
@@ -804,7 +804,7 @@ msgstr ""
 msgid "Dim to"
 msgstr ""
 
-#: iridia/ui/app.py:1316 iridia/ui/keybinds_tab.py:165
+#: iridia/ui/app.py:1316 iridia/ui/keybinds_tab.py:169
 msgid "Try it"
 msgstr ""
 
@@ -828,7 +828,7 @@ msgid ""
 "daemon's timeout instead of the minutes above)."
 msgstr ""
 
-#: iridia/ui/app.py:1336 iridia/ui/app.py:1642 iridia/ui/keybinds_tab.py:366
+#: iridia/ui/app.py:1336 iridia/ui/app.py:1642 iridia/ui/keybinds_tab.py:370
 msgid "Copied"
 msgstr ""
 
@@ -1317,7 +1317,7 @@ msgstr ""
 msgid "OpenRGB"
 msgstr ""
 
-#: iridia/ui/app.py:1829 iridia/ui/keybinds_tab.py:389
+#: iridia/ui/app.py:1829 iridia/ui/keybinds_tab.py:393
 msgid "That didn't work"
 msgstr ""
 
@@ -1350,7 +1350,7 @@ msgstr ""
 msgid "OpenRGB's autostart is off"
 msgstr ""
 
-#: iridia/ui/app.py:1855 iridia/ui/keybinds_tab.py:121
+#: iridia/ui/app.py:1855 iridia/ui/keybinds_tab.py:125
 msgid "Turn off"
 msgstr ""
 
@@ -1488,81 +1488,85 @@ msgid "Not connected"
 msgstr ""
 
 #: iridia/ui/app.py:2079
+msgid "Following the screen's backlight"
+msgstr ""
+
+#: iridia/ui/app.py:2080
 msgid "Available"
 msgstr ""
 
-#: iridia/ui/app.py:2079
+#: iridia/ui/app.py:2080
 msgid "Not available"
 msgstr ""
 
-#: iridia/ui/app.py:2081 iridia/ui/widgets.py:211
+#: iridia/ui/app.py:2082 iridia/ui/widgets.py:211
 msgid "Mixed"
 msgstr ""
 
-#: iridia/ui/app.py:2082
+#: iridia/ui/app.py:2083
 msgid "Frozen (wallpaper changes are ignored)"
 msgstr ""
 
-#: iridia/ui/app.py:2082
+#: iridia/ui/app.py:2083
 msgid "Following the wallpaper"
 msgstr ""
 
-#: iridia/ui/app.py:2086
+#: iridia/ui/app.py:2087
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
 msgstr ""
 
-#: iridia/ui/app.py:2088
+#: iridia/ui/app.py:2089
 #, python-brace-format
 msgid "Scheduled {start} to {end} (cap {cap}%)"
 msgstr ""
 
-#: iridia/ui/app.py:2091
+#: iridia/ui/app.py:2092
 msgid "Off (PC asleep)"
 msgstr ""
 
-#: iridia/ui/app.py:2092
+#: iridia/ui/app.py:2093
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:2092
+#: iridia/ui/app.py:2093
 msgid "On"
 msgstr ""
 
-#: iridia/ui/app.py:2093
+#: iridia/ui/app.py:2094
 #, python-brace-format
 msgid "{n} strip changed by a keybind (see Keybinds)"
 msgid_plural "{n} strips changed by a keybind (see Keybinds)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:2097
+#: iridia/ui/app.py:2098
 #, python-brace-format
 msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
 msgstr ""
 
-#: iridia/ui/app.py:2097
+#: iridia/ui/app.py:2098
 msgid "nothing yet"
 msgstr ""
 
-#: iridia/ui/app.py:2097
+#: iridia/ui/app.py:2098
 msgid " (cached)"
 msgstr ""
 
-#: iridia/ui/app.py:2097
+#: iridia/ui/app.py:2098
 msgid "n/a (cached or not yet run)"
 msgstr ""
 
-#: iridia/ui/app.py:2128
+#: iridia/ui/app.py:2129
 #, python-brace-format
 msgid "Connected, but not seeing: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:2129
+#: iridia/ui/app.py:2130
 msgid "Connected. All configured devices visible."
 msgstr ""
 
-#: iridia/ui/app.py:2131
+#: iridia/ui/app.py:2132
 msgid "Not connected."
 msgstr ""
 
@@ -1580,7 +1584,7 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
-#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:386 iridia/ui/sections_panel.py:425
+#: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:390 iridia/ui/sections_panel.py:425
 #: iridia/ui/zonecard.py:900
 msgid "Done"
 msgstr ""
@@ -2074,327 +2078,331 @@ msgid ""
 "where the LEDs are on the Layout tab."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:24
+#: iridia/ui/keybinds_tab.py:25
 msgid "All lights off / on"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:25
+#: iridia/ui/keybinds_tab.py:26
 msgid "Freeze colors / follow the wallpaper"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:26
+#: iridia/ui/keybinds_tab.py:27
 msgid "Night mode on / off"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:27
+#: iridia/ui/keybinds_tab.py:28
 msgid "Pause / resume animations"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:28
+#: iridia/ui/keybinds_tab.py:29
 msgid "Load a setup"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:30
+#: iridia/ui/keybinds_tab.py:31
 msgid "No modifier"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:31
+#: iridia/ui/keybinds_tab.py:32
 msgid "All strips"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:34
+#: iridia/ui/keybinds_tab.py:35
 msgid "sxhkd (X11 window managers)"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:49
+#: iridia/ui/keybinds_tab.py:50
 msgid "~/.config/hypr/hyprland.conf (or a file it sources)"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:63
+#: iridia/ui/keybinds_tab.py:64
 #, python-brace-format
 msgid "~/.config/niri/config.kdl, inside binds { }"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:69
+#: iridia/ui/keybinds_tab.py:70
+msgid "river 0.4 and later leave keys to your window manager: bind this command in its config:"
+msgstr ""
+
+#: iridia/ui/keybinds_tab.py:73
 msgid ""
 "System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"
 " press your key:"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:72
+#: iridia/ui/keybinds_tab.py:76
 msgid ""
 "Settings, Keyboard, View and Customize Shortcuts, Custom Shortcuts, +. Paste this as the command,"
 " then set your key:"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:103
+#: iridia/ui/keybinds_tab.py:107
 msgid ""
 "Iridia doesn't listen to your keyboard. Your desktop does: you give a key a command, and pressing"
 " it runs that command. Build the command here, then add it to your desktop's config below."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:107
+#: iridia/ui/keybinds_tab.py:111
 msgid "Change strips"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:107
+#: iridia/ui/keybinds_tab.py:111
 msgid "Other actions"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:114 iridia/ui/layout_tab.py:1076
+#: iridia/ui/keybinds_tab.py:118 iridia/ui/layout_tab.py:1076
 msgid "Strips"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:120
+#: iridia/ui/keybinds_tab.py:124
 msgid "Power"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:121
+#: iridia/ui/keybinds_tab.py:125
 msgid "Leave as is"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:121
+#: iridia/ui/keybinds_tab.py:125
 msgid "Turn on"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:122 iridia/ui/keybinds_tab.py:459 iridia/ui/sections_panel.py:66
+#: iridia/ui/keybinds_tab.py:126 iridia/ui/keybinds_tab.py:463 iridia/ui/sections_panel.py:66
 msgid "Back to normal"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:126
+#: iridia/ui/keybinds_tab.py:130
 msgid "Pick the color"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:132 iridia/ui/zonecard.py:319
+#: iridia/ui/keybinds_tab.py:136 iridia/ui/zonecard.py:319
 msgid "Brightness"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:137 iridia/ui/keybinds_tab.py:453
+#: iridia/ui/keybinds_tab.py:141 iridia/ui/keybinds_tab.py:457
 msgid "Static pattern"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:141 iridia/ui/sections_panel.py:327
+#: iridia/ui/keybinds_tab.py:145 iridia/ui/sections_panel.py:327
 msgid "Effect"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:148
+#: iridia/ui/keybinds_tab.py:152
 msgid "Do"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:158
+#: iridia/ui/keybinds_tab.py:162
 msgid "Command"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:164
+#: iridia/ui/keybinds_tab.py:168
 msgid "Copy command"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:169
+#: iridia/ui/keybinds_tab.py:173
 msgid "Add it to your desktop"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:169
+#: iridia/ui/keybinds_tab.py:173
 msgid ""
 "Pick your desktop and a key. Paste the line into the file shown, then reload your desktop's "
 "config."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:173
+#: iridia/ui/keybinds_tab.py:177
 msgid "Desktop"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:178
+#: iridia/ui/keybinds_tab.py:182
 msgid "Key"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:187
+#: iridia/ui/keybinds_tab.py:191
 msgid ""
 "Key names: F1 to F12, letters, numbers, or names like Print, Pause, XF86Tools. Pick a combination"
 " your desktop doesn't use yet."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:195
+#: iridia/ui/keybinds_tab.py:199
 msgid "Copy line"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:200
+#: iridia/ui/keybinds_tab.py:204
 msgid "Changed by a keybind right now"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:200
+#: iridia/ui/keybinds_tab.py:204
 msgid ""
 "Strip keybinds are temporary: nothing is saved, and they end when you press the key again, run "
 "Back to normal, or restart the daemon."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:207
+#: iridia/ui/keybinds_tab.py:211
 msgid "More examples"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:207
+#: iridia/ui/keybinds_tab.py:211
 #, python-brace-format
 msgid ""
 "Short form for reading. In your desktop's config write the full path, {exe}, as the command above"
 " does: desktops often don't know where Iridia is installed."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:212
+#: iridia/ui/keybinds_tab.py:216
 msgid "the names you can use"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:213
+#: iridia/ui/keybinds_tab.py:217
 msgid "off, again: back to normal"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:214
+#: iridia/ui/keybinds_tab.py:218
 msgid "one color, again: back to normal"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:215
+#: iridia/ui/keybinds_tab.py:219
 msgid "every strip at 20%"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:216
+#: iridia/ui/keybinds_tab.py:220
 msgid "light a strip that is switched off"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:217
+#: iridia/ui/keybinds_tab.py:221
 msgid "several at once"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:218
+#: iridia/ui/keybinds_tab.py:222
 msgid "several strips (commas)"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:219
+#: iridia/ui/keybinds_tab.py:223
 msgid "undo every keybind change"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:220
+#: iridia/ui/keybinds_tab.py:224
 msgid "always off, never switch back"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:221
+#: iridia/ui/keybinds_tab.py:225
 msgid "everything off / on"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:222
+#: iridia/ui/keybinds_tab.py:226
 msgid "stop / start following the wallpaper"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:223
+#: iridia/ui/keybinds_tab.py:227
 msgid "night mode on / off"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:224
+#: iridia/ui/keybinds_tab.py:228
 msgid "an effect, again: back to normal"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:225
+#: iridia/ui/keybinds_tab.py:229
 msgid "still colors until you press it again"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:226
+#: iridia/ui/keybinds_tab.py:230
 msgid "pause / resume every animation"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:227
+#: iridia/ui/keybinds_tab.py:231
 msgid "load a saved setup (this one is permanent)"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:231
+#: iridia/ui/keybinds_tab.py:235
 msgid ""
 "Names are the ones shown in the window (rename a strip with its pencil button). When two strips "
 "share a name, use Device/Zone, as `zone list` shows."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:318
+#: iridia/ui/keybinds_tab.py:322
 msgid "Pick at least one thing to change: Turn on or off, a color or a brightness."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:320
+#: iridia/ui/keybinds_tab.py:324
 msgid "Save a setup first (Settings, Setups and backups)."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:323
+#: iridia/ui/keybinds_tab.py:327
 msgid "Undoes every keybind change on these strips."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:325
+#: iridia/ui/keybinds_tab.py:329
 msgid "Turns the strips off; press the key again to bring them back."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:327
+#: iridia/ui/keybinds_tab.py:331
 msgid "turns them on (even when switched off)"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:328
+#: iridia/ui/keybinds_tab.py:332
 msgid "runs an effect"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:329
+#: iridia/ui/keybinds_tab.py:333
 msgid "shows one color"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:331
+#: iridia/ui/keybinds_tab.py:335
 msgid "sets the brightness"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:332
+#: iridia/ui/keybinds_tab.py:336
 #, python-brace-format
 msgid "One press: {actions}. The next press puts everything back."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:334
+#: iridia/ui/keybinds_tab.py:338
 msgid "Pick several strips to change them together."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:337
+#: iridia/ui/keybinds_tab.py:341
 msgid "Same key turns everything off, then back on."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:338
+#: iridia/ui/keybinds_tab.py:342
 msgid "Same key freezes the current colors, then follows the wallpaper again."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:339
+#: iridia/ui/keybinds_tab.py:343
 msgid "Switches night mode on or off (this one is saved)."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:340
+#: iridia/ui/keybinds_tab.py:344
 msgid "Same key pauses every animated effect, then lets them run again."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:341
+#: iridia/ui/keybinds_tab.py:345
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:361
+#: iridia/ui/keybinds_tab.py:365
 msgid "Keybind color"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:444
+#: iridia/ui/keybinds_tab.py:448
 msgid "Nothing: every strip shows its normal colors."
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:448
+#: iridia/ui/keybinds_tab.py:452
 msgid "on"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:448
+#: iridia/ui/keybinds_tab.py:452
 msgid "off"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:450
+#: iridia/ui/keybinds_tab.py:454
 #, python-brace-format
 msgid "{n}% brightness"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:462
+#: iridia/ui/keybinds_tab.py:466
 msgid "Everything back to normal"
 msgstr ""
 
-#: iridia/ui/keybinds_tab.py:469
+#: iridia/ui/keybinds_tab.py:473
 msgid "Failed"
 msgstr ""
 

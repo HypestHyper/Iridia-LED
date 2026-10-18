@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 - **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it
   starts (at most every few hours), shows one desktop notification per new version, and installs

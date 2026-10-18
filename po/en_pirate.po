@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-17 08:24+0000\n"
+"POT-Creation-Date: 2026-10-18 02:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -1215,6 +1215,9 @@ msgstr "Hailed"
 msgid "Not connected"
 msgstr "Not hailed"
 
+msgid "Following the screen's backlight"
+msgstr "Followin' the screen's lantern"
+
 msgid "Available"
 msgstr "Aboard"
 
@@ -1717,6 +1720,9 @@ msgstr "~/.config/hypr/hyprland.conf (or a file it calls aboard)"
 #, python-brace-format
 msgid "~/.config/niri/config.kdl, inside binds { }"
 msgstr "~/.config/niri/config.kdl, inside binds { }"
+
+msgid "river 0.4 and later leave keys to your window manager: bind this command in its config:"
+msgstr "river 0.4 an' later leave keys to yer window manager: bind this command in its config:"
 
 msgid ""
 "System Settings, Keyboard, Shortcuts, Add New, Command or Script. Paste this as the command, then"

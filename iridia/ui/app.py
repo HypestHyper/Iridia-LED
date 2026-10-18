@@ -2076,7 +2076,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r["wallpaper"].set_label(wp)
         r["dominant"].set_label(f"#{colors[0]}" if colors else "-")
         r["openrgb"].set_label(_("Connected") if st.get("openrgb_connected") else _("Not connected"))
-        r["ddc"].set_label(_("Available") if st.get("ddc_available") else _("Not available"))
+        r["ddc"].set_label(_("Following the screen's backlight") if st.get("ddc_source") == "backlight"
+                           else _("Available") if st.get("ddc_available") else _("Not available"))
         modes = {z.get("mode", "full") for z in self._all_zone_cfgs(st.get("device_configs", {}))}
         r["mode"].set_label(MODE_LABELS.get(next(iter(modes)), MODE_LABELS["full"]) if len(modes) == 1 else _("Mixed") if modes else MODE_LABELS["full"])
         r["freeze"].set_label(_("Frozen (wallpaper changes are ignored)") if frozen else _("Following the wallpaper"))

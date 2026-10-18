@@ -32,6 +32,12 @@
   upgrade changed Python. `sh install.sh` hands over to bash; `sudo bash install.sh` is refused
   (it would install for root). Pillow 9.1 or newer is required: with Ubuntu 22.04's 9.0 every
   wallpaper gave the same color.
+- **Monitor brightness on Ubuntu and Debian:** ddcutil 1.x (Ubuntu 22.04 and 24.04, Debian 12) refused
+  an option Iridia passed, so brightness never followed the monitor there. Laptops without a DDC/CI
+  monitor now follow the built-in screen's backlight.
+- **Sensors on more machines:** with an integrated and a dedicated AMD GPU, the dedicated one is shown;
+  two drives of the same kind each get their own sensor; with several NVIDIA GPUs the first is read;
+  Intel Arc (xe) temperatures are found.
 - **Start at login, on more desktops:** the river line no longer uses `riverctl` (river 0.4 refuses
   to start when its init file contains it); Wayfire gets its own line; i3 gets its own (with
   `--no-startup-id`); river, bspwm and dwm started from a TTY or startx are recognised by their

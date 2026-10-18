@@ -112,3 +112,22 @@ def test_level_color_and_both():
     flash = _part(sensor="ram", show="color", palette="colors", flash_above=80)
     assert S.sensor_part(flash, 2, 90.0, resolve, t=0.2) != S.sensor_part(flash, 2, 90.0, resolve, t=0.7)
     assert S.sensor_part(flash, 2, 70.0, resolve, t=0.2) == S.sensor_part(flash, 2, 70.0, resolve, t=0.7)
+
+
+def test_the_discrete_gpu_wins_and_twin_drives_get_their_own_ids(tmp_path, monkeypatch):
+    monkeypatch.setattr("iridia.sensors.shutil.which", lambda exe: None)
+    hub = _machine(tmp_path)                            # card1: an iGPU, hwmon2 its amdgpu sensor
+    (tmp_path / "sys/class/drm/card1/device/mem_info_vram_total").write_text("536870912\n")
+    dgpu = tmp_path / "sys/class/drm/card0/device"
+    (dgpu / "hwmon" / "hwmon9").mkdir(parents=True)
+    (dgpu / "gpu_busy_percent").write_text("88\n")
+    (dgpu / "mem_info_vram_total").write_text("17163091968\n")
+    (dgpu / "hwmon/hwmon9/name").write_text("amdgpu\n")
+    (dgpu / "hwmon/hwmon9/temp1_input").write_text("71000\n")
+    (dgpu / "hwmon/hwmon9/temp1_label").write_text("edge\n")
+    hw = tmp_path / "sys/class/hwmon/hwmon9"
+    hw.symlink_to(dgpu / "hwmon/hwmon9")
+    _hwmon(tmp_path, 4, "nvme", [("Composite", 45000)])
+    src = hub.discover()
+    assert src["gpu_load"].read() == 88.0 and src["gpu_temp"].read() == 71.0
+    assert src["hwmon:nvme:Composite"].read() == 38.85 and src["hwmon:nvme#2:Composite"].read() == 45.0

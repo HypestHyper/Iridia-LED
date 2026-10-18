@@ -32,11 +32,11 @@ PCT_RANGE = (0.0, 100.0)
 
 CPU_CHIPS = ("k10temp", "zenpower", "coretemp", "cpu_thermal", "soc_thermal", "cpu-thermal")
 CPU_LABELS = ("Tctl", "Tdie", "Package id 0", "Physical id 0")
-GPU_CHIPS = ("amdgpu", "nouveau", "radeon")
-GPU_LABELS = ("edge", "junction")
+GPU_CHIPS = ("amdgpu", "nouveau", "radeon", "xe", "i915")
+GPU_LABELS = ("edge", "junction", "pkg")
 DISK_CHIPS = ("nvme", "drivetemp")
 
-_ID_RE = re.compile(r"^[A-Za-z0-9_:.\- ]{1,80}$")
+_ID_RE = re.compile(r"^[A-Za-z0-9_:.#\- ]{1,80}$")
 
 
 def valid_id(sid) -> bool:
@@ -95,7 +95,7 @@ class _NvidiaStream:
                 return
             try:
                 self._proc = subprocess.Popen(
-                    [exe, "--query-gpu=temperature.gpu,utilization.gpu", "--format=csv,noheader,nounits",
+                    [exe, "--id=0", "--query-gpu=temperature.gpu,utilization.gpu", "--format=csv,noheader,nounits",
                      "-lms", str(int(READ_SEC * 1000))],
                     stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, text=True, bufsize=1)
             except OSError:
@@ -180,8 +180,7 @@ class SensorHub:
         if p:
             src["cpu_temp"] = Source("cpu_temp", "CPU temperature", lambda p=p: _read_milli(p))
         nvidia = bool(shutil.which("nvidia-smi")) and os.path.isdir(os.path.join(self.proc, "driver", "nvidia"))
-        busy = sorted(glob.glob(os.path.join(self.sys, "class", "drm", "card*", "device", "gpu_busy_percent")))
-        gpu_t = self._pick(temps, GPU_CHIPS, GPU_LABELS)
+        busy, gpu_t = self._main_gpu(temps)
         if nvidia:
             src["gpu_temp"] = Source("gpu_temp", "GPU temperature (NVIDIA)", lambda: self._nvidia.temp, nvidia=True)
             src["gpu_load"] = Source("gpu_load", "GPU load (NVIDIA)", lambda: self._nvidia.load, nvidia=True)
@@ -201,11 +200,38 @@ class SensorHub:
         seen = {}
         for chip, label, path in temps:
             sid = f"hwmon:{chip}:{label}"
-            if sid in seen or not valid_id(sid):
+            n = seen.get(sid, 0) + 1
+            seen[sid] = n
+            if n > 1:                       # two drives (or GPUs) with the same chip name: nvme#2
+                sid = f"hwmon:{chip}#{n}:{label}"
+            if not valid_id(sid):
                 continue
-            seen[sid] = True
-            src[sid] = Source(sid, f"{chip} {label}", lambda p=path: _read_milli(p))
+            src[sid] = Source(sid, f"{chip}{f' #{n}' if n > 1 else ''} {label}", lambda p=path: _read_milli(p))
         return src
+
+    def _main_gpu(self, temps):
+        """(gpu_busy_percent files, temperature file) of the main GPU: with an integrated and a
+        discrete AMD GPU, the one with the most video memory, its own temperature."""
+        cards = []
+        for busy in glob.glob(os.path.join(self.sys, "class", "drm", "card*", "device", "gpu_busy_percent")):
+            dev = os.path.dirname(busy)
+            vram = _read(os.path.join(dev, "mem_info_vram_total")) or "0"
+            try:
+                size = int(vram.strip())
+            except ValueError:
+                size = 0
+            cards.append((size, busy, dev))
+        cards.sort(key=lambda c: (-c[0], c[1]))
+        busy = [c[1] for c in cards]
+        temp = None
+        if cards:
+            for d in sorted(glob.glob(os.path.join(cards[0][2], "hwmon", "hwmon*"))):
+                own = [(c, lb, p) for c, lb, p in temps if p.startswith(d + os.sep) or os.path.realpath(
+                    os.path.dirname(p)) == os.path.realpath(d)]
+                temp = self._pick(own, GPU_CHIPS, GPU_LABELS)
+                if temp:
+                    break
+        return busy, temp or self._pick(temps, GPU_CHIPS, GPU_LABELS)
 
     def sources(self) -> Dict[str, Source]:
         now = time.monotonic()

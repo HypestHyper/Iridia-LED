@@ -2609,6 +2609,7 @@ class Daemon:
             "rgb_test": ({"device": self._rgbtest[0], "zone": self._rgbtest[1]} if self._rgbtest else None),
             "brightness": self._current_brightness,
             "ddc_available": self.ddc.is_available(),
+            "ddc_source": getattr(self.ddc, "source", None),
             "ddc_last_error": self.ddc.last_error,
             "openrgb_connected": self.openrgb.client is not None,
             "openrgb_protocol": getattr(self.openrgb, "protocol", None) if self.openrgb.client is not None else None,

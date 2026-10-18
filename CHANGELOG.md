@@ -11,7 +11,9 @@
 - **The launcher shows up in Plasma right away**, with its icon on the window: Plasma's menu cache is
   rebuilt after installing.
 - *Diagnostics* names the devices it sees, so one OpenRGB doesn't report at all stands out.
-- Dragging a slider no longer prints GTK warnings.
+- **No more GTK warnings in the terminal** with the Breeze theme (KDE Plasma's default for GTK apps):
+  Breeze pulls scrollbars out with a negative margin that Iridia's style didn't undo, and GTK warned
+  on every redraw. Dragging a slider warned too.
 - The README is shorter.
 
 ## 1.3.0

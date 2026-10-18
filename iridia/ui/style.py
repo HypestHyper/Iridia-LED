@@ -176,7 +176,10 @@ checkbutton check, checkbutton radio {{ background: transparent; border: 2px sol
 checkbutton check:checked, checkbutton radio:checked {{ background: {PRIMARY}; border-color: {PRIMARY}; }}
 
 scrollbar {{ background: transparent; border: none; }}
-scrollbar slider {{ background: {OUTLINE_VARIANT}; border-radius: 999px; min-width: 6px; min-height: 6px; border: none; }}
+/* margin too: some themes (Breeze) pull the slider out with a negative margin that only their own
+   transparent border makes up for, and without it its size goes below zero (GTK warns on every redraw) */
+scrollbar slider {{ background: {OUTLINE_VARIANT}; border-radius: 999px; min-width: 6px; min-height: 6px; border: none;
+  margin: 0; }}
 scrollbar slider:hover {{ background: {OUTLINE}; }}
 
 tooltip {{ background: {INVERSE_SURFACE}; color: {INVERSE_ON_SURFACE}; border-radius: 8px; }}

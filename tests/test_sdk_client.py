@@ -70,10 +70,11 @@ def _port():
 def server(tmp_path):
     procs = []
 
-    def start(protocol=6, delay=0.0):
+    def start(protocol=6, delay=0.0, **extra):
         port = _port()
         env = dict(os.environ, FAKE_OPENRGB_MODE="devices", FAKE_OPENRGB_PROTOCOL=str(protocol),
-                   FAKE_OPENRGB_UPDATE_DELAY=str(delay), FAKE_OPENRGB_PACKETS=str(tmp_path / "packets.log"))
+                   FAKE_OPENRGB_UPDATE_DELAY=str(delay), FAKE_OPENRGB_PACKETS=str(tmp_path / "packets.log"),
+                   **{f"FAKE_OPENRGB_{k.upper()}": str(v) for k, v in extra.items()})
         p = subprocess.Popen([sys.executable, FAKE, "--server", "--server-port", str(port)], env=env,
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         procs.append(p)
@@ -144,6 +145,24 @@ def test_the_controller_falls_back_to_openrgb_python(server):
             assert ctl.send("Fake RAM", ["ff0000"] * 8, {"Stick": {"enabled": True}})
             assert ctl.send_frames("Fake ARGB Controller", {"": [(1, 2, 3)] * 40}) is True
             assert ctl.resize_zone("Fake ARGB Controller", "Channel 2", 25) is None
+        finally:
+            ctl.disconnect()
+
+
+def test_a_device_openrgb_finds_after_we_connected_is_picked_up(server):
+    """OpenRGB answers while it's still finding devices (the RAM first, USB ones later). Whether it
+    says so or not, and whichever client talks to it, the late device shows up."""
+    from iridia.openrgb_ctl import OpenRGBController
+    for protocol, silent in ((6, ""), (6, "1"), (3, "")):
+        ctl = OpenRGBController("127.0.0.1", server(protocol=protocol, late=0.4, late_silent=silent))
+        try:
+            assert ctl.ensure_connected(retry_interval=0)
+            assert set(ctl.devices) == {"Fake RAM"}
+            time.sleep(0.6)
+            ctl.maybe_enumerate(interval=0)
+            assert set(ctl.devices) == {"Fake RAM", "Fake ARGB Controller"}, (protocol, silent)
+            assert ctl.send("Fake ARGB Controller", ["00ff00"] * 40, {"Channel 1": {"enabled": True},
+                                                                       "Channel 2": {"enabled": True}})
         finally:
             ctl.disconnect()
 

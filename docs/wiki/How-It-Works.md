@@ -32,7 +32,8 @@ later checks ask only that one:
 1. Caelestia and Noctalia (their state files)
 2. Hyprland: swww or awww, hyprpaper, swaybg
 3. Sway: swww or awww, swaybg
-4. GNOME (light and dark wallpaper), KDE Plasma, XFCE, Cinnamon, MATE
+4. GNOME (light and dark wallpaper, slideshows), KDE Plasma (also its default wallpaper, before you
+   pick one), XFCE, Cinnamon, MATE, COSMIC, LXQt
 5. feh, nitrogen, xwallpaper, waypaper
 6. The newest image in `wallpaper.watch_folder`
 
@@ -80,7 +81,10 @@ only when something changed.
 ## Brightness
 
 ddcutil reads the monitor's brightness every few seconds on a background thread, so a slow monitor never
-holds up the colors. Without DDC, the manual brightness is used.
+holds up the colors, and only while some strip follows the monitor. Without a monitor to follow (no
+ddcutil, no monitor answering, or the one you picked switched off), those strips use their Manual
+brightness. *Automatic* follows the first monitor that answers; a monitor picked in *Settings, Monitor
+brightness* is the only one followed. A laptop's own screen is followed through its backlight.
 
 ## Resilience
 

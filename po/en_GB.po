@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 02:31+0000\n"
+"POT-Creation-Date: 2026-10-18 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -615,6 +615,75 @@ msgstr "Done: restarting the window…"
 
 msgid "That didn't work: see the output below. Nothing of yours was changed."
 msgstr "That didn't work: see the output below. Nothing of yours was changed."
+
+msgid "Monitor brightness"
+msgstr "Monitor brightness"
+
+msgid ""
+"Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
+"from this monitor."
+msgstr ""
+"Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
+"from this monitor."
+
+msgid "Monitor"
+msgstr "Monitor"
+
+msgid "Look again"
+msgstr "Look again"
+
+msgid "Looking for monitors…"
+msgstr "Looking for monitors…"
+
+msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+msgstr "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+
+#, python-brace-format
+msgid "I2C bus {n}"
+msgstr "I2C bus {n}"
+
+msgid "doesn't answer"
+msgstr "doesn't answer"
+
+msgid "Following the screen's backlight."
+msgstr "Following the screen's backlight."
+
+msgid "the monitor"
+msgstr "the monitor"
+
+#, python-brace-format
+msgid "Following {name}, now at {n}%."
+msgstr "Following {name}, now at {n}%."
+
+#, python-brace-format
+msgid "Following {name} once a strip has Follow monitor brightness on."
+msgstr "Following {name} once a strip has Follow monitor brightness on."
+
+msgid ""
+"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
+"press Look again."
+msgstr ""
+"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
+"press Look again."
+
+msgid ""
+"ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
+"installing Iridia you may need to log out and in once."
+msgstr ""
+"ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
+"installing Iridia you may need to log out and in once."
+
+msgid "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
+msgstr "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
+
+msgid "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
+msgstr "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
+
+msgid "No monitor brightness to follow."
+msgstr "No monitor brightness to follow."
+
+msgid "Strips that follow it use their Manual brightness meanwhile."
+msgstr "Strips that follow it use their Manual brightness meanwhile."
 
 msgid "Lock and idle"
 msgstr "Lock and idle"
@@ -2558,6 +2627,9 @@ msgstr "Follow monitor brightness"
 
 msgid "Manual"
 msgstr "Manual"
+
+msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
+msgstr "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 
 msgid "Range"
 msgstr "Range"

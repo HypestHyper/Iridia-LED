@@ -55,6 +55,22 @@ Usually two things went wrong at once:
 To fix it now: `iridia openrgb restart`. OpenRGB's own output, when Iridia started it, is in
 `~/.local/share/iridia/openrgb.log`; OpenRGB also keeps logs in `~/.config/OpenRGB/logs/`.
 
+## A device isn't listed at all
+
+Iridia controls what OpenRGB reports, so look in OpenRGB's own window first.
+
+- **Fans, AIO coolers and strips on an ARGB header** (an Arctic Liquid Freezer III on the motherboard's
+  header, for example) aren't devices of their own. OpenRGB can't see what's plugged into a header: they
+  are that header's zone, under the motherboard or the controller. Give the zone its LED count.
+- **USB controllers** (many motherboards' RGB chips, Razer, Corsair, NZXT and others) need OpenRGB's udev
+  rules. A package installs them, but they only apply to devices plugged in afterwards: reboot, or run
+  `sudo udevadm control --reload-rules && sudo udevadm trigger`, then restart OpenRGB.
+- **New hardware needs a new OpenRGB.** OpenRGB 0.9 doesn't know recent graphics cards and motherboards.
+  If OpenRGB's window shows a device Iridia doesn't, check that both are the same OpenRGB:
+  `iridia openrgb status` shows the one Iridia starts. A Flatpak or AppImage next to a distribution's
+  package can be a different version.
+- On a live USB all three usually apply at once.
+
 ## A device shows as missing
 
 When a device OpenRGB used to report disappears, Iridia restarts OpenRGB's server to bring it back, at
@@ -75,7 +91,9 @@ update), switch it off on the Devices tab so it stops being reported.
 
 ## Brightness doesn't follow the monitor
 
-Run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
+*Settings, Monitor brightness* says what's wrong and which monitor is followed; pick the right one there
+if you have several (or `iridia monitor` lists them, `iridia monitor 6` picks the one on I2C bus 6), and
+press *Look again* after installing ddcutil. Then run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
 many docks don't), DDC/CI may be off in the monitor's menu, or you have no access to the I2C bus yet:
 run `bash install.sh` again to set it up (see [Installation](Installation.md#setting-up-monitor-brightness-optional)),
 and log out and in once afterwards.

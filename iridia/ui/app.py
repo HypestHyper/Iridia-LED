@@ -937,6 +937,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(label(_("Turns off shape morphs, sliding panels and the color cross-fade."), ("small", "faint")))
         p.append(c)
 
+        self._build_monitor_settings(p)
+
         # night + sleep
         p.append(section(_("Night mode and sleep"), _("Dim the LEDs at night, and turn them off while the PC sleeps.")))
         c = card()
@@ -1290,6 +1292,69 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 rc = 1
             GLib.idle_add(finish, rc)
         threading.Thread(target=work, daemon=True).start()
+
+    def _build_monitor_settings(self, p):
+        p.append(section(_("Monitor brightness"), _("Strips with Follow monitor brightness on (under Brightness, on "
+                                                    "each strip) take their brightness from this monitor.")))
+        c = card()
+        r = wrap_row(10)
+        self._ddc_buses = {_("Automatic"): None}
+        self._ddc_dd = Dropdown(list(self._ddc_buses), _("Automatic"), self._ddc_pick, placeholder="")
+        r.append(hbox(10, label(_("Monitor"), ("body", "dim")), self._ddc_dd))
+        r.append(button(_("Look again"), "refresh", "tonal small",
+                        lambda: self.bg(lambda: self.client.ddc(rescan=True),
+                                        lambda _r: self.toast(_("Looking for monitors…")))))
+        c.append(r)
+        c.append(label(_("Automatic follows the first monitor that answers. A monitor you pick is the only one "
+                         "followed."), ("small", "faint")))
+        self._ddc_lbl = label("", ("small", "dim"), wrap=True)
+        c.append(self._ddc_lbl)
+        p.append(c)
+
+    def _ddc_pick(self, text):
+        if text in self._ddc_buses:
+            bus = self._ddc_buses[text]
+            self.bg(lambda: self.client.ddc(bus=bus))
+
+    def _apply_ddc(self, st):
+        ok = bool(st.get("ddc_available"))
+        for c in self._zone_cards.values():
+            c.set_follow_ok(ok)
+        if not hasattr(self, "_ddc_dd"):
+            return
+        displays = st.get("ddc_displays") or []
+        choice = st.get("ddc_choice")
+        buses = {_("Automatic"): None}
+        for d in displays:
+            where = d.get("connector") or _("I2C bus {n}").format(n=d.get("bus"))
+            text = f"{d.get('name') or _('Monitor')} ({where})"
+            buses[text + ("" if d.get("ok", True) else "  ·  " + _("doesn't answer"))] = d.get("bus")
+        if choice is not None and choice not in buses.values():
+            buses[_("I2C bus {n}").format(n=choice)] = choice
+        self._ddc_buses = buses
+        self._ddc_dd.set_items(list(buses), next((k for k, b in buses.items() if b == choice), _("Automatic")))
+        names = {d.get("bus"): d.get("name") for d in displays}
+        mon = st.get("monitor_brightness")
+        if st.get("ddc_detecting"):
+            text = _("Looking for monitors…")
+        elif st.get("ddc_source") == "backlight":
+            text = _("Following the screen's backlight.")
+        elif ok:
+            name = names.get(st.get("ddc_bus")) or _("the monitor")
+            text = (_("Following {name}, now at {n}%.").format(name=name, n=mon) if mon is not None else
+                    _("Following {name} once a strip has Follow monitor brightness on.").format(name=name))
+        else:
+            text = {
+                "no_ddcutil": _("ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil "
+                                "package, then press Look again."),
+                "no_monitor": _("ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and "
+                                "after installing Iridia you may need to log out and in once."),
+                "no_answer": _("No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."),
+                "chosen_silent": _("This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another "
+                                   "one."),
+            }.get(st.get("ddc_problem"), _("No monitor brightness to follow."))
+            text += " " + _("Strips that follow it use their Manual brightness meanwhile.")
+        self._ddc_lbl.set_label(text)
 
     def _build_session_settings(self, p):
         p.append(section(_("Lock and idle"), _("Dim or turn off the LEDs when the screen locks or you're away. "
@@ -2076,8 +2141,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r["wallpaper"].set_label(wp)
         r["dominant"].set_label(f"#{colors[0]}" if colors else "-")
         r["openrgb"].set_label(_("Connected") if st.get("openrgb_connected") else _("Not connected"))
+        mon_name = next((d.get("name") for d in st.get("ddc_displays") or []
+                         if d.get("bus") == st.get("ddc_bus") and d.get("name")), None)
         r["ddc"].set_label(_("Following the screen's backlight") if st.get("ddc_source") == "backlight"
-                           else _("Available") if st.get("ddc_available") else _("Not available"))
+                           else (mon_name or _("Available")) if st.get("ddc_available") else _("Not available"))
         modes = {z.get("mode", "full") for z in self._all_zone_cfgs(st.get("device_configs", {}))}
         r["mode"].set_label(MODE_LABELS.get(next(iter(modes)), MODE_LABELS["full"]) if len(modes) == 1 else _("Mixed") if modes else MODE_LABELS["full"])
         r["freeze"].set_label(_("Frozen (wallpaper changes are ignored)") if frozen else _("Following the wallpaper"))
@@ -2117,6 +2184,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         else:
             self._sync_devices(devices, colors, custom)
         self._apply_hw(st.get("devices") or [])
+        self._apply_ddc(st)
         self._sync_animation_settings(st)
         for k, info in (st.get("strip_info") or {}).items():
             c = self._zone_cards.get(k)

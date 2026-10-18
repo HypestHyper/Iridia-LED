@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 02:31+0000\n"
+"POT-Creation-Date: 2026-10-18 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -615,6 +615,75 @@ msgstr "Done: restartin' the window…"
 
 msgid "That didn't work: see the output below. Nothing of yours was changed."
 msgstr "That didn't work: see the output below. Nothin' o' yers was changed."
+
+msgid "Monitor brightness"
+msgstr "Spyglass brightness"
+
+msgid ""
+"Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
+"from this monitor."
+msgstr ""
+"Strips that follow the spyglass (under Brightness, on each strip) take their glow from this one, "
+"arr."
+
+msgid "Monitor"
+msgstr "Spyglass"
+
+msgid "Look again"
+msgstr "Look again, matey"
+
+msgid "Looking for monitors…"
+msgstr "Scannin' the horizon for spyglasses…"
+
+msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+msgstr "Automatic follows the first spyglass that answers. Pick one, an' only that one be followed."
+
+#, python-brace-format
+msgid "I2C bus {n}"
+msgstr "I2C bus {n}, arr"
+
+msgid "doesn't answer"
+msgstr "be silent as the deep"
+
+msgid "Following the screen's backlight."
+msgstr "Followin' the screen's lantern."
+
+msgid "the monitor"
+msgstr "the spyglass"
+
+#, python-brace-format
+msgid "Following {name}, now at {n}%."
+msgstr "Followin' {name}, now at {n}%."
+
+#, python-brace-format
+msgid "Following {name} once a strip has Follow monitor brightness on."
+msgstr "Followin' {name} once a strip follows the spyglass."
+
+msgid ""
+"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
+"press Look again."
+msgstr ""
+"ddcutil ain't aboard, so no spyglass brightness can be read. Haul in the ddcutil package, then "
+"press Look again, matey."
+
+msgid ""
+"ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
+"installing Iridia you may need to log out and in once."
+msgstr ""
+"ddcutil spies no spyglass. Some docks an' adapters keep the brightness to themselves, an' after "
+"installin' Iridia ye may need to go ashore an' back once."
+
+msgid "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
+msgstr "No spyglass answers. Turn DDC/CI on in the spyglass's own menu, then press Look again, matey."
+
+msgid "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
+msgstr "This spyglass be silent. Turn DDC/CI on in its own menu, or pick another, arr."
+
+msgid "No monitor brightness to follow."
+msgstr "No spyglass brightness to follow."
+
+msgid "Strips that follow it use their Manual brightness meanwhile."
+msgstr "Strips that follow it use their By hand brightness till then."
 
 msgid "Lock and idle"
 msgstr "Lock an' shore leave"
@@ -2560,6 +2629,9 @@ msgstr "Follow the spyglass brightness"
 
 msgid "Manual"
 msgstr "By hand"
+
+msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
+msgstr "No spyglass brightness to follow (see Settings, Spyglass brightness), so By hand be used."
 
 msgid "Range"
 msgstr "Range"

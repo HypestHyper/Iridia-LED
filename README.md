@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img alt="Version 1.3.0" src="https://img.shields.io/badge/version-1.3.0-7c5cff">
+  <img alt="Version 1.3.1" src="https://img.shields.io/badge/version-1.3.1-7c5cff">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
@@ -29,14 +29,11 @@
 
 ---
 
-Iridia extracts colors from the current wallpaper and sends them to RGB devices (LED strips, RAM,
-keyboards and so on) through [OpenRGB](https://openrgb.org/). LED brightness can follow the monitor's
-brightness over DDC/CI.
+Iridia takes the colors of your wallpaper and puts them on your RGB devices (LED strips, RAM,
+keyboards, fans and so on) through [OpenRGB](https://openrgb.org/). Change the wallpaper and the lights
+follow.
 
-It consists of a background daemon, a command line tool and a GTK 4 settings window. The daemon handles
-wallpaper detection, color extraction and sending colors to OpenRGB; the window and the command line only
-change its settings. Each OpenRGB zone can be configured separately (pattern, colors, brightness, color
-correction). Patterns are static by default; animated effects are there when you want them.
+A small background service does the work; a GTK 4 window and an `iridia` command change its settings.
 
 > **Note:** This project was written almost entirely by an AI assistant, with direction and testing by the author. It has been tested mainly on CachyOS with Hyprland,
 > and a Razer Chroma ARGB controller driving WS2812B strips. Other hardware,
@@ -50,67 +47,17 @@ correction). Patterns are static by default; animated effects are there when you
 
 ## Features
 
-**Wallpaper**
-
-- Finds the wallpaper on Hyprland (hyprpaper, swww/awww, swaybg), Sway, niri, GNOME, KDE, XFCE,
-  Cinnamon, MATE, COSMIC, LXQt, feh, nitrogen, xwallpaper, waypaper, Caelestia and Noctalia, or uses a
-  watched folder.
-- Three color extraction methods (Caelestia's scheme, Material Color Utilities, Pillow).
-- Color picks are stored per wallpaper and restored when that wallpaper is used again.
-
-**Zones and patterns**
-
-- Patterns: solid, gradient, segments, center out, edges in, alternating, and painted LED by LED.
-- Strip preview with adjustable color stops; reverse and mirror.
-- Saved colors, recently used colors, and colors marked as exact (sent without correction).
-- Animated effects: breathing, comet, fill, embers, rainbow, rainbow vomit and color cycle, using the
-  zone's colors, also running through the room along the Layout ([Animations](docs/wiki/Animations.md)).
-  With OpenRGB 1.0 each frame waits until the controller has shown the one before, so a slow
-  controller never falls behind.
-- An *Everything* card that changes all zones at once.
-- Split a strip into parts, each with the strip's own look, a pattern or effect of its own, a sensor,
-  or nothing; set single LEDs by hand ([Devices and patterns](docs/wiki/Devices-and-Patterns.md)).
-- Sensors: CPU and GPU temperature and load, memory use and disk temperature as a bar or a color,
-  several on one strip.
-
-**Layout**
-
-- A 2D drawing of the strips with their current colors, one dot per LED, scaled by LEDs per metre.
-- Strips can be moved, bent, turned, flipped, cloned (with their own names) and hidden; LEDs can be
-  painted on the drawing.
-- Cuts for strips joined again with a wire (drag the piece after a cut anywhere), and parts of a strip
-  can be left out of the drawing. Strip names and LED numbers can be hidden.
-- *Find LEDs* lights a single LED on the physical strip, to locate corners.
-
-**Brightness and time**
-
-- Brightness from the monitor (DDC/CI), a laptop's screen backlight, or set manually, with a range and
-  an inverted mode.
-- Night mode (a brightness cap between two times), LEDs off during suspend, dim or off when the screen
-  locks or you're away.
-- Freeze: ignore wallpaper changes until unfrozen.
-
-**Strip types and correction**
-
-- Addressable 5V (WS2812B, SK6812), 12V grouped (WS2811, COB), plain 12V RGB, and RGBW (experimental).
-- Color order setting with a test pattern, and an optional power limit.
-- Color correction: a 48 color palette, or calibration profiles that can be edited.
-
-**Other**
-
-- `iridia zone` commands for keyboard shortcuts (on/off, color, brightness; running the same command
-  again reverts it). The window shows the config line for several compositors and desktops.
-- Setups: save and load the whole configuration under a name, with automatic backups.
-- Starts OpenRGB's server inside your session, keeps exactly one running, and restarts it when it
-  comes up without devices. Or leave it to systemd, or to yourself.
-- `iridia doctor` for diagnostics, and a log viewer in the window.
-- Updates from the window (checked download, settings backed up, one click back), no password needed.
-- Light in the background: about 0.1% of one CPU core and 30 MB of memory with static colors.
-
-**Languages**
-
-The window uses British spelling by default. American English can be picked in Settings,
-Appearance, Language. The command line, the log and `iridia doctor` use American spelling.
+- **Works on most desktops:** GNOME, KDE Plasma, XFCE, Cinnamon, MATE, COSMIC, Hyprland, Sway, niri and
+  more ([full list](docs/wiki/How-It-Works.md#wallpaper-detection)), or a folder you choose.
+- **Each zone its own look:** a solid color, a gradient, segments and other patterns, with its own
+  brightness. A strip can be split into parts, for example one that shows the CPU temperature.
+- **Animations when you want them:** breathing, comet, rainbow and a few more, in the wallpaper's colors.
+- **A map of your room:** draw where the strips are, and gradients and animations run across them.
+- **Brightness that fits:** follows your monitor (DDC/CI) or laptop screen, dims at night, and goes
+  off when the screen locks or the PC sleeps.
+- **Most strip types:** WS2812B, WS2811, plain 12V RGB and RGBW, with color order and color correction.
+- **Keyboard shortcuts and saved setups** through the `iridia` command.
+- **Light:** about 0.1% of one CPU core and 30 MB of memory with static colors.
 
 ## Install
 
@@ -144,9 +91,8 @@ your launcher and starts it. It asks two things:
 Nothing of Iridia itself goes outside your home folder. Add `--yes` to skip the questions and use the
 defaults, `--no-deps` to leave system packages alone.
 
-**Updating:** `git pull && bash install.sh`. Your settings are kept. Updating from 1.1.0 also removes
-its `iridia-openrgb.service`, which could start OpenRGB too early at boot (see the
-[changelog](CHANGELOG.md)).
+**Updating:** from the window's *Updates* tab, with `iridia update`, or with `git pull && bash install.sh`.
+Your settings are kept ([Updates](docs/wiki/Updates.md)).
 
 <details>
 <summary><b>Installing the dependencies by hand</b></summary>

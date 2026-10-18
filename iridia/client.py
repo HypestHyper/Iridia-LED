@@ -149,6 +149,11 @@ class Client:
         """Every sensor a strip can show, with a fresh reading."""
         return self._ipc.send({"cmd": "sensors"})
 
+    def ddc(self, **kw) -> dict:
+        """Monitor brightness: bus (an I2C bus number, or None for the first monitor that answers), or
+        rescan=True to look for monitors again."""
+        return self._ipc.send(dict(kw, cmd="ddc"))
+
     def session(self, **kw) -> dict:
         """Lock and idle: lock, idle (keep/dim/off), idle_minutes, dim, test (seconds), or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="session"))

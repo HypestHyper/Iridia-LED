@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.3.1
+
+- **Pick the monitor whose brightness the LEDs follow.** *Settings, Monitor brightness* lists the
+  monitors ddcutil finds (also `iridia monitor`). *Automatic* follows the first one that answers, as
+  before; a monitor you pick is the only one followed, never swapped for another when it doesn't answer.
+  The section says what's wrong when nothing can be followed, and *Look again* finds a monitor (or
+  ddcutil) added since.
+- **Follow monitor brightness has a fallback.** Without a monitor to follow (no ddcutil, DDC/CI off in
+  the monitor's menu, the chosen monitor switched off), strips use their *Manual* brightness instead of
+  a fixed 100%, and the strip's Brightness section says so.
+- **Follow monitor brightness is off for new strips.** Strips you already have keep their setting. ddcutil
+  is only asked while some strip follows the monitor.
+- The brightness in the window's header is the LEDs' own (the brightest strip), not the monitor's.
+- **The installer applies OpenRGB's udev rules right away.** When it installs OpenRGB, the rules only
+  reached devices plugged in afterwards, so OpenRGB's server couldn't open USB controllers (many
+  motherboards, Razer and others) until the next reboot.
+- **Devices OpenRGB finds after Iridia connected are picked up.** OpenRGB answers while it's still
+  finding devices (the RAM first, USB controllers and graphics cards later). With OpenRGB before 1.0,
+  Iridia kept the first, partial list until the next restart; with 1.0 it relied on OpenRGB saying
+  so. It now checks the list every few seconds either way.
+- **KDE Plasma's default wallpaper is found.** Plasma writes no wallpaper line until you pick one, so a
+  fresh desktop (a live USB, a new user) had none to find. The global theme's default is used then.
+- **The launcher shows up in Plasma right away**, with its icon on the window: Plasma's menu cache is
+  rebuilt after installing.
+- *Diagnostics* names the devices it sees, so one OpenRGB doesn't report at all stands out.
+- **No more GTK warnings in the terminal** with the Breeze theme (KDE Plasma's default for GTK apps):
+  Breeze pulls scrollbars out with a negative margin that Iridia's style didn't undo, and GTK warned
+  on every redraw. Dragging a slider warned too.
+- The README is shorter.
+
 ## 1.3.0
 
 - **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it

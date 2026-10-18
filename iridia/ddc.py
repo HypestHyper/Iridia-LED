@@ -7,12 +7,45 @@ monitor that answers DDC/CI, a laptop's internal screen is followed through
 import glob, logging, os, re, subprocess, threading, time
 
 logger = logging.getLogger("iridia")
+_UNSET = object()
+
+
+def parse_detect(out: str) -> list:
+    """`ddcutil detect --terse` -> [{"bus", "name", "connector"}] for the displays it lists (not the
+    "Invalid display" ones, which have no DDC/CI), in its order."""
+    displays, cur = [], None
+    for raw in (out or "").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        if not raw[0].isspace():            # a block starts: "Display 1", "Invalid display", ...
+            cur = {"bus": None, "name": "", "connector": ""} if line.startswith("Display") else None
+            if cur is not None:
+                displays.append(cur)
+            continue
+        if cur is None or ":" not in line:
+            continue
+        key, value = (x.strip() for x in line.split(":", 1))
+        if key == "I2C bus":
+            m = re.search(r"i2c-(\d+)", value)
+            cur["bus"] = int(m.group(1)) if m else None
+        elif key == "Monitor":              # MFG:Model:Serial
+            parts = value.split(":")
+            cur["name"] = (parts[1] if len(parts) > 1 and parts[1].strip() else parts[0]).strip()
+        elif key == "DRM connector":
+            cur["connector"] = re.sub(r"^card\d+-", "", value)
+    return [d for d in displays if d["bus"] is not None]
 
 
 class DDCController:
     def __init__(self, enabled=True, bus_number=None, poll_interval=5.0, fallback_brightness=100):
         self.enabled = enabled
-        self.bus = bus_number
+        self.choice = bus_number            # the monitor picked in Settings (I2C bus), or None: automatic
+        self.bus = bus_number               # the one followed
+        self.displays = []                  # what ddcutil detect lists: [{"bus", "name", "connector", "ok"}]
+        self.detections = 0                 # finished detections (tests wait on it)
+        self.detecting = False
+        self.problem = None                 # why nothing is followed: no_ddcutil, no_monitor, no_answer, chosen_silent
         self.poll_interval = poll_interval
         self.fallback_brightness = fallback_brightness
         self.last_brightness = fallback_brightness
@@ -31,10 +64,13 @@ class DDCController:
 
     def _detect_bg(self):
         with self._busy:
+            self.detecting = True
             try:
                 self._detect()
             except Exception as e:          # noqa: BLE001
                 logger.warning(f"DDC detection failed: {type(e).__name__}: {e}")
+            self.detecting = False
+            self.detections += 1
 
     def _run(self, cmd, timeout=5):
         try:
@@ -54,54 +90,67 @@ class DDCController:
             return ""
 
     def _detect(self):
+        self._available, self.source, self._backlight, self.displays = False, None, None, []
+        self.last_error = self.problem = None
         if not self.enabled:
             logger.debug("DDC disabled in config, skipping detection")
             return
         version = self._run(["ddcutil", "--version"])
         if not version:
             logger.info("DDC: 'ddcutil' not available, install it for monitor-brightness-synced LED brightness (optional)")
+            self.last_error, self.problem = "ddcutil isn't installed", "no_ddcutil"
             self._try_backlight()
             return
         m = re.search(r"ddcutil\s+(\d+)", version)
         self._quiet = ["--syslog", "NEVER"] if m and int(m.group(1)) >= 2 else []
-        if self.bus is not None:
-            out = self._run(["ddcutil", "getvcp", "10", "--bus", str(self.bus), "--terse"] + self._quiet)
-            if out:
-                self._available = True
-                self.source = "ddc"
-                logger.info(f"DDC: using configured I2C bus {self.bus}")
+        self.displays = parse_detect(self._run(["ddcutil", "detect", "--terse"]))
+        for d in self.displays:
+            d["ok"] = bool(self._getvcp(d["bus"]))
+        if self.choice is not None:
+            # The monitor you picked, and no other: following another screen instead is worse than
+            # following none (the Manual brightness is used then).
+            known = any(d["bus"] == self.choice for d in self.displays)
+            if any(d["bus"] == self.choice and d["ok"] for d in self.displays) or \
+                    (not known and self._getvcp(self.choice)):
+                self._use(self.choice, "the chosen monitor")
                 return
-            logger.warning(f"DDC: configured bus {self.bus} didn't respond to getvcp, falling back to auto-detect")
-        out = self._run(["ddcutil", "detect", "--terse"])
-        if not out:
-            logger.info("DDC: 'ddcutil detect' found no displays")
-            self._try_backlight()
+            self.last_error = f"the chosen monitor (I2C bus {self.choice}) doesn't answer"
+            self.problem = "chosen_silent"
+            logger.warning(f"DDC: the chosen monitor on I2C bus {self.choice} doesn't answer DDC/CI; is DDC/CI on "
+                           "in its own menu? Using each zone's Manual brightness meanwhile.")
             return
-        lines = out.splitlines()
-        candidates_tried = []
-        for i, line in enumerate(lines):
-            line = line.strip()
-            if not line.startswith("Display"):
-                continue
-            for j in range(i + 1, min(i + 5, len(lines))):
-                bus_line = lines[j].strip()
-                m = re.search(r"i2c-(\d+)", bus_line)
-                if m:
-                    bus = int(m.group(1))
-                    candidates_tried.append(bus)
-                    test = self._run(["ddcutil", "getvcp", "10", "--bus", str(bus), "--terse"] + self._quiet)
-                    if test:
-                        self.bus = bus
-                        self._available = True
-                        self.source = "ddc"
-                        logger.info(f"DDC: display on I2C bus {bus}, brightness polling enabled")
-                        return
-                    break
-        self._available = False
-        logger.info(f"DDC: display(s) detected ({candidates_tried or 'none with an i2c bus'}) but none "
-                    "responded to getvcp (feature 0x10, brightness). "
-                    "This is often a DDC/CI setting disabled in the monitor's own OSD menu.")
+        first = next((d for d in self.displays if d["ok"]), None)
+        if first:
+            self._use(first["bus"], "the first monitor that answers")
+            return
+        if self.displays:
+            self.last_error, self.problem = "no monitor answers DDC/CI", "no_answer"
+            logger.info(f"DDC: display(s) found (I2C bus {', '.join(str(d['bus']) for d in self.displays)}) but "
+                        "none answered getvcp (feature 0x10, brightness). This is often a DDC/CI setting turned off "
+                        "in the monitor's own menu.")
+        else:
+            self.last_error, self.problem = "ddcutil found no monitor", "no_monitor"
+            logger.info("DDC: 'ddcutil detect' found no displays")
         self._try_backlight()
+
+    def _getvcp(self, bus) -> str:
+        return self._run(["ddcutil", "getvcp", "10", "--bus", str(bus), "--terse"] + self._quiet)
+
+    def _use(self, bus, why):
+        self.bus = bus
+        self._available = True
+        self.source = "ddc"
+        self.last_error = self.problem = None
+        name = next((d["name"] for d in self.displays if d["bus"] == bus and d["name"]), "")
+        logger.info(f"DDC: following {why}" + (f", {name}" if name else "") + f" (I2C bus {bus})")
+
+    def redetect(self, choice=_UNSET):
+        """Look for monitors again (ddcutil installed since, a monitor plugged in), optionally with a
+        new choice: an I2C bus number, or None for the first monitor that answers."""
+        if choice is not _UNSET:
+            self.choice = choice
+        self._last_poll = 0.0
+        threading.Thread(target=self._detect_bg, daemon=True, name="iridia-ddc").start()
 
     BACKLIGHT = "/sys/class/backlight"
 
@@ -127,6 +176,7 @@ class DDCController:
         self._backlight = (best[1], best[2])
         self._available = True
         self.source = "backlight"
+        self.last_error = self.problem = None
         logger.info(f"Brightness: following the screen's backlight ({os.path.dirname(best[1])})")
 
     def _read_backlight(self):

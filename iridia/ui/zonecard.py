@@ -16,7 +16,7 @@ from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, St
 
 ZONE_FIELDS_DEFAULT = {
     "enabled": True, "led_count": 20, "pattern": "solid", "mode": "full",
-    "pattern_colors": [0], "brightness_sync": True, "manual_brightness": 100,
+    "pattern_colors": [0], "brightness_sync": False, "manual_brightness": 100,
     "brightness_range": [0, 100], "invert_brightness": False, "gamma_correction": False,
     "pattern_params": {}, "calibration_profile": "WS2812B", "animation": None,
 }
@@ -318,12 +318,17 @@ class ZoneCard(Gtk.Box):
         br.set_margin_top(6)
         br.append(label(_("Brightness"), ("subheading",)))
         r1 = hbox(10)
-        row1, self._sync = switch_row(_("Follow monitor brightness"), self.cfg.get("brightness_sync", True), self._on_sync)
+        row1, self._sync = switch_row(_("Follow monitor brightness"), self.cfg.get("brightness_sync", False), self._on_sync)
         r1.append(row1)
         r1.append(label(_("Manual"), ("small", "dim"), xalign=1.0))
         self._manual = Spin(0, 100, self.cfg.get("manual_brightness", 100), self._on_manual)
         r1.append(self._manual)
         br.append(r1)
+        self._follow_ok = True
+        self._sync_note = label(_("No monitor brightness to follow (see Settings, Monitor brightness), so Manual is "
+                                  "used."), ("small", "faint"), wrap=True)
+        self._sync_note.set_visible(False)
+        br.append(self._sync_note)
         r2 = hbox(12)
         r2.append(label(_("Range"), ("small", "dim")))
         rng = self.cfg.get("brightness_range", [0, 100])
@@ -878,6 +883,12 @@ class ZoneCard(Gtk.Box):
 
     def _on_sync(self, v):
         self._call(self.client.set_zone_brightness_sync, self.device_name, self.zone_name, v)
+        self._sync_note.set_visible(bool(v) and not self._follow_ok)
+
+    def set_follow_ok(self, ok: bool):
+        """Whether there's a monitor brightness to follow (the note says Manual is used otherwise)."""
+        self._follow_ok = ok
+        self._sync_note.set_visible(self._sync.get_active() and not ok)
 
     def _on_manual(self, v):
         self._call(self.client.set_zone_manual_brightness, self.device_name, self.zone_name, int(v))
@@ -972,7 +983,8 @@ class ZoneCard(Gtk.Box):
             colors_changed = True
         if holding:
             return
-        self._sync.set_value(zcfg.get("brightness_sync", True))
+        self._sync.set_value(zcfg.get("brightness_sync", False))
+        self._sync_note.set_visible(self._sync.get_active() and not self._follow_ok)
         if not self._manual.busy():
             self._manual.set_quiet(zcfg.get("manual_brightness", 100))
         if not self._range.dragging():

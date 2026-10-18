@@ -57,9 +57,9 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `openrgb.auto_restart_on_missing_device` | `true` | Restart OpenRGB's server when a device goes missing (at most twice per device; only an OpenRGB Iridia started) |
 | `openrgb.missing_device_restart_threshold_sec` | `45` | How long a device must be missing first |
 | `openrgb.restart_cooldown_sec` | `120` | Minimum time between such restarts |
-| `ddc.enabled` | `true` | Follow monitor brightness |
-| `ddc.bus_number` | `null` | The I2C bus of the monitor; `null` finds it |
-| `ddc.fallback_brightness` | `100` | Brightness used when no monitor answers |
+| `ddc.enabled` | `true` | Look for monitors to follow (`false`: never run ddcutil) |
+| `ddc.bus_number` | `null` | The I2C bus of the monitor to follow (*Settings, Monitor brightness*); `null` follows the first that answers |
+| `ddc.fallback_brightness` | `100` | Brightness assumed until the followed monitor's first reading (with no monitor to follow, strips use their Manual brightness) |
 | `night.enabled`, `night.start`, `night.end`, `night.cap` | `false`, `23:00`, `07:00`, `20` | Night mode |
 | `sleep.lights_off` | `true` | LEDs off while the PC sleeps |
 | `session.lock`, `session.idle` | `keep`, `keep` | When the screen locks / after `session.idle_minutes` without input: `keep`, `dim` or `off` |
@@ -96,7 +96,7 @@ with one entry per zone; a device without zones keeps the zone settings on itsel
         "pattern_params": {"stops": [0.0, 0.5, 1.0], "reverse": false},
         "mode": "calibrated",
         "calibration_profile": "WS2812B",
-        "brightness_sync": true,
+        "brightness_sync": false,
         "brightness_range": [10, 100],
         "strip_type": "addressable",
         "color_order": "RGB",

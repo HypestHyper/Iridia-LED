@@ -55,6 +55,59 @@ def _kde_image(path: str) -> str:
     return None
 
 
+def _data_dirs():
+    home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return [home] + [d for d in (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":") if d]
+
+
+def _ini_value(path: str, group: str, key: str):
+    """One value from a KDE-style config file ([Group] key=value; key[$e]= counts too)."""
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            lines = f.read().splitlines()
+    except OSError:
+        return None
+    section = None
+    for line in lines:
+        line = line.strip()
+        if line.startswith("["):
+            section = line
+        elif section == f"[{group}]" and "=" in line:
+            k, v = line.split("=", 1)
+            if k.split("[", 1)[0].strip() == key:
+                return v.strip()
+    return None
+
+
+def _kde_default():
+    """The wallpaper a Plasma desktop shows before you pick one (Plasma writes no Image= line until
+    then): the global theme's [Wallpaper] Image=, else Plasma's own, Next."""
+    cfg = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    globs = [os.path.join(cfg, "kdeglobals"), os.path.join(cfg, "kdedefaults", "kdeglobals")]
+    globs += [os.path.join(d, "kdeglobals") for d in (os.environ.get("XDG_CONFIG_DIRS") or "/etc/xdg").split(":") if d]
+    theme = next((v for v in (_ini_value(f, "KDE", "LookAndFeelPackage") for f in globs) if v),
+                 "org.kde.breeze.desktop")
+    names = []
+    for d in _data_dirs():
+        defaults = os.path.join(d, "plasma", "look-and-feel", theme, "contents", "defaults")
+        if os.path.isfile(defaults):
+            names.append(_ini_value(defaults, "Wallpaper", "Image"))
+            break
+    for name in names + ["Next"]:
+        if not name:
+            continue
+        if name.startswith(("/", "file:")):
+            path = _kde_image(_uri_path(name))
+            if path and os.path.exists(path):
+                return path
+            continue
+        for d in _data_dirs():
+            path = _kde_image(os.path.join(d, "wallpapers", name))
+            if path and os.path.isfile(path):
+                return path
+    return None
+
+
 def fill_session_env():
     """Find the desktop session when we weren't started from inside it.
 
@@ -338,7 +391,7 @@ class WallpaperDetector:
             # Nothing answered: don't spawn every backend's tools every few seconds forever.
             # A watched file changing (invalidate()) still triggers a check right away.
             self._slow_ts = now + 27.0
-        if self._last_path is None:
+        if self._last_path is None and (slow_due or self.last_error is None):
             # Never found anything at all - this is the case worth
             # explaining, since it means nothing will ever be extracted.
             msg = (f"No wallpaper backend matched (desktop='{self._de}'). Tried: {tried}. "
@@ -504,7 +557,8 @@ class WallpaperDetector:
     def _kde(self):
         """Plasma 5 and 6 keep each desktop's wallpaper under
         [Containments][N][Wallpaper][org.kde.image][General] Image=... (a file, a file:// URL, or a
-        wallpaper package folder)."""
+        wallpaper package folder). A desktop still showing the default wallpaper has no Image= line."""
+        other_plugin = False
         for name in self.KDE_FILES:
             kfile = os.path.expanduser(name)
             try:
@@ -522,6 +576,10 @@ class WallpaperDetector:
                     path = _kde_image(_uri_path(line[6:]))
                     if path and os.path.exists(path):
                         return path
+                elif line.startswith("wallpaperplugin=") and line[16:] != "org.kde.image":
+                    other_plugin = True     # a slideshow, a plain colour, picture of the day...
+        if not other_plugin and "kde" in self._de:
+            return _kde_default()
         return None
 
     def _xfce(self):

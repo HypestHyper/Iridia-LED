@@ -31,8 +31,13 @@ def cmd_status(args):
     print(f"Wallpaper: {resp.get('wallpaper', 'N/A')}")
     print(f"Extracted colors: {', '.join(resp.get('extracted_colors', [])[:4])}")
     print(f"Brightness: {resp.get('brightness', 'N/A')}%")
-    print(f"DDC available: {resp.get('ddc_available', False)}"
-          + (" (following the screen's backlight)" if resp.get("ddc_source") == "backlight" else ""))
+    mon = resp.get("monitor_brightness")
+    names = {d.get("bus"): d.get("name") for d in resp.get("ddc_displays") or []}
+    following = ("the screen's backlight" if resp.get("ddc_source") == "backlight"
+                 else f"{names.get(resp.get('ddc_bus')) or 'a monitor'} (I2C bus {resp.get('ddc_bus')})")
+    print(f"Monitor brightness: {f'{mon}% from {following}' if mon is not None else 'not followed'}"
+          if resp.get("ddc_available") else
+          f"Monitor brightness: not available ({resp.get('ddc_last_error') or 'no monitor answers'})")
     proto = resp.get("openrgb_protocol")
     print(f"OpenRGB connected: {resp.get('openrgb_connected', False)}"
           + (" (SDK protocol 6)" if proto == 6 else " (OpenRGB before 1.0, openrgb-python)" if proto is not None else ""))
@@ -749,6 +754,60 @@ def cmd_sensors(args):
     return _report({"cmd": "sensors"}, text)
 
 
+def cmd_monitor(args):
+    """iridia monitor [list | auto | BUS | rescan]: which monitor's brightness strips follow."""
+    what = (args.what or "list").lower()
+    if what == "auto":
+        req = {"cmd": "ddc", "bus": None}
+    elif what == "rescan":
+        req = {"cmd": "ddc", "rescan": True}
+    elif what.isdigit():
+        req = {"cmd": "ddc", "bus": int(what)}
+    elif what != "list":
+        print("Use: iridia monitor [list | auto | BUS | rescan] (BUS: the I2C bus number 'list' shows)",
+              file=sys.stderr)
+        return 2
+    else:
+        req = None
+    if req is not None:
+        try:
+            r = _client().send(req)
+        except Exception as e:              # noqa: BLE001
+            print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
+            return 1
+        if not r.get("ok"):
+            print(f"Failed: {r.get('error')}", file=sys.stderr)
+            return 1
+        print("Looking for monitors again..." if what == "rescan" else
+              "Following the first monitor that answers." if what == "auto" else f"Following the monitor on I2C bus {what}.")
+        import time
+        time.sleep(0.3)
+        for _i in range(60):                # ddcutil takes a moment (seconds with several monitors)
+            try:
+                if not _client().send({"cmd": "status"}).get("ddc_detecting"):
+                    break
+            except Exception:               # noqa: BLE001
+                break
+            time.sleep(0.25)
+
+    def text(st):
+        choice, bus = st.get("ddc_choice"), st.get("ddc_bus")
+        out = [f"Choice: {'automatic (the first monitor that answers)' if choice is None else f'I2C bus {choice}'}"]
+        for d in st.get("ddc_displays") or []:
+            mark = "*" if d.get("bus") == bus else " "
+            ok = "" if d.get("ok", True) else "  (doesn't answer: is DDC/CI on in its menu?)"
+            out.append(f" {mark} bus {d.get('bus'):<3} {d.get('name') or 'Monitor'} ({d.get('connector') or '?'}){ok}")
+        if bus is not None and all(d.get("bus") != bus for d in st.get("ddc_displays") or []):
+            out.append(f" * bus {bus:<3} (answers, though 'ddcutil detect' doesn't list it)")
+        if st.get("ddc_source") == "backlight":
+            out.append("Following the screen's backlight.")
+        elif not st.get("ddc_available"):
+            out.append(f"Nothing to follow: {st.get('ddc_last_error') or 'no monitor answers'}. Strips that follow "
+                       "the monitor use their Manual brightness.")
+        return "\n".join(out)
+    return _report({"cmd": "status"}, text)
+
+
 def cmd_animations(args):
     """iridia animations pause | resume | toggle | status."""
     if args.action == "status":
@@ -987,8 +1046,7 @@ StartupWMClass={assets.APP_ID}
     with open(desktop_path, "w") as f:
         f.write(desktop_content)
     os.chmod(desktop_path, 0o644)
-    if shutil.which("update-desktop-database"):
-        subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
+    _refresh_launchers(apps_dir)
     print(f"Launcher: {desktop_path}")
     from iridia import autostart
     if how == "keep":
@@ -1129,6 +1187,20 @@ def _install_icon():
     except OSError as e:
         print(f"Warning: could not install icon: {e}")
 
+def _refresh_launchers(apps_dir):
+    """Make app menus see the launcher now. Plasma reads its own cache (KService) rather than the
+    folder, and in a fresh session (a live USB) it may not notice a folder created just now: then it
+    shows neither the launcher nor the window's icon, which it finds through the launcher."""
+    tools = [["update-desktop-database", apps_dir]]
+    tools += [[t] for t in ("kbuildsycoca6", "kbuildsycoca5") if shutil.which(t)][:1]
+    for cmd in tools:
+        if shutil.which(cmd[0]):
+            try:
+                subprocess.run(cmd, check=False, capture_output=True, timeout=60)
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+
 def _remove_icon():
     _purge_stale_icons()
 
@@ -1142,9 +1214,7 @@ def _service_remove():
         if os.path.exists(desktop_path):
             os.remove(desktop_path)
     _remove_icon()
-    apps_dir = os.path.expanduser("~/.local/share/applications")
-    if shutil.which("update-desktop-database"):
-        subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
+    _refresh_launchers(os.path.expanduser("~/.local/share/applications"))
     _systemctl("daemon-reload")
     print("Service removed.")
     return 0
@@ -1351,6 +1421,8 @@ def main(argv=None):
     ses_parser.add_argument("--idle-minutes", type=float)
     ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
+    p_mon = subparsers.add_parser("monitor", help="Which monitor's brightness strips follow: list, auto, a bus, rescan")
+    p_mon.add_argument("what", nargs="?", default="list", help="list (default), auto, an I2C bus number, or rescan")
     up_parser = subparsers.add_parser("update", help="Look for a new version and install it (or go back)",
                                       description="Checks GitHub for a newer release, backs up your settings, "
                                                   "installs it (no password needed) and keeps the current version "
@@ -1397,7 +1469,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

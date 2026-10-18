@@ -46,6 +46,34 @@ def test_kde_plasma_5_and_6(home):
     assert WallpaperDetector()._kde() == big
 
 
+def test_kde_default_wallpaper_before_one_is_picked(home, monkeypatch):
+    tmp, tool, image = home
+    data = tmp / "share"
+    monkeypatch.setenv("XDG_DATA_DIRS", str(data))
+    monkeypatch.setenv("XDG_CONFIG_DIRS", str(tmp / "xdg"))
+    next_big = image("share/wallpapers/Next/contents/images/3840x2160.png")
+    (tmp / ".config").mkdir()
+    rc = tmp / ".config/plasma-org.kde.plasma.desktop-appletsrc"
+    rc.write_text("[Containments][1]\nplugin=org.kde.plasma.folder\nwallpaperplugin=org.kde.image\n")
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+    assert WallpaperDetector()._kde() == next_big            # no Image= line yet: Plasma's own default
+    # a distribution's global theme names its own
+    theme = image("share/wallpapers/Distro/contents/images/2560x1440.jpg")
+    (tmp / "xdg").mkdir()
+    (tmp / "xdg/kdeglobals").write_text("[KDE]\nLookAndFeelPackage=org.distro.desktop\n")
+    lnf = data / "plasma/look-and-feel/org.distro.desktop/contents"
+    lnf.mkdir(parents=True)
+    (lnf / "defaults").write_text("[kdeglobals][KDE]\nwidgetStyle=Breeze\n\n[Wallpaper]\nImage=Distro\n")
+    assert WallpaperDetector()._kde() == theme
+    # a slideshow or a plain colour: no image to guess
+    rc.write_text("[Containments][1]\nwallpaperplugin=org.kde.slideshow\n")
+    assert WallpaperDetector()._kde() is None
+    # and outside Plasma, an installed Plasma's default isn't your wallpaper
+    rc.write_text("[Containments][1]\nwallpaperplugin=org.kde.image\n")
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "Hyprland")
+    assert WallpaperDetector()._kde() is None
+
+
 def test_gnome_dark_style_and_slideshows(home):
     tmp, tool, image = home
     light, dark = image("light.png"), image("dark.png")

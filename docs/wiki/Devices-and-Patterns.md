@@ -90,7 +90,7 @@ tools, with more room, are on the [Layout](Layout.md) tab.
 
 | Setting | What it does |
 | --- | --- |
-| **Follow monitor brightness** | LED brightness follows your monitor over DDC/CI. Off: the *Manual* value is used. |
+| **Follow monitor brightness** | LED brightness follows your monitor over DDC/CI (off by default; pick the monitor in *Settings, Monitor brightness*). Off, or with no monitor to follow: the *Manual* value is used. |
 | **Range** | Maps the monitor's 0 to 100% onto this range, for example 20 to 80% so the LEDs never go fully dark or fully bright |
 | **Invert** | Brighter LEDs when the monitor is darker (bias lighting) |
 | **Gamma correction** | Makes dim levels look more even on strips with a harsh response. Not used in Calibrated mode. |

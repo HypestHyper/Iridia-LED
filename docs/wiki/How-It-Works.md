@@ -81,7 +81,10 @@ only when something changed.
 ## Brightness
 
 ddcutil reads the monitor's brightness every few seconds on a background thread, so a slow monitor never
-holds up the colors. Without DDC, the manual brightness is used.
+holds up the colors, and only while some strip follows the monitor. Without a monitor to follow (no
+ddcutil, no monitor answering, or the one you picked switched off), those strips use their Manual
+brightness. *Automatic* follows the first monitor that answers; a monitor picked in *Settings, Monitor
+brightness* is the only one followed. A laptop's own screen is followed through its backlight.
 
 ## Resilience
 

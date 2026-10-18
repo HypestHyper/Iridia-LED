@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 02:31+0000\n"
+"POT-Creation-Date: 2026-10-18 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -590,6 +590,71 @@ msgstr "Fini : la fenêtre redémarre…"
 
 msgid "That didn't work: see the output below. Nothing of yours was changed."
 msgstr "Raté. Rien n'a changé."
+
+msgid "Monitor brightness"
+msgstr "Le fromage qui brille"
+
+msgid ""
+"Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
+"from this monitor."
+msgstr "Le petit déjeuner est servi dans le jardin."
+
+msgid "Monitor"
+msgstr "Ratatouille"
+
+msgid "Look again"
+msgstr "Encore un croissant"
+
+msgid "Looking for monitors…"
+msgstr "Où est la boulangerie…"
+
+msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+msgstr "Le train part à huit heures. Le chien dort sur le canapé."
+
+#, python-brace-format
+msgid "I2C bus {n}"
+msgstr "Bus numéro {n}"
+
+msgid "doesn't answer"
+msgstr "pas de fromage"
+
+msgid "Following the screen's backlight."
+msgstr "La lumière du croissant."
+
+msgid "the monitor"
+msgstr "la baguette"
+
+#, python-brace-format
+msgid "Following {name}, now at {n}%."
+msgstr "{name} mange une pomme à {n}%."
+
+#, python-brace-format
+msgid "Following {name} once a strip has Follow monitor brightness on."
+msgstr "{name} attend le bus sous la pluie."
+
+msgid ""
+"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
+"press Look again."
+msgstr "Il n'y a plus de ddcutil à la boulangerie. Achetez le paquet ddcutil, puis encore un croissant."
+
+msgid ""
+"ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
+"installing Iridia you may need to log out and in once."
+msgstr ""
+"Le chat a mangé le moniteur. Certains adaptateurs préfèrent le thé, et il faut parfois sortir et "
+"revenir."
+
+msgid "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
+msgstr "Personne ne répond. Allumez le DDC/CI dans le menu du fromage, puis encore un croissant."
+
+msgid "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
+msgstr "Ce fromage ne répond pas. Allumez le DDC/CI, ou choisissez un autre fromage."
+
+msgid "No monitor brightness to follow."
+msgstr "Il n'y a pas de lumière ici."
+
+msgid "Strips that follow it use their Manual brightness meanwhile."
+msgstr "Les bandes mangent des crêpes en attendant."
 
 msgid "Lock and idle"
 msgstr "Dodo"
@@ -2427,6 +2492,9 @@ msgstr "La crêpe est tombée par terre"
 
 msgid "Manual"
 msgstr "Café"
+
+msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
+msgstr "Pas de lumière (voir Réglages, Le fromage qui brille), alors Café."
 
 msgid "Range"
 msgstr "Oh là là"

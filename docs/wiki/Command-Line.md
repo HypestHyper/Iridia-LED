@@ -97,6 +97,7 @@ Saved settings, like the *Advanced* part of a zone card. LED and part numbers st
 | `iridia split NAME part 1 same` / `off` | Part 1 shows the strip's own look, or nothing |
 | `iridia split NAME part 4 sensor cpu_temp level max=85 flash=80 background=dim` | Part 4 shows a sensor: `level`, `color` or `both`, optional `min=`, `max=`, `flash=`, `background=dim`, `palette=colors` |
 | `iridia sensors` | Every sensor Iridia found, with its ID and current reading |
+| `iridia monitor` | The monitors ddcutil finds and the one followed; `iridia monitor 6` follows the one on I2C bus 6, `auto` the first that answers, `rescan` looks again |
 | `iridia split NAME led 27 ffffff` / `off` / `normal` | Set one LED, turn it off, or give it back |
 | `iridia split NAME join` / `clear-leds` | One part again / no single LEDs |
 

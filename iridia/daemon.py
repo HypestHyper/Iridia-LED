@@ -838,7 +838,7 @@ class Daemon:
 
         def fresh(n, enabled=True):
             z = {"enabled": enabled, "led_count": n, "pattern": "solid",
-                 "pattern_colors": [0], "mode": "full", "brightness_sync": True,
+                 "pattern_colors": [0], "mode": "full", "brightness_sync": False,
                  "manual_brightness": 100, "brightness_range": [0, 100],
                  "invert_brightness": False, "gamma_correction": False}
             if not n:
@@ -1827,7 +1827,33 @@ class Daemon:
                          f"{choice if choice else 'automatic'}")
         return {"ok": True}
 
+    def _follows_monitor(self) -> bool:
+        """Some switched-on zone follows the monitor (only then is ddcutil asked, every few seconds)."""
+        for dev in self.config.devices_view.values():
+            if not isinstance(dev, dict) or not dev.get("enabled", True):
+                continue
+            zones = dev.get("zones")
+            for z in (zones.values() if isinstance(zones, dict) and zones else [dev]):
+                if isinstance(z, dict) and z.get("enabled", True) and z.get("brightness_sync", False):
+                    return True
+        return False
+
+    def _shown_brightness(self) -> int:
+        """The brightness the LEDs are at (the brightest switched-on zone), for the window's header."""
+        best = None
+        for dev in self.config.devices_view.values():
+            if not isinstance(dev, dict) or not dev.get("enabled", True):
+                continue
+            zones = dev.get("zones")
+            for z in (zones.values() if isinstance(zones, dict) and zones else [dev]):
+                if isinstance(z, dict) and z.get("enabled", True):
+                    b = self._get_zone_brightness(clean_zone_cfg(z))
+                    best = b if best is None else max(best, b)
+        return best if best is not None else 100
+
     def _read_brightness(self):
+        if not self._follows_monitor():
+            return
         brightness = self.ddc.get_brightness()
         if brightness is not None and brightness != self._current_brightness:
             self.logger.debug(f"Brightness changed: {self._current_brightness}% -> {brightness}%")
@@ -2334,7 +2360,8 @@ class Daemon:
         return b
 
     def _zone_brightness_raw(self, zcfg: Dict[str, Any]) -> int:
-        if not zcfg.get("brightness_sync", True):
+        if not zcfg.get("brightness_sync", False) or not self.ddc.is_available():
+            # nothing to follow (no ddcutil, no monitor answers, the chosen one is off): the Manual value
             return zcfg.get("manual_brightness", 100)
         brightness = self._current_brightness
         range_min, range_max = zcfg.get("brightness_range", [0, 100])
@@ -2409,6 +2436,8 @@ class Daemon:
             return self._cmd_set_zone_colors(req)
         if cmd == "set_zone_led_count":
             return self._cmd_set_zone_led_count(req)
+        if cmd == "ddc":
+            return self._cmd_ddc(req)
         if cmd == "set_zone_brightness_sync":
             return self._cmd_set_zone_brightness_sync(req)
         if cmd == "set_zone_manual_brightness":
@@ -2607,10 +2636,17 @@ class Daemon:
             "overlays": dict(self._overlays),
             "strip_info": dict(self._strip_info),
             "rgb_test": ({"device": self._rgbtest[0], "zone": self._rgbtest[1]} if self._rgbtest else None),
-            "brightness": self._current_brightness,
+            "brightness": self._shown_brightness(),
+            "monitor_brightness": (self._current_brightness if self.ddc.is_available() and self._follows_monitor()
+                                   else None),
             "ddc_available": self.ddc.is_available(),
             "ddc_source": getattr(self.ddc, "source", None),
             "ddc_last_error": self.ddc.last_error,
+            "ddc_displays": [dict(d) for d in getattr(self.ddc, "displays", [])],
+            "ddc_choice": getattr(self.ddc, "choice", None),
+            "ddc_problem": getattr(self.ddc, "problem", None),
+            "ddc_detecting": bool(getattr(self.ddc, "detecting", False)),
+            "ddc_bus": self.ddc.bus if self.ddc.is_available() and self.ddc.source == "ddc" else None,
             "openrgb_connected": self.openrgb.client is not None,
             "openrgb_protocol": getattr(self.openrgb, "protocol", None) if self.openrgb.client is not None else None,
             "openrgb_host": self.openrgb.host,
@@ -3087,6 +3123,20 @@ class Daemon:
         now = clean_zone_cfg(self._zone_cfg(dev, zone))
         return {"ok": True, "device": dev, "zone": zone or "", "led_count": now["led_count"],
                 "sections": now["sections"], "led_overrides": zone_sections.overrides_for_config(now["led_overrides"])}
+
+    def _cmd_ddc(self, req: dict) -> dict:
+        """Which monitor's brightness to follow ("bus": an I2C bus number, or null for the first that
+        answers), or "rescan": look for monitors again (ddcutil installed since, a monitor plugged in)."""
+        if "bus" in req:
+            bus = req["bus"]
+            if bus is not None and (isinstance(bus, bool) or not isinstance(bus, int) or not 0 <= bus < 1000):
+                return {"ok": False, "error": "bus must be an I2C bus number or null"}
+            self.config.set("ddc.bus_number", bus)
+            self.ddc.redetect(bus)
+        elif req.get("rescan"):
+            self.ddc.redetect()
+        self._needs_update = True
+        return {"ok": True}
 
     def _cmd_set_zone_brightness_sync(self, req: dict) -> dict:
         dev = req.get("device")

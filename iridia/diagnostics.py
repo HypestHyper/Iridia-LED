@@ -101,14 +101,20 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
         checks.append(Check("OpenRGB connection", False, err, hint))
 
     if status.get("ddc_available"):
-        checks.append(Check("Monitor brightness sync (DDC)", True, "Available"))
+        bus = status.get("ddc_bus")
+        name = next((d.get("name") for d in status.get("ddc_displays") or [] if d.get("bus") == bus), None)
+        checks.append(Check("Monitor brightness sync (DDC)", True,
+                            "Following the screen's backlight" if status.get("ddc_source") == "backlight" else
+                            f"Following {name or 'a monitor'} (I2C bus {bus})"
+                            + ("" if status.get("ddc_choice") is not None else ", the first that answers")))
     else:
         err = status.get("ddc_last_error")
         checks.append(Check(
             "Monitor brightness sync (DDC)", None,
             err or "Not available",
-            "Optional, only needed for LED brightness to follow monitor brightness. "
-            "Needs 'ddcutil' installed, and DDC/CI enabled in the monitor's own OSD menu."
+            "Optional, only needed for LED brightness to follow monitor brightness; strips that follow it use "
+            "their Manual brightness meanwhile. Needs 'ddcutil' installed, and DDC/CI enabled in the monitor's "
+            "own menu. Pick the monitor in Settings, Monitor brightness (or: iridia monitor)."
         ))
 
     wallpaper = status.get("wallpaper")

@@ -209,8 +209,21 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
                 for m in "${MISSING[@]}"; do
                     read -r -a group <<< "$(pkgname "$m")"
                     [ ${#group[@]} -eq 0 ] && continue
-                    "${INSTALL_CMD[@]}" "${group[@]}" || echo "WARNING: couldn't install ${group[*]} (see above), continuing."
+                    if "${INSTALL_CMD[@]}" "${group[@]}"; then
+                        [ "$m" = openrgb ] && OPENRGB_NEW=1
+                    else
+                        echo "WARNING: couldn't install ${group[*]} (see above), continuing."
+                    fi
                 done
+                if [ "${OPENRGB_NEW:-0}" = 1 ] && command -v udevadm >/dev/null 2>&1; then
+                    # OpenRGB's udev rules only reach devices plugged in after the package: apply them
+                    # to what's there now, or its server can't open USB controllers (many motherboards,
+                    # Razer, Corsair...) until the next reboot.
+                    ELEV=(); case "${INSTALL_CMD[0]}" in sudo|doas) ELEV=("${INSTALL_CMD[0]}") ;; esac
+                    "${ELEV[@]}" udevadm control --reload-rules 2>/dev/null || true
+                    "${ELEV[@]}" udevadm trigger --subsystem-match=hidraw --subsystem-match=usb \
+                        --subsystem-match=i2c-dev 2>/dev/null || true
+                fi
                 ;;
         esac
     fi

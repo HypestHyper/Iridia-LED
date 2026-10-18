@@ -49,15 +49,25 @@ class FakeOpenRGB:
 
 
 class FakeDDC:
-    def __init__(self, **kwargs):
+    def __init__(self, bus_number=None, **kwargs):
         self.brightness = 100
         self.last_error = None
+        self.available = False
+        self.source, self.bus, self.choice, self.displays = None, None, bus_number, []
+        self.polls = 0
+        self.redetected = []
 
     def is_available(self):
-        return False
+        return self.available
 
     def get_brightness(self):
+        self.polls += 1
         return self.brightness
+
+    def redetect(self, choice="unchanged"):
+        self.redetected.append(choice)
+        if choice != "unchanged":
+            self.choice = choice
 
 
 DEVICES = {
@@ -215,6 +225,7 @@ def test_manual_brightness_scales_colors(d):
 
 
 def test_monitor_brightness_with_range_and_invert(d):
+    d.ddc.available = True
     d.config.set(("devices", "Strip", "brightness_sync"), True)
     d.config.set(("devices", "Strip", "brightness_range"), [20, 60])
     d._current_brightness = 50
@@ -223,6 +234,45 @@ def test_monitor_brightness_with_range_and_invert(d):
     zcfg["invert_brightness"] = True
     d._current_brightness = 100
     assert d._zone_brightness_raw(zcfg) == 20
+
+
+def test_following_a_monitor_that_isnt_there_uses_the_manual_brightness(d):
+    """No ddcutil, no monitor answering, or the chosen one off: Follow monitor brightness falls back to
+    the zone's Manual value instead of a frozen reading; ddcutil is only asked while a zone follows."""
+    d.config.set(("devices", "Strip", "manual_brightness"), 30)
+    d.config.set(("devices", "Strip", "brightness_sync"), True)
+    d._current_brightness = 80
+    zcfg = clean_zone_cfg(d.config.get(("devices", "Strip")))
+    assert d._zone_brightness_raw(zcfg) == 30
+    d.ddc.available = True
+    assert d._zone_brightness_raw(zcfg) == 80
+    st = _cmd(d, "status")
+    assert st["monitor_brightness"] == 80 and st["brightness"] == 100      # the brightest zone: the hub's
+    # nothing follows the monitor: ddcutil isn't asked, and the header shows what the LEDs use
+    d.config.set(("devices", "Strip", "brightness_sync"), False)
+    d.ddc.polls = 0
+    d._read_brightness()
+    assert d.ddc.polls == 0
+    st = _cmd(d, "status")
+    assert st["monitor_brightness"] is None and st["brightness"] == 100     # the other devices' 100%
+    d.config.set(("devices", "Strip", "brightness_sync"), True)
+    d._read_brightness()
+    assert d.ddc.polls == 1
+
+
+def test_a_new_device_doesnt_follow_the_monitor(d):
+    d.openrgb.real["New Board"] = ["ARGB 1"]
+    d._autoadd_devices()
+    assert d.config.get(("devices", "New Board", "zones", "ARGB 1", "brightness_sync")) is False
+
+
+def test_picking_the_monitor(d):
+    assert _cmd(d, "ddc", bus=6)["ok"]
+    assert d.config.get("ddc.bus_number") == 6 and d.ddc.redetected == [6]
+    assert _cmd(d, "ddc", bus=None)["ok"]
+    assert d.config.get("ddc.bus_number") is None and d.ddc.choice is None
+    assert _cmd(d, "ddc", rescan=True)["ok"] and d.ddc.redetected[-1] == "unchanged"
+    assert not _cmd(d, "ddc", bus="DP-1")["ok"] and not _cmd(d, "ddc", bus=True)["ok"]
 
 
 def test_disabled_zone_and_lights_off_send_black(d):

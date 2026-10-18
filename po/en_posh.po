@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 02:31+0000\n"
+"POT-Creation-Date: 2026-10-18 19:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -622,6 +622,75 @@ msgstr "Done: restarting the window…"
 
 msgid "That didn't work: see the output below. Nothing of yours was changed."
 msgstr "That did not succeed: kindly see the output below. Nothing of yours was altered."
+
+msgid "Monitor brightness"
+msgstr "The looking-glass's brightness"
+
+msgid ""
+"Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
+"from this monitor."
+msgstr ""
+"Strips that defer to the looking-glass (under Brightness, on each strip) take their brightness "
+"from this one."
+
+msgid "Monitor"
+msgstr "Looking-glass"
+
+msgid "Look again"
+msgstr "Have another look"
+
+msgid "Looking for monitors…"
+msgstr "Seeking the looking-glasses…"
+
+msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+msgstr "Automatic defers to the first looking-glass that responds. One you choose is the only one heeded."
+
+#, python-brace-format
+msgid "I2C bus {n}"
+msgstr "I2C bus {n}"
+
+msgid "doesn't answer"
+msgstr "does not respond"
+
+msgid "Following the screen's backlight."
+msgstr "Following the screen's own backlight."
+
+msgid "the monitor"
+msgstr "the looking-glass"
+
+#, python-brace-format
+msgid "Following {name}, now at {n}%."
+msgstr "Deferring to {name}, presently at {n}%."
+
+#, python-brace-format
+msgid "Following {name} once a strip has Follow monitor brightness on."
+msgstr "Deferring to {name} once a strip defers to the looking-glass."
+
+msgid ""
+"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
+"press Look again."
+msgstr ""
+"ddcutil is not installed, so no looking-glass brightness may be read. Kindly install the ddcutil "
+"package, then have another look."
+
+msgid ""
+"ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
+"installing Iridia you may need to log out and in once."
+msgstr ""
+"ddcutil finds no looking-glass. Certain docks and adapters withhold the brightness, and after "
+"installing Iridia one may need to log out and in once."
+
+msgid "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
+msgstr "No looking-glass responds. Kindly enable DDC/CI in its own menu, then have another look."
+
+msgid "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
+msgstr "This looking-glass does not respond. Kindly enable DDC/CI in its own menu, or choose another."
+
+msgid "No monitor brightness to follow."
+msgstr "No looking-glass brightness to defer to."
+
+msgid "Strips that follow it use their Manual brightness meanwhile."
+msgstr "Strips that defer to it use their By hand brightness meanwhile."
 
 msgid "Lock and idle"
 msgstr "Lock and repose"
@@ -2585,6 +2654,11 @@ msgstr "Defer to the looking-glass's brightness"
 
 msgid "Manual"
 msgstr "By hand"
+
+msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
+msgstr ""
+"No looking-glass brightness to defer to (see Settings, The looking-glass's brightness), so By "
+"hand is used."
 
 msgid "Range"
 msgstr "Range"

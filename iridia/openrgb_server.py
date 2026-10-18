@@ -748,9 +748,13 @@ class Supervisor:
         with self._lock:
             log = _open_log()
             try:
+                # restore_signals=False: OpenRGB inherits Python's ignored SIGPIPE (as systemd's
+                # IgnoreSIGPIPE does for services). OpenRGB before 1.0 doesn't ignore it itself, so a
+                # client hanging up just before OpenRGB writes to it (announcing a device it found)
+                # killed the whole server (exit code -13); now that write just fails.
                 self._proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
                                               stdout=log or subprocess.DEVNULL, stderr=subprocess.STDOUT,
-                                              start_new_session=True)
+                                              start_new_session=True, restore_signals=False)
             except OSError as e:
                 self.last_action = f"couldn't run {cmd[0]}: {e}"
                 self._next_try = self._clock() + self.BACKOFF[-1]

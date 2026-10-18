@@ -167,6 +167,27 @@ def test_a_device_openrgb_finds_after_we_connected_is_picked_up(server):
             ctl.disconnect()
 
 
+def test_an_empty_list_at_first_keeps_the_connection(server):
+    """OpenRGB just started reports nothing yet. Iridia stays connected (hanging up made OpenRGB before
+    1.0 die of SIGPIPE when it announced a device to the closed connection) and looks every second
+    until the devices are there, not every 10."""
+    from iridia.openrgb_ctl import OpenRGBController
+    for protocol in (6, 3):
+        ctl = OpenRGBController("127.0.0.1", server(protocol=protocol, late=0.5, late_all=1))
+        try:
+            assert ctl.ensure_connected(retry_interval=0)
+            assert ctl.devices == {} and ctl.client is not None and ctl.no_devices_since is not None
+            client = ctl.client
+            end = time.monotonic() + 3
+            while time.monotonic() < end and len(ctl.devices) < 2:
+                ctl.maybe_enumerate(interval=10.0)
+                time.sleep(0.1)
+            assert set(ctl.devices) == {"Fake RAM", "Fake ARGB Controller"}, protocol
+            assert ctl.client is client                         # the same connection all along
+        finally:
+            ctl.disconnect()
+
+
 def test_a_closed_connection_is_a_connection_error(server):
     port = server()
     c = S.SDKClient("127.0.0.1", port)

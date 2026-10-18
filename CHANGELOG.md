@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **OpenRGB's server no longer dies over and over** (exit code -13). OpenRGB before 1.0 (Fedora's
+  0.9+git, for one) doesn't ignore SIGPIPE, so a client hanging up just before OpenRGB wrote to it
+  killed the whole server. That happened easily at start: OpenRGB, still scanning, reported no
+  devices; Iridia hung up to reconnect, and OpenRGB then announced the first device it found to the
+  closed connection. Iridia now stays connected while the list is empty, and the server it starts
+  ignores SIGPIPE (as a systemd service does).
+- **Devices show up sooner after OpenRGB starts:** for the first minute after connecting, and while
+  the list is empty, Iridia looks every second instead of every 10.
+- The window's status no longer waits for a slow OpenRGB (it timed out, and the daemon logged
+  "Broken pipe" errors). OpenRGB going away logs one line about animations instead of one per zone,
+  and no warning per device while it has none.
+
 ## 1.3.1
 
 - **Pick the monitor whose brightness the LEDs follow.** *Settings, Monitor brightness* lists the

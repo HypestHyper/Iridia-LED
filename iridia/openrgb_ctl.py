@@ -255,23 +255,18 @@ class OpenRGBController:
                 if (self.last_error or "").startswith("OpenRGB is running but reports no devices"):
                     self.last_error = None      # fixed now; don't show it as the last problem
             if not devices:
-                # The SDK client caches the device list from connect time,
-                # so a server that's still scanning USB (e.g. just
-                # restarted) yields an empty list that never fills in on
-                # this connection. Drop it and reconnect shortly. If it stays
-                # empty, the daemon restarts OpenRGB (only one Iridia started).
+                # Still scanning (just started), or it started before it could see the hardware. Stay
+                # connected: the list is checked every second meanwhile (maybe_enumerate), so devices
+                # show up as soon as OpenRGB finds them. Hanging up and reconnecting instead was worse:
+                # OpenRGB before 1.0 is killed by SIGPIPE when it announces a found device to a
+                # connection that was just closed. If the list stays empty, the daemon restarts
+                # OpenRGB (only one Iridia started).
                 if self.no_devices_since is None:
                     self.no_devices_since = time.time()
                 self._record_error("OpenRGB is running but reports no devices (it may have started before the "
                                    "hardware was accessible)")
                 self._warn_once("OpenRGB connected but reports no devices yet (still scanning, or it started "
-                                "before it could see the hardware), reconnecting shortly")
-                try:
-                    self.client.disconnect()
-                except Exception:
-                    pass
-                self.client = None
-                self.connected_since = None
+                                "before it could see the hardware)")
                 return
             self._log_inventory_if_changed()
         except ConnectionError as e:
@@ -290,9 +285,15 @@ class OpenRGBController:
             logger.warning(f"OpenRGB device enumeration failed: {type(e).__name__}: {e}")
             self.devices = {}
 
+    WARMUP_SEC = 60.0          # after connecting, OpenRGB may still be finding devices
+
     @_locked
     def maybe_enumerate(self, interval: float = 10.0):
-        if time.time() - self._last_enum >= interval:
+        now = time.time()
+        if self.client is not None and (not self.devices or getattr(self.client, "list_changed", False)
+                                        or now - (self.connected_since or 0) < self.WARMUP_SEC):
+            interval = min(interval, 1.0)       # devices still turning up: look every second
+        if now - self._last_enum >= interval:
             self._enumerate()
 
     @staticmethod
@@ -397,10 +398,11 @@ class OpenRGBController:
             self._record_error(msg)
             return None
 
-    @_locked
     def list_devices(self) -> List[Dict]:
+        # No lock: the status answer must not wait for a slow OpenRGB (still scanning, restarting);
+        # the device dict is replaced, never changed in place, so this reads one whole list.
         result = []
-        for name, dev in self.devices.items():
+        for name, dev in dict(self.devices).items():
             zones = [{"name": zn, "led_count": len(getattr(z, "leds", None) or [])} for zn, z in zones_of(dev)]
             result.append({"name": name, "type": str(getattr(dev, "type", "unknown")),
                            "mode": self._active_mode_name(dev), "zones": zones,
@@ -523,6 +525,9 @@ class OpenRGBController:
     def send(self, device_name: str, colors: List[str], zones_config: Optional[Dict] = None) -> bool:
         """Send colours to a device, or to the zones named in zones_config (only those)."""
         dev = self.devices.get(device_name)
+        if dev is None and not self.devices:
+            self._record_error("OpenRGB reports no devices right now")    # said once elsewhere, not per device
+            return False
         if dev is None:
             msg = (f"'{device_name}' isn't in the enumerated device list "
                    f"(have: {list(self.devices.keys())}), name mismatch, or it "

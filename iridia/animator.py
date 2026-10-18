@@ -97,12 +97,21 @@ class Animator:
             for d in list(self.timing):
                 if d not in jobs:
                     del self.timing[d]
+        # Everything starting or stopping at once (OpenRGB connecting or gone, animations switched
+        # on or off) is one line; each zone's details are for the debug log then.
+        stopped = [k for k in old if k not in new]
+        started = [k for k in new if k not in old]
+        bulk = (stopped and not new) or (started and not old)
+        say = logger.debug if bulk else logger.info
         for k in sorted(set(old) | set(new)):
             if old.get(k) != new.get(k):
                 if k not in new:
-                    logger.info(f"Animation stopped on {k}")
+                    say(f"Animation stopped on {k}")
                 else:
-                    logger.info(f"Animation on {k}: {new[k]}")
+                    say(f"Animation on {k}: {new[k]}")
+        if bulk:
+            logger.info(f"Animations stopped on {len(stopped)} zone(s)" if stopped else
+                        f"Animations running on {len(started)} zone(s): {', '.join(sorted(started))}")
         if jobs and not self.running():
             self._stop.clear()
             self._last_tick = None

@@ -13,6 +13,9 @@ FAKE_OPENRGB_UPDATE_DELAY: seconds each colour write takes, like a slow controll
   Then, like OpenRGB 1.0: every colour update goes into one queue per controller (shared by all
   clients) that the controller's thread writes one by one; everything else is answered at once,
   including device data, so a protocol 0 client can't tell how far behind the controller is.
+FAKE_OPENRGB_LATE: with "devices", the ARGB controller is found this many seconds after the start
+  (like a USB device found after the RAM), and every client is told the list changed (packet 100),
+  unless FAKE_OPENRGB_LATE_SILENT is set.
 FAKE_OPENRGB_PROTOCOL: the SDK protocol the server speaks (default 3). 6, like OpenRGB 1.0: the
   controller count lists controller IDs, colour packets name a controller by its ID, and each one
   is acknowledged (packet 10) once it has been written.
@@ -102,6 +105,8 @@ if mode == "devices":
         ], U.DeviceType.DRAM),
     ]
     VERSION = 3
+LATE = float(os.environ.get("FAKE_OPENRGB_LATE") or 0)
+LATE_DEVICE = DEVICES.pop(0) if LATE and DEVICES else None
 PACKETS = os.environ.get("FAKE_OPENRGB_PACKETS")
 UPDATE_DELAY = float(os.environ.get("FAKE_OPENRGB_UPDATE_DELAY") or 0)
 PROTOCOL = int(os.environ.get("FAKE_OPENRGB_PROTOCOL") or VERSION)
@@ -110,6 +115,7 @@ WORKERS = {}
 WORKERS_LOCK = threading.Lock()
 V6 = []                                             # protocol 6 connections: send(dev, ptype, payload)
 V6_LOCK = threading.Lock()
+CONNS = []                                          # every connection's send(dev, ptype, payload)
 
 
 def note(ptype, dev, size):
@@ -249,6 +255,9 @@ def serve(conn):
         with send_lock:
             conn.sendall(struct.pack("ccccIII", b"O", b"R", b"G", b"B", dev, ptype, len(payload)) + payload)
 
+    with V6_LOCK:
+        CONNS.append(send)
+
     def ack(dev, ptype, status=0):
         if proto >= 6:
             send(dev, 10, struct.pack("II", ptype, status))
@@ -304,7 +313,28 @@ def serve(conn):
         with V6_LOCK:
             if send in V6:
                 V6.remove(send)
+            if send in CONNS:
+                CONNS.remove(send)
         conn.close()
+
+
+def found_late():
+    time.sleep(LATE)
+    DEVICES.append(LATE_DEVICE)
+    IDS.append(500 + len(IDS))
+    if os.environ.get("FAKE_OPENRGB_LATE_SILENT"):
+        return
+    with V6_LOCK:
+        conns = list(CONNS)
+    for send in conns:
+        try:
+            send(0, 100, b"")
+        except OSError:
+            pass
+
+
+if LATE_DEVICE is not None:
+    threading.Thread(target=found_late, daemon=True).start()
 
 
 srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

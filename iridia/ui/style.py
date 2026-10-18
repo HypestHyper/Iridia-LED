@@ -166,7 +166,7 @@ scale {{ padding: 10px 6px; }}
 scale trough {{ background: {SECONDARY_CONTAINER}; border-radius: 999px; min-height: 12px; border: none; }}
 scale highlight {{ background: {PRIMARY}; border-radius: 999px; min-height: 12px; }}
 scale slider {{ background: {PRIMARY}; border: none; box-shadow: 0 0 0 4px {SURFACE_CONTAINER}; border-radius: 3px;
-  min-width: 4px; min-height: 36px; margin: -12px -2px; transition: min-width 200ms {EASE_STD}; }}
+  min-width: 4px; min-height: 36px; margin: -12px 0; transition: min-width 200ms {EASE_STD}; }}
 scale slider:active {{ min-width: 2px; }}
 .card-inner scale slider {{ box-shadow: 0 0 0 4px {SURFACE_CONTAINER_HIGH}; }}
 

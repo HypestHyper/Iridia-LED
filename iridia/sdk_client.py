@@ -347,6 +347,16 @@ class SDKClient:
                 devices.append(self._fetch(Device(self, i, cid)))
             self.devices = devices
 
+    def check_list(self):
+        """Ask for the controller list and flag a change: a safety net for an announcement that never
+        came (OpenRGB still finding devices when we connected)."""
+        with self._request_lock:
+            data = self.request(0, COUNT, b"", reply=COUNT)
+        n = struct.unpack_from("<I", data)[0]
+        ids = list(struct.unpack_from(f"<{n}I", data, 4)) if len(data) >= 4 + 4 * n else []
+        if ids != self.ids:
+            self.list_changed = True
+
     def refresh_device(self, index: int):
         with self._request_lock:
             if 0 <= index < len(self.devices):

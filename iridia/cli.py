@@ -987,8 +987,7 @@ StartupWMClass={assets.APP_ID}
     with open(desktop_path, "w") as f:
         f.write(desktop_content)
     os.chmod(desktop_path, 0o644)
-    if shutil.which("update-desktop-database"):
-        subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
+    _refresh_launchers(apps_dir)
     print(f"Launcher: {desktop_path}")
     from iridia import autostart
     if how == "keep":
@@ -1129,6 +1128,20 @@ def _install_icon():
     except OSError as e:
         print(f"Warning: could not install icon: {e}")
 
+def _refresh_launchers(apps_dir):
+    """Make app menus see the launcher now. Plasma reads its own cache (KService) rather than the
+    folder, and in a fresh session (a live USB) it may not notice a folder created just now: then it
+    shows neither the launcher nor the window's icon, which it finds through the launcher."""
+    tools = [["update-desktop-database", apps_dir]]
+    tools += [[t] for t in ("kbuildsycoca6", "kbuildsycoca5") if shutil.which(t)][:1]
+    for cmd in tools:
+        if shutil.which(cmd[0]):
+            try:
+                subprocess.run(cmd, check=False, capture_output=True, timeout=60)
+            except (OSError, subprocess.SubprocessError):
+                pass
+
+
 def _remove_icon():
     _purge_stale_icons()
 
@@ -1142,9 +1155,7 @@ def _service_remove():
         if os.path.exists(desktop_path):
             os.remove(desktop_path)
     _remove_icon()
-    apps_dir = os.path.expanduser("~/.local/share/applications")
-    if shutil.which("update-desktop-database"):
-        subprocess.run(["update-desktop-database", apps_dir], check=False, capture_output=True)
+    _refresh_launchers(os.path.expanduser("~/.local/share/applications"))
     _systemctl("daemon-reload")
     print("Service removed.")
     return 0

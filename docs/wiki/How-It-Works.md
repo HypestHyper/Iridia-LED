@@ -32,7 +32,8 @@ later checks ask only that one:
 1. Caelestia and Noctalia (their state files)
 2. Hyprland: swww or awww, hyprpaper, swaybg
 3. Sway: swww or awww, swaybg
-4. GNOME (light and dark wallpaper), KDE Plasma, XFCE, Cinnamon, MATE
+4. GNOME (light and dark wallpaper, slideshows), KDE Plasma (also its default wallpaper, before you
+   pick one), XFCE, Cinnamon, MATE, COSMIC, LXQt
 5. feh, nitrogen, xwallpaper, waypaper
 6. The newest image in `wallpaper.watch_folder`
 

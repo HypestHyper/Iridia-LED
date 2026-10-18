@@ -235,6 +235,14 @@ class OpenRGBController:
         if not self.client:
             return
         try:
+            if self.protocol == 6:
+                self.client.check_list()
+            else:
+                # openrgb-python only reads OpenRGB's "the list changed" when it reads an answer, and
+                # sending colours reads none: asking for the count reads it, and a new count
+                # re-reads the devices. OpenRGB still finding devices when we connected (USB ones
+                # come after the RAM) is then seen, not missed until the next restart.
+                self.client.comms.requestDeviceNum()
             if getattr(self.client, "list_changed", False):
                 logger.info("OpenRGB's device list changed: reading it again")
                 self.client.refresh()

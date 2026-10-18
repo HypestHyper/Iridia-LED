@@ -51,7 +51,9 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
                 "will also attempt this on its own after a while."
             ))
         elif devs:
-            checks.append(Check("Configured devices visible", True, f"{len(devs)} device(s), all present"))
+            # named, so a device that isn't there at all (OpenRGB doesn't report it) is noticed too
+            checks.append(Check("Configured devices visible", True,
+                                f"{len(devs)} device(s), all present: {', '.join(devs)}"))
 
         # Zone names in config must match what OpenRGB reports exactly,
         # and the device must be in Direct mode for colors to show.

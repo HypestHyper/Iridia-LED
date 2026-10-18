@@ -37,6 +37,9 @@ for cmd in iridia iridia-gui; do
 done
 systemctl --user daemon-reload 2>/dev/null || true
 command -v update-desktop-database >/dev/null && update-desktop-database "$APPS_DIR" 2>/dev/null
+for k in kbuildsycoca6 kbuildsycoca5; do
+    command -v "$k" >/dev/null && { "$k" >/dev/null 2>&1; break; }
+done
 if [ "$KEEP" = 0 ]; then
     rm -rf "$HOME/.config/iridia" "$HOME/.cache/iridia" "$HOME/.local/share/iridia"
     echo "Settings removed."

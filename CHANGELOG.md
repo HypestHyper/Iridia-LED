@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- **Devices OpenRGB finds after Iridia connected are picked up.** OpenRGB answers while it's still
+  finding devices (the RAM first, USB controllers and graphics cards later). With OpenRGB before 1.0,
+  Iridia kept the first, partial list until the next restart; with 1.0 it relied on OpenRGB saying
+  so. It now checks the list every few seconds either way.
+- **KDE Plasma's default wallpaper is found.** Plasma writes no wallpaper line until you pick one, so a
+  fresh desktop (a live USB, a new user) had none to find. The global theme's default is used then.
+- **The launcher shows up in Plasma right away**, with its icon on the window: Plasma's menu cache is
+  rebuilt after installing.
+- *Diagnostics* names the devices it sees, so one OpenRGB doesn't report at all stands out.
+- Dragging a slider no longer prints GTK warnings.
+- The README is shorter.
+
 ## 1.3.0
 
 - **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it

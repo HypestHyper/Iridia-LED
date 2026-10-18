@@ -13,6 +13,8 @@
 - The window's status no longer waits for a slow OpenRGB (it timed out, and the daemon logged
   "Broken pipe" errors). OpenRGB going away logs one line about animations instead of one per zone,
   and no warning per device while it has none.
+- "OpenRGB not reachable, is its SDK server actually running?" is no longer a warning while Iridia (or
+  its systemd unit) is starting that server anyway.
 
 ## 1.3.1
 

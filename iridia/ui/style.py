@@ -73,6 +73,9 @@ button {{ border: none; box-shadow: none; background-image: none; outline: none;
   background: {SECONDARY_CONTAINER};
   transition: border-radius 200ms {EASE_STD}, background-color 200ms {EASE_STD}, color 200ms; }}
 button:hover {{ background: {SECONDARY_CONTAINER_HOVER}; }}
+/* some themes (or ~/.config/gtk-4.0/gtk.css) grow things on hover: nothing moves or grows here */
+button, button:hover, button:checked, button:active, dropdown, switch, check, radio, row, row:hover {{
+  transform: none; }}
 button:active {{ border-radius: 10px; }}
 button:disabled {{ opacity: 0.45; }}
 button.filled {{ background: {PRIMARY}; color: {ON_PRIMARY}; }}

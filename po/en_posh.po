@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 13:58+0000\n"
+"POT-Creation-Date: 2026-10-19 16:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2523,8 +2523,17 @@ msgstr "Remainder of the gauge"
 msgid "Flash above"
 msgstr "Flash beyond"
 
-msgid "From the other end"
-msgstr "From the far end"
+msgid "Fills from"
+msgstr "Fills from"
+
+msgid "The start"
+msgstr "The beginning"
+
+msgid "The middle"
+msgstr "The centre"
+
+msgid "The other end"
+msgstr "The far end"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

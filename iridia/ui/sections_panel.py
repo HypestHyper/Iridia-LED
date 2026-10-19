@@ -406,9 +406,12 @@ class SectionsPanel(Gtk.Box):
         row, _sw = switch_row(_("Flash above"), fl is not None,
                               lambda on: self._set_part(k, flash_above=float(fl_spin.get_value()) if on else None))
         box.append(hbox(8, row, fl_spin, label(unit, ("small", "dim"))))
-        row, _sw = switch_row(_("From the other end"), bool((sec.get("params") or {}).get("reverse")),
-                              lambda on: self._set_part(k, params={"reverse": True} if on else {}))
-        box.append(row)
+        p = sec.get("params") or {}
+        start = "middle" if p.get("middle") else "end" if p.get("reverse") else "start"
+        box.append(hbox(10, label(_("Fills from"), ("small", "dim")),
+                        Group([("start", _("The start")), ("middle", _("The middle")), ("end", _("The other end"))],
+                              start, lambda v: self._set_part(k, params={"middle": {"middle": True},
+                                                                         "end": {"reverse": True}}.get(v, {})))))
 
     def _set_part(self, k, **fields):
         if k >= len(self.secs):

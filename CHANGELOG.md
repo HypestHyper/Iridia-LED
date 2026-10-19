@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Sensor bars can fill from the middle**, growing both ways at once (*Fills from: The start, The
+  middle, The other end*). With an even number of LEDs the two middle ones light together, so both
+  sides always match; the tip on each side is partly lit, as at the ends.
+
 ## 1.3.4
 
 - **Text no longer cut off at the Default window size.** Default scales the window to 90%, which gave

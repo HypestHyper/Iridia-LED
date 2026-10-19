@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 13:58+0000\n"
+"POT-Creation-Date: 2026-10-19 16:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -2372,8 +2372,17 @@ msgstr "Le reste"
 msgid "Flash above"
 msgstr "Clignoter au-dessus"
 
-msgid "From the other end"
-msgstr "De l'autre côté"
+msgid "Fills from"
+msgstr "Commence par"
+
+msgid "The start"
+msgstr "Le croissant"
+
+msgid "The middle"
+msgstr "Le milieu du fromage"
+
+msgid "The other end"
+msgstr "La baguette"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

@@ -135,7 +135,7 @@ dividers, the whole strip can be one sensor. In the part's **Settings**:
 | **Colors** | **Cool to hot** (blue, green, amber, red) or **Picked colors** (low to high, in order) |
 | **Rest of the bar** | **Off**, or **Dim**: the unlit part glows faintly so you see the whole bar |
 | **Flash above** | Blink once a second over this reading |
-| **From the other end** | The bar fills from the part's last LED |
+| **Fills from** | The start, the other end (the part's last LED), or the middle: the bar grows both ways at once. With an even number of LEDs the two in the middle light together, so both sides always match |
 
 Readings are taken once a second, only for sensors a strip shows, and smoothed over a few seconds so
 a short spike doesn't make the bar jump. They come straight from the kernel (`/proc`, `/sys/class/hwmon`,

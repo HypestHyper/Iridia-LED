@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 16:37+0000\n"
+"POT-Creation-Date: 2026-10-19 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,8 +22,8 @@ msgstr ""
 msgid "Iridia {version}"
 msgstr ""
 
-#: iridia/ui/app.py:219 iridia/ui/app.py:1303 iridia/ui/app.py:1304 iridia/ui/app.py:1361
-#: iridia/ui/app.py:1369 iridia/ui/zonecard.py:108 iridia/ui/zonecard.py:336 iridia/ui/zonecard.py:382
+#: iridia/ui/app.py:219 iridia/ui/app.py:1304 iridia/ui/app.py:1305 iridia/ui/app.py:1362
+#: iridia/ui/app.py:1370 iridia/ui/zonecard.py:108 iridia/ui/zonecard.py:336 iridia/ui/zonecard.py:382
 msgid "Automatic"
 msgstr ""
 
@@ -67,7 +67,7 @@ msgstr ""
 msgid "Saved #{h}"
 msgstr ""
 
-#: iridia/ui/app.py:350 iridia/ui/app.py:358 iridia/ui/app.py:989 iridia/ui/layout_tab.py:1345
+#: iridia/ui/app.py:350 iridia/ui/app.py:358 iridia/ui/app.py:990 iridia/ui/layout_tab.py:1345
 msgid "Rename"
 msgstr ""
 
@@ -105,7 +105,7 @@ msgstr ""
 msgid "Connecting…"
 msgstr ""
 
-#: iridia/ui/app.py:383 iridia/ui/app.py:2168
+#: iridia/ui/app.py:383 iridia/ui/app.py:2375
 msgid "Freeze colors"
 msgstr ""
 
@@ -129,11 +129,11 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: iridia/ui/app.py:427 iridia/ui/app.py:1849
+#: iridia/ui/app.py:427 iridia/ui/app.py:2055
 msgid "Service"
 msgstr ""
 
-#: iridia/ui/app.py:428 iridia/ui/app.py:1086
+#: iridia/ui/app.py:428 iridia/ui/app.py:1087
 msgid "Updates"
 msgstr ""
 
@@ -169,7 +169,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: iridia/ui/app.py:516 iridia/ui/app.py:999 iridia/ui/app.py:1529
+#: iridia/ui/app.py:516 iridia/ui/app.py:1000 iridia/ui/app.py:1735
 msgid "Restore"
 msgstr ""
 
@@ -186,7 +186,7 @@ msgstr ""
 msgid "Now playing"
 msgstr ""
 
-#: iridia/ui/app.py:621
+#: iridia/ui/app.py:621 iridia/ui/app.py:1509
 msgid "Wallpaper"
 msgstr ""
 
@@ -292,8 +292,8 @@ msgstr ""
 msgid "Color correction is off, so the strip gets the wallpaper colors as they are."
 msgstr ""
 
-#: iridia/ui/app.py:745 iridia/ui/keybinds_tab.py:132 iridia/ui/sections_panel.py:66
-#: iridia/ui/sections_panel.py:378
+#: iridia/ui/app.py:745 iridia/ui/app.py:1511 iridia/ui/keybinds_tab.py:132
+#: iridia/ui/sections_panel.py:66 iridia/ui/sections_panel.py:378
 msgid "Color"
 msgstr ""
 
@@ -314,7 +314,7 @@ msgstr ""
 msgid "Your devices show up here once it runs. Start it here or from the Service tab."
 msgstr ""
 
-#: iridia/ui/app.py:791 iridia/ui/app.py:1709
+#: iridia/ui/app.py:791 iridia/ui/app.py:1915
 msgid "Start daemon"
 msgstr ""
 
@@ -395,11 +395,11 @@ msgstr ""
 msgid "Font"
 msgstr ""
 
-#: iridia/ui/app.py:903 iridia/ui/app.py:910 iridia/ui/app.py:1658
+#: iridia/ui/app.py:903 iridia/ui/app.py:910 iridia/ui/app.py:1864
 msgid "Google Sans Flex (built in)"
 msgstr ""
 
-#: iridia/ui/app.py:903 iridia/ui/app.py:910 iridia/ui/app.py:1658
+#: iridia/ui/app.py:903 iridia/ui/app.py:910 iridia/ui/app.py:1864
 msgid "System font"
 msgstr ""
 
@@ -437,11 +437,11 @@ msgstr ""
 msgid "Dim the LEDs at night, and turn them off while the PC sleeps."
 msgstr ""
 
-#: iridia/ui/app.py:954 iridia/ui/sections_panel.py:382
+#: iridia/ui/app.py:954 iridia/ui/app.py:1526 iridia/ui/sections_panel.py:382
 msgid "From"
 msgstr ""
 
-#: iridia/ui/app.py:954 iridia/ui/sections_panel.py:382
+#: iridia/ui/app.py:954 iridia/ui/app.py:1493 iridia/ui/sections_panel.py:382
 msgid "to"
 msgstr ""
 
@@ -457,1224 +457,1363 @@ msgstr ""
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr ""
 
-#: iridia/ui/app.py:977
+#: iridia/ui/app.py:978
 msgid "Setups and backups"
 msgstr ""
 
-#: iridia/ui/app.py:978
+#: iridia/ui/app.py:979
 msgid ""
 "Save everything (devices, zones, layout, night mode, calibration, your colors for each wallpaper "
 "and your saved colors) under a name, and load it again later."
 msgstr ""
 
-#: iridia/ui/app.py:982 iridia/ui/app.py:1495 iridia/ui/app.py:1504 iridia/ui/keybinds_tab.py:156
+#: iridia/ui/app.py:983 iridia/ui/app.py:1701 iridia/ui/app.py:1710 iridia/ui/keybinds_tab.py:156
 msgid "Setup"
 msgstr ""
 
-#: iridia/ui/app.py:983 iridia/ui/keybinds_tab.py:155
+#: iridia/ui/app.py:984 iridia/ui/keybinds_tab.py:155
 msgid "No setups yet"
 msgstr ""
 
-#: iridia/ui/app.py:987
+#: iridia/ui/app.py:988
 msgid "Save current as…"
 msgstr ""
 
-#: iridia/ui/app.py:988 iridia/ui/app.py:1518
+#: iridia/ui/app.py:989 iridia/ui/app.py:1724
 msgid "Load"
 msgstr ""
 
-#: iridia/ui/app.py:990 iridia/ui/app.py:1019
+#: iridia/ui/app.py:991 iridia/ui/app.py:1020
 msgid "Export"
 msgstr ""
 
-#: iridia/ui/app.py:991 iridia/ui/app.py:1018
+#: iridia/ui/app.py:992 iridia/ui/app.py:1019
 msgid "Import"
 msgstr ""
 
-#: iridia/ui/app.py:992 iridia/ui/app.py:1020 iridia/ui/app.py:1550 iridia/ui/app.py:1640
+#: iridia/ui/app.py:993 iridia/ui/app.py:1021 iridia/ui/app.py:1756 iridia/ui/app.py:1846
 msgid "Delete"
 msgstr ""
 
-#: iridia/ui/app.py:996
+#: iridia/ui/app.py:997
 msgid "Automatic backups"
 msgstr ""
 
-#: iridia/ui/app.py:997
+#: iridia/ui/app.py:998
 msgid "No backups yet"
 msgstr ""
 
-#: iridia/ui/app.py:1001
+#: iridia/ui/app.py:1002
 msgid "Loading a setup first saves what you have now as an automatic backup, so you can always go back."
 msgstr ""
 
-#: iridia/ui/app.py:1007
+#: iridia/ui/app.py:1008
 msgid "Color calibration"
 msgstr ""
 
-#: iridia/ui/app.py:1007
+#: iridia/ui/app.py:1008
 msgid ""
 "Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
 " Calibrated on the Devices tab."
 msgstr ""
 
-#: iridia/ui/app.py:1011
+#: iridia/ui/app.py:1012
 msgid "Profile"
 msgstr ""
 
-#: iridia/ui/app.py:1016
+#: iridia/ui/app.py:1017
 msgid "Edit"
 msgstr ""
 
-#: iridia/ui/app.py:1017
+#: iridia/ui/app.py:1018 iridia/ui/app.py:1497
 msgid "Add"
 msgstr ""
 
-#: iridia/ui/app.py:1025
+#: iridia/ui/app.py:1026
 msgid "Color extraction"
 msgstr ""
 
-#: iridia/ui/app.py:1025
+#: iridia/ui/app.py:1026
 msgid "How Iridia picks colors from your wallpaper."
 msgstr ""
 
-#: iridia/ui/app.py:1030
+#: iridia/ui/app.py:1031
 msgid ""
 "Automatic (recommended): Caelestia's own colors if Caelestia set the wallpaper, otherwise "
 "Material, otherwise Pillow"
 msgstr ""
 
-#: iridia/ui/app.py:1032
+#: iridia/ui/app.py:1033
 msgid "Material: prominent colors from the image (needs material-color-utilities)"
 msgstr ""
 
-#: iridia/ui/app.py:1033
+#: iridia/ui/app.py:1034
 msgid "Pillow: median-cut dominant colors, no extra dependencies"
 msgstr ""
 
-#: iridia/ui/app.py:1044
+#: iridia/ui/app.py:1045
 msgid "Reset wallpaper detection cache"
 msgstr ""
 
-#: iridia/ui/app.py:1045
+#: iridia/ui/app.py:1046
 msgid "Forget all saved wallpaper colors"
 msgstr ""
 
-#: iridia/ui/app.py:1047
+#: iridia/ui/app.py:1048
 msgid ""
 "Once a way of finding your wallpaper works, Iridia remembers it instead of trying every method. "
 "Reset this after changing wallpaper tool or shell."
 msgstr ""
 
-#: iridia/ui/app.py:1054
+#: iridia/ui/app.py:1055
 msgid "Logging"
 msgstr ""
 
-#: iridia/ui/app.py:1056
+#: iridia/ui/app.py:1057
 msgid "Write a log file"
 msgstr ""
 
-#: iridia/ui/app.py:1061
+#: iridia/ui/app.py:1062
 msgid "Recent log"
 msgstr ""
 
-#: iridia/ui/app.py:1061
+#: iridia/ui/app.py:1062
 msgid "The daemon's latest messages. Works even with the log file switched off."
 msgstr ""
 
-#: iridia/ui/app.py:1064
+#: iridia/ui/app.py:1065
 msgid "Lines"
 msgstr ""
 
-#: iridia/ui/app.py:1067 iridia/ui/sections_panel.py:377
+#: iridia/ui/app.py:1068 iridia/ui/sections_panel.py:377
 msgid "Show"
 msgstr ""
 
-#: iridia/ui/app.py:1068 iridia/ui/app.py:1440 iridia/ui/app.py:1746
+#: iridia/ui/app.py:1069 iridia/ui/app.py:1441 iridia/ui/app.py:1952
 msgid "Copy"
 msgstr ""
 
-#: iridia/ui/app.py:1071
+#: iridia/ui/app.py:1072
 msgid "Log copied"
 msgstr ""
 
-#: iridia/ui/app.py:1077
+#: iridia/ui/app.py:1078
 msgid "Press Show to load the latest lines."
 msgstr ""
 
-#: iridia/ui/app.py:1086
+#: iridia/ui/app.py:1087
 msgid "New versions of Iridia come from its releases on GitHub."
 msgstr ""
 
-#: iridia/ui/app.py:1093
+#: iridia/ui/app.py:1094
 msgid "Check now"
 msgstr ""
 
-#: iridia/ui/app.py:1094
+#: iridia/ui/app.py:1095
 msgid "Update now"
 msgstr ""
 
-#: iridia/ui/app.py:1095
+#: iridia/ui/app.py:1096
 msgid "Skip this version"
 msgstr ""
 
-#: iridia/ui/app.py:1099
+#: iridia/ui/app.py:1100
 msgid "What's new"
 msgstr ""
 
-#: iridia/ui/app.py:1113
+#: iridia/ui/app.py:1114
 msgid ""
 "Updating needs no password: the new version installs like the old one, into your home folder. "
 "Your settings are backed up first (Settings, Setups and backups)."
 msgstr ""
 
-#: iridia/ui/app.py:1118
+#: iridia/ui/app.py:1119
 msgid "Checking"
 msgstr ""
 
-#: iridia/ui/app.py:1121
+#: iridia/ui/app.py:1122
 msgid "Look for updates when Iridia starts"
 msgstr ""
 
-#: iridia/ui/app.py:1122
+#: iridia/ui/app.py:1123
 msgid "Show a notification when there's a new version"
 msgstr ""
 
-#: iridia/ui/app.py:1123
+#: iridia/ui/app.py:1124
 msgid "Include test versions"
 msgstr ""
 
-#: iridia/ui/app.py:1127
+#: iridia/ui/app.py:1128
 msgid ""
 "Iridia asks GitHub at most once every few hours, when the daemon or this window starts, and sends"
 " nothing about you."
 msgstr ""
 
-#: iridia/ui/app.py:1131 iridia/ui/app.py:1135 iridia/ui/app.py:1254
+#: iridia/ui/app.py:1132 iridia/ui/app.py:1136 iridia/ui/app.py:1255
 msgid "Go back"
 msgstr ""
 
-#: iridia/ui/app.py:1131
+#: iridia/ui/app.py:1132
 msgid "The version before the last update is kept, so you can undo an update."
 msgstr ""
 
-#: iridia/ui/app.py:1181 iridia/ui/app.py:1187 iridia/ui/app.py:1190
+#: iridia/ui/app.py:1182 iridia/ui/app.py:1188 iridia/ui/app.py:1191
 #, python-brace-format
 msgid "Iridia {v}"
 msgstr ""
 
-#: iridia/ui/app.py:1182
+#: iridia/ui/app.py:1183
 #, python-brace-format
 msgid "Couldn't check: {err}"
 msgstr ""
 
-#: iridia/ui/app.py:1184
+#: iridia/ui/app.py:1185
 #, python-brace-format
 msgid "Iridia {v} is available"
 msgstr ""
 
-#: iridia/ui/app.py:1185
+#: iridia/ui/app.py:1186
 #, python-brace-format
 msgid "You have {cur}. Released {date}."
 msgstr ""
 
-#: iridia/ui/app.py:1188
+#: iridia/ui/app.py:1189
 msgid "You have the latest version."
 msgstr ""
 
-#: iridia/ui/app.py:1191
+#: iridia/ui/app.py:1192
 msgid "Not checked yet."
 msgstr ""
 
-#: iridia/ui/app.py:1194
+#: iridia/ui/app.py:1195
 msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
 msgstr ""
 
-#: iridia/ui/app.py:1200
+#: iridia/ui/app.py:1201
 #, python-brace-format
 msgid "What's new in {v}"
 msgstr ""
 
-#: iridia/ui/app.py:1202
+#: iridia/ui/app.py:1203
 #, python-brace-format
 msgid "Kept from before the last update: Iridia {v}."
 msgstr ""
 
-#: iridia/ui/app.py:1203
+#: iridia/ui/app.py:1204
 msgid "Nothing kept yet: the version you have now is kept when you update."
 msgstr ""
 
-#: iridia/ui/app.py:1206
+#: iridia/ui/app.py:1207
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr ""
 
-#: iridia/ui/app.py:1219 iridia/ui/app.py:1706 iridia/ui/app.py:1720 iridia/ui/app.py:1757
-#: iridia/ui/app.py:1764
+#: iridia/ui/app.py:1220 iridia/ui/app.py:1912 iridia/ui/app.py:1926 iridia/ui/app.py:1963
+#: iridia/ui/app.py:1970
 msgid "Checking…"
 msgstr ""
 
-#: iridia/ui/app.py:1230
+#: iridia/ui/app.py:1231
 msgid "Couldn't check for updates"
 msgstr ""
 
-#: iridia/ui/app.py:1236
+#: iridia/ui/app.py:1237
 #, python-brace-format
 msgid "Iridia {v} skipped. Newer versions still show up."
 msgstr ""
 
-#: iridia/ui/app.py:1240
+#: iridia/ui/app.py:1241
 #, python-brace-format
 msgid "Install Iridia {v}?"
 msgstr ""
 
-#: iridia/ui/app.py:1241
+#: iridia/ui/app.py:1242
 msgid ""
 "Your settings are backed up first, and the version you have now is kept so you can go back. The "
 "LEDs pause for a few seconds while the daemon restarts, and this window restarts when it's done."
 msgstr ""
 
-#: iridia/ui/app.py:1244
+#: iridia/ui/app.py:1245
 #, python-brace-format
 msgid "Updating to {v}…"
 msgstr ""
 
-#: iridia/ui/app.py:1245
+#: iridia/ui/app.py:1246
 msgid "Update"
 msgstr ""
 
-#: iridia/ui/app.py:1249
+#: iridia/ui/app.py:1250
 #, python-brace-format
 msgid "Go back to Iridia {v}?"
 msgstr ""
 
-#: iridia/ui/app.py:1250
+#: iridia/ui/app.py:1251
 msgid ""
 "The version you have now is kept in its place, so you can switch again. Your settings stay as "
 "they are."
 msgstr ""
 
-#: iridia/ui/app.py:1253
+#: iridia/ui/app.py:1254
 #, python-brace-format
 msgid "Going back to {v}…"
 msgstr ""
 
-#: iridia/ui/app.py:1278
+#: iridia/ui/app.py:1279
 msgid "Done: restarting the window…"
 msgstr ""
 
-#: iridia/ui/app.py:1281
+#: iridia/ui/app.py:1282
 msgid "That didn't work: see the output below. Nothing of yours was changed."
 msgstr ""
 
-#: iridia/ui/app.py:1299
+#: iridia/ui/app.py:1300
 msgid "Monitor brightness"
 msgstr ""
 
-#: iridia/ui/app.py:1299
+#: iridia/ui/app.py:1300
 msgid ""
 "Strips with Follow monitor brightness on (under Brightness, on each strip) take their brightness "
 "from this monitor."
 msgstr ""
 
-#: iridia/ui/app.py:1305 iridia/ui/app.py:1364 iridia/ui/zonecard.py:335
+#: iridia/ui/app.py:1306 iridia/ui/app.py:1365 iridia/ui/zonecard.py:335
 msgid "Monitor"
 msgstr ""
 
-#: iridia/ui/app.py:1306
+#: iridia/ui/app.py:1307
 msgid "Look again"
 msgstr ""
 
-#: iridia/ui/app.py:1308 iridia/ui/app.py:1378
+#: iridia/ui/app.py:1309 iridia/ui/app.py:1379
 msgid "Looking for monitors…"
 msgstr ""
 
-#: iridia/ui/app.py:1309
+#: iridia/ui/app.py:1310
 msgid "Install ddcutil"
 msgstr ""
 
-#: iridia/ui/app.py:1313
+#: iridia/ui/app.py:1314
 msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
 msgstr ""
 
-#: iridia/ui/app.py:1327
+#: iridia/ui/app.py:1328
 msgid "your package manager"
 msgstr ""
 
-#: iridia/ui/app.py:1328
+#: iridia/ui/app.py:1329
 #, python-brace-format
 msgid "Install ddcutil with {how}, then press Look again."
 msgstr ""
 
-#: iridia/ui/app.py:1339
+#: iridia/ui/app.py:1340
 msgid "ddcutil installed. Looking for monitors…"
 msgstr ""
 
-#: iridia/ui/app.py:1342
+#: iridia/ui/app.py:1343
 msgid "Not installed: the password dialog was closed."
 msgstr ""
 
-#: iridia/ui/app.py:1344
+#: iridia/ui/app.py:1345
 #, python-brace-format
 msgid "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
 msgstr ""
 
-#: iridia/ui/app.py:1363 iridia/ui/app.py:1367
+#: iridia/ui/app.py:1364 iridia/ui/app.py:1368
 #, python-brace-format
 msgid "I2C bus {n}"
 msgstr ""
 
-#: iridia/ui/app.py:1365
+#: iridia/ui/app.py:1366
 msgid "doesn't answer"
 msgstr ""
 
-#: iridia/ui/app.py:1380
+#: iridia/ui/app.py:1381
 msgid "Following the screen's backlight."
 msgstr ""
 
-#: iridia/ui/app.py:1382
-msgid "the monitor"
-msgstr ""
-
 #: iridia/ui/app.py:1383
-#, python-brace-format
-msgid "Following {name}, now at {n}%."
+msgid "the monitor"
 msgstr ""
 
 #: iridia/ui/app.py:1384
 #, python-brace-format
+msgid "Following {name}, now at {n}%."
+msgstr ""
+
+#: iridia/ui/app.py:1385
+#, python-brace-format
 msgid "Following {name} once a strip has Follow monitor brightness on."
 msgstr ""
 
-#: iridia/ui/app.py:1387
+#: iridia/ui/app.py:1388
 msgid ""
 "ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
 "asks for your password), or install the ddcutil package yourself and press Look again."
 msgstr ""
 
-#: iridia/ui/app.py:1390
+#: iridia/ui/app.py:1391
 msgid ""
 "ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "
 "installing Iridia you may need to log out and in once."
 msgstr ""
 
-#: iridia/ui/app.py:1392
+#: iridia/ui/app.py:1393
 msgid "No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."
 msgstr ""
 
-#: iridia/ui/app.py:1393
+#: iridia/ui/app.py:1394
 msgid "This monitor doesn't answer. Turn DDC/CI on in its own menu, or pick another one."
 msgstr ""
 
-#: iridia/ui/app.py:1395
+#: iridia/ui/app.py:1396
 msgid "No monitor brightness to follow."
 msgstr ""
 
-#: iridia/ui/app.py:1396
+#: iridia/ui/app.py:1397
 msgid "Strips that follow it use their Manual brightness meanwhile."
 msgstr ""
 
-#: iridia/ui/app.py:1400
+#: iridia/ui/app.py:1401
 msgid "Lock and idle"
 msgstr ""
 
-#: iridia/ui/app.py:1400
+#: iridia/ui/app.py:1401
 msgid ""
 "Dim or turn off the LEDs when the screen locks or you're away. Strips can stay lit: see "
 "Brightness on each strip."
 msgstr ""
 
-#: iridia/ui/app.py:1404
+#: iridia/ui/app.py:1405
 msgid "Keep"
 msgstr ""
 
-#: iridia/ui/app.py:1404 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:400
+#: iridia/ui/app.py:1405 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:400
 msgid "Dim"
 msgstr ""
 
-#: iridia/ui/app.py:1404 iridia/ui/app.py:2192 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:19
+#: iridia/ui/app.py:1405 iridia/ui/app.py:2399 iridia/ui/effects.py:74 iridia/ui/sections_panel.py:19
 #: iridia/ui/sections_panel.py:66 iridia/ui/sections_panel.py:400
 msgid "Off"
 msgstr ""
 
-#: iridia/ui/app.py:1406
+#: iridia/ui/app.py:1407
 msgid "When the screen locks"
 msgstr ""
 
-#: iridia/ui/app.py:1411
+#: iridia/ui/app.py:1412
 msgid "After"
 msgstr ""
 
-#: iridia/ui/app.py:1412
+#: iridia/ui/app.py:1413
 msgid "minutes without input"
 msgstr ""
 
-#: iridia/ui/app.py:1416
+#: iridia/ui/app.py:1417
 msgid "Dim to"
 msgstr ""
 
-#: iridia/ui/app.py:1421 iridia/ui/keybinds_tab.py:169
+#: iridia/ui/app.py:1422 iridia/ui/app.py:1544 iridia/ui/keybinds_tab.py:169
 msgid "Try it"
 msgstr ""
 
-#: iridia/ui/app.py:1423
+#: iridia/ui/app.py:1424
 msgid "Acting as if the screen were locked for 5 seconds."
 msgstr ""
 
-#: iridia/ui/app.py:1426
+#: iridia/ui/app.py:1427
 msgid ""
 "The LEDs fade out over 2 seconds and come back in half a second. Try it shows the lock setting "
 "(or off, if that's Keep) for 5 seconds."
 msgstr ""
 
-#: iridia/ui/app.py:1431
+#: iridia/ui/app.py:1432
 msgid "Idle time can't be seen here: lines for hypridle or swayidle"
 msgstr ""
 
-#: iridia/ui/app.py:1434
+#: iridia/ui/app.py:1435
 msgid ""
 "Add these to your idle daemon's config, and Iridia knows when you're away (it then uses that "
 "daemon's timeout instead of the minutes above)."
 msgstr ""
 
-#: iridia/ui/app.py:1441 iridia/ui/app.py:1747 iridia/ui/keybinds_tab.py:370
+#: iridia/ui/app.py:1442 iridia/ui/app.py:1953 iridia/ui/keybinds_tab.py:370
 msgid "Copied"
 msgstr ""
 
-#: iridia/ui/app.py:1454
+#: iridia/ui/app.py:1455
 msgid "in use"
 msgstr ""
 
-#: iridia/ui/app.py:1454
+#: iridia/ui/app.py:1455
 msgid "away"
 msgstr ""
 
-#: iridia/ui/app.py:1454 iridia/ui/layout_tab.py:447
+#: iridia/ui/app.py:1455 iridia/ui/layout_tab.py:447
 msgid "locked"
 msgstr ""
 
-#: iridia/ui/app.py:1455
+#: iridia/ui/app.py:1456
 #, python-brace-format
 msgid "Right now: {state}."
 msgstr ""
 
-#: iridia/ui/app.py:1457
+#: iridia/ui/app.py:1458
 #, python-brace-format
 msgid "Locking seen through: {lock}."
 msgstr ""
 
-#: iridia/ui/app.py:1458
+#: iridia/ui/app.py:1459
 msgid "logind, ScreenSaver or a screen locker, once one shows up"
 msgstr ""
 
-#: iridia/ui/app.py:1460
+#: iridia/ui/app.py:1461
 #, python-brace-format
 msgid "Idle time from: {idle}."
 msgstr ""
 
-#: iridia/ui/app.py:1462
+#: iridia/ui/app.py:1463
 msgid "nothing here"
 msgstr ""
 
-#: iridia/ui/app.py:1464
+#: iridia/ui/app.py:1465
 msgid "Nothing is watched while both are Keep."
 msgstr ""
 
-#: iridia/ui/app.py:1466
+#: iridia/ui/app.py:1467
 msgid "Your idle daemon says you're away."
 msgstr ""
 
-#: iridia/ui/app.py:1476
-msgid "Saved."
+#: iridia/ui/app.py:1475
+msgid "Notifications"
 msgstr ""
 
-#: iridia/ui/app.py:1476 iridia/ui/app.py:1495
+#: iridia/ui/app.py:1475
+msgid ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+msgstr ""
+
+#: iridia/ui/app.py:1480
+msgid "Flash LEDs for notifications"
+msgstr ""
+
+#: iridia/ui/app.py:1483
+msgid "Which LEDs"
+msgstr ""
+
+#: iridia/ui/app.py:1489
+msgid "No strips yet"
+msgstr ""
+
+#: iridia/ui/app.py:1500
+msgid "Pulse"
+msgstr ""
+
+#: iridia/ui/app.py:1500
+msgid "Flash"
+msgstr ""
+
+#: iridia/ui/app.py:1500
+msgid "Sweep"
+msgstr ""
+
+#: iridia/ui/app.py:1502 iridia/ui/keybinds_tab.py:145 iridia/ui/sections_panel.py:327
+msgid "Effect"
+msgstr ""
+
+#: iridia/ui/app.py:1505
+msgid "for"
+msgstr ""
+
+#: iridia/ui/app.py:1506
+msgid "seconds"
+msgstr ""
+
+#: iridia/ui/app.py:1509
+msgid "One per app"
+msgstr ""
+
+#: iridia/ui/app.py:1509
+msgid "Custom"
+msgstr ""
+
+#: iridia/ui/app.py:1521
+msgid "Urgent notifications flash red"
+msgstr ""
+
+#: iridia/ui/app.py:1524
+msgid "Every app"
+msgstr ""
+
+#: iridia/ui/app.py:1524
+msgid "Only these"
+msgstr ""
+
+#: iridia/ui/app.py:1524
+msgid "All but these"
+msgstr ""
+
+#: iridia/ui/app.py:1531
+msgid "Apps show up here once they've sent a notification."
+msgstr ""
+
+#: iridia/ui/app.py:1534
+msgid "Not while Do Not Disturb is on"
+msgstr ""
+
+#: iridia/ui/app.py:1537
+msgid "Not during night mode"
+msgstr ""
+
+#: iridia/ui/app.py:1553 iridia/ui/app.py:1682 iridia/ui/app.py:1701
 msgid "Couldn't save"
 msgstr ""
 
-#: iridia/ui/app.py:1494
+#: iridia/ui/app.py:1564
+msgid "Flashing now."
+msgstr ""
+
+#: iridia/ui/app.py:1566
+msgid "Pick some LEDs first."
+msgstr ""
+
+#: iridia/ui/app.py:1571 iridia/ui/app.py:1591
+msgid "All of it"
+msgstr ""
+
+#: iridia/ui/app.py:1573 iridia/ui/app.py:1592 iridia/ui/sections_panel.py:294
+#, python-brace-format
+msgid "Part {n}"
+msgstr ""
+
+#: iridia/ui/app.py:1576 iridia/ui/app.py:1581 iridia/ui/app.py:1589
+msgid "Some LEDs"
+msgstr ""
+
+#: iridia/ui/app.py:1640
+#, python-brace-format
+msgid "part {n}"
+msgstr ""
+
+#: iridia/ui/app.py:1641
+#, python-brace-format
+msgid "LEDs {a} to {b}"
+msgstr ""
+
+#: iridia/ui/app.py:1641
+msgid "all of it"
+msgstr ""
+
+#: iridia/ui/app.py:1645 iridia/ui/app.py:2067
+msgid "Remove"
+msgstr ""
+
+#: iridia/ui/app.py:1649
+msgid "None yet: pick a strip and press Add."
+msgstr ""
+
+#: iridia/ui/app.py:1664
+msgid ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+msgstr ""
+
+#: iridia/ui/app.py:1667
+msgid "Listening for notifications."
+msgstr ""
+
+#: iridia/ui/app.py:1669
+msgid "Pick some LEDs to start listening."
+msgstr ""
+
+#: iridia/ui/app.py:1671
+msgid "Off."
+msgstr ""
+
+#: iridia/ui/app.py:1682
+msgid "Saved."
+msgstr ""
+
+#: iridia/ui/app.py:1700
 #, python-brace-format
 msgid "Saved “{name}”."
 msgstr ""
 
-#: iridia/ui/app.py:1497
+#: iridia/ui/app.py:1703
 msgid "Save setup"
 msgstr ""
 
-#: iridia/ui/app.py:1497
+#: iridia/ui/app.py:1703
 msgid "Name for this setup. Saving under an existing name replaces it."
 msgstr ""
 
-#: iridia/ui/app.py:1500 iridia/ui/app.py:1596
+#: iridia/ui/app.py:1706 iridia/ui/app.py:1802
 msgid "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
 msgstr ""
 
-#: iridia/ui/app.py:1504
+#: iridia/ui/app.py:1710
 msgid "Couldn't load"
 msgstr ""
 
-#: iridia/ui/app.py:1510
+#: iridia/ui/app.py:1716
 #, python-brace-format
 msgid "Loaded {what}. The previous state is in Automatic backups."
 msgstr ""
 
-#: iridia/ui/app.py:1516
+#: iridia/ui/app.py:1722
 msgid "Load setup"
 msgstr ""
 
-#: iridia/ui/app.py:1516
+#: iridia/ui/app.py:1722
 #, python-brace-format
 msgid "Load “{name}”? Your current settings are backed up first."
 msgstr ""
 
-#: iridia/ui/app.py:1526
+#: iridia/ui/app.py:1732
 msgid "Restore backup"
 msgstr ""
 
-#: iridia/ui/app.py:1526
+#: iridia/ui/app.py:1732
 #, python-brace-format
 msgid "Restore the backup from {date}? Your current settings are backed up first."
 msgstr ""
 
-#: iridia/ui/app.py:1528
+#: iridia/ui/app.py:1734
 #, python-brace-format
 msgid "the backup from {date}"
 msgstr ""
 
-#: iridia/ui/app.py:1540
+#: iridia/ui/app.py:1746
 #, python-brace-format
 msgid "Renamed to “{name}”."
 msgstr ""
 
-#: iridia/ui/app.py:1541
+#: iridia/ui/app.py:1747
 msgid "Rename setup"
 msgstr ""
 
-#: iridia/ui/app.py:1541
+#: iridia/ui/app.py:1747
 #, python-brace-format
 msgid "New name for “{old}”."
 msgstr ""
 
-#: iridia/ui/app.py:1542
+#: iridia/ui/app.py:1748
 msgid "Use letters, numbers, spaces, dashes and brackets."
 msgstr ""
 
-#: iridia/ui/app.py:1547
+#: iridia/ui/app.py:1753
 msgid "Delete setup"
 msgstr ""
 
-#: iridia/ui/app.py:1547
+#: iridia/ui/app.py:1753
 #, python-brace-format
 msgid "Delete the setup “{name}”?"
 msgstr ""
 
-#: iridia/ui/app.py:1549 iridia/ui/app.py:1638
+#: iridia/ui/app.py:1755 iridia/ui/app.py:1844
 #, python-brace-format
 msgid "Deleted “{name}”."
 msgstr ""
 
-#: iridia/ui/app.py:1555
+#: iridia/ui/app.py:1761
 msgid "Save a setup first, then export it."
 msgstr ""
 
-#: iridia/ui/app.py:1557
+#: iridia/ui/app.py:1763
 msgid "Export setup"
 msgstr ""
 
-#: iridia/ui/app.py:1559 iridia/ui/app.py:1623
+#: iridia/ui/app.py:1765 iridia/ui/app.py:1829
 #, python-brace-format
 msgid "Saved {path}"
 msgstr ""
 
-#: iridia/ui/app.py:1562
+#: iridia/ui/app.py:1768
 msgid "Import setup"
 msgstr ""
 
-#: iridia/ui/app.py:1564
+#: iridia/ui/app.py:1770
 #, python-brace-format
 msgid "Imported as “{name}”. Select it and click Load."
 msgstr ""
 
-#: iridia/ui/app.py:1565
+#: iridia/ui/app.py:1771
 msgid "Couldn't import"
 msgstr ""
 
-#: iridia/ui/app.py:1597
+#: iridia/ui/app.py:1803
 #, python-brace-format
 msgid "A profile called “{name}” already exists."
 msgstr ""
 
-#: iridia/ui/app.py:1602 iridia/ui/app.py:1613 iridia/ui/app.py:1634
+#: iridia/ui/app.py:1808 iridia/ui/app.py:1819 iridia/ui/app.py:1840
 msgid "Calibration"
 msgstr ""
 
-#: iridia/ui/app.py:1607
+#: iridia/ui/app.py:1813
 msgid "Add a profile"
 msgstr ""
 
-#: iridia/ui/app.py:1607
+#: iridia/ui/app.py:1813
 #, python-brace-format
 msgid "A new profile that starts as a copy of {base}. Give it a name, for example the strip it is for."
 msgstr ""
 
-#: iridia/ui/app.py:1617
+#: iridia/ui/app.py:1823
 #, python-brace-format
 msgid "Imported as “{name}”."
 msgstr ""
 
-#: iridia/ui/app.py:1618
+#: iridia/ui/app.py:1824
 msgid "Import a calibration profile"
 msgstr ""
 
-#: iridia/ui/app.py:1622
+#: iridia/ui/app.py:1828
 msgid "Export profile"
 msgstr ""
 
-#: iridia/ui/app.py:1628
+#: iridia/ui/app.py:1834
 msgid "WS2812B can't be deleted. Open Edit and use Reset to defaults."
 msgstr ""
 
-#: iridia/ui/app.py:1639
+#: iridia/ui/app.py:1845
 msgid "Delete profile"
 msgstr ""
 
-#: iridia/ui/app.py:1639
+#: iridia/ui/app.py:1845
 #, python-brace-format
 msgid "Delete “{name}”? Zones using it fall back to WS2812B."
 msgstr ""
 
-#: iridia/ui/app.py:1647
+#: iridia/ui/app.py:1853
 msgid "Wallpaper detection will start over."
 msgstr ""
 
-#: iridia/ui/app.py:1650
+#: iridia/ui/app.py:1856
 msgid "Forget saved colors"
 msgstr ""
 
-#: iridia/ui/app.py:1650
+#: iridia/ui/app.py:1856
 msgid ""
 "Forget the colors you picked for every wallpaper? Zones will follow each wallpaper's own colors "
 "again."
 msgstr ""
 
-#: iridia/ui/app.py:1654
+#: iridia/ui/app.py:1860
 msgid "Saved wallpaper colors forgotten."
 msgstr ""
 
-#: iridia/ui/app.py:1655
+#: iridia/ui/app.py:1861
 msgid "Forget"
 msgstr ""
 
-#: iridia/ui/app.py:1669
+#: iridia/ui/app.py:1875
 msgid "The language changes when the window restarts."
 msgstr ""
 
-#: iridia/ui/app.py:1669 iridia/ui/app.py:1965
+#: iridia/ui/app.py:1875 iridia/ui/app.py:2171
 msgid "Restart"
 msgstr ""
 
-#: iridia/ui/app.py:1695
+#: iridia/ui/app.py:1901
 #, python-brace-format
 msgid "Couldn't read the log: {error}"
 msgstr ""
 
-#: iridia/ui/app.py:1697
+#: iridia/ui/app.py:1903
 #, python-brace-format
 msgid "Daemon not reachable: {error}"
 msgstr ""
 
-#: iridia/ui/app.py:1702
+#: iridia/ui/app.py:1908
 msgid "Background daemon"
 msgstr ""
 
-#: iridia/ui/app.py:1702
+#: iridia/ui/app.py:1908
 msgid ""
 "The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
 "keeps working when this window is closed. This window only changes its settings."
 msgstr ""
 
-#: iridia/ui/app.py:1710
+#: iridia/ui/app.py:1916
 msgid "Kill daemon"
 msgstr ""
 
-#: iridia/ui/app.py:1712
+#: iridia/ui/app.py:1918
 msgid ""
 "Killing the daemon stops it completely. Your lights stay on their last colors until you start it "
 "again."
 msgstr ""
 
-#: iridia/ui/app.py:1716
+#: iridia/ui/app.py:1922
 msgid "Start the daemon when I log in"
 msgstr ""
 
-#: iridia/ui/app.py:1716
+#: iridia/ui/app.py:1922
 msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
 msgstr ""
 
-#: iridia/ui/app.py:1719 iridia/ui/app.py:1875
+#: iridia/ui/app.py:1925 iridia/ui/app.py:2081
 msgid "systemd service"
 msgstr ""
 
-#: iridia/ui/app.py:1723
+#: iridia/ui/app.py:1929
 msgid "Enable at login"
 msgstr ""
 
-#: iridia/ui/app.py:1724
+#: iridia/ui/app.py:1930
 msgid "Disable"
 msgstr ""
 
-#: iridia/ui/app.py:1725
+#: iridia/ui/app.py:1931
 msgid "Remove completely"
 msgstr ""
 
-#: iridia/ui/app.py:1728
+#: iridia/ui/app.py:1934
 msgid "Other ways"
 msgstr ""
 
-#: iridia/ui/app.py:1729
+#: iridia/ui/app.py:1935
 msgid ""
 "Add one of these to your compositor or desktop's own startup config instead of (or as well as) "
 "systemd."
 msgstr ""
 
-#: iridia/ui/app.py:1734
+#: iridia/ui/app.py:1940
 msgid "Environment"
 msgstr ""
 
-#: iridia/ui/app.py:1748 iridia/ui/app.py:1815
+#: iridia/ui/app.py:1954 iridia/ui/app.py:2021
 msgid "Install XDG autostart"
 msgstr ""
 
-#: iridia/ui/app.py:1754
+#: iridia/ui/app.py:1960
 msgid "OpenRGB connection"
 msgstr ""
 
-#: iridia/ui/app.py:1754
+#: iridia/ui/app.py:1960
 msgid "OpenRGB is a separate program that talks to your LEDs. Iridia needs it running."
 msgstr ""
 
-#: iridia/ui/app.py:1760
+#: iridia/ui/app.py:1966
 msgid "Start OpenRGB"
 msgstr ""
 
-#: iridia/ui/app.py:1769 iridia/ui/app.py:1954
+#: iridia/ui/app.py:1975 iridia/ui/app.py:2160
 msgid "Turn off OpenRGB's own autostart"
 msgstr ""
 
-#: iridia/ui/app.py:1775
+#: iridia/ui/app.py:1981
 msgid "Reconnect"
 msgstr ""
 
-#: iridia/ui/app.py:1776
+#: iridia/ui/app.py:1982
 msgid "Reconnecting…"
 msgstr ""
 
-#: iridia/ui/app.py:1777 iridia/ui/app.py:1963
+#: iridia/ui/app.py:1983 iridia/ui/app.py:2169
 msgid "Restart OpenRGB server"
 msgstr ""
 
-#: iridia/ui/app.py:1779
+#: iridia/ui/app.py:1985
 msgid ""
 "Reconnect is quick and safe to try first. Restart stops and relaunches OpenRGB's SDK server (or "
 "its systemd service); use it when a device stops responding and Reconnect doesn't bring it back. "
 "It won't touch an OpenRGB window."
 msgstr ""
 
-#: iridia/ui/app.py:1784 iridia/ui/dialogs.py:294 iridia/ui/dialogs.py:295
+#: iridia/ui/app.py:1990 iridia/ui/dialogs.py:294 iridia/ui/dialogs.py:295
 msgid "Diagnostics"
 msgstr ""
 
-#: iridia/ui/app.py:1786
+#: iridia/ui/app.py:1992
 msgid "Run diagnostics"
 msgstr ""
 
-#: iridia/ui/app.py:1787
+#: iridia/ui/app.py:1993
 msgid ""
 "Checks the daemon, OpenRGB, zones, DDC and wallpaper detection in one go, the same thing “iridia "
 "doctor” prints."
 msgstr ""
 
-#: iridia/ui/app.py:1791 iridia/ui/app.py:1984
+#: iridia/ui/app.py:1997 iridia/ui/app.py:2190
 msgid "Uninstall"
 msgstr ""
 
-#: iridia/ui/app.py:1793
+#: iridia/ui/app.py:1999
 msgid "Uninstall Iridia…"
 msgstr ""
 
-#: iridia/ui/app.py:1794
+#: iridia/ui/app.py:2000
 msgid ""
 "Stops the daemon and removes the service, launcher, icons and program files. You choose whether "
 "to keep your settings. Same as running “iridia uninstall”."
 msgstr ""
 
-#: iridia/ui/app.py:1806
+#: iridia/ui/app.py:2012
 msgid ""
 "Couldn't find the iridia-daemon launcher next to Python, so this uses the bare name and relies on"
 " your login PATH. If it doesn't start, replace it with the full path (run: which iridia-daemon)."
 msgstr ""
 
-#: iridia/ui/app.py:1809
+#: iridia/ui/app.py:2015
 #, python-brace-format
 msgid "Add this to: {file}"
 msgstr ""
 
-#: iridia/ui/app.py:1814
+#: iridia/ui/app.py:2020
 msgid "Remove XDG autostart"
 msgstr ""
 
-#: iridia/ui/app.py:1821
+#: iridia/ui/app.py:2027
 msgid "XDG autostart removed"
 msgstr ""
 
-#: iridia/ui/app.py:1824
+#: iridia/ui/app.py:2030
 msgid "XDG autostart installed"
 msgstr ""
 
-#: iridia/ui/app.py:1833 iridia/ui/app.py:1842
+#: iridia/ui/app.py:2039 iridia/ui/app.py:2048
 msgid "Daemon"
 msgstr ""
 
-#: iridia/ui/app.py:1842
+#: iridia/ui/app.py:2048
 msgid "Couldn't stop it."
 msgstr ""
 
-#: iridia/ui/app.py:1848
+#: iridia/ui/app.py:2054
 msgid "Enabled. The daemon now starts at login."
 msgstr ""
 
-#: iridia/ui/app.py:1849
+#: iridia/ui/app.py:2055
 msgid "Install failed:"
 msgstr ""
 
-#: iridia/ui/app.py:1857
+#: iridia/ui/app.py:2063
 msgid "Remove service"
 msgstr ""
 
-#: iridia/ui/app.py:1857
+#: iridia/ui/app.py:2063
 msgid "Stop, disable and delete the systemd service (and the app launcher)? Your settings are kept."
 msgstr ""
 
-#: iridia/ui/app.py:1859
+#: iridia/ui/app.py:2065
 msgid "Removed."
 msgstr ""
 
-#: iridia/ui/app.py:1861
-msgid "Remove"
-msgstr ""
-
-#: iridia/ui/app.py:1875
+#: iridia/ui/app.py:2081
 msgid "With Iridia"
 msgstr ""
 
-#: iridia/ui/app.py:1875
+#: iridia/ui/app.py:2081
 msgid "I start it myself"
 msgstr ""
 
-#: iridia/ui/app.py:1891
+#: iridia/ui/app.py:2097
 msgid "OpenRGB isn't installed, so there is nothing to start."
 msgstr ""
 
-#: iridia/ui/app.py:1893
+#: iridia/ui/app.py:2099
 msgid ""
 "The Iridia daemon starts OpenRGB's server inside your session, and starts it again if it stops. "
 "Works with or without systemd."
 msgstr ""
 
-#: iridia/ui/app.py:1897
+#: iridia/ui/app.py:2103
 #, python-brace-format
 msgid "Running (pid {pid})."
 msgstr ""
 
-#: iridia/ui/app.py:1899
+#: iridia/ui/app.py:2105
 msgid "Running, but not started by Iridia, so Iridia won't restart it."
 msgstr ""
 
-#: iridia/ui/app.py:1901
+#: iridia/ui/app.py:2107
 msgid "A systemd user service (iridia-openrgb.service) starts it with your graphical session."
 msgstr ""
 
-#: iridia/ui/app.py:1904
+#: iridia/ui/app.py:2110
 msgid ""
 "Your session doesn't start graphical-session.target, so this service won't start at login. Pick "
 "“With Iridia” instead."
 msgstr ""
 
-#: iridia/ui/app.py:1907
+#: iridia/ui/app.py:2113
 #, python-brace-format
 msgid "Service: {state}"
 msgstr ""
 
-#: iridia/ui/app.py:1909
+#: iridia/ui/app.py:2115
 msgid ""
 "Iridia never starts or restarts OpenRGB. Start its server yourself: the OpenRGB window with its "
 "SDK server on, or a service."
 msgstr ""
 
-#: iridia/ui/app.py:1912
+#: iridia/ui/app.py:2118
 msgid "The OpenRGB window is open, but its SDK server is off. In OpenRGB: SDK Server tab, Start Server."
 msgstr ""
 
-#: iridia/ui/app.py:1919
+#: iridia/ui/app.py:2125
 #, python-brace-format
 msgid ""
 "Also started by: {what}. Two OpenRGB instances fight over the hardware, so Iridia won't start one"
 " while that is set up."
 msgstr ""
 
-#: iridia/ui/app.py:1934 iridia/ui/app.py:1943
+#: iridia/ui/app.py:2140 iridia/ui/app.py:2149
 msgid "OpenRGB"
 msgstr ""
 
-#: iridia/ui/app.py:1934 iridia/ui/keybinds_tab.py:393
+#: iridia/ui/app.py:2140 iridia/ui/keybinds_tab.py:393
 msgid "That didn't work"
 msgstr ""
 
-#: iridia/ui/app.py:1936
+#: iridia/ui/app.py:2142
 msgid "OpenRGB start method changed"
 msgstr ""
 
-#: iridia/ui/app.py:1943
+#: iridia/ui/app.py:2149
 msgid ""
 "Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
 "runs until you log out."
 msgstr ""
 
-#: iridia/ui/app.py:1945
+#: iridia/ui/app.py:2151
 msgid "Stop it"
 msgstr ""
 
-#: iridia/ui/app.py:1945
+#: iridia/ui/app.py:2151
 msgid "Keep it running"
 msgstr ""
 
-#: iridia/ui/app.py:1955
+#: iridia/ui/app.py:2161
 #, python-brace-format
 msgid ""
 "Add “Hidden=true” to {files}, so your desktop no longer starts OpenRGB at login? The file stays; "
 "delete that line to undo."
 msgstr ""
 
-#: iridia/ui/app.py:1958
+#: iridia/ui/app.py:2164
 msgid "OpenRGB's autostart is off"
 msgstr ""
 
-#: iridia/ui/app.py:1960 iridia/ui/keybinds_tab.py:125
+#: iridia/ui/app.py:2166 iridia/ui/keybinds_tab.py:125
 msgid "Turn off"
 msgstr ""
 
-#: iridia/ui/app.py:1963
+#: iridia/ui/app.py:2169
 msgid ""
 "This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
 "other software using it."
 msgstr ""
 
-#: iridia/ui/app.py:1972 iridia/ui/app.py:1973
+#: iridia/ui/app.py:2178 iridia/ui/app.py:2179
 msgid "Uninstall Iridia"
 msgstr ""
 
-#: iridia/ui/app.py:1974
+#: iridia/ui/app.py:2180
 msgid ""
 "Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
 "something else changes them."
 msgstr ""
 
-#: iridia/ui/app.py:1984
+#: iridia/ui/app.py:2190
 #, python-brace-format
 msgid "Couldn't start the uninstaller: {e}"
 msgstr ""
 
-#: iridia/ui/app.py:1987 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
+#: iridia/ui/app.py:2193 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
 #: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227
 msgid "Cancel"
 msgstr ""
 
-#: iridia/ui/app.py:1988
+#: iridia/ui/app.py:2194
 msgid "Remove, keep my settings"
 msgstr ""
 
-#: iridia/ui/app.py:1989
+#: iridia/ui/app.py:2195
 msgid "Remove everything"
 msgstr ""
 
-#: iridia/ui/app.py:2009
+#: iridia/ui/app.py:2215
 msgid "Daemon stopped"
 msgstr ""
 
-#: iridia/ui/app.py:2015
+#: iridia/ui/app.py:2221
 #, python-brace-format
 msgid "Running (pid {pid}, started by {who})"
 msgstr ""
 
-#: iridia/ui/app.py:2017
+#: iridia/ui/app.py:2223
 msgid "by systemd"
 msgstr ""
 
-#: iridia/ui/app.py:2017
+#: iridia/ui/app.py:2223
 msgid "without systemd"
 msgstr ""
 
-#: iridia/ui/app.py:2018
+#: iridia/ui/app.py:2224
 #, python-brace-format
 msgid "Running (pid {pid}, started {by})"
 msgstr ""
 
-#: iridia/ui/app.py:2024
+#: iridia/ui/app.py:2230
 msgid "Enabled. The daemon starts automatically when you log in."
 msgstr ""
 
-#: iridia/ui/app.py:2025
+#: iridia/ui/app.py:2231
 msgid "Installed but not enabled. It won't start at login."
 msgstr ""
 
-#: iridia/ui/app.py:2026
+#: iridia/ui/app.py:2232
 msgid "Not installed. Click “Enable at login” to set it up."
 msgstr ""
 
-#: iridia/ui/app.py:2027
+#: iridia/ui/app.py:2233
 #, python-brace-format
 msgid "systemd status: {status}"
 msgstr ""
 
-#: iridia/ui/app.py:2028
+#: iridia/ui/app.py:2234
 msgid ""
 "Your session doesn't start graphical-session.target, so the service won't start the daemon at "
 "login. Use one of the other ways below."
 msgstr ""
 
-#: iridia/ui/app.py:2038
+#: iridia/ui/app.py:2244
 msgid "Colors frozen. Wallpaper changes are ignored."
 msgstr ""
 
-#: iridia/ui/app.py:2039
+#: iridia/ui/app.py:2245
 msgid "Colors follow the wallpaper again."
 msgstr ""
 
-#: iridia/ui/app.py:2049
+#: iridia/ui/app.py:2255
 msgid "Daemon restarting…"
 msgstr ""
 
-#: iridia/ui/app.py:2137
+#: iridia/ui/app.py:2343
 msgid "Daemon not running"
 msgstr ""
 
-#: iridia/ui/app.py:2141
+#: iridia/ui/app.py:2347
 msgid "The daemon isn't running"
 msgstr ""
 
-#: iridia/ui/app.py:2142
+#: iridia/ui/app.py:2348
 msgid "Start it from the Service tab."
 msgstr ""
 
-#: iridia/ui/app.py:2158
+#: iridia/ui/app.py:2365
 msgid "OpenRGB not connected"
 msgstr ""
 
-#: iridia/ui/app.py:2160
+#: iridia/ui/app.py:2367
 #, python-brace-format
 msgid "Can't see: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:2162
+#: iridia/ui/app.py:2369
 #, python-brace-format
 msgid "Night mode until {time}"
 msgstr ""
 
-#: iridia/ui/app.py:2168
+#: iridia/ui/app.py:2375
 msgid "Frozen"
 msgstr ""
 
-#: iridia/ui/app.py:2171
+#: iridia/ui/app.py:2378
 msgid "No wallpaper detected yet"
 msgstr ""
 
-#: iridia/ui/app.py:2183
+#: iridia/ui/app.py:2390
 msgid "Connected"
 msgstr ""
 
-#: iridia/ui/app.py:2183
+#: iridia/ui/app.py:2390
 msgid "Not connected"
 msgstr ""
 
-#: iridia/ui/app.py:2186
+#: iridia/ui/app.py:2393
 msgid "Following the screen's backlight"
 msgstr ""
 
-#: iridia/ui/app.py:2187
+#: iridia/ui/app.py:2394
 msgid "Available"
 msgstr ""
 
-#: iridia/ui/app.py:2187
+#: iridia/ui/app.py:2394
 msgid "Not available"
 msgstr ""
 
-#: iridia/ui/app.py:2189 iridia/ui/widgets.py:211
+#: iridia/ui/app.py:2396 iridia/ui/widgets.py:211
 msgid "Mixed"
 msgstr ""
 
-#: iridia/ui/app.py:2190
+#: iridia/ui/app.py:2397
 msgid "Frozen (wallpaper changes are ignored)"
 msgstr ""
 
-#: iridia/ui/app.py:2190
+#: iridia/ui/app.py:2397
 msgid "Following the wallpaper"
 msgstr ""
 
-#: iridia/ui/app.py:2194
+#: iridia/ui/app.py:2401
 #, python-brace-format
 msgid "On until {end}, brightness capped at {cap}%"
 msgstr ""
 
-#: iridia/ui/app.py:2196
+#: iridia/ui/app.py:2403
 #, python-brace-format
 msgid "Scheduled {start} to {end} (cap {cap}%)"
 msgstr ""
 
-#: iridia/ui/app.py:2199
+#: iridia/ui/app.py:2406
 msgid "Off (PC asleep)"
 msgstr ""
 
-#: iridia/ui/app.py:2200
+#: iridia/ui/app.py:2407
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:2200
+#: iridia/ui/app.py:2407
 msgid "On"
 msgstr ""
 
-#: iridia/ui/app.py:2201
+#: iridia/ui/app.py:2408
 #, python-brace-format
 msgid "{n} strip changed by a keybind (see Keybinds)"
 msgid_plural "{n} strips changed by a keybind (see Keybinds)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:2205
+#: iridia/ui/app.py:2412
 #, python-brace-format
 msgid "Right now: wallpaper found via “{found}”{cached}, colors extracted via “{engine}”."
 msgstr ""
 
-#: iridia/ui/app.py:2205
+#: iridia/ui/app.py:2412
 msgid "nothing yet"
 msgstr ""
 
-#: iridia/ui/app.py:2205
+#: iridia/ui/app.py:2412
 msgid " (cached)"
 msgstr ""
 
-#: iridia/ui/app.py:2205
+#: iridia/ui/app.py:2412
 msgid "n/a (cached or not yet run)"
 msgstr ""
 
-#: iridia/ui/app.py:2237
+#: iridia/ui/app.py:2444
 #, python-brace-format
 msgid "Connected, but not seeing: {devices}"
 msgstr ""
 
-#: iridia/ui/app.py:2238
+#: iridia/ui/app.py:2445
 msgid "Connected. All configured devices visible."
 msgstr ""
 
-#: iridia/ui/app.py:2240
+#: iridia/ui/app.py:2447
 msgid "Not connected."
 msgstr ""
 
@@ -2287,10 +2426,6 @@ msgstr ""
 
 #: iridia/ui/keybinds_tab.py:141 iridia/ui/keybinds_tab.py:457
 msgid "Static pattern"
-msgstr ""
-
-#: iridia/ui/keybinds_tab.py:145 iridia/ui/sections_panel.py:327
-msgid "Effect"
 msgstr ""
 
 #: iridia/ui/keybinds_tab.py:152
@@ -3017,11 +3152,6 @@ msgid "{n} LED set"
 msgid_plural "{n} LEDs set"
 msgstr[0] ""
 msgstr[1] ""
-
-#: iridia/ui/sections_panel.py:294
-#, python-brace-format
-msgid "Part {n}"
-msgstr ""
 
 #: iridia/ui/sections_panel.py:302
 msgid "Finding sensors…"

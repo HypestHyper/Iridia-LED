@@ -971,6 +971,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(row)
         p.append(c)
         self._build_session_settings(p)
+        self._build_notify_settings(p)
         self._build_animation_settings(p)
 
         # setups
@@ -1468,6 +1469,211 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if self._sess_lbl.get_label() != txt:
             self._sess_lbl.set_label(txt)
         self._sess_hooks.set_visible(bool(w.get("idle") and w.get("idle_checked") and not s.get("idle_method")))
+
+    # ------------------------------------------------------------ notifications
+    def _build_notify_settings(self, p):
+        p.append(section(_("Notifications"), _("Flash some LEDs when a desktop notification comes in. Iridia only "
+                                               "sees which app sent it, never what it says.")))
+        c = card()
+        n = self.config.get("notify", {}) or {}
+        self._nt = {}
+        row, self._nt["enabled"] = switch_row(_("Flash LEDs for notifications"), bool(n.get("enabled", False)),
+                                              lambda v: self._notify_set(enabled=v))
+        c.append(row)
+        c.append(label(_("Which LEDs"), ("body",)))
+        self._nt_list = vbox(6)
+        self._nt_targets = None
+        c.append(self._nt_list)
+        self._nt_strips = {}            # dropdown text -> (device, zone, LED count, parts)
+        r = wrap_row(10)
+        self._nt_strip = Dropdown([], None, lambda _v: self._notify_which_items(), placeholder=_("No strips yet"))
+        self._nt_which = Dropdown([], None, lambda _v: self._notify_range_shown(), placeholder="")
+        self._nt_from = Spin(1, 9999, 1)
+        self._nt_to = Spin(1, 9999, 10)
+        self._nt_range = hbox(8, self._nt_from, label(_("to"), ("body", "dim")), self._nt_to)
+        self._nt_range.set_visible(False)
+        r.append(hbox(10, self._nt_strip, self._nt_which))
+        r.append(self._nt_range)
+        r.append(button(_("Add"), "add", "tonal small", self._notify_add))
+        c.append(r)
+        r = wrap_row(10)
+        self._nt["effect"] = Group([("pulse", _("Pulse")), ("flash", _("Flash")), ("sweep", _("Sweep"))],
+                                   n.get("effect", "pulse"), lambda v: self._notify_set(effect=v))
+        r.append(hbox(10, label(_("Effect"), ("body", "dim")), self._nt["effect"]))
+        self._nt["duration"] = Spin(0.5, 5, n.get("duration", 1.5), lambda v: self._notify_set(duration=v),
+                                    step=0.5, digits=1)
+        r.append(hbox(10, label(_("for"), ("body", "dim")), self._nt["duration"],
+                      label(_("seconds"), ("body", "dim"))))
+        c.append(r)
+        r = wrap_row(10)
+        self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom"))],
+                                  n.get("color", "accent"), lambda v: self._notify_set(color=v))
+        r.append(hbox(10, label(_("Color"), ("body", "dim")), self._nt["color"]))
+        self._nt_hex = Gtk.Entry(text="#" + str(n.get("hex", "ffffff")), width_chars=8, max_width_chars=8,
+                                 hexpand=False)
+        self._nt_hex.connect("activate", lambda *_a: self._notify_hex())
+        fc = Gtk.EventControllerFocus()
+        fc.connect("leave", lambda *_a: self._notify_hex())
+        self._nt_hex.add_controller(fc)
+        self._nt_hex.set_visible(n.get("color") == "custom")
+        r.append(self._nt_hex)
+        c.append(r)
+        row, self._nt["urgent_red"] = switch_row(_("Urgent notifications flash red"), bool(n.get("urgent_red", True)),
+                                                 lambda v: self._notify_set(urgent_red=v))
+        c.append(row)
+        self._nt["apps"] = Group([("all", _("Every app")), ("only", _("Only these")), ("except", _("All but these"))],
+                                 n.get("apps", "all"), lambda v: self._notify_set(apps=v))
+        c.append(hbox(10, label(_("From"), ("body", "dim")), self._nt["apps"]))
+        self._nt_apps = wrap_row(6)
+        self._nt_seen = None
+        self._nt_apps_box = vbox(0, self._nt_apps)
+        c.append(self._nt_apps_box)
+        self._nt_apps_note = label(_("Apps show up here once they've sent a notification."), ("small", "faint"),
+                                   wrap=True)
+        c.append(self._nt_apps_note)
+        row, self._nt["dnd"] = switch_row(_("Not while Do Not Disturb is on"), bool(n.get("dnd", True)),
+                                          lambda v: self._notify_set(dnd=v))
+        c.append(row)
+        row, self._nt["night_quiet"] = switch_row(_("Not during night mode"), bool(n.get("night_quiet", False)),
+                                                  lambda v: self._notify_set(night_quiet=v))
+        c.append(row)
+        r = hbox(10)
+        self._nt_lbl = label("", ("small", "dim"), wrap=True)
+        self._nt_lbl.set_hexpand(True)
+        r.append(self._nt_lbl)
+        r.append(button(_("Try it"), "bolt", "tonal small", self._notify_try))
+        c.append(r)
+        p.append(c)
+
+    def _notify_set(self, **kw):
+        self.bg(lambda: self.client.notify(**kw), self._notify_done)
+
+    def _notify_done(self, r):
+        if not r.get("ok"):
+            self.toast(r.get("error") or _("Couldn't save"))
+        self._apply_notify(r.get("notify"), None)
+
+    def _notify_hex(self):
+        t = self._nt_hex.get_text().strip().lstrip("#").lower()
+        if len(t) == 6 and all(ch in "0123456789abcdef" for ch in t):
+            self._notify_set(hex=t)
+
+    def _notify_try(self):
+        def done(r):
+            if r.get("ok"):
+                self.toast(_("Flashing now."))
+            else:
+                self.toast(_("Pick some LEDs first."))
+        self.bg(lambda: self.client.notify(test=True), done)
+
+    def _notify_which_items(self):
+        info = self._nt_strips.get(self._nt_strip.value())
+        items = [_("All of it")]
+        if info:
+            items += [_("Part {n}").format(n=k + 1) for k in range(info[3] if info[3] > 1 else 0)]
+            self._nt_from.set_range(1, max(1, info[2]))
+            self._nt_to.set_range(1, max(1, info[2]))
+        items.append(_("Some LEDs"))
+        self._nt_which.set_items(items, self._nt_which.value() if self._nt_which.value() in items else items[0])
+        self._notify_range_shown()
+
+    def _notify_range_shown(self):
+        self._nt_range.set_visible(self._nt_which.value() == _("Some LEDs"))
+
+    def _notify_add(self):
+        info = self._nt_strips.get(self._nt_strip.value())
+        if not info:
+            return
+        t = {"device": info[0], "zone": info[1]}
+        which = self._nt_which.value() or ""
+        if which == _("Some LEDs"):
+            t["start"], t["end"] = int(self._nt_from.get_value()), int(self._nt_to.get_value())
+        elif which != _("All of it"):
+            items = [_("Part {n}").format(n=k + 1) for k in range(info[3])]
+            if which in items:
+                t["part"] = items.index(which)
+        self._notify_set(add_target=t)
+
+    def _notify_strip_name(self, t) -> str:
+        for text, info in self._nt_strips.items():
+            if (info[0], info[1]) == (t.get("device"), t.get("zone", "")):
+                return text
+        return t.get("device", "") + (" / " + t["zone"] if t.get("zone") else "")
+
+    def _apply_notify(self, n, devices):
+        if not n or not hasattr(self, "_nt_lbl"):
+            return
+        if devices is not None:
+            strips, names = {}, []
+            for dev, cfg in sorted(devices.items()):
+                if not isinstance(cfg, dict):
+                    continue
+                zones = cfg.get("zones")
+                items = list(zones.items()) if isinstance(zones, dict) and zones else [("", cfg)]
+                for zn, zc in items:
+                    if isinstance(zc, dict):
+                        names.append((zc.get("display_name") or zn or dev, dev, zn, zc))
+            dup = {x[0] for x in names if [y[0] for y in names].count(x[0]) > 1}
+            for name, dev, zn, zc in names:
+                text = f"{dev} / {name}" if name in dup else name
+                strips[text] = (dev, zn, int(zc.get("led_count") or 0), len(zc.get("sections") or []))
+            if strips != self._nt_strips:
+                self._nt_strips = strips
+                cur = self._nt_strip.value()
+                self._nt_strip.set_items(list(strips), cur if cur in strips else (next(iter(strips), None)))
+                self._notify_which_items()
+        for k, w in self._nt.items():
+            if isinstance(w, Group):
+                w.set_active(n.get(k))
+            elif isinstance(w, Spin):
+                w.set_quiet(n.get(k, 1.5))
+            else:
+                w.set_value(bool(n.get(k)))
+        self._nt_hex.set_visible(n.get("color") == "custom")
+        if not self._nt_hex.has_focus():
+            self._nt_hex.set_text("#" + str(n.get("hex", "ffffff")))
+        targets = n.get("targets") or []
+        if targets != self._nt_targets:
+            self._nt_targets = targets
+            widgets.clear(self._nt_list)
+            for i, t in enumerate(targets):
+                which = (_("part {n}").format(n=t["part"] + 1) if "part" in t else
+                         _("LEDs {a} to {b}").format(a=t["start"], b=t["end"]) if "start" in t else _("all of it"))
+                txt = label(f"{self._notify_strip_name(t)}: {which}", ("body",))
+                txt.set_hexpand(True)
+                rm = button(None, "close", "flat small", lambda i=i: self._notify_set(remove_target=i),
+                            tooltip=_("Remove"))
+                row = hbox(10, txt, rm)
+                self._nt_list.append(row)
+            if not targets:
+                self._nt_list.append(label(_("None yet: pick a strip and press Add."), ("small", "faint")))
+        seen = (n.get("seen") or [], n.get("app_list") or [], n.get("apps"))
+        if seen != self._nt_seen:
+            self._nt_seen = seen
+            widgets.clear(self._nt_apps)
+            picked = {a.lower() for a in seen[1]}
+            for app in sorted(set(seen[0]) | set(seen[1]), key=str.lower):
+                b = Gtk.ToggleButton(label=app, active=app.lower() in picked)
+                b.add_css_class("filter")
+                b.connect("toggled", lambda b, app=app: self._notify_app(app, b.get_active()))
+                self._nt_apps.append(b)
+        choosing = n.get("apps") != "all"
+        self._nt_apps_box.set_visible(choosing and bool(seen[0] or seen[1]))
+        self._nt_apps_note.set_visible(choosing and not (seen[0] or seen[1]))
+        if not n.get("method"):
+            txt = _("Can't listen for notifications here: install dbus-monitor (the dbus tools package) or "
+                    "use a system with systemd's busctl.")
+        elif n.get("listening"):
+            txt = _("Listening for notifications.")
+        elif n.get("enabled"):
+            txt = _("Pick some LEDs to start listening.")
+        else:
+            txt = _("Off.")
+        if self._nt_lbl.get_label() != txt:
+            self._nt_lbl.set_label(txt)
+
+    def _notify_app(self, app, on):
+        self._notify_set(pick_app=[app, on])
 
     def _save_night(self):
         req = {"enabled": self._night_sw.get_active(), "start": self._night_start.get_text().strip(),
@@ -2154,6 +2360,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         missing = st.get("openrgb_missing_devices", [])
         night = st.get("night") or {}
         self._apply_session(st.get("session"))
+        self._apply_notify(st.get("notify"), st.get("device_configs") or {})
         if not st.get("openrgb_connected"):
             self._chip.set(_("OpenRGB not connected"), "error")
         elif missing:

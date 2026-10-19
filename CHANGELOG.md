@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **LEDs can flash for desktop notifications** (Settings, *Notifications*, or `iridia notify`). Pick
+  which LEDs: whole strips, one of their parts, or a range like LEDs 3 to 12, on any devices. Only
+  those flash (*Pulse*, *Flash* or *Sweep*), in the wallpaper colour, a colour per app or one you
+  pick, red when urgent; the rest of the strip, animations included, carries on. Every app, only
+  some, or all but some; quiet during Do Not Disturb (GNOME, KDE, mako, dunst, SwayNC) and,
+  if you like, night mode. Works on any desktop: Iridia listens on the session bus with
+  `dbus-monitor` or systemd's `busctl`, and only sees which app sent a notification, never what it says.
 - **Sensor bars can fill from the middle**, growing both ways at once (*Fills from: The start, The
   middle, The other end*). With an even number of LEDs the two middle ones light together, so both
   sides always match; the tip on each side is partly lit, as at the ends.

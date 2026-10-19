@@ -62,6 +62,20 @@ DEFAULT_CONFIG = {
         "prerelease": False,        # include test versions
         "skip": ""                  # a version you said to skip
     },
+    "notify": {
+        "enabled": False,           # flash LEDs when a desktop notification comes in
+        "targets": [],              # which LEDs: {"device", "zone", and "part" or "start"/"end"}
+        "effect": "pulse",          # pulse | flash | sweep
+        "color": "accent",          # accent (the wallpaper colour) | app (one per app) | custom
+        "hex": "ffffff",            # the custom colour
+        "urgent_red": True,         # urgent notifications flash red
+        "duration": 1.5,            # seconds
+        "apps": "all",              # all | only (app_list) | except (app_list)
+        "app_list": [],
+        "dnd": True,                # not while Do Not Disturb is on
+        "night_quiet": False,       # not while night mode is on
+        "seen": []                  # apps that sent notifications, to pick from
+    },
     "devices": {},
     "custom_colors": [],
     "profiles": {

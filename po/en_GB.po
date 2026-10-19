@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 16:37+0000\n"
+"POT-Creation-Date: 2026-10-19 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -795,11 +795,136 @@ msgstr "Nothing is watched while both are Keep."
 msgid "Your idle daemon says you're away."
 msgstr "Your idle daemon says you're away."
 
-msgid "Saved."
-msgstr "Saved."
+#, fuzzy
+msgid "Notifications"
+msgstr "Animations"
+
+msgid ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+msgstr ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+
+msgid "Flash LEDs for notifications"
+msgstr "Flash LEDs for notifications"
+
+#, fuzzy
+msgid "Which LEDs"
+msgstr "Count LEDs"
+
+#, fuzzy
+msgid "No strips yet"
+msgstr "No setups yet"
+
+#, fuzzy
+msgid "Pulse"
+msgstr "Close"
+
+#, fuzzy
+msgid "Flash"
+msgstr "Flash above"
+
+#, fuzzy
+msgid "Sweep"
+msgstr "Keep"
+
+msgid "Effect"
+msgstr "Effect"
+
+#, fuzzy
+msgid "for"
+msgstr "Forget"
+
+#, fuzzy
+msgid "seconds"
+msgstr "Second colour"
+
+msgid "One per app"
+msgstr "One per app"
+
+#, fuzzy
+msgid "Custom"
+msgstr "Custom colour…"
+
+msgid "Urgent notifications flash red"
+msgstr "Urgent notifications flash red"
+
+msgid "Every app"
+msgstr "Every app"
+
+msgid "Only these"
+msgstr "Only these"
+
+msgid "All but these"
+msgstr "All but these"
+
+msgid "Apps show up here once they've sent a notification."
+msgstr "Apps show up here once they've sent a notification."
+
+msgid "Not while Do Not Disturb is on"
+msgstr "Not while Do Not Disturb is on"
+
+#, fuzzy
+msgid "Not during night mode"
+msgstr "Slow animations during night mode"
 
 msgid "Couldn't save"
 msgstr "Couldn't save"
+
+msgid "Flashing now."
+msgstr "Flashing now."
+
+msgid "Pick some LEDs first."
+msgstr "Pick some LEDs first."
+
+msgid "All of it"
+msgstr "All of it"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Part {n}"
+
+#, fuzzy
+msgid "Some LEDs"
+msgstr "Set LEDs"
+
+#, fuzzy, python-brace-format
+msgid "part {n}"
+msgstr "Part {n}"
+
+#, fuzzy, python-brace-format
+msgid "LEDs {a} to {b}"
+msgstr "Hide LEDs {a} to {b}"
+
+msgid "all of it"
+msgstr "all of it"
+
+msgid "Remove"
+msgstr "Remove"
+
+msgid "None yet: pick a strip and press Add."
+msgstr "None yet: pick a strip and press Add."
+
+msgid ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+msgstr ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+
+msgid "Listening for notifications."
+msgstr "Listening for notifications."
+
+msgid "Pick some LEDs to start listening."
+msgstr "Pick some LEDs to start listening."
+
+#, fuzzy
+msgid "Off."
+msgstr "Off"
+
+msgid "Saved."
+msgstr "Saved."
 
 #, python-brace-format
 msgid "Saved “{name}”."
@@ -1101,9 +1226,6 @@ msgstr "Stop, disable and delete the systemd service (and the app launcher)? You
 
 msgid "Removed."
 msgstr "Removed."
-
-msgid "Remove"
-msgstr "Remove"
 
 msgid "With Iridia"
 msgstr "With Iridia"
@@ -1862,9 +1984,6 @@ msgstr "Brightness"
 msgid "Static pattern"
 msgstr "Static pattern"
 
-msgid "Effect"
-msgstr "Effect"
-
 msgid "Do"
 msgstr "Do"
 
@@ -2456,10 +2575,6 @@ msgid "{n} LED set"
 msgid_plural "{n} LEDs set"
 msgstr[0] "{n} LED set"
 msgstr[1] "{n} LEDs set"
-
-#, python-brace-format
-msgid "Part {n}"
-msgstr "Part {n}"
 
 msgid "Finding sensors…"
 msgstr "Finding sensors…"

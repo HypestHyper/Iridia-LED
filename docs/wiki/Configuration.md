@@ -65,6 +65,11 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `session.lock`, `session.idle` | `keep`, `keep` | When the screen locks / after `session.idle_minutes` without input: `keep`, `dim` or `off` |
 | `updates.check`, `updates.notify`, `updates.prerelease`, `updates.skip` | `true`, `true`, `false`, `""` | Look for new versions at start, notify, include test versions, a version to skip |
 | `session.idle_minutes`, `session.dim` | `10`, `20` | Minutes without input; brightness in percent for `dim` |
+| `notify.enabled`, `notify.targets` | `false`, `[]` | Flash LEDs for notifications; which LEDs: `{"device", "zone"}` plus `"part"` (0 = the first) or `"start"`/`"end"` (LED numbers from 1), or neither for the whole strip (see [Notifications](Notifications.md)) |
+| `notify.effect`, `notify.duration` | `pulse`, `1.5` | `pulse`, `flash` or `sweep`; seconds (0.5 to 5) |
+| `notify.color`, `notify.hex`, `notify.urgent_red` | `accent`, `ffffff`, `true` | `accent` (the wallpaper colour), `app` (one per app) or `custom` (`notify.hex`); urgent ones red |
+| `notify.apps`, `notify.app_list` | `all`, `[]` | `all`, `only` or `except` the apps in the list |
+| `notify.dnd`, `notify.night_quiet`, `notify.seen` | `true`, `false`, `[]` | Quiet during Do Not Disturb / night mode; apps seen so far |
 | `animations.enabled` | `true` | Run animated effects (off: animated zones show their first color) |
 | `animations.fps` | `30` | Frames per second: 15, 30 or 60 |
 | `animations.night_pause`, `animations.night_slow` | `false`, `false` | Pause or slow (half speed) animations in night mode |

@@ -5,6 +5,7 @@ or change your real settings, and nothing talks to hardware.
 """
 import json
 import os
+import time
 
 import pytest
 
@@ -726,3 +727,114 @@ def test_a_daemon_started_in_a_session_stops_when_it_ends(d, tmp_path, monkeypat
     assert d._session_over()                            # seen before, gone now
     monkeypatch.setenv("SYSTEMD_EXEC_PID", str(os.getpid()))
     assert not d._session_over()                        # systemd stops its own services
+
+
+# ----------------------------------------------------------------- notification flashes
+
+class FakeWatcher:
+    def __init__(self):
+        self.running, self.method = False, "dbus-monitor"
+
+    def set_needed(self, on):
+        self.running = on
+
+    def stop(self):
+        self.running = False
+
+
+def _peak(d):
+    d._flash.t0 = time.monotonic() - d._flash.duration * 0.25      # a pulse at its brightest
+
+
+def test_a_notification_flashes_only_the_chosen_leds(d, monkeypatch):
+    monkeypatch.setattr("iridia.notifywatch.dnd_on", lambda: False)
+    d.notifywatch = FakeWatcher()
+    r = _cmd(d, "notify", enabled=True, color="custom", hex="0000ff",
+             targets=[{"device": "Strip", "zone": "", "start": 2, "end": 3}, {"device": "Nope"}])
+    assert r["ok"] and r["notify"]["targets"] == [{"device": "Strip", "zone": "", "start": 2, "end": 3},
+                                                   {"device": "Nope", "zone": ""}]
+    d._update_notify()
+    assert d.notifywatch.running                    # listening only now that it's wanted
+    d._update_all_devices()
+    d._on_notification("Signal", False)
+    d._update_notify()
+    assert d._flash is not None and "Signal" in d.config.get("notify")["seen"]
+    _peak(d)
+    jobs = _jobs(d)
+    assert jobs["Strip|"].frame(0.0) == [(255, 0, 0), (0, 0, 255), (0, 0, 255), (255, 0, 0)]
+    d._update_all_devices()
+    sent = len(d.openrgb.sent)
+    d._update_all_devices()
+    assert len(d.openrgb.sent) == sent              # the flash job sends it, not the static path
+    d._flash.t0 -= 10                               # over: the static colours go out again
+    d._update_notify()
+    assert d._flash is None and "Strip|" not in _jobs(d)
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+
+
+def test_a_flash_on_one_zone_sends_the_whole_device(d, monkeypatch):
+    d.notifywatch = FakeWatcher()
+    _cmd(d, "notify", targets=[{"device": "Hub v1.0", "zone": "A"}], color="custom", hex="ffffff",
+         effect="flash")
+    d._update_all_devices()
+    assert _cmd(d, "notify", test=True)["ok"]
+    d._flash.t0 = time.monotonic() - 0.01           # the first blink
+    jobs = _jobs(d)
+    assert jobs["Hub v1.0|A"].frame(0.0) == [(255, 255, 255)] * 2
+    assert jobs["Hub v1.0|B"].frame(0.0) == [(0, 0, 255)] * 2
+
+
+def test_a_flash_over_a_part_of_an_animated_strip(d):
+    d.notifywatch = FakeWatcher()
+    d.config.set(("devices", "Strip", "led_count"), 6)
+    _animate(d, effect="rainbow")
+    _cmd(d, "set_zone_sections", device="Strip", zone="", sections=[{"start": 4, "type": "same"}])
+    _cmd(d, "notify", targets=[{"device": "Strip", "zone": "", "part": 1}], color="custom", hex="00ff00")
+    assert _cmd(d, "notify", test=True)["ok"]
+    _peak(d)
+    f = _jobs(d)["Strip|"].frame(1.0)
+    assert f[4:] == [(0, 255, 0)] * 2 and (0, 255, 0) not in f[:4]
+
+
+def test_which_notifications_flash(d, monkeypatch):
+    dnd = [False]
+    monkeypatch.setattr("iridia.notifywatch.dnd_on", lambda: dnd[0])
+    d.notifywatch = FakeWatcher()
+    _cmd(d, "notify", enabled=True, targets=[{"device": "Strip"}], apps="except", app_list=["Signal"])
+    for app, urgent, flashes in (("Signal", True, False), ("Thunderbird", True, True)):
+        d._flash = None
+        d._on_notification(app, urgent)
+        d._update_notify()
+        assert (d._flash is not None) == flashes, app
+    assert d._flash.rgb == (255, 0, 0)              # urgent: red
+    dnd[0] = True
+    d._flash = None
+    d._on_notification("Thunderbird", False)
+    d._update_notify()
+    assert d._flash is None                         # Do Not Disturb
+    assert _cmd(d, "notify", forget=True)["notify"]["seen"] == []
+    assert not _cmd(d, "notify", test=True, test_targets=[])["ok"]
+    _cmd(d, "notify", enabled=False)
+    d._update_notify()
+    assert not d.notifywatch.running
+
+
+def test_notify_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    d.notifywatch = FakeWatcher()
+    assert cli.main(["notify", "add", "Hub v1.0/A", "leds", "2-2"]) == 0
+    assert cli.main(["notify", "add", "Strip", "part", "1"]) == 0
+    assert cli.main(["notify", "on", "--effect", "sweep", "--color", "#00FF00", "--duration", "2"]) == 0
+    out = capsys.readouterr().out
+    assert "Hub v1.0/A: LEDs 2-2" in out and "Strip: part 1" in out and "sweep, 2.0 s, #00ff00" in out
+    assert d._notify_settings()["enabled"] is True
+    assert cli.main(["notify", "test"]) == 0 and d._flash is not None
+    assert cli.main(["notify", "add", "nothing-here"]) == 1
+    assert cli.main(["notify", "add", "Strip", "half"]) == 2
+    assert cli.main(["notify", "clear"]) == 0 and d._notify_settings()["targets"] == []

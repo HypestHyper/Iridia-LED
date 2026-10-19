@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 16:37+0000\n"
+"POT-Creation-Date: 2026-10-19 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -795,11 +795,136 @@ msgstr "Nothin' be watched while both be Hold fast."
 msgid "Your idle daemon says you're away."
 msgstr "Yer idle daemon says ye've gone ashore."
 
-msgid "Saved."
-msgstr "Stashed."
+#, fuzzy
+msgid "Notifications"
+msgstr "Dancin' lanterns"
+
+msgid ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+msgstr ""
+"Flash some lanterns when a message comes aboard. Iridia only sees which crew sent it, never what "
+"it says."
+
+msgid "Flash LEDs for notifications"
+msgstr "Flash lanterns fer messages"
+
+#, fuzzy
+msgid "Which LEDs"
+msgstr "Count the lanterns"
+
+#, fuzzy
+msgid "No strips yet"
+msgstr "No charts yet"
+
+#, fuzzy
+msgid "Pulse"
+msgstr "Close"
+
+#, fuzzy
+msgid "Flash"
+msgstr "Flash above"
+
+#, fuzzy
+msgid "Sweep"
+msgstr "Hold fast"
+
+msgid "Effect"
+msgstr "Trick"
+
+#, fuzzy
+msgid "for"
+msgstr "Overboard"
+
+#, fuzzy
+msgid "seconds"
+msgstr "Second colour"
+
+msgid "One per app"
+msgstr "One fer each crew"
+
+#, fuzzy
+msgid "Custom"
+msgstr "A color o' yer own…"
+
+msgid "Urgent notifications flash red"
+msgstr "Urgent messages flash red"
+
+msgid "Every app"
+msgstr "Every crew"
+
+msgid "Only these"
+msgstr "Only these"
+
+msgid "All but these"
+msgstr "All but these"
+
+msgid "Apps show up here once they've sent a notification."
+msgstr "Crews show up here once they've sent a message."
+
+msgid "Not while Do Not Disturb is on"
+msgstr "Not while the crew be sleepin' (Do Not Disturb)"
+
+#, fuzzy
+msgid "Not during night mode"
+msgstr "Slow the lanterns when night falls"
 
 msgid "Couldn't save"
 msgstr "Blast! Couldn't stash it"
+
+msgid "Flashing now."
+msgstr "Flashin' now!"
+
+msgid "Pick some LEDs first."
+msgstr "Pick some lanterns first."
+
+msgid "All of it"
+msgstr "All of it"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Share {n}"
+
+#, fuzzy
+msgid "Some LEDs"
+msgstr "Rig lanterns"
+
+#, fuzzy, python-brace-format
+msgid "part {n}"
+msgstr "Share {n}"
+
+#, fuzzy, python-brace-format
+msgid "LEDs {a} to {b}"
+msgstr "Hide lanterns {a} to {b}"
+
+msgid "all of it"
+msgstr "all of it"
+
+msgid "Remove"
+msgstr "Scuttle"
+
+msgid "None yet: pick a strip and press Add."
+msgstr "None yet: pick a strip an' press Add."
+
+msgid ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+msgstr ""
+"Can't hear messages on this ship: install dbus-monitor (the dbus tools package) or use a ship "
+"with systemd's busctl."
+
+msgid "Listening for notifications."
+msgstr "Listenin' fer messages."
+
+msgid "Pick some LEDs to start listening."
+msgstr "Pick some lanterns to start listenin'."
+
+#, fuzzy
+msgid "Off."
+msgstr "Raw"
+
+msgid "Saved."
+msgstr "Stashed."
 
 #, python-brace-format
 msgid "Saved “{name}”."
@@ -1101,9 +1226,6 @@ msgstr "Stop, stand down an' scuttle the systemd service (an' the app launcher)?
 
 msgid "Removed."
 msgstr "Scuttled."
-
-msgid "Remove"
-msgstr "Scuttle"
 
 msgid "With Iridia"
 msgstr "Iridia's crew does it"
@@ -1864,9 +1986,6 @@ msgstr "Brightness"
 msgid "Static pattern"
 msgstr "Still pattern"
 
-msgid "Effect"
-msgstr "Trick"
-
 msgid "Do"
 msgstr "Order"
 
@@ -2458,10 +2577,6 @@ msgid "{n} LED set"
 msgid_plural "{n} LEDs set"
 msgstr[0] "{n} lantern rigged"
 msgstr[1] "{n} lanterns rigged"
-
-#, python-brace-format
-msgid "Part {n}"
-msgstr "Share {n}"
 
 msgid "Finding sensors…"
 msgstr "Scannin' the horizon…"

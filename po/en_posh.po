@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 16:37+0000\n"
+"POT-Creation-Date: 2026-10-19 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -805,11 +805,136 @@ msgstr "Nothing is observed whilst both are Leave be."
 msgid "Your idle daemon says you're away."
 msgstr "Your idle daemon reports that you have stepped away."
 
-msgid "Saved."
-msgstr "Preserved."
+#, fuzzy
+msgid "Notifications"
+msgstr "Animated Spectacles"
+
+msgid ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+msgstr ""
+"Flash some lamps when a desktop notification arrives. Iridia sees only which application sent it,"
+" never what it says."
+
+msgid "Flash LEDs for notifications"
+msgstr "Flash the lamps for notifications"
+
+#, fuzzy
+msgid "Which LEDs"
+msgstr "Count the lamps"
+
+#, fuzzy
+msgid "No strips yet"
+msgstr "No arrangements as yet"
+
+#, fuzzy
+msgid "Pulse"
+msgstr "Close"
+
+#, fuzzy
+msgid "Flash"
+msgstr "Flash beyond"
+
+#, fuzzy
+msgid "Sweep"
+msgstr "Leave be"
+
+msgid "Effect"
+msgstr "Spectacle"
+
+#, fuzzy
+msgid "for"
+msgstr "Forget"
+
+#, fuzzy
+msgid "seconds"
+msgstr "Second colour"
+
+msgid "One per app"
+msgstr "One for each application"
+
+#, fuzzy
+msgid "Custom"
+msgstr "A colour of one's own…"
+
+msgid "Urgent notifications flash red"
+msgstr "Urgent notifications flash red"
+
+msgid "Every app"
+msgstr "Every application"
+
+msgid "Only these"
+msgstr "Only these"
+
+msgid "All but these"
+msgstr "All save these"
+
+msgid "Apps show up here once they've sent a notification."
+msgstr "Applications appear here once they have sent a notification."
+
+msgid "Not while Do Not Disturb is on"
+msgstr "Not while Do Not Disturb is on"
+
+#, fuzzy
+msgid "Not during night mode"
+msgstr "Slow the spectacles at night"
 
 msgid "Couldn't save"
 msgstr "Most regrettably, it could not be preserved"
+
+msgid "Flashing now."
+msgstr "Flashing at once."
+
+msgid "Pick some LEDs first."
+msgstr "Do choose some lamps first."
+
+msgid "All of it"
+msgstr "The whole of it"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Portion {n}"
+
+#, fuzzy
+msgid "Some LEDs"
+msgstr "Attend to lamps"
+
+#, fuzzy, python-brace-format
+msgid "part {n}"
+msgstr "Portion {n}"
+
+#, fuzzy, python-brace-format
+msgid "LEDs {a} to {b}"
+msgstr "Conceal lamps {a} to {b}"
+
+msgid "all of it"
+msgstr "the whole of it"
+
+msgid "Remove"
+msgstr "Remove"
+
+msgid "None yet: pick a strip and press Add."
+msgstr "None as yet: choose a strip and press Add."
+
+msgid ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+msgstr ""
+"One cannot listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+
+msgid "Listening for notifications."
+msgstr "Listening for notifications."
+
+msgid "Pick some LEDs to start listening."
+msgstr "Choose some lamps to begin listening."
+
+#, fuzzy
+msgid "Off."
+msgstr "Unadorned"
+
+msgid "Saved."
+msgstr "Preserved."
 
 #, python-brace-format
 msgid "Saved “{name}”."
@@ -1119,9 +1244,6 @@ msgstr ""
 
 msgid "Removed."
 msgstr "Removed."
-
-msgid "Remove"
-msgstr "Remove"
 
 msgid "With Iridia"
 msgstr "By Iridia's hand"
@@ -1888,9 +2010,6 @@ msgstr "Brightness"
 msgid "Static pattern"
 msgstr "A still pattern"
 
-msgid "Effect"
-msgstr "Spectacle"
-
 msgid "Do"
 msgstr "Undertake"
 
@@ -2482,10 +2601,6 @@ msgid "{n} LED set"
 msgid_plural "{n} LEDs set"
 msgstr[0] "{n} lamp attended to"
 msgstr[1] "{n} lamps attended to"
-
-#, python-brace-format
-msgid "Part {n}"
-msgstr "Portion {n}"
 
 msgid "Finding sensors…"
 msgstr "Consulting the instruments…"

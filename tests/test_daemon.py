@@ -674,6 +674,24 @@ def test_a_sensor_part_shows_the_reading(d):
     assert d.sensors.wanted == set()
 
 
+def test_a_dim_rest_of_bar_stays_dim_with_palette_correction(d):
+    """Palette snaps by hue: the bar's dimmed rest (and its tip) came out at full strength, so "the rest of
+    the bar dim" lit the whole strip. Correction now works on the full color, the level is applied after."""
+    d.sensors = FakeSensors()
+    d.sensors.vals["ram"] = 55.0
+    d.config.set(("devices", "Strip", "led_count"), 10)
+    d.config.set(("devices", "Strip", "mode"), "palette")
+    assert _cmd(d, "set_zone_sections", device="Strip", zone="",
+                sections=[{"start": 0, "type": "sensor", "sensor": "ram", "show": "both", "palette": "colors",
+                           "colors": ["ff2000"], "background": "dim"}])["ok"]
+    d._update_all_devices()
+    leds = [sum(bytes.fromhex(c)) for c in d.openrgb.last("Strip")]
+    full = leds[0]
+    assert full > 0 and leds[:5] == [full] * 5
+    assert 0 < leds[5] < full                           # the tip: partly on (55% of 10 LEDs)
+    assert all(0 < v <= full * 0.2 for v in leds[6:])   # the rest: dim, not lit
+
+
 def test_sensor_cli(d, monkeypatch, capsys):
     from iridia import cli
 

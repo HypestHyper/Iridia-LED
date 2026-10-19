@@ -51,6 +51,17 @@ def unit_of(sid: str) -> str:
     return "°C" if sid.endswith("_temp") or sid.startswith("hwmon:") else "%"
 
 
+def format_value(v: Optional[float], unit: str = "") -> str:
+    """A reading as shown: whole numbers for temperatures and percentages (the smoothed value has
+    many digits, and text whose width changes every second moves what's next to it), one decimal
+    otherwise."""
+    if v is None:
+        return "-"
+    whole = unit in ("°C", "%", "W", "MHz", "RPM")
+    txt = f"{v:.0f}" if whole else f"{v:.1f}"
+    return f"{txt} {unit}".strip()
+
+
 def _read(path: str) -> Optional[str]:
     try:
         with open(path) as f:

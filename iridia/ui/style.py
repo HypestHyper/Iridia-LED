@@ -51,6 +51,7 @@ headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
 .error-text {{ color: {ERROR}; }}
 .warn-text {{ color: {TERTIARY}; }}
 .mono {{ font-family: monospace; font-size: 12.5px; }}
+.tnum {{ font-feature-settings: "tnum"; }}
 .icon {{ font-family: "{ICON}"; font-size: 20px; font-weight: 400; font-variation-settings: "FILL" 0, "wght" 400, "opsz" 24; }}
 .icon.fill {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .icon.big {{ font-size: 28px; }}
@@ -73,6 +74,12 @@ button {{ border: none; box-shadow: none; background-image: none; outline: none;
   background: {SECONDARY_CONTAINER};
   transition: border-radius 200ms {EASE_STD}, background-color 200ms {EASE_STD}, color 200ms; }}
 button:hover {{ background: {SECONDARY_CONTAINER_HOVER}; }}
+/* some themes (or ~/.config/gtk-4.0/gtk.css) grow things on hover: nothing moves or grows here, and the
+   text in a button keeps the button's own size and weight (a class on the label, .icon for one, still
+   sets its own: plain element selectors, as Iridia's rules outrank a theme's whatever their detail) */
+button, button:hover, button:checked, button:active, dropdown, switch, check, radio, row, row:hover {{
+  transform: none; }}
+button label {{ font-weight: inherit; font-size: inherit; letter-spacing: inherit; transform: none; }}
 button:active {{ border-radius: 10px; }}
 button:disabled {{ opacity: 0.45; }}
 button.filled {{ background: {PRIMARY}; color: {ON_PRIMARY}; }}
@@ -97,7 +104,9 @@ button.toggled, button.filled.toggled {{ background: {PRIMARY}; color: {ON_PRIMA
   transition: border-radius 220ms {EASE_STD}, background-color 200ms {EASE_STD}; }}
 .group > button:first-child {{ border-top-left-radius: 18px; border-bottom-left-radius: 18px; }}
 .group > button:last-child {{ border-top-right-radius: 18px; border-bottom-right-radius: 18px; }}
+.group > button:hover {{ background: {SECONDARY_CONTAINER_HOVER}; }}
 .group > button:checked {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-radius: 18px; }}
+.group > button:checked:hover {{ background: {PRIMARY_HOVER}; }}
 button.filter {{ border-radius: 8px; padding: 4px 12px; min-height: 24px; background: transparent;
   border: 1px solid {OUTLINE_VARIANT}; color: {ON_SURFACE_VARIANT}; font-weight: 500; box-shadow: none; }}
 button.filter:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
@@ -199,17 +208,23 @@ _PX = re.compile(r"(font-size: )?(?<![\w.])(\d+(?:\.\d+)?)px")
 
 def scale_px(css: str, factor: float) -> str:
     """Scale every size in a stylesheet. Hairlines (2px and less) and 999px pills stay as they are, and
-    text shrinks less than the rest (never below 10px) so it stays readable."""
+    text shrinks less than the rest (never below 10px) so it stays readable.
+
+    Everything comes out in whole pixels: GTK 4.24 cuts off the tops of letters when text or the room
+    around it has a fractional size (13.2px text, 5.4px padding), as the Default size had."""
     if factor == 1:
         return css
+
+    def whole(x):
+        return int(x + 0.5)
 
     def one(m):
         font, v = m.group(1), float(m.group(2))
         if v <= 2 or v >= 999:
             return m.group(0)
         if font:
-            return f"{font}{max(min(v, 10), round(v * (1 - (1 - factor) * 0.6), 1)):g}px"
-        return f"{round(v * factor, 1):g}px"
+            return f"{font}{max(min(whole(v), 10), whole(v * (1 - (1 - factor) * 0.6)))}px"
+        return f"{max(1, whole(v * factor))}px"
     return _PX.sub(one, css)
 
 

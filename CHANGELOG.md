@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.3.4
+
+- **Text no longer cut off at the Default window size.** Default scales the window to 90%, which gave
+  fractional sizes (13.2px text, 5.4px padding), and GTK 4.24 cuts off the tops of letters then.
+  Every scaled size is now a whole pixel. (1.3.3's switch to GTK's GL renderer wasn't the fix.)
+- No "Use GtkSettings:gtk-interface-color-scheme instead" warning on GTK 4.20 and newer.
+- **Buttons and options no longer grow on hover.** A desktop GTK theme or `~/.config/gtk-4.0/gtk.css`
+  could make the text in buttons bolder or bigger on hover (or scale the buttons); the text in a button
+  now keeps the button's own size and weight, and nothing scales.
+- **Sensor bars work with color correction.** Palette correction snaps each color by its hue, so it
+  turned the bar's partly lit tip and its dimmed rest into full colors: "the rest of the bar dim" lit
+  the whole strip, and the bar jumped a whole LED at a time instead of gliding. Correction now works on
+  the full color and each LED's level (the tip, the dimmed rest, the blink) is applied after it, with
+  gamma correction and in Calibrated mode too. The dimmed rest is a little brighter (12%).
+- **A sensor's reading no longer jiggles the part's settings popup:** readings show as whole degrees and
+  percentages with equal-width digits (it showed every digit of the smoothed value, so the text, and
+  the popup pinned next to it, changed width every second).
+- **The connected button groups light up on hover** (Off / Palette / Calibrated and the like): their own
+  background hid the hover color.
+
 ## 1.3.3
 
 - **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon

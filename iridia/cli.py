@@ -747,7 +747,8 @@ def cmd_sensors(args):
             return "No sensors found."
         out = ["Sensors (the ID is what 'iridia split NAME part K sensor ID' takes):"]
         for s in rows:
-            v = "-" if s.get("value") is None else f"{s['value']:g} {s['unit']}"
+            from iridia.sensors import format_value
+            v = format_value(s.get("value"), s["unit"])
             note = "  (read only while shown: it wakes the GPU)" if s.get("wakes_gpu") else ""
             out.append(f"  {s['id']:<28} {s['name']:<32} {v}{note}")
         return "\n".join(out)

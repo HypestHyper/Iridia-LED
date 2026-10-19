@@ -2273,7 +2273,11 @@ class IridiaApp(Gtk.Application):
         Gtk.Window.set_default_icon_name(assets.ICON_NAME)
         settings = Gtk.Settings.get_default()
         if settings is not None:
-            settings.set_property("gtk-application-prefer-dark-theme", True)
+            scheme = getattr(Gtk, "InterfaceColorScheme", None)
+            if scheme is not None and settings.find_property("gtk-interface-color-scheme"):
+                settings.set_property("gtk-interface-color-scheme", scheme.DARK)     # GTK 4.20+
+            else:
+                settings.set_property("gtk-application-prefer-dark-theme", True)
 
     def do_activate(self):
         if self.win is None:

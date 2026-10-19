@@ -72,7 +72,12 @@ def test_window_sizes_scale_the_stylesheet():
     style = pytest.importorskip("iridia.ui.style")
     css = "a { min-height: 40px; border: 1px solid; margin: -12px 2px; border-radius: 999px; font-size: 14px; }"
     assert style.scale_px(css, 1) == css
-    assert style.scale_px(css, 0.8) == ("a { min-height: 32px; border: 1px solid; margin: -9.6px 2px; "
-                                        "border-radius: 999px; font-size: 12.3px; }")
+    assert style.scale_px(css, 0.8) == ("a { min-height: 32px; border: 1px solid; margin: -10px 2px; "
+                                        "border-radius: 999px; font-size: 12px; }")
+    # whole pixels only, at every size (fractional text got its top cut off in GTK 4.24)
+    import re
+    for factor in (f for f in style.SIZES.values() if f != 1):
+        out = style.scale_px(style.CSS, factor)
+        assert not re.search(r"\d\.\d+px", out), factor
     assert "font-size: 10px" in style.scale_px("x { font-size: 11px; }", 0.5)      # text never below 10px
     assert style.scale_px("x { font-size: 9px; }", 0.5) == "x { font-size: 9px; }"

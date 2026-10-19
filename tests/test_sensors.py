@@ -103,7 +103,7 @@ def test_level_color_and_both():
     col = S.sensor_part(_part(sensor="ram", show="color", palette="colors"), 4, 100.0, resolve)
     assert col == [(255, 255, 255)] * 4
     both = S.sensor_part(_part(sensor="ram", show="both", palette="colors", background="dim"), 4, 50.0, resolve)
-    assert both[0] == both[1] == (127, 127, 127) and both[3] == (10, 10, 10)
+    assert both[0] == both[1] == (127, 127, 127) and both[3] == (15, 15, 15)
     rev = S.sensor_part(_part(sensor="ram", show="level", palette="colors", params={"reverse": True}), 10, 50.0,
                         resolve)
     assert rev == out[::-1]
@@ -131,3 +131,9 @@ def test_the_discrete_gpu_wins_and_twin_drives_get_their_own_ids(tmp_path, monke
     src = hub.discover()
     assert src["gpu_load"].read() == 88.0 and src["gpu_temp"].read() == 71.0
     assert src["hwmon:nvme:Composite"].read() == 38.85 and src["hwmon:nvme#2:Composite"].read() == 45.0
+
+
+def test_readings_are_shown_with_a_steady_width():
+    from iridia.sensors import format_value
+    assert format_value(45.26174, "°C") == "45 °C" and format_value(7.25, "%") == "7 %"
+    assert format_value(1.2345, "GB") == "1.2 GB" and format_value(None, "°C") == "-"

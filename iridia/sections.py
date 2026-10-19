@@ -254,41 +254,57 @@ def sensor_level(sec: dict, value: Optional[float]) -> Optional[float]:
     return min(1.0, max(0.0, (value - sec["min"]) / (sec["max"] - sec["min"])))
 
 
-def sensor_part(sec: dict, length: int, value: Optional[float], resolve: Resolve, t: float = 0.0) -> List[tuple]:
+DIM_REST = 0.12          # "the rest of the bar dim": this much of the color
+
+
+def sensor_part(sec: dict, length: int, value: Optional[float], resolve: Resolve, t: float = 0.0,
+                levels: Optional[list] = None) -> List[tuple]:
     """A sensor part as (r, g, b): the reading's color, a level bar, or a bar in the reading's color.
     Over flash_above the LEDs blink once a second. No reading: one dim LED, so the part isn't
-    mistaken for "0"."""
+    mistaken for "0".
+
+    With levels (a list as long as the part), the colors come back at full strength and how lit each
+    LED is (0 to 1: the bar's tip partly, the dimmed rest) goes into levels instead, so color
+    correction sees the real color: Palette snaps by hue, and snapped a dim LED to a full one."""
     if length <= 0:
         return []
+    out, lv = _sensor_leds(sec, length, value, resolve, t)
+    if levels is not None:
+        levels[:] = lv
+        return out
+    return [c if f >= 1 else _scale(c, f) for c, f in zip(out, lv)]
+
+
+def _sensor_leds(sec, length, value, resolve, t):
     level = sensor_level(sec, value)
     cols = HEAT if sec.get("palette") != "colors" else _section_colors(sec, resolve)
     if level is None:
-        out = [(0, 0, 0)] * length
-        out[0] = _scale(_ramp(cols, 0.0), 0.15)
-        return out
+        lv = [0.0] * length
+        lv[0] = 0.15
+        return [_ramp(cols, 0.0)] * length, lv
     now_col = _ramp(cols, level)
     flash = sec.get("flash_above") is not None and value >= sec["flash_above"] and int(t * 2) % 2 == 1
     show = sec.get("show", "level")
     if show == "color":
-        out = [now_col] * length
+        out, lv = [now_col] * length, [1.0] * length
     else:
         lit = level * length
-        out = []
+        dim = DIM_REST if sec.get("background") == "dim" else 0.0
+        out, lv = [], []
         for i in range(length):
-            c = now_col if show == "both" else _ramp(cols, (i + 0.5) / length)
+            out.append(now_col if show == "both" else _ramp(cols, (i + 0.5) / length))
             if i + 1 <= lit:
-                out.append(c)
+                lv.append(1.0)
             elif i < lit:
-                out.append(_scale(c, lit - i))           # the LED at the tip, partly on: smooth movement
-            elif sec.get("background") == "dim":
-                out.append(_scale(c, 0.08))
+                lv.append(max(dim, lit - i))            # the LED at the tip, partly on: smooth movement
             else:
-                out.append((0, 0, 0))
+                lv.append(dim)
     if flash:
-        out = [_scale(c, 0.15) for c in out]
+        lv = [f * 0.15 for f in lv]
     if (sec.get("params") or {}).get("reverse"):
         out.reverse()
-    return out
+        lv.reverse()
+    return out, lv
 
 
 def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[PatternGenerator] = None,
@@ -312,17 +328,27 @@ def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[Pat
 
 def compose_static(base: List[str], sections: Sequence[dict], overrides: Dict[int, str], resolve: Resolve,
                    patterns: Optional[PatternGenerator] = None, sensor: Optional[Sensor] = None,
-                   t: float = 0.0) -> List[str]:
-    """The whole strip's hex colors: base (what the strip shows) with each part and single LED on top."""
+                   t: float = 0.0, levels: Optional[list] = None) -> List[str]:
+    """The whole strip's hex colors: base (what the strip shows) with each part and single LED on top.
+    With levels (one 1.0 per LED), sensor parts come at full strength and their LEDs' levels go there
+    (see sensor_part): the caller scales them after color correction."""
     out = list(base)
     n = len(out)
     for a, b, sec in spans(sections, n):
+        if levels is not None and sec["type"] == "sensor":
+            lv = []
+            v = sensor(sec["sensor"]) if sensor is not None else None
+            out[a:b] = [animations.rgb_to_hex(c) for c in sensor_part(sec, b - a, v, resolve, t, lv)]
+            levels[a:b] = lv
+            continue
         part = static_part(sec, b - a, resolve, patterns, sensor, t)
         if part is not None:
             out[a:b] = part
     for i, h in overrides.items():
         if 0 <= i < n:
             out[i] = h
+            if levels is not None:
+                levels[i] = 1.0
     return out
 
 
@@ -352,7 +378,8 @@ class Composer:
                     self.fixed.append((a, b, [animations.hex_to_rgb(c) for c in part]))
         self.single = [(i, animations.hex_to_rgb(h)) for i, h in sorted(overrides.items()) if 0 <= i < n]
 
-    def frame(self, base: List[tuple], t: float) -> List[tuple]:
+    def frame(self, base: List[tuple], t: float, levels: Optional[list] = None) -> List[tuple]:
+        """levels: as in compose_static (sensor parts at full strength, their LEDs' levels there)."""
         out = list(base)
         for a, b, part in self.fixed:
             out[a:b] = part
@@ -360,7 +387,14 @@ class Composer:
             out[a:b] = animations.render(anim["effect"], anim, b - a, t, cols, seed, pos)
         for a, b, sec in self.readings:
             v = self._sensor(sec["sensor"]) if self._sensor is not None else None
-            out[a:b] = sensor_part(sec, b - a, v, self._resolve, t)
+            if levels is None:
+                out[a:b] = sensor_part(sec, b - a, v, self._resolve, t)
+            else:
+                lv = []
+                out[a:b] = sensor_part(sec, b - a, v, self._resolve, t, lv)
+                levels[a:b] = lv
         for i, c in self.single:
             out[i] = c
+            if levels is not None:
+                levels[i] = 1.0
         return out

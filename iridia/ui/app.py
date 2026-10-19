@@ -2273,11 +2273,6 @@ class IridiaApp(Gtk.Application):
         Gtk.Window.set_default_icon_name(assets.ICON_NAME)
         settings = Gtk.Settings.get_default()
         if settings is not None:
-            # Iridia styles everything itself; a desktop theme only adds to that, and what it adds for
-            # what Iridia doesn't set shows through (Breeze's scrollbar margins, themes that grow buttons
-            # on hover). GTK's built-in theme underneath instead. GTK_THEME still picks another.
-            if not os.environ.get("GTK_THEME"):
-                settings.set_property("gtk-theme-name", "Adwaita")
             scheme = getattr(Gtk, "InterfaceColorScheme", None)
             if scheme is not None and settings.find_property("gtk-interface-color-scheme"):
                 settings.set_property("gtk-interface-color-scheme", scheme.DARK)     # GTK 4.20+

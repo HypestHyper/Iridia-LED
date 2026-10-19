@@ -6,10 +6,11 @@
   fractional sizes (13.2px text, 5.4px padding), and GTK 4.24 cuts off the tops of letters then.
   Every scaled size is now a whole pixel. (1.3.3's switch to GTK's GL renderer wasn't the fix.)
 - No "Use GtkSettings:gtk-interface-color-scheme instead" warning on GTK 4.20 and newer.
-- **Buttons and options no longer grow on hover.** Iridia styles everything itself, but a desktop GTK
-  theme (or `~/.config/gtk-4.0/gtk.css`) still applied whatever Iridia didn't set, such as a hover
-  scale. The window now uses GTK's built-in theme underneath (`GTK_THEME` still picks another), and
-  nothing grows or moves on hover.
+- **Buttons and options no longer grow on hover.** A desktop GTK theme or `~/.config/gtk-4.0/gtk.css`
+  could make the text in buttons bolder or bigger on hover (or scale the buttons); the text in a button
+  now keeps the button's own size and weight, and nothing scales.
+- **The connected button groups light up on hover** (Off / Palette / Calibrated and the like): their own
+  background hid the hover color.
 
 ## 1.3.3
 

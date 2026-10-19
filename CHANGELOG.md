@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.4
 
 - **Text no longer cut off at the Default window size.** Default scales the window to 90%, which gave
   fractional sizes (13.2px text, 5.4px padding), and GTK 4.24 cuts off the tops of letters then.

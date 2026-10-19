@@ -65,7 +65,10 @@ class IPCServer(threading.Thread):
                 data += chunk
             req = json.loads(data.decode("utf-8"))
             resp = self.daemon.handle_command(req)
-            conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
+            try:
+                conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
+            except (BrokenPipeError, ConnectionResetError, socket.timeout):
+                logger.debug(f"IPC client hung up before the answer to {req.get('cmd') if isinstance(req, dict) else '?'}")
         except Exception as e:
             # Without this, an exception here is only ever visible to
             # whichever client happened to trigger it (via the error

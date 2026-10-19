@@ -6,6 +6,7 @@ its own HOME, XDG_RUNTIME_DIR and a PATH holding only those fakes and python3.
 """
 import json
 import os
+import signal
 import socket
 import stat
 import subprocess
@@ -165,6 +166,25 @@ def test_waits_for_the_grace_then_starts_and_remembers_it(env):
     sup.tick("daemon", "127.0.0.1", False, "", env.port)    # still starting up: no second one
     time.sleep(0.3)
     assert len(env.starts()) == 1
+
+
+def test_the_server_ignores_sigpipe(env, tmp_path):
+    """Like a systemd service (IgnoreSIGPIPE): OpenRGB before 1.0 doesn't ignore it itself, and died
+    (exit code -13) when a client hung up just before OpenRGB wrote to it."""
+    seen = tmp_path / "sigign"
+    real = Path(os.readlink(env.bin / "openrgb")) if (env.bin / "openrgb").is_symlink() else FAKES / "openrgb"
+    (env.bin / "openrgb").unlink()
+    # a shell records what it inherited (the fake itself is Python, which ignores SIGPIPE on its own)
+    (env.bin / "openrgb").write_text(f'#!/bin/sh\nwhile read -r k v; do [ "$k" = SigIgn: ] && echo "$k $v" > "{seen}"; done < /proc/$$/status\n'
+                                     f'exec python3 "{real}" "$@"\n')
+    (env.bin / "openrgb").chmod(0o755)
+    clock = Clock()
+    sup = _sup(clock)
+    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    clock.t += osrv.Supervisor.QUICK_SEC + 0.5
+    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    assert wait_for(lambda: seen.exists() and seen.read_text().strip())
+    assert int(seen.read_text().split()[1], 16) & (1 << (signal.SIGPIPE - 1))
 
 
 def test_a_restarted_daemon_reuses_the_running_server(env):
@@ -367,9 +387,10 @@ def test_port_probe_runs_once(env, monkeypatch):
     monkeypatch.setattr(ctl, "_detect_port", lambda: probes.append(1) or real())
     for _ in range(3):
         ctl._last_connect_attempt = 0
-        assert ctl.ensure_connected(retry_interval=0) is False      # zero devices: dropped
+        assert ctl.ensure_connected(retry_interval=0) is True       # zero devices: stays connected
+        assert ctl.no_devices_since is not None
+        ctl.disconnect()
     assert probes == [1] and ctl.port == env.port
-    assert ctl.no_devices_since is not None
     stranger.terminate()
     stranger.wait(5)
 

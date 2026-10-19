@@ -1084,11 +1084,18 @@ class Daemon:
             ports = ([self.openrgb.port] if self.openrgb._configured_port or self.openrgb._auto_detected
                      else self.openrgb.COMMON_PORTS)
             tried = ", ".join(str(p) for p in ports)
-            self.logger.warning(
-                f"OpenRGB not reachable on {self.openrgb.host} (port{'s' if len(ports) > 1 else ''} {tried}), "
-                "is its SDK server actually running? Colors are still being tracked "
-                "and will be sent as soon as it connects."
-            )
+            where = f"{self.openrgb.host} (port{'s' if len(ports) > 1 else ''} {tried})"
+            method = self._orgb_settings()[0]
+            if method in ("daemon", "systemd") and openrgb_server.is_local(self.openrgb.host):
+                # Iridia (or its unit) brings the server up: nothing for you to do yet
+                self.logger.info(f"OpenRGB isn't reachable on {where} yet; its server is started "
+                                 f"{'by Iridia' if method == 'daemon' else 'by the systemd unit'}. Colors are kept "
+                                 "and sent as soon as it's up.")
+            else:
+                self.logger.warning(
+                    f"OpenRGB not reachable on {where}, is its SDK server actually running? Colors are still "
+                    "being tracked and will be sent as soon as it connects."
+                )
 
     def _health_check(self):
         now = time.time()

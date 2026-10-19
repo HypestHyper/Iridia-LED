@@ -1304,12 +1304,44 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r.append(button(_("Look again"), "refresh", "tonal small",
                         lambda: self.bg(lambda: self.client.ddc(rescan=True),
                                         lambda _r: self.toast(_("Looking for monitors…")))))
+        self._ddc_install_btn = button(_("Install ddcutil"), "download", "filled small", self._ddc_install)
+        self._ddc_install_btn.set_visible(False)
+        r.append(self._ddc_install_btn)
         c.append(r)
         c.append(label(_("Automatic follows the first monitor that answers. A monitor you pick is the only one "
                          "followed."), ("small", "faint")))
         self._ddc_lbl = label("", ("small", "dim"), wrap=True)
         c.append(self._ddc_lbl)
         p.append(c)
+
+    def _ddc_install(self):
+        """Install ddcutil with the distribution's package manager, through the desktop's password
+        dialog (pkexec), and give this session the I2C bus; then look for monitors again."""
+        import shlex
+        import shutil
+        from iridia import ddc
+        cmd = ddc.install_command()
+        if not cmd or not shutil.which("pkexec"):
+            how = ("sudo " + " ".join(shlex.quote(c) for c in cmd)) if cmd else _("your package manager")
+            self.toast(_("Install ddcutil with {how}, then press Look again.").format(how=how))
+            return
+        self._ddc_install_btn.set_sensitive(False)
+
+        def run():
+            return subprocess.run(["pkexec", "/bin/sh", "-c", ddc.install_script(cmd)],
+                                  stdin=subprocess.DEVNULL, capture_output=True, text=True).returncode
+
+        def done(code):
+            self._ddc_install_btn.set_sensitive(True)
+            if code == 0:
+                self.toast(_("ddcutil installed. Looking for monitors…"))
+                self.bg(lambda: self.client.ddc(rescan=True))
+            elif code in (126, 127):
+                self.toast(_("Not installed: the password dialog was closed."))
+            else:
+                self.toast(_("Couldn't install ddcutil (the package manager failed). Try it in a terminal: "
+                             "sudo {cmd}").format(cmd=" ".join(cmd)))
+        self.bg(run, done)
 
     def _ddc_pick(self, text):
         if text in self._ddc_buses:
@@ -1333,6 +1365,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             buses[_("I2C bus {n}").format(n=choice)] = choice
         self._ddc_buses = buses
         self._ddc_dd.set_items(list(buses), next((k for k, b in buses.items() if b == choice), _("Automatic")))
+        self._ddc_install_btn.set_visible(st.get("ddc_problem") == "no_ddcutil")
         names = {d.get("bus"): d.get("name") for d in displays}
         mon = st.get("monitor_brightness")
         if st.get("ddc_detecting"):
@@ -1345,8 +1378,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     _("Following {name} once a strip has Follow monitor brightness on.").format(name=name))
         else:
             text = {
-                "no_ddcutil": _("ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil "
-                                "package, then press Look again."),
+                "no_ddcutil": _("ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it "
+                                "up (it asks for your password), or install the ddcutil package yourself and press "
+                                "Look again."),
                 "no_monitor": _("ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and "
                                 "after installing Iridia you may need to log out and in once."),
                 "no_answer": _("No monitor answers. Turn DDC/CI on in the monitor's own menu, then press Look again."),

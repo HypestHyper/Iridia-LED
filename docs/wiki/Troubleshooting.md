@@ -93,7 +93,7 @@ update), switch it off on the Devices tab so it stops being reported.
 
 *Settings, Monitor brightness* says what's wrong and which monitor is followed; pick the right one there
 if you have several (or `iridia monitor` lists them, `iridia monitor 6` picks the one on I2C bus 6), and
-press *Look again* after installing ddcutil. Then run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
+press *Look again* after installing ddcutil (or use *Install ddcutil* there). Then run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
 many docks don't), DDC/CI may be off in the monitor's menu, or you have no access to the I2C bus yet:
 run `bash install.sh` again to set it up (see [Installation](Installation.md#setting-up-monitor-brightness-optional)),
 and log out and in once afterwards.

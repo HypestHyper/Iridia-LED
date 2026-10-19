@@ -5,6 +5,16 @@
 - **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon
   starts at login: type a number (or press Enter for the default) instead of a name. Names still work,
   and so do `--openrgb=` and `--autostart=`.
+- **Colors show up on the strips without nudging them.** Static colors are only sent when they change,
+  and nothing forgot what had been sent when OpenRGB reconnected (after a restart) or its device list
+  changed, so a fresh OpenRGB kept showing its own colors until you changed one. Now everything is
+  sent again then, and once more three seconds later for controllers that miss the first update after
+  being switched to Direct mode.
+- **Install ddcutil from the window:** *Settings, Monitor brightness* has an *Install ddcutil* button
+  when it's missing. It asks for your password (the desktop's own dialog), installs it with your
+  distribution's package manager and gives your session the I2C bus, so monitor brightness works
+  without a terminal, also after updating (updates don't install system packages). The installer's
+  list of missing packages now says what each optional one is for.
 
 ## 1.3.2
 

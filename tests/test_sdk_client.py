@@ -158,9 +158,11 @@ def test_a_device_openrgb_finds_after_we_connected_is_picked_up(server):
         try:
             assert ctl.ensure_connected(retry_interval=0)
             assert set(ctl.devices) == {"Fake RAM"}
+            epoch = ctl.epoch
             time.sleep(0.6)
             ctl.maybe_enumerate(interval=0)
             assert set(ctl.devices) == {"Fake RAM", "Fake ARGB Controller"}, (protocol, silent)
+            assert ctl.epoch > epoch                    # the daemon sends everything again
             assert ctl.send("Fake ARGB Controller", ["00ff00"] * 40, {"Channel 1": {"enabled": True},
                                                                        "Channel 2": {"enabled": True}})
         finally:

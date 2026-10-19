@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 19:05+0000\n"
+"POT-Creation-Date: 2026-10-19 13:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -642,8 +642,30 @@ msgstr "Have another look"
 msgid "Looking for monitors…"
 msgstr "Seeking the looking-glasses…"
 
+msgid "Install ddcutil"
+msgstr "Install ddcutil"
+
 msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
 msgstr "Automatic defers to the first looking-glass that responds. One you choose is the only one heeded."
+
+msgid "your package manager"
+msgstr "your package manager"
+
+#, python-brace-format
+msgid "Install ddcutil with {how}, then press Look again."
+msgstr "Kindly install ddcutil with {how}, then have another look."
+
+msgid "ddcutil installed. Looking for monitors…"
+msgstr "ddcutil is installed. Seeking the looking-glasses…"
+
+msgid "Not installed: the password dialog was closed."
+msgstr "Not installed: the password dialogue was dismissed."
+
+#, python-brace-format
+msgid "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
+msgstr ""
+"ddcutil could not be installed (the package manager failed). Kindly try it in a terminal: sudo "
+"{cmd}"
 
 #, python-brace-format
 msgid "I2C bus {n}"
@@ -667,11 +689,12 @@ msgid "Following {name} once a strip has Follow monitor brightness on."
 msgstr "Deferring to {name} once a strip defers to the looking-glass."
 
 msgid ""
-"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
-"press Look again."
+"ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
+"asks for your password), or install the ddcutil package yourself and press Look again."
 msgstr ""
-"ddcutil is not installed, so no looking-glass brightness may be read. Kindly install the ddcutil "
-"package, then have another look."
+"ddcutil is not installed, so no looking-glass brightness may be read. Install ddcutil sees to it "
+"(it asks for your password), or kindly install the ddcutil package yourself and have another "
+"look."
 
 msgid ""
 "ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "

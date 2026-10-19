@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 19:05+0000\n"
+"POT-Creation-Date: 2026-10-19 13:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -635,8 +635,28 @@ msgstr "Look again"
 msgid "Looking for monitors…"
 msgstr "Looking for monitors…"
 
+msgid "Install ddcutil"
+msgstr "Install ddcutil"
+
 msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
 msgstr "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
+
+msgid "your package manager"
+msgstr "your package manager"
+
+#, python-brace-format
+msgid "Install ddcutil with {how}, then press Look again."
+msgstr "Install ddcutil with {how}, then press Look again."
+
+msgid "ddcutil installed. Looking for monitors…"
+msgstr "ddcutil installed. Looking for monitors…"
+
+msgid "Not installed: the password dialog was closed."
+msgstr "Not installed: the password dialogue was closed."
+
+#, python-brace-format
+msgid "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
+msgstr "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
 
 #, python-brace-format
 msgid "I2C bus {n}"
@@ -660,11 +680,11 @@ msgid "Following {name} once a strip has Follow monitor brightness on."
 msgstr "Following {name} once a strip has Follow monitor brightness on."
 
 msgid ""
-"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
-"press Look again."
+"ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
+"asks for your password), or install the ddcutil package yourself and press Look again."
 msgstr ""
-"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
-"press Look again."
+"ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
+"asks for your password), or install the ddcutil package yourself and press Look again."
 
 msgid ""
 "ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "

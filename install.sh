@@ -182,7 +182,16 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
         for p in $(pkgname "$m"); do PKGS+=("$p"); done
     done
     [ "$(id -u)" -eq 0 ] && INSTALL_CMD=("${INSTALL_CMD[@]:1}")   # already root: no sudo
-    echo "Missing on this system: ${MISSING[*]}"
+    SHOWN=()
+    for m in "${MISSING[@]}"; do
+        case "$m" in
+            ddcutil) SHOWN+=("ddcutil (for the LEDs to follow your monitor's brightness)") ;;
+            gdbus)   SHOWN+=("gdbus (to notice sleep and the lock screen)") ;;
+            *)       SHOWN+=("$m") ;;
+        esac
+    done
+    echo "Missing on this system:"
+    printf '  - %s\n' "${SHOWN[@]}"
     if [ -n "${ATOMIC:-}" ]; then
         echo "$ATOMIC"
     elif [ -z "$PM" ]; then
@@ -255,7 +264,8 @@ if ! command -v gdbus >/dev/null 2>&1; then
     echo "      screen isn't seen. Debian/Ubuntu: libglib2.0-bin; openSUSE: glib2-tools."
 fi
 if ! command -v ddcutil &> /dev/null; then
-    echo "NOTE: 'ddcutil' is not installed (optional: monitor-brightness-synced LEDs)."
+    echo "NOTE: 'ddcutil' is not installed (optional: for the LEDs to follow your monitor's brightness)."
+    echo "      Install it later from the window: Settings, Monitor brightness, Install ddcutil."
 fi
 
 # --- monitor brightness: ddcutil needs read/write access to /dev/i2c-* -----

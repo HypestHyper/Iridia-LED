@@ -258,6 +258,8 @@ class Daemon:
         self._needs_update = True
         self._force_refresh = False
         self._last_sent: Dict[str, str] = {}
+        self._openrgb_epoch = 0
+        self._settle_resend_at: Optional[float] = None
         self._start_time = time.time()
         self._orgb = openrgb_server.Supervisor()
         self._orgb_busy = False
@@ -764,6 +766,7 @@ class Daemon:
         if connected:
             enum_interval = self.config.get("timing.device_enumeration_interval_sec", 10.0)
             self.openrgb.maybe_enumerate(interval=enum_interval)
+            self._check_openrgb_epoch()
             self._autoadd_devices()
             self._check_missing_devices()
 
@@ -783,6 +786,25 @@ class Daemon:
             self._update_sensor_zones()
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
+
+    SETTLE_RESEND_SEC = 3.0      # after (re)connecting, send everything once more after this long
+
+    def _check_openrgb_epoch(self, now: Optional[float] = None):
+        """OpenRGB (re)connected or its device list changed: its devices may be fresh ones showing their
+        own colours, so send every zone again, and once more a little later (some controllers miss the
+        first update right after being switched to Direct mode). Static colours are otherwise only sent
+        when they change, so the strips stayed dark until a colour was nudged."""
+        epoch = getattr(self.openrgb, "epoch", 0)
+        now = time.monotonic() if now is None else now
+        if epoch != self._openrgb_epoch:
+            self._openrgb_epoch = epoch
+            self._last_sent = {}
+            self._needs_update = True
+            self._settle_resend_at = now + self.SETTLE_RESEND_SEC
+        elif self._settle_resend_at is not None and now >= self._settle_resend_at:
+            self._settle_resend_at = None
+            self._last_sent = {}
+            self._needs_update = True
 
     def _reconcile_zones(self):
         """If none of a device's configured zone names exist in what

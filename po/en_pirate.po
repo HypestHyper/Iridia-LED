@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 19:05+0000\n"
+"POT-Creation-Date: 2026-10-19 13:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -635,8 +635,28 @@ msgstr "Look again, matey"
 msgid "Looking for monitors…"
 msgstr "Scannin' the horizon for spyglasses…"
 
+msgid "Install ddcutil"
+msgstr "Haul in ddcutil"
+
 msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
 msgstr "Automatic follows the first spyglass that answers. Pick one, an' only that one be followed."
+
+msgid "your package manager"
+msgstr "yer package manager"
+
+#, python-brace-format
+msgid "Install ddcutil with {how}, then press Look again."
+msgstr "Haul in ddcutil with {how}, then press Look again, matey."
+
+msgid "ddcutil installed. Looking for monitors…"
+msgstr "ddcutil be aboard. Scannin' for spyglasses…"
+
+msgid "Not installed: the password dialog was closed."
+msgstr "Not hauled in: ye closed the password scroll."
+
+#, python-brace-format
+msgid "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
+msgstr "Couldn't haul in ddcutil (the package manager ran aground). Try it in a terminal: sudo {cmd}"
 
 #, python-brace-format
 msgid "I2C bus {n}"
@@ -660,11 +680,11 @@ msgid "Following {name} once a strip has Follow monitor brightness on."
 msgstr "Followin' {name} once a strip follows the spyglass."
 
 msgid ""
-"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
-"press Look again."
+"ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
+"asks for your password), or install the ddcutil package yourself and press Look again."
 msgstr ""
-"ddcutil ain't aboard, so no spyglass brightness can be read. Haul in the ddcutil package, then "
-"press Look again, matey."
+"ddcutil ain't aboard, so no spyglass brightness can be read. Haul in ddcutil sets it up (it asks "
+"for yer password), or haul in the ddcutil package yerself and press Look again."
 
 msgid ""
 "ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "

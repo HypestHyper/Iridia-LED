@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Text no longer cut off at the Default window size.** Default scales the window to 90%, which gave
+  fractional sizes (13.2px text, 5.4px padding), and GTK 4.24 cuts off the tops of letters then.
+  Every scaled size is now a whole pixel. (1.3.3's switch to GTK's GL renderer wasn't the fix.)
+- No "Use GtkSettings:gtk-interface-color-scheme instead" warning on GTK 4.20 and newer.
+
 ## 1.3.3
 
 - **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon

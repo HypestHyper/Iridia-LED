@@ -199,17 +199,23 @@ _PX = re.compile(r"(font-size: )?(?<![\w.])(\d+(?:\.\d+)?)px")
 
 def scale_px(css: str, factor: float) -> str:
     """Scale every size in a stylesheet. Hairlines (2px and less) and 999px pills stay as they are, and
-    text shrinks less than the rest (never below 10px) so it stays readable."""
+    text shrinks less than the rest (never below 10px) so it stays readable.
+
+    Everything comes out in whole pixels: GTK 4.24 cuts off the tops of letters when text or the room
+    around it has a fractional size (13.2px text, 5.4px padding), as the Default size had."""
     if factor == 1:
         return css
+
+    def whole(x):
+        return int(x + 0.5)
 
     def one(m):
         font, v = m.group(1), float(m.group(2))
         if v <= 2 or v >= 999:
             return m.group(0)
         if font:
-            return f"{font}{max(min(v, 10), round(v * (1 - (1 - factor) * 0.6), 1)):g}px"
-        return f"{round(v * factor, 1):g}px"
+            return f"{font}{max(min(whole(v), 10), whole(v * (1 - (1 - factor) * 0.6)))}px"
+        return f"{max(1, whole(v * factor))}px"
     return _PX.sub(one, css)
 
 

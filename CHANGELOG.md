@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon
+  starts at login: type a number (or press Enter for the default) instead of a name. Names still work,
+  and so do `--openrgb=` and `--autostart=`.
+
 ## 1.3.2
 
 - **OpenRGB's server no longer dies over and over** (exit code -13). OpenRGB before 1.0 (Fedora's

@@ -124,3 +124,23 @@ def test_no_ddcutil_says_so(tools):
     c = D.DDCController(poll_interval=1)
     _wait(c)
     assert not c.is_available() and c.last_error == "ddcutil isn't installed"
+
+
+@pytest.mark.parametrize("release, tool, expect", [
+    ('NAME="Fedora Linux"\nID=fedora\n', "dnf", ["dnf", "install", "-y", "ddcutil"]),
+    ('ID=cachyos\nID_LIKE=arch\n', "pacman", ["pacman", "-S", "--needed", "--noconfirm", "ddcutil"]),
+    ('ID=linuxmint\nID_LIKE="ubuntu debian"\n', "apt-get", ["apt-get", "install", "-y", "ddcutil"]),
+    ('ID="opensuse-tumbleweed"\nID_LIKE="opensuse suse"\n', "zypper",
+     ["zypper", "--non-interactive", "install", "ddcutil"]),
+])
+def test_the_command_that_installs_ddcutil(tools, monkeypatch, release, tool, expect):
+    tmp, _ = tools
+    (tmp / "os-release").write_text(release)
+    monkeypatch.setattr(D, "OS_RELEASE", str(tmp / "os-release"))
+    monkeypatch.setenv("PATH", str(tmp / "bin"))
+    assert D.install_command() is None                  # its package manager isn't there
+    (tmp / "bin" / tool).write_text("#!/bin/sh\n")
+    (tmp / "bin" / tool).chmod(0o755)
+    assert D.install_command() == expect
+    script = D.install_script(expect)
+    assert script.startswith(" ".join(expect) + " && ") and "modprobe i2c-dev" in script

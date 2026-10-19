@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-18 19:05+0000\n"
+"POT-Creation-Date: 2026-10-19 13:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -608,8 +608,28 @@ msgstr "Encore un croissant"
 msgid "Looking for monitors…"
 msgstr "Où est la boulangerie…"
 
+msgid "Install ddcutil"
+msgstr "Achetez du ddcutil"
+
 msgid "Automatic follows the first monitor that answers. A monitor you pick is the only one followed."
 msgstr "Le train part à huit heures. Le chien dort sur le canapé."
+
+msgid "your package manager"
+msgstr "le boulanger"
+
+#, python-brace-format
+msgid "Install ddcutil with {how}, then press Look again."
+msgstr "Achetez du ddcutil chez {how}, puis encore un croissant."
+
+msgid "ddcutil installed. Looking for monitors…"
+msgstr "Le ddcutil est arrivé. Où est la boulangerie…"
+
+msgid "Not installed: the password dialog was closed."
+msgstr "Pas de fromage : la porte est fermée."
+
+#, python-brace-format
+msgid "Couldn't install ddcutil (the package manager failed). Try it in a terminal: sudo {cmd}"
+msgstr "Le boulanger est fermé. Essayez au terminal : sudo {cmd}"
 
 #, python-brace-format
 msgid "I2C bus {n}"
@@ -633,9 +653,11 @@ msgid "Following {name} once a strip has Follow monitor brightness on."
 msgstr "{name} attend le bus sous la pluie."
 
 msgid ""
-"ddcutil isn't installed, so no monitor brightness can be read. Install the ddcutil package, then "
-"press Look again."
-msgstr "Il n'y a plus de ddcutil à la boulangerie. Achetez le paquet ddcutil, puis encore un croissant."
+"ddcutil isn't installed, so no monitor brightness can be read. Install ddcutil sets it up (it "
+"asks for your password), or install the ddcutil package yourself and press Look again."
+msgstr ""
+"Il n'y a plus de ddcutil à la boulangerie. Achetez du ddcutil (il demande le mot de passe), ou "
+"achetez le paquet vous-même, puis encore un croissant."
 
 msgid ""
 "ddcutil finds no monitor. Some docks and adapters don't pass brightness through, and after "

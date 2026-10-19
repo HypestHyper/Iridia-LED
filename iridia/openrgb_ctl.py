@@ -130,6 +130,9 @@ class OpenRGBController:
         self._last_warned: Optional[str] = None
         self.lock = threading.RLock()
         self._asserted: set = set()          # devices put in Direct mode since this connection
+        # Goes up on every connection and every change to the device list: OpenRGB's devices may be
+        # new ones then (a restarted server shows its own colours), so what was sent must be sent again.
+        self.epoch = 0
         self.protocol = 0                    # 6: Iridia's own client; 0: openrgb-python (OpenRGB before 1.0)
         self._said_protocol = None
 
@@ -185,6 +188,7 @@ class OpenRGBController:
         try:
             self.client, self.protocol = self._open_client()
             self.connected_since = time.time()
+            self.epoch += 1
             self._asserted.clear()               # (re)connected: put devices in Direct mode again
             self._enumerate()
             return self.client is not None
@@ -248,6 +252,8 @@ class OpenRGBController:
                 self.client.refresh()
             devs = [d for d in (self.client.devices or []) if d is not None]
             devices = dict(zip(unique_names([d.name for d in devs]), devs))
+            if set(devices) != set(self.devices):
+                self.epoch += 1
             self.devices = devices
             self._last_enum = time.time()
             if devices:

@@ -26,6 +26,7 @@ class FakeOpenRGB:
 
         self.frames = []              # (device, {zone: [(r, g, b), ...]}) from the animation thread
         self.real = {}                # device -> [zone names]: what list_devices() reports
+        self.epoch = 1                # goes up when OpenRGB reconnects or its device list changes
 
     def list_devices(self):
         return [{"name": d, "zones": [{"name": z, "led_count": 0} for z in zs]} for d, zs in self.real.items()]
@@ -264,6 +265,26 @@ def test_a_new_device_doesnt_follow_the_monitor(d):
     d.openrgb.real["New Board"] = ["ARGB 1"]
     d._autoadd_devices()
     assert d.config.get(("devices", "New Board", "zones", "ARGB 1", "brightness_sync")) is False
+
+
+def test_colours_are_sent_again_after_openrgb_reconnects(d):
+    """Static colours are only sent when they change. A restarted OpenRGB shows its own colours, so after
+    a reconnect (or a changed device list) everything goes out again, and once more a moment later."""
+    t = 1000.0
+
+    def step():
+        d._check_openrgb_epoch(t)
+        d._update_all_devices()
+        return len(d.openrgb.sent)
+    n = step()
+    assert n and d.openrgb.last("Strip") == ["ff0000"] * 4
+    d._needs_update = True
+    assert step() == n                                  # nothing changed: nothing sent
+    d.openrgb.epoch += 1                                # OpenRGB came back
+    assert step() == 2 * n
+    t += d.SETTLE_RESEND_SEC + 0.1                      # and once more, for a slow controller
+    assert step() == 3 * n
+    assert step() == 3 * n                              # then quiet again
 
 
 def test_picking_the_monitor(d):

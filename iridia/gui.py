@@ -1,9 +1,18 @@
 """Entry point for the Iridia window (GTK 4). The window itself lives in iridia/ui/."""
 
+import os
 import sys
 
 
+def pick_renderer(env=os.environ):
+    """GTK's newer renderers (Vulkan, the default on Wayland since GTK 4.16) cut off the tops of letters
+    with Iridia's font at fractional scales (Hyprland at 1.25, for one); the GL renderer draws them
+    whole. Set before GTK loads; your own GSK_RENDERER still wins (GSK_RENDERER=vulkan iridia-gui)."""
+    env.setdefault("GSK_RENDERER", "gl")
+
+
 def main():
+    pick_renderer()
     try:
         import gi
         gi.require_version("Gtk", "4.0")

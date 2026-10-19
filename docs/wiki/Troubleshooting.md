@@ -93,7 +93,7 @@ update), switch it off on the Devices tab so it stops being reported.
 
 *Settings, Monitor brightness* says what's wrong and which monitor is followed; pick the right one there
 if you have several (or `iridia monitor` lists them, `iridia monitor 6` picks the one on I2C bus 6), and
-press *Look again* after installing ddcutil. Then run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
+press *Look again* after installing ddcutil (or use *Install ddcutil* there). Then run `ddcutil detect`. If it finds nothing, your monitor or cable may not support DDC/CI (laptop panels and
 many docks don't), DDC/CI may be off in the monitor's menu, or you have no access to the I2C bus yet:
 run `bash install.sh` again to set it up (see [Installation](Installation.md#setting-up-monitor-brightness-optional)),
 and log out and in once afterwards.
@@ -103,6 +103,13 @@ and log out and in once afterwards.
 GTK 4 for Python is missing, or belongs to another Python. `iridia doctor` has a *Window (GTK 4)* line.
 Install the packages for your distribution (see [Installation](Installation.md#installing-the-dependencies-yourself))
 and run the installer again. GTK 4.6 or newer is needed.
+
+## Text in the window is cut off or drawn oddly
+
+The window uses GTK's GL renderer, because the Vulkan one (GTK's default on Wayland since 4.16) cuts off
+the tops of letters at fractional scales. If GL misbehaves on your graphics driver, start the window with
+another one: `GSK_RENDERER=ngl iridia-gui` (or `vulkan`, or `cairo`, the slowest). *Settings, Font, System
+font* also avoids it.
 
 ## The daemon doesn't start at login
 

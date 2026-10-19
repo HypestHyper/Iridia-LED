@@ -4,7 +4,7 @@ ddcutil 1.x (Ubuntu 22.04: 1.2, Ubuntu 24.04 and Debian 12: 1.4) and 2.x take di
 --syslog only exists since 2.0, and 1.x refuses the whole command when it sees it. Without a
 monitor that answers DDC/CI, a laptop's internal screen is followed through
 /sys/class/backlight (readable by everyone, no ddcutil needed)."""
-import glob, logging, os, re, subprocess, threading, time
+import glob, logging, os, re, shutil, subprocess, threading, time
 
 logger = logging.getLogger("iridia")
 _UNSET = object()
@@ -248,3 +248,46 @@ class DDCController:
 
     def is_available(self):
         return self._available
+
+
+OS_RELEASE = "/etc/os-release"
+
+
+def install_command():
+    """The command that installs ddcutil on this distribution (run as root), or None (unknown, or an
+    image-based system where packages need a reboot: the installer says what to do there)."""
+    if os.path.exists("/run/ostree-booted"):
+        return None
+    ids = ""
+    try:
+        with open(OS_RELEASE, encoding="utf-8") as f:
+            for line in f:
+                k, _, v = line.strip().partition("=")
+                if k in ("ID", "ID_LIKE"):
+                    ids += " " + v.strip().strip('"').lower()
+    except OSError:
+        pass
+    words = set(ids.split())
+    table = [({"arch"}, "pacman", ["pacman", "-S", "--needed", "--noconfirm", "ddcutil"]),
+             ({"debian", "ubuntu"}, "apt-get", ["apt-get", "install", "-y", "ddcutil"]),
+             ({"fedora", "rhel"}, "dnf", ["dnf", "install", "-y", "ddcutil"]),
+             ({"suse", "opensuse", "opensuse-tumbleweed", "opensuse-leap"}, "zypper",
+              ["zypper", "--non-interactive", "install", "ddcutil"]),
+             ({"void"}, "xbps-install", ["xbps-install", "-Sy", "ddcutil"]),
+             ({"alpine"}, "apk", ["apk", "add", "ddcutil"]),
+             ({"gentoo"}, "emerge", ["emerge", "--noreplace", "app-misc/ddcutil"])]
+    for names, tool, cmd in table:
+        if words & names or any(w.startswith("opensuse") for w in words) and tool == "zypper":
+            return cmd if shutil.which(tool) else None
+    for _names, tool, cmd in table:         # an unknown relative: whichever manager is there
+        if shutil.which(tool):
+            return cmd
+    return None
+
+
+def install_script(cmd) -> str:
+    """Root shell script: install ddcutil, then give this session the I2C bus now (the i2c-dev module,
+    and ddcutil's own udev rules applied to the buses that exist already)."""
+    import shlex
+    return (" ".join(shlex.quote(c) for c in cmd) + " && { modprobe i2c-dev; "
+            "udevadm control --reload-rules; udevadm trigger --subsystem-match=i2c-dev; true; }")

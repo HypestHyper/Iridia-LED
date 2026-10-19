@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.3.3
+
+- **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon
+  starts at login: type a number (or press Enter for the default) instead of a name. Names still work,
+  and so do `--openrgb=` and `--autostart=`.
+- **Colors show up on the strips without nudging them.** Static colors are only sent when they change,
+  and nothing forgot what had been sent when OpenRGB reconnected (after a restart) or its device list
+  changed, so a fresh OpenRGB kept showing its own colors until you changed one. Now everything is
+  sent again then, and once more three seconds later for controllers that miss the first update after
+  being switched to Direct mode.
+- **Install ddcutil from the window:** *Settings, Monitor brightness* has an *Install ddcutil* button
+  when it's missing. It asks for your password (the desktop's own dialog), installs it with your
+  distribution's package manager and gives your session the I2C bus, so monitor brightness works
+  without a terminal, also after updating (updates don't install system packages). The installer's
+  list of missing packages now says what each optional one is for.
+- **No more cut-off text** (the tops of letters in labels and buttons) with fractional scaling, on
+  Hyprland for one: GTK's Vulkan renderer clips Iridia's font there, so the window uses GTK's GL
+  renderer. To pick another: `GSK_RENDERER=vulkan iridia-gui` (or `ngl`, `cairo`).
+- **Pick the monitor on the Everything card too:** a *Monitor* dropdown under Follow monitor brightness,
+  the same choice as in *Settings, Monitor brightness* (changing one changes the other).
+
 ## 1.3.2
 
 - **OpenRGB's server no longer dies over and over** (exit code -13). OpenRGB before 1.0 (Fedora's

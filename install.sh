@@ -182,7 +182,16 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
         for p in $(pkgname "$m"); do PKGS+=("$p"); done
     done
     [ "$(id -u)" -eq 0 ] && INSTALL_CMD=("${INSTALL_CMD[@]:1}")   # already root: no sudo
-    echo "Missing on this system: ${MISSING[*]}"
+    SHOWN=()
+    for m in "${MISSING[@]}"; do
+        case "$m" in
+            ddcutil) SHOWN+=("ddcutil (for the LEDs to follow your monitor's brightness)") ;;
+            gdbus)   SHOWN+=("gdbus (to notice sleep and the lock screen)") ;;
+            *)       SHOWN+=("$m") ;;
+        esac
+    done
+    echo "Missing on this system:"
+    printf '  - %s\n' "${SHOWN[@]}"
     if [ -n "${ATOMIC:-}" ]; then
         echo "$ATOMIC"
     elif [ -z "$PM" ]; then
@@ -255,7 +264,8 @@ if ! command -v gdbus >/dev/null 2>&1; then
     echo "      screen isn't seen. Debian/Ubuntu: libglib2.0-bin; openSUSE: glib2-tools."
 fi
 if ! command -v ddcutil &> /dev/null; then
-    echo "NOTE: 'ddcutil' is not installed (optional: monitor-brightness-synced LEDs)."
+    echo "NOTE: 'ddcutil' is not installed (optional: for the LEDs to follow your monitor's brightness)."
+    echo "      Install it later from the window: Settings, Monitor brightness, Install ddcutil."
 fi
 
 # --- monitor brightness: ddcutil needs read/write access to /dev/i2c-* -----
@@ -375,39 +385,63 @@ mkdir -p "$CONFIG_DIR"
 
 # --- how OpenRGB's server and the daemon start ----------------------------
 PY="$VENV_DIR/bin/python"
-ask() {   # ask PROMPT DEFAULT -> answer on stdout
-    local reply=""
-    if [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then read -r -p "$1 [$2] " reply || reply=""; fi
-    echo "${reply:-$2}"
+# choose VAR DEFAULT NAME DESCRIPTION [NAME DESCRIPTION ...]: a numbered menu. Enter takes the default;
+# a number or the name picks one. Sets VAR to the name.
+choose() {
+    local var=$1 def=$2 i=0 defn=1 reply n
+    local names=()
+    shift 2
+    while [ $# -ge 2 ]; do
+        i=$((i + 1))
+        names+=("$1")
+        if [ "$1" = "$def" ]; then
+            defn=$i
+            printf '  %d) %-11s %s  (default)\n' "$i" "$1" "$2"
+        else
+            printf '  %d) %-11s %s\n' "$i" "$1" "$2"
+        fi
+        shift 2
+    done
+    while true; do
+        reply=""
+        read -r -p "Choose 1-$i [$defn]: " reply || true      # end of input: what was typed, or the default
+        reply="${reply:-$defn}"
+        if [[ "$reply" =~ ^[0-9]+$ ]] && [ "$reply" -ge 1 ] && [ "$reply" -le "$i" ]; then
+            printf -v "$var" '%s' "${names[$((reply - 1))]}"
+            return
+        fi
+        for n in "${names[@]}"; do
+            if [ "$n" = "$reply" ]; then printf -v "$var" '%s' "$n"; return; fi
+        done
+        echo "  Type a number from 1 to $i, or press Enter for $defn."
+    done
 }
 if [ -z "$OPENRGB_METHOD" ] && [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then
     CUR=$("$PY" -c "from iridia import openrgb_server as o; print(o.start_method())" 2>/dev/null || echo daemon)
     OTHERS=$("$PY" -c "from iridia import openrgb_server as o; print(', '.join(o.others()))" 2>/dev/null || true)
+    OPTS=(daemon "the Iridia daemon starts it, inside your session (recommended; works with or without systemd)")
+    "$PY" -c "from iridia import openrgb_server as o; raise SystemExit(0 if o.has_systemd() else 1)" 2>/dev/null &&
+        OPTS+=(systemd "a systemd user service starts it with your graphical session")
+    OPTS+=(off "you start OpenRGB yourself (its window with the SDK server on, a root service, ...)")
     echo ""
     echo "How should OpenRGB's server be started?"
-    echo "  daemon   the Iridia daemon starts it, inside your session (recommended; works with or without systemd)"
-    "$PY" -c "from iridia import openrgb_server as o; raise SystemExit(0 if o.has_systemd() else 1)" 2>/dev/null &&
-    echo "  systemd  a systemd user service starts it with your graphical session"
-    echo "  off      you start OpenRGB yourself (its window with the SDK server on, a root service, ...)"
     if [ -n "$OTHERS" ]; then
         echo "Something else already starts OpenRGB: $OTHERS"
         echo "Two OpenRGB instances fight over the hardware. Pick 'off' to keep that, or keep 'daemon' and turn"
         echo "that off (for an autostart entry: iridia openrgb hide-autostart)."
     fi
-    OPENRGB_METHOD=$(ask "OpenRGB start method?" "$CUR")
-    case "$OPENRGB_METHOD" in daemon|systemd|off) ;; *) echo "Unknown answer, keeping $CUR."; OPENRGB_METHOD="$CUR" ;; esac
+    choose OPENRGB_METHOD "$CUR" "${OPTS[@]}"
 fi
 if [ -z "$AUTOSTART" ]; then
     DEF=$("$PY" -c "from iridia.cli import default_autostart; print(default_autostart())" 2>/dev/null || echo xdg)
     if [ "$ASSUME_YES" -eq 0 ] && [ -t 0 ]; then
         echo ""
         echo "How should the Iridia daemon start when you log in?"
-        echo "  systemd     a systemd user service (needs a session that reaches graphical-session.target)"
-        echo "  xdg         ~/.config/autostart (GNOME, KDE, XFCE, Cinnamon, ...)"
-        echo "  compositor  a line in your compositor's config (Hyprland, Sway, niri, ...); printed below"
-        echo "  none        nothing; you start it yourself"
-        AUTOSTART=$(ask "Daemon autostart?" "$DEF")
-        case "$AUTOSTART" in systemd|xdg|compositor|none) ;; *) echo "Unknown answer, using $DEF."; AUTOSTART="$DEF" ;; esac
+        choose AUTOSTART "$DEF" \
+            systemd "a systemd user service (needs a session that reaches graphical-session.target)" \
+            xdg "an entry in ~/.config/autostart (GNOME, KDE, XFCE, Cinnamon, ...)" \
+            compositor "a line in your compositor's config (Hyprland, Sway, niri, ...); printed below" \
+            none "nothing; you start it yourself"
     else
         AUTOSTART="$DEF"
     fi

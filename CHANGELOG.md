@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.3
 
 - **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon
   starts at login: type a number (or press Enter for the default) instead of a name. Names still work,

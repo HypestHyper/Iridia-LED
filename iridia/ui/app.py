@@ -821,6 +821,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._global_card = ZoneCard(self, "*", "*", merged, extracted, custom, GlobalClient(self.client),
                                      global_mode=True, expanded=expanded.get("*", True), title=_("Everything"))
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
+        if getattr(self, "_ddc_menu", None):
+            self._global_card.set_monitors(*self._ddc_menu)
         self._dev_box.append(self._global_card)
         for d, dc in devices.items():
             self._dev_box.append(section(d, None if dc.get("enabled", True) else _("Disabled")))
@@ -1364,7 +1366,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if choice is not None and choice not in buses.values():
             buses[_("I2C bus {n}").format(n=choice)] = choice
         self._ddc_buses = buses
-        self._ddc_dd.set_items(list(buses), next((k for k, b in buses.items() if b == choice), _("Automatic")))
+        current = next((k for k, b in buses.items() if b == choice), _("Automatic"))
+        self._ddc_dd.set_items(list(buses), current)
+        self._ddc_menu = (list(buses), current, bool(displays))
+        if self._global_card is not None:
+            self._global_card.set_monitors(*self._ddc_menu)
         self._ddc_install_btn.set_visible(st.get("ddc_problem") == "no_ddcutil")
         names = {d.get("bus"): d.get("name") for d in displays}
         mon = st.get("monitor_brightness")

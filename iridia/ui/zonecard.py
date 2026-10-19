@@ -329,6 +329,14 @@ class ZoneCard(Gtk.Box):
                                   "used."), ("small", "faint"), wrap=True)
         self._sync_note.set_visible(False)
         br.append(self._sync_note)
+        if self.global_mode:
+            # the same choice as Settings, Monitor brightness (one monitor for every strip)
+            self._mon_row = hbox(10)
+            self._mon_row.append(label(_("Monitor"), ("small", "dim")))
+            self._mon_dd = Dropdown([_("Automatic")], _("Automatic"), lambda v: self.app._ddc_pick(v), placeholder="")
+            self._mon_row.append(self._mon_dd)
+            self._mon_row.set_visible(False)
+            br.append(self._mon_row)
         r2 = hbox(12)
         r2.append(label(_("Range"), ("small", "dim")))
         rng = self.cfg.get("brightness_range", [0, 100])
@@ -884,6 +892,12 @@ class ZoneCard(Gtk.Box):
     def _on_sync(self, v):
         self._call(self.client.set_zone_brightness_sync, self.device_name, self.zone_name, v)
         self._sync_note.set_visible(bool(v) and not self._follow_ok)
+
+    def set_monitors(self, items, current, show: bool):
+        """The Everything card's monitor list (the one in Settings, kept in step)."""
+        if hasattr(self, "_mon_dd"):
+            self._mon_dd.set_items(list(items), current)
+            self._mon_row.set_visible(show)
 
     def set_follow_ok(self, ok: bool):
         """Whether there's a monitor brightness to follow (the note says Manual is used otherwise)."""

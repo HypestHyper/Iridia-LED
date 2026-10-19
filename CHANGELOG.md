@@ -15,6 +15,8 @@
   distribution's package manager and gives your session the I2C bus, so monitor brightness works
   without a terminal, also after updating (updates don't install system packages). The installer's
   list of missing packages now says what each optional one is for.
+- **Pick the monitor on the Everything card too:** a *Monitor* dropdown under Follow monitor brightness,
+  the same choice as in *Settings, Monitor brightness* (changing one changes the other).
 
 ## 1.3.2
 

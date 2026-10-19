@@ -51,6 +51,7 @@ headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
 .error-text {{ color: {ERROR}; }}
 .warn-text {{ color: {TERTIARY}; }}
 .mono {{ font-family: monospace; font-size: 12.5px; }}
+.tnum {{ font-feature-settings: "tnum"; }}
 .icon {{ font-family: "{ICON}"; font-size: 20px; font-weight: 400; font-variation-settings: "FILL" 0, "wght" 400, "opsz" 24; }}
 .icon.fill {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .icon.big {{ font-size: 28px; }}

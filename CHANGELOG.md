@@ -9,6 +9,14 @@
 - **Buttons and options no longer grow on hover.** A desktop GTK theme or `~/.config/gtk-4.0/gtk.css`
   could make the text in buttons bolder or bigger on hover (or scale the buttons); the text in a button
   now keeps the button's own size and weight, and nothing scales.
+- **Sensor bars work with color correction.** Palette correction snaps each color by its hue, so it
+  turned the bar's partly lit tip and its dimmed rest into full colors: "the rest of the bar dim" lit
+  the whole strip, and the bar jumped a whole LED at a time instead of gliding. Correction now works on
+  the full color and each LED's level (the tip, the dimmed rest, the blink) is applied after it, with
+  gamma correction and in Calibrated mode too. The dimmed rest is a little brighter (12%).
+- **A sensor's reading no longer jiggles the part's settings popup:** readings show as whole degrees and
+  percentages with equal-width digits (it showed every digit of the smoothed value, so the text, and
+  the popup pinned next to it, changed width every second).
 - **The connected button groups light up on hover** (Off / Palette / Calibrated and the like): their own
   background hid the hover color.
 

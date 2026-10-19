@@ -228,7 +228,7 @@ class SectionsPanel(Gtk.Box):
             num = label(str(k + 1), ("subheading", "accent"))
             num.set_size_request(18, -1)
             r.append(num)
-            lbl = label("", ("small", "dim"))
+            lbl = label("", ("small", "dim", "tnum"))     # equal-width digits: the reading doesn't jiggle
             lbl.set_size_request(130, -1)
             self._row_labels.append(lbl)
             r.append(lbl)
@@ -257,8 +257,8 @@ class SectionsPanel(Gtk.Box):
             if sec["type"] == "sensor":
                 v = self.sensor_value(sec["sensor"])
                 name = SENSOR_NAMES.get(sec["sensor"], sec["sensor"].replace("hwmon:", "").replace(":", " "))
-                from iridia.sensors import unit_of
-                txt += "\n" + name + (f": {v:g} {unit_of(sec['sensor'])}" if v is not None else "")
+                from iridia.sensors import format_value, unit_of
+                txt += "\n" + name + (f": {format_value(v, unit_of(sec['sensor']))}" if v is not None else "")
             if lbl.get_label() != txt:
                 lbl.set_label(txt)
 
@@ -353,7 +353,8 @@ class SectionsPanel(Gtk.Box):
         for f in found:
             nm = SENSOR_NAMES.get(f["id"], f["name"])
             if f.get("value") is not None:
-                nm += f"  ({f['value']:g} {f['unit']})"
+                from iridia.sensors import format_value
+                nm += f"  ({format_value(f['value'], f['unit'])})"
             names[nm] = f["id"]
         if sec["sensor"] not in names.values():
             names[SENSOR_NAMES.get(sec["sensor"], sec["sensor"]) + "  " + _("(not found here)")] = sec["sensor"]

@@ -1943,6 +1943,7 @@ class Daemon:
         mode = zcfg.get("mode", self.config.color_mode)       # full (off) | palette | calibrated
         brightness = None
         exact = False                                        # send the colours untouched
+        levels = None                                        # sensor parts: each LED's level, applied last
 
         override = self._override_colors(device_name, zone_name, led_count)
         ov = self._overlays.get(key) or {}
@@ -1979,10 +1980,11 @@ class Daemon:
                 return
             if zcfg["sections"] or zcfg["led_overrides"]:
                 if self._strip_type(device_name, zone_name, zcfg) != "single":
+                    levels = [1.0] * len(final_colors)
                     final_colors = zone_sections.compose_static(
                         final_colors, zcfg["sections"], zcfg["led_overrides"],
                         lambda e: resolve_colors(e, self._extracted_colors), self.patterns,
-                        self.sensors.value, time.monotonic())
+                        self.sensors.value, time.monotonic(), levels)
 
         if not exact:
             brightness = int(round(self._brightness_now(key, zcfg)))
@@ -2010,6 +2012,9 @@ class Daemon:
                     gamma = zcfg.get("gamma_value", 2.2)
                     final_colors = [c if p else self._gamma_correct(c, gamma) for c, p in zip(final_colors, plain)]
                 final_colors = [self._scale_brightness(c, brightness) for c in final_colors]
+            if levels is not None and min(levels, default=1.0) < 1.0:
+                # after correction: Palette snaps a dim color to a full one, gamma lifts it
+                final_colors = [c if f >= 1.0 else self._scale_level(c, f) for c, f in zip(final_colors, levels)]
 
         final_colors = self._finish(key, device_name, zone_name, zcfg, final_colors)
         # an animated zone's neighbours are sent with its frames (one packet per device)
@@ -2216,7 +2221,9 @@ class Daemon:
                     return None
                 ov = self._overlays.get(key) or {}
                 b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
-                return self._finish_rgb(key, dev, zn, zc, correct(parts.frame(base, clock), b))
+                lv = [1.0] * n
+                frame = correct(parts.frame(base, clock, lv), b)
+                return self._finish_rgb(key, dev, zn, zc, self._levels_rgb(frame, lv))
             return Job(key, dev, zn, real_n, still, f"{len(parts.moving)} animated part(s)")
         if pts:
             positions = animations.layout_positions(pts[0], anim["angle"], pts[1])
@@ -2241,11 +2248,14 @@ class Daemon:
                 raw = memo[1]
             else:
                 raw = animations.render(effect, anim, n, t, colors, seed, positions, base, extent)
+            lv = None
             if parts is not None:
-                raw = parts.frame(raw, clock)
+                lv = [1.0] * n
+                raw = parts.frame(raw, clock, lv)
             ov = self._overlays.get(key) or {}
             b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
-            return self._finish_rgb(key, dev, zn, zc, correct(raw, b))
+            out = correct(raw, b)
+            return self._finish_rgb(key, dev, zn, zc, self._levels_rgb(out, lv) if lv else out)
         desc = ", ".join(f"{k}={v}" for k, v in anim.items())
         return Job(key, dev, zn, real_n, frame, desc)
 
@@ -2399,6 +2409,18 @@ class Daemon:
             brightness = 100 - brightness
         scaled = int(brightness * (range_max - range_min) / 100 + range_min)
         return max(range_min, min(range_max, scaled))
+
+    @staticmethod
+    def _scale_level(hex_color: str, f: float) -> str:
+        r, g, b = (int(int(hex_color[i:i + 2], 16) * f + 0.5) for i in (0, 2, 4))
+        return f"{r:02x}{g:02x}{b:02x}"
+
+    @staticmethod
+    def _levels_rgb(frame: list, levels: list) -> list:
+        if min(levels, default=1.0) >= 1.0:
+            return frame
+        return [c if f >= 1.0 else (int(c[0] * f + 0.5), int(c[1] * f + 0.5), int(c[2] * f + 0.5))
+                for c, f in zip(frame, levels)]
 
     @staticmethod
     def _scale_brightness(hex_color: str, pct: int) -> str:

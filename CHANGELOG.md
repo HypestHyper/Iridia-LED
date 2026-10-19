@@ -15,6 +15,9 @@
   distribution's package manager and gives your session the I2C bus, so monitor brightness works
   without a terminal, also after updating (updates don't install system packages). The installer's
   list of missing packages now says what each optional one is for.
+- **No more cut-off text** (the tops of letters in labels and buttons) with fractional scaling, on
+  Hyprland for one: GTK's Vulkan renderer clips Iridia's font there, so the window uses GTK's GL
+  renderer. To pick another: `GSK_RENDERER=vulkan iridia-gui` (or `ngl`, `cairo`).
 - **Pick the monitor on the Everything card too:** a *Monitor* dropdown under Follow monitor brightness,
   the same choice as in *Settings, Monitor brightness* (changing one changes the other).
 

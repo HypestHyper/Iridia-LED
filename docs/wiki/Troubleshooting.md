@@ -104,6 +104,13 @@ GTK 4 for Python is missing, or belongs to another Python. `iridia doctor` has a
 Install the packages for your distribution (see [Installation](Installation.md#installing-the-dependencies-yourself))
 and run the installer again. GTK 4.6 or newer is needed.
 
+## Text in the window is cut off or drawn oddly
+
+The window uses GTK's GL renderer, because the Vulkan one (GTK's default on Wayland since 4.16) cuts off
+the tops of letters at fractional scales. If GL misbehaves on your graphics driver, start the window with
+another one: `GSK_RENDERER=ngl iridia-gui` (or `vulkan`, or `cairo`, the slowest). *Settings, Font, System
+font* also avoids it.
+
 ## The daemon doesn't start at login
 
 `iridia doctor` shows how the running daemon was started and what is set up to start it. If

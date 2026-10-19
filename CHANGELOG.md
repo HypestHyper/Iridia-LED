@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.2
 
 - **OpenRGB's server no longer dies over and over** (exit code -13). OpenRGB before 1.0 (Fedora's
   0.9+git, for one) doesn't ignore SIGPIPE, so a client hanging up just before OpenRGB wrote to it

@@ -1389,6 +1389,28 @@ def clear(container: Gtk.Widget):
         c = n
 
 
+def restyle_all():
+    """Make every widget work out its style again, on hidden pages too. After the stylesheet
+    changes, GTK 4.24 leaves values a hidden widget inherits (the text size in a button) as they
+    were until something else changes on that widget, so text on a tab you weren't looking at
+    kept its old size until you hovered it."""
+    for top in Gtk.Window.list_toplevels():
+        for w in _walk(top):
+            w.add_css_class("restyle")
+            w.remove_css_class("restyle")
+
+
+def _walk(w):
+    stack = [w]
+    while stack:
+        w = stack.pop()
+        yield w
+        c = w.get_first_child()
+        while c is not None:
+            stack.append(c)
+            c = c.get_next_sibling()
+
+
 def load_css(provider, css: str):
     """CssProvider loading that works from GTK 4.6 to 4.20 (the binding changed twice)."""
     if hasattr(provider, "load_from_string"):          # 4.12+

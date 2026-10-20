@@ -16,6 +16,26 @@ APP_ID = "io.github.HypestHyper.Iridia"   # GTK application id; the launcher fil
 OLD_LAUNCHERS = ("iridia.desktop", "io.github.iridia.Iridia.desktop")
 
 
+def desktop_entry(exec_path: str = APP_ID) -> str:
+    """The launcher file. data/io.github.HypestHyper.Iridia.desktop is this with Exec=APP_ID (a test
+    keeps the two the same); the installed one names the full path of iridia-gui, since launchers
+    don't run through a login shell and so don't see ~/.local/bin in PATH."""
+    return f"""[Desktop Entry]
+Type=Application
+Name=Iridia
+GenericName=RGB lighting
+Comment=Set RGB lights from the colours of your wallpaper, through OpenRGB
+Exec={exec_path}
+Icon={ICON_NAME}
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=led;rgb;argb;openrgb;wallpaper;lighting;light;strip;ws2812b;colour;color;ambient;
+StartupNotify=true
+StartupWMClass={APP_ID}
+X-GNOME-UsesNotifications=true
+"""
+
+
 def icon_svg_path() -> str:
     """Absolute path to the bundled iridia.svg inside the installed package.
 

@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - run: pip install ruff
       - run: ruff check iridia scripts tests
       - name: shellcheck
-        run: shellcheck install.sh uninstall.sh
+        run: shellcheck install.sh uninstall.sh tests/validate-desktop.sh
 
   test:
     runs-on: ubuntu-22.04
@@ -32,3 +32,12 @@ jobs:
       - name: Byte-compile every module (catches syntax newer than the oldest supported Python)
         run: python -m compileall -q iridia scripts
       - run: pytest -q
+
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the validators
+        run: sudo apt-get update -q && sudo apt-get install -y -q desktop-file-utils appstream libglib2.0-bin
+      - name: Desktop entry, metadata, icons and versions
+        run: sh tests/validate-desktop.sh

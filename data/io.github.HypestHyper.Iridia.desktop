@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Iridia
+GenericName=RGB lighting
+Comment=Set RGB lights from the colours of your wallpaper, through OpenRGB
+Exec=io.github.HypestHyper.Iridia
+Icon=iridia
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=led;rgb;argb;openrgb;wallpaper;lighting;light;strip;ws2812b;colour;color;ambient;
+StartupNotify=true
+StartupWMClass=io.github.HypestHyper.Iridia
+X-GNOME-UsesNotifications=true

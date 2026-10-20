@@ -6,8 +6,12 @@
   between Compact, Default and Large left the text in buttons on the other tabs at the old size
   (GTK 4.24 doesn't recompute it for hidden widgets) until you hovered each one, so buttons seemed
   to shrink or grow on hover. Every widget now takes the new size straight away.
+- The launcher has a clearer description and more search words, and launchers that check it now know
+  Iridia sends notifications. The themed (symbolic) icon is square, so panels no longer squash it.
+- For packagers: a desktop entry, AppStream metadata and icons in `data/`, and an Arch PKGBUILD in
+  `packaging/arch/`.
 
-## 1.3.5
+## 1.3.5 — 2026-10-20
 
 - **LEDs can flash for desktop notifications** (Settings, *Notifications*, or `iridia notify`). Pick
   which LEDs: whole strips, one of their parts, or a range like LEDs 3 to 12, on any devices. Only
@@ -21,7 +25,7 @@
   sides always match; the tip on each side is partly lit, as at the ends.
 - Tidier screenshots in the README and wiki.
 
-## 1.3.4
+## 1.3.4 — 2026-10-19
 
 - **Text no longer cut off at the Default window size.** Default scales the window to 90%, which gave
   fractional sizes (13.2px text, 5.4px padding), and GTK 4.24 cuts off the tops of letters then.
@@ -41,7 +45,7 @@
 - **The connected button groups light up on hover** (Off / Palette / Calibrated and the like): their own
   background hid the hover color.
 
-## 1.3.3
+## 1.3.3 — 2026-10-19
 
 - **The installer's questions are numbered menus.** How OpenRGB's server starts and how the daemon
   starts at login: type a number (or press Enter for the default) instead of a name. Names still work,
@@ -62,7 +66,7 @@
 - **Pick the monitor on the Everything card too:** a *Monitor* dropdown under Follow monitor brightness,
   the same choice as in *Settings, Monitor brightness* (changing one changes the other).
 
-## 1.3.2
+## 1.3.2 — 2026-10-19
 
 - **OpenRGB's server no longer dies over and over** (exit code -13). OpenRGB before 1.0 (Fedora's
   0.9+git, for one) doesn't ignore SIGPIPE, so a client hanging up just before OpenRGB wrote to it
@@ -78,7 +82,7 @@
 - "OpenRGB not reachable, is its SDK server actually running?" is no longer a warning while Iridia (or
   its systemd unit) is starting that server anyway.
 
-## 1.3.1
+## 1.3.1 — 2026-10-18
 
 - **Pick the monitor whose brightness the LEDs follow.** *Settings, Monitor brightness* lists the
   monitors ddcutil finds (also `iridia monitor`). *Automatic* follows the first one that answers, as
@@ -108,7 +112,7 @@
   on every redraw. Dragging a slider warned too.
 - The README is shorter.
 
-## 1.3.0
+## 1.3.0 — 2026-10-18
 
 - **Updates.** A new *Updates* tab (and `iridia update`): Iridia looks for a new release when it
   starts (at most every few hours), shows one desktop notification per new version, and installs
@@ -200,7 +204,7 @@
   splits them evenly in whole LEDs, says when the count doesn't divide evenly, and warns when parts are
   only 1 or 2 LEDs apart.
 
-## 1.2.1
+## 1.2.1 — 2026-10-16
 
 **Iridia's own OpenRGB client.** With OpenRGB 1.0, Iridia now talks to OpenRGB entirely with SDK
 protocol 6, through its own client, instead of openrgb-python plus a second connection for animation
@@ -216,7 +220,7 @@ frames.
 - `iridia status` and `iridia doctor` say whether Iridia talks protocol 6 or, with OpenRGB before 1.0,
   uses openrgb-python as before.
 
-## 1.2.0
+## 1.2.0 — 2026-10-16
 
 **Animations.** Iridia is no longer static only. Static patterns stay as they were, and stay the default.
 
@@ -273,7 +277,7 @@ change shows at once. With OpenRGB before 1.0, frames go over the main connectio
   devices, and the `i2c-dev` module now and at every boot. It asks first (`--yes` doesn't, `--no-deps`
   leaves it alone) and reminds you to log out and in once.
 
-## 1.1.1
+## 1.1.1 — 2026-10-15
 
 **OpenRGB at boot.** On some machines the LEDs showed random colors after a reboot: 1.1.0's
 `iridia-openrgb.service` started OpenRGB with the user manager, before the session could reach the
@@ -322,7 +326,7 @@ then fought it over the controller.
   rules against a fake `openrgb` and `systemctl`. A GitHub Actions workflow runs them on Python 3.8 to
   3.13, with ruff and shellcheck. `pip install -e ".[dev]"` installs the tools.
 
-## 1.1.0
+## 1.1.0 — 2026-10-15
 
 - Iridia starts OpenRGB's server: with systemd through a user service, `iridia-openrgb.service`, set up by
   the installer; without systemd the daemon runs `openrgb --server` itself when it can't reach it. It
@@ -338,7 +342,7 @@ then fought it over the controller.
 - The app id is now `io.github.HypestHyper.Iridia` (the window class for window rules). The old
   launcher is removed when the service is installed again.
 
-## 1.0.0
+## 1.0.0 — 2026-10-15
 
 The first public release.
 

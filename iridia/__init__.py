@@ -1,6 +1,9 @@
 """Iridia, LED wallpaper sync for Linux."""
 
-__version__ = "1.3.5"
+APP_ID = "io.github.HypestHyper.Iridia"
+APP_NAME = "Iridia"
+VERSION = "1.3.5"
+__version__ = VERSION
 
 
 def get_version() -> str:

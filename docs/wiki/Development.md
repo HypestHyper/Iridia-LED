@@ -134,8 +134,25 @@ and shellcheck:
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/pytest -q
 .venv/bin/ruff check iridia scripts tests
-shellcheck install.sh uninstall.sh
+shellcheck install.sh uninstall.sh tests/validate-desktop.sh
+sh tests/validate-desktop.sh      # needs desktop-file-utils and appstream
 ```
+
+`tests/validate-desktop.sh` checks the desktop entry and AppStream metadata in `data/`, that the icons
+are square, and that the version is the same everywhere: `VERSION` in `iridia/__init__.py`,
+`pyproject.toml`, the `## X.Y.Z — date` heading in CHANGELOG.md, the metainfo's `<release>`,
+`packaging/arch/PKGBUILD` and the README badge. `data/` holds the files for packagers; the installer
+writes the same desktop entry (`iridia/assets.py`), and a test keeps the two identical.
+
+## Releasing
+
+Collect changes under `## Unreleased` in CHANGELOG.md. To release, set the new version in all the
+places above, rename `## Unreleased` to `## X.Y.Z — YYYY-MM-DD`, add a `<release>` to the metainfo, and
+run the Release workflow by hand (Actions, Release, Run workflow) on `main`. It tags the commit, runs the
+tests, builds `iridia-X.Y.Z.tar.gz` (with `iridia/` at its top, which the in-app updater of every earlier
+version expects) and writes the notes from the changelog. *Move the tag* rebuilds an existing release
+from the current commit, only for wording or documentation fixes; *Remove a release* deletes one and its
+tag. Run by hand on a version that's already released, it stops rather than replace that release.
 
 ## Testing without hardware
 

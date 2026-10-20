@@ -1,52 +1,112 @@
 name: Release
 
-# Publishes a release: the source archive without tests, and the notes from that version's section in
-# CHANGELOG.md. Either push a tag like v1.1.1, or run this workflow by hand (Actions tab, Release, Run
-# workflow): it then tags the current commit with the version in pyproject.toml.
+# Publishes a release: the source archive without the tests, and the notes from that version's
+# section in CHANGELOG.md. Push a tag like v1.3.6, publish a release in the web page, or run this by
+# hand (Actions, Release, Run workflow): it then tags the current commit with VERSION from
+# iridia/__init__.py. The archive keeps the iridia/ folder at its top, which the in-app updater of
+# every earlier version expects.
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      move_tag:
+        description: "Move the existing release's tag to this commit (for fixes that don't need a new version)"
+        type: boolean
+        default: false
+      remove:
+        description: "Remove a release and its tag instead, like v1.0.0 (leave empty to publish)"
+        type: string
+        default: ""
 
 permissions:
   contents: write
 
 jobs:
+  remove:
+    if: github.event_name == 'workflow_dispatch' && inputs.remove != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove the release and its tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.remove }}
+        run: gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes
+
   release:
+    if: github.event_name != 'workflow_dispatch' || inputs.remove == ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Work out the version
         run: |
-          v=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)
+          v=$(sed -n 's/^VERSION = "\(.*\)"/\1/p' iridia/__init__.py)
           if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "v$v" ]; then
-            echo "Tag $GITHUB_REF_NAME doesn't match pyproject.toml's version $v"; exit 1
+            echo "Tag $GITHUB_REF_NAME doesn't match the version $v"; exit 1
           fi
-          grep -q "^## $v\$" CHANGELOG.md || { echo "CHANGELOG.md has no '## $v' section"; exit 1; }
+          grep -q "^## $v " CHANGELOG.md || { echo "CHANGELOG.md has no '## $v' section"; exit 1; }
           echo "VERSION=$v" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the tests
+        run: |
+          python -m pip install --quiet -e ".[dev]"
+          python -m pytest -q tests
       - name: Build the archive
-        run: git archive --format=tar.gz --prefix=iridia/ -o "iridia-$VERSION.tar.gz" HEAD
+        run: |
+          git archive --format=tar.gz --prefix=iridia/ -o "iridia-$VERSION.tar.gz" HEAD \
+            -- . ':!tests' ':!.github' ':!scripts'
       - name: Write the release notes
         run: |
-          awk -v head="## $VERSION" '$0 == head {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          awk -v head="## $VERSION " 'index($0, head) == 1 {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
           cat >> notes.md <<NOTES
 
           ## Install or update
+
+          **From the window:** the Updates tab (or \`iridia update\`) installs it and keeps your settings.
+
+          **With git** (easiest to keep up to date). To install:
+
+              git clone https://github.com/${GITHUB_REPOSITORY}.git
+              cd ${GITHUB_REPOSITORY#*/}
+              bash install.sh
+
+          To update a copy you cloned before, run these in its folder:
+
+              git pull
+              bash install.sh --update
+
+          **Or download** iridia-$VERSION.tar.gz from the files below, then:
 
               tar xzf iridia-$VERSION.tar.gz
               cd iridia
               bash install.sh
 
-          Or from git: \`git clone https://github.com/${GITHUB_REPOSITORY}.git\`, then \`bash install.sh\` in that folder
-          (to update an existing clone: \`git pull && bash install.sh\`). Your settings are kept.
-          See the [installation guide](https://github.com/${GITHUB_REPOSITORY}/blob/v$VERSION/docs/wiki/Installation.md).
+          Either way, your settings are kept.
           NOTES
+      - name: Move the tag
+        if: github.event_name == 'workflow_dispatch' && inputs.move_tag
+        run: |
+          git tag -f "v$VERSION" "$GITHUB_SHA"
+          git push -f origin "v$VERSION"
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
+          MOVE: ${{ github.event_name == 'workflow_dispatch' && inputs.move_tag }}
         run: |
           if gh release view "v$VERSION" >/dev/null 2>&1; then
-            echo "Release v$VERSION already exists"; exit 1
+            # a release published in the web page gets its download; an existing one is only
+            # rebuilt when asked to (Move the tag), so earlier releases stay as they are
+            if [ "$GITHUB_EVENT_NAME" != release ] && [ "$MOVE" != true ]; then
+              echo "Release v$VERSION already exists. Bump the version, or tick 'Move the tag' to rebuild it."
+              exit 1
+            fi
+            gh release upload "v$VERSION" "iridia-$VERSION.tar.gz" --clobber
+            gh release edit "v$VERSION" --title "Iridia $VERSION" --notes-file notes.md
+          else
+            gh release create "v$VERSION" "iridia-$VERSION.tar.gz" --title "Iridia $VERSION" \
+              --notes-file notes.md --target "$GITHUB_SHA"
           fi
-          gh release create "v$VERSION" "iridia-$VERSION.tar.gz" --title "Iridia $VERSION" \
-            --notes-file notes.md --target "$GITHUB_SHA"

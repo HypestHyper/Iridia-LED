@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.HypestHyper.Iridia</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Iridia</name>
+  <summary>Set RGB lights from the colours of your wallpaper</summary>
+  <developer id="io.github.hypesthyper">
+    <name>HypestHyper</name>
+  </developer>
+  <description>
+    <p>
+      Iridia takes the colours of your wallpaper and puts them on your RGB devices (LED strips, RAM,
+      keyboards, fans and so on) through OpenRGB. Change the wallpaper and the lights follow.
+    </p>
+    <ul>
+      <li>Finds the wallpaper on GNOME, KDE Plasma, XFCE, Cinnamon, MATE, COSMIC, Hyprland, Sway, niri and more</li>
+      <li>A pattern, brightness and colours for each zone; strips can be split into parts</li>
+      <li>Animations in the wallpaper's colours, and a map of the room they run across</li>
+      <li>Sensor bars for CPU temperature, load and memory</li>
+      <li>Follows the monitor's brightness, dims at night, goes off when the screen locks or the PC sleeps</li>
+      <li>Flashes chosen LEDs when a desktop notification comes in</li>
+      <li>WS2812B, WS2811, 12V RGB and RGBW strips, with colour order and colour correction</li>
+      <li>Keyboard shortcuts and saved setups through the iridia command</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.HypestHyper.Iridia.desktop</launchable>
+  <url type="homepage">https://github.com/HypestHyper/Iridia-LED</url>
+  <content_rating type="oars-1.1"/>
+  <categories>
+    <category>Settings</category>
+    <category>HardwareSettings</category>
+  </categories>
+  <keywords>
+    <keyword>RGB</keyword>
+    <keyword>LED</keyword>
+    <keyword>OpenRGB</keyword>
+    <keyword>wallpaper</keyword>
+    <keyword>lighting</keyword>
+  </keywords>
+  <provides>
+    <binary>iridia</binary>
+    <binary>iridia-gui</binary>
+    <binary>iridia-daemon</binary>
+  </provides>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <releases>
+    <release version="1.3.5" date="2026-10-20">
+      <description>
+        <ul>
+          <li>Chosen LEDs flash when a desktop notification comes in</li>
+          <li>Sensor bars can fill from the middle</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.3.4" date="2026-10-19">
+      <description>
+        <ul>
+          <li>No cut-off text at the Default window size</li>
+          <li>Buttons no longer grow on hover; button groups light up on hover</li>
+          <li>Sensor bars work with colour correction</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.3.3" date="2026-10-19">
+      <description>
+        <ul>
+          <li>Numbered menus in the installer</li>
+          <li>ddcutil can be installed from the window</li>
+          <li>Colours reach the strips without a nudge</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.3.2" date="2026-10-19">
+      <description>
+        <ul>
+          <li>OpenRGB's server no longer restarts over and over</li>
+          <li>Devices show up sooner after OpenRGB starts</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.3.1" date="2026-10-18">
+      <description>
+        <ul>
+          <li>Pick the monitor whose brightness the LEDs follow</li>
+          <li>Devices found later are picked up; KDE's default wallpaper is found</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.3.0" date="2026-10-18">
+      <description>
+        <ul>
+          <li>Updates from the window, with a way back</li>
+          <li>Sensors, lock and idle, window sizes</li>
+          <li>Strips can be split into parts, and single LEDs set</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.2.1" date="2026-10-16">
+      <description>
+        <ul>
+          <li>Iridia's own OpenRGB client: one connection, every update confirmed</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.2.0" date="2026-10-16">
+      <description>
+        <ul>
+          <li>Seven animated effects, which can follow the layout of the room</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.1.1" date="2026-10-15">
+      <description>
+        <ul>
+          <li>OpenRGB starts reliably at login</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.1.0" date="2026-10-15">
+      <description>
+        <ul>
+          <li>Iridia starts OpenRGB's server itself</li>
+          <li>British spelling in the window by default</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0" date="2026-10-15">
+      <description>
+        <ul>
+          <li>The first public release</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

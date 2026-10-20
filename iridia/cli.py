@@ -1103,18 +1103,7 @@ WantedBy=graphical-session.target
     # by the desktop environment, not through a login shell, so it
     # never sees PATH additions a venv relies on — a bare command name
     # here would silently fail to launch for virtually everyone.
-    desktop_content = f"""[Desktop Entry]
-Name=Iridia
-Comment=Sync LED colors with wallpaper via OpenRGB
-Exec={gui_bin}
-Type=Application
-Terminal=false
-Categories=System;Settings;HardwareSettings;
-Keywords=led;rgb;openrgb;wallpaper;light;strip;
-Icon={assets.ICON_NAME}
-StartupNotify=false
-StartupWMClass={assets.APP_ID}
-"""
+    desktop_content = assets.desktop_entry(gui_bin)
     with open(desktop_path, "w") as f:
         f.write(desktop_content)
     os.chmod(desktop_path, 0o644)

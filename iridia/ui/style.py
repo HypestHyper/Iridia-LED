@@ -255,6 +255,7 @@ class Style:
         self._provider = Gtk.CssProvider()
         self._motion = Gtk.CssProvider()
         self._fade = None
+        self.on_reload = None           # called after the stylesheet changed size, font or colours
         display = Gdk.Display.get_default()
         Gtk.StyleContext.add_provider_for_display(display, self._provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
         Gtk.StyleContext.add_provider_for_display(display, self._motion, Gtk.STYLE_PROVIDER_PRIORITY_USER + 2)
@@ -274,14 +275,20 @@ class Style:
         css = CSS.format(FONT=self.family(), ICON=fonts.ICON_FAMILY, EASE=EASE, EASE_STD=EASE_STD, **pal)
         load_css(self._provider, scale_px(css, self.scale))
 
+    def _reloaded(self):
+        if self.on_reload:
+            self.on_reload()
+
     def set_scale(self, scale: float):
         if scale != self.scale:
             self.scale = scale
             self._load(self.palette)
+            self._reloaded()
 
     def set_font(self, font: str):
         self.font = font
         self._load(self.palette)
+        self._reloaded()
 
     def set_reduce_motion(self, on: bool):
         self.reduce_motion = on
@@ -303,6 +310,7 @@ class Style:
             self._load(new)
             if on_frame:
                 on_frame()
+            self._reloaded()
             return
         steps = {"i": 0}
         n = 8
@@ -315,6 +323,7 @@ class Style:
                 on_frame()
             if t >= 1:
                 self._fade = None
+                self._reloaded()
                 return False
             return True
         self._fade = GLib.timeout_add(36, frame)

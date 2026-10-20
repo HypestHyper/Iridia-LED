@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Text in buttons no longer stays at the old size after changing the window size.** Switching
+  between Compact, Default and Large left the text in buttons on the other tabs at the old size
+  (GTK 4.24 doesn't recompute it for hidden widgets) until you hovered each one, so buttons seemed
+  to shrink or grow on hover. Every widget now takes the new size straight away.
+
 ## 1.3.5
 
 - **LEDs can flash for desktop notifications** (Settings, *Notifications*, or `iridia notify`). Pick

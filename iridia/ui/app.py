@@ -173,6 +173,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._layout_folded = False
         widgets.STYLE = Style(self._seed, self.prefs.get("font", ""), bool(self.prefs.get("reduce_motion", False)),
                               self._ui_scale())
+        widgets.STYLE.on_reload = lambda: GLib.idle_add(lambda: (widgets.restyle_all(), False)[1])
         dialogs.PAUSE = self.pause
         self._build()
         keys = Gtk.EventControllerKey()

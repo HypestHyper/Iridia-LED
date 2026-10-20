@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.5
 
 - **LEDs can flash for desktop notifications** (Settings, *Notifications*, or `iridia notify`). Pick
   which LEDs: whole strips, one of their parts, or a range like LEDs 3 to 12, on any devices. Only
@@ -12,6 +12,7 @@
 - **Sensor bars can fill from the middle**, growing both ways at once (*Fills from: The start, The
   middle, The other end*). With an even number of LEDs the two middle ones light together, so both
   sides always match; the tip on each side is partly lit, as at the ends.
+- Tidier screenshots in the README and wiki.
 
 ## 1.3.4
 

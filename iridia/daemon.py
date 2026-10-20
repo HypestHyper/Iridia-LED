@@ -23,6 +23,7 @@ from iridia.palette import Palette
 from iridia.patterns import PatternGenerator
 from iridia import animations
 from iridia import sections as zone_sections
+from iridia import notifyflash
 from iridia.animator import Animator, Job
 from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
@@ -211,6 +212,12 @@ class Daemon:
         self._night_active = False
         self.sleepwatch = None
         self.sessionwatch = None
+        self.notifywatch = None
+        self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
+        self._notify_lock = threading.Lock()
+        self._flash: Optional[notifyflash.Flash] = None   # a notification flash running now
+        self._flash_keys: set = set()       # zones showing it through a flash job (static or paused)
+        self._static_pre: Dict[str, list] = {}    # key -> the static colours before _finish, for flashes
         self._stopping = threading.Event()  # set when the daemon shuts down
         self._sessions_dir = "/run/systemd/sessions"
         self._sensor_zones = set()          # zones to redraw for a new sensor reading
@@ -314,6 +321,8 @@ class Daemon:
         self._detect_wallpaper()
         self._start_sleepwatch()
         self._start_sessionwatch()
+        from iridia.notifywatch import NotifyWatcher
+        self.notifywatch = NotifyWatcher(self._on_notification)
         threading.Thread(target=self._update_check, daemon=True, name="update-check").start()
 
         while self.running:
@@ -340,7 +349,7 @@ class Daemon:
         """Something that needs a tick twice a second (sensor readings and blinks, identify, LED
         counting, test colors, a color preview). Otherwise once a second is plenty: commands,
         lock changes and fades wake the loop themselves."""
-        return bool(self.sensors.values() or self._identify or self._probe or self._rgbtest or self._preview_hex)
+        return bool(self.sensors.values() or self._identify or self._probe or self._rgbtest or self._preview_hex or self._flash)
 
     # ------------------------------------------------------------- updates
     UPDATE_DELAY_SEC = 60           # after the daemon starts: the login has other things to do first
@@ -430,6 +439,165 @@ class Daemon:
 
     def _cmd_sensors(self, req: dict) -> dict:
         return {"ok": True, "sensors": self.sensors.listing(), "values": self.sensors.values()}
+
+    # ------------------------------------------------------------- notifications
+    def _notify_settings(self) -> dict:
+        return notifyflash.clean(self.config.get("notify", {}))
+
+    def _on_notification(self, app: str, urgent: bool):
+        """Called from the watcher thread."""
+        with self._notify_lock:
+            if len(self._notify_events) < 20:
+                self._notify_events.append((app, urgent))
+        self._wake.set()
+
+    def _update_notify(self):
+        from iridia.notifywatch import dnd_on
+        st = self._notify_settings()
+        if self.notifywatch is not None:
+            self.notifywatch.set_needed(st["enabled"] and bool(st["targets"]))
+        with self._notify_lock:
+            events, self._notify_events = self._notify_events, []
+        for app, urgent in events:
+            if app and app not in st["seen"]:
+                st["seen"] = [app] + st["seen"][:notifyflash.SEEN_MAX - 1]
+                cur = self.config.get("notify", {})
+                self.config.set("notify", dict(cur if isinstance(cur, dict) else {}, seen=st["seen"]))
+            if not st["enabled"] or not notifyflash.wanted(st, app):
+                continue
+            if st["night_quiet"] and self._night_active:
+                continue
+            if st["dnd"] and dnd_on():
+                continue
+            self._start_flash(st, app, urgent)
+        if self._flash is not None and self._flash.done():
+            self._flash = None
+
+    def _start_flash(self, st: dict, app: str, urgent: bool) -> bool:
+        now = time.monotonic()
+        if self._flash is not None and now - self._flash.t0 < notifyflash.COALESCE_SEC:
+            return True                     # a burst of notifications: one flash
+        if urgent and st["urgent_red"]:
+            rgb = notifyflash.URGENT
+        elif st["color"] == "app":
+            rgb = notifyflash.app_color(app)
+        elif st["color"] == "custom":
+            rgb = animations.hex_to_rgb(st["hex"])
+        else:
+            rgb = animations.hex_to_rgb(self._led_base_color() or "ffffff")
+        ranges = self._flash_ranges(st["targets"])
+        if not ranges:
+            return False
+        self.logger.debug(f"Notification from {app or 'an app'}: flashing {len(ranges)} zone(s)")
+        self._flash = notifyflash.Flash(ranges, rgb, st["effect"], st["duration"], now)
+        return True
+
+    def _flash_ranges(self, targets: list) -> Dict[str, list]:
+        """zone key -> the LEDs to flash on it, for the enabled strips the targets name."""
+        out: Dict[str, list] = {}
+        devices = self.config.devices_view
+        for t in targets:
+            dev_cfg = devices.get(t["device"])
+            if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True):
+                continue
+            zones = dev_cfg.get("zones")
+            if t["zone"]:
+                raw = zones.get(t["zone"]) if isinstance(zones, dict) else None
+            else:
+                raw = None if isinstance(zones, dict) and zones else dev_cfg
+            if not isinstance(raw, dict) or not raw.get("enabled", True):
+                continue
+            zc = clean_zone_cfg(raw)
+            n = zc["led_count"]
+            if self._strip_type(t["device"], t["zone"], zc) == "single":
+                r = (0, n) if n > 0 else None       # one colour for the whole strip
+            else:
+                r = notifyflash.target_range(t, n, zc["sections"], zone_sections.spans)
+            if r is not None:
+                out.setdefault(self._zone_key(t["device"], t["zone"]), []).append(r)
+        return out
+
+    def _flash_blocked(self, device: str, zone: str, key: str) -> bool:
+        """What a flash gives way to: lights off, sleep, identify, Count LEDs, Test colors, a color
+        preview, a keybind's color or power. (Animations being paused doesn't stop it.)"""
+        if self._lights_off or self._asleep or self._preview_hex or self._anim_hold:
+            return True
+        if self._identify or self._probe:
+            return True
+        test = self._rgbtest
+        if test and (test[0], test[1] or "") == (device, zone or ""):
+            return True
+        ov = self._overlays.get(key)
+        return bool(ov and ("power" in ov or "hex" in ov))
+
+    def _flash_mix(self, fl, key: str, zcfg: dict, colors: list) -> list:
+        ov = self._overlays.get(key) or {}
+        b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zcfg)
+        if b <= 0:
+            return colors                   # a strip that's dark (locked, brightness 0) stays dark
+        return fl.mix(key, colors, max(35.0, min(100.0, b)) / 100.0)
+
+    def _notify_status(self) -> dict:
+        from iridia.notifywatch import monitor_command
+        w = self.notifywatch
+        return {"notify": dict(self._notify_settings(), listening=bool(w and w.running),
+                               method=(w.method if w and w.running else None) or
+                               ((monitor_command() or [None])[0]),
+                               flashing=self._flash is not None)}
+
+    def _cmd_notify(self, req: dict) -> dict:
+        """Notification flash settings; test=True flashes now (on req's targets, or the saved ones)."""
+        cur = self.config.get("notify", {})
+        new = dict(cur if isinstance(cur, dict) else {})
+        changed = False
+        for k in ("enabled", "targets", "effect", "color", "hex", "urgent_red", "duration", "apps",
+                  "app_list", "dnd", "night_quiet"):
+            if k in req:
+                new[k] = req[k]
+                changed = True
+        pick = req.get("pick_app")
+        if isinstance(pick, list) and len(pick) == 2 and isinstance(pick[0], str):
+            names = [a for a in new.get("app_list") or [] if isinstance(a, str) and a.lower() != pick[0].lower()]
+            new["app_list"] = names + ([pick[0]] if pick[1] else [])
+            changed = True
+        rm = req.get("remove_target")
+        if isinstance(rm, int) and not isinstance(rm, bool):
+            ts = list(new.get("targets") or [])
+            if 0 <= rm < len(ts):
+                del ts[rm]
+            new["targets"] = ts
+            changed = True
+        if req.get("forget"):
+            new["seen"] = []
+            changed = True
+        if req.get("clear_targets"):
+            new["targets"] = []
+            changed = True
+        add = req.get("add_target")
+        if isinstance(add, dict):
+            # the window names the device and zone; the command line a strip's name (or
+            # Device/Zone, a device, all)
+            if isinstance(add.get("device"), str):
+                keys, err = [self._zone_key(add["device"], add.get("zone") or "")], None
+            else:
+                keys, err = self._resolve_target(add.get("target"))
+            if err:
+                return {"ok": False, "error": err}
+            which = {k: add[k] for k in ("part", "start", "end") if k in add}
+            new["targets"] = list(new.get("targets") or []) + [
+                dict(which, device=k.partition("|")[0], zone=k.partition("|")[2]) for k in keys]
+            changed = True
+        if changed:
+            self.config.set("notify", notifyflash.clean(new))
+        if req.get("test"):
+            st = self._notify_settings()
+            if "test_targets" in req:
+                st["targets"] = notifyflash.clean({"targets": req["test_targets"]})["targets"]
+            self._flash = None
+            if not self._start_flash(st, "Iridia", bool(req.get("urgent"))):
+                return dict(self._notify_status(), ok=False, error="No LEDs chosen for notifications")
+            self._needs_update = True
+        return dict(self._notify_status(), ok=True)
 
     # ------------------------------------------------------------- lock and idle
     SESSION_ACTIONS = ("keep", "dim", "off")
@@ -603,6 +771,8 @@ class Daemon:
             self.sleepwatch.stop()
         if self.sessionwatch:
             self.sessionwatch.stop()
+        if self.notifywatch:
+            self.notifywatch.stop()
         self.sensors.stop()
         self.ipc.stop()
         if self._observer:
@@ -774,6 +944,7 @@ class Daemon:
         self._read_brightness()
 
         self._update_session()
+        self._update_notify()
         self._update_sensors()
         self._refresh_animations(connected)
         if self._glide_active:
@@ -2016,6 +2187,7 @@ class Daemon:
                 # after correction: Palette snaps a dim color to a full one, gamma lifts it
                 final_colors = [c if f >= 1.0 else self._scale_level(c, f) for c, f in zip(final_colors, levels)]
 
+        self._static_pre[key] = [animations.hex_to_rgb(c) for c in final_colors]
         final_colors = self._finish(key, device_name, zone_name, zcfg, final_colors)
         # an animated zone's neighbours are sent with its frames (one packet per device)
         self._static_rgb[key] = [animations.hex_to_rgb(c) for c in final_colors]
@@ -2066,6 +2238,8 @@ class Daemon:
         return not s["enabled"] or (self._night_active and s["night_pause"])
 
     def _anim_owns(self, key: str, device: str, zone: str) -> bool:
+        if key in self._flash_keys:
+            return not self._flash_blocked(device, zone, key)
         return key in self._anim_keys and not self._anim_blocked(device, zone, key)
 
     def _brightness_now(self, key: str, zcfg: dict) -> float:
@@ -2116,6 +2290,8 @@ class Daemon:
         self._night_cap = self._night_settings()["cap"]
         jobs_by_dev: Dict[str, tuple] = {}
         keys, seen = set(), set()
+        flash_on = set(self._flash.ranges) if self._flash is not None else set()
+        flash_keys = set()
         if connected:
             real = {d["name"]: [z["name"] for z in d["zones"]] for d in self.openrgb.list_devices()}
             layout_groups: Dict[tuple, list] = {}
@@ -2132,8 +2308,13 @@ class Daemon:
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
-                    if anim is None and not (zone_sections.has_effects(zc["sections"])
-                                             and self._strip_type(dev, zn, zc) != "single"):
+                    still = anim is None and not (zone_sections.has_effects(zc["sections"])
+                                                  and self._strip_type(dev, zn, zc) != "single")
+                    if key in flash_on and (still or (self._anim_blocked(dev, zn, key)
+                                                      and not self._flash_blocked(dev, zn, key))):
+                        plan.append((dev, zn, key, zc, "flash", None))   # static (or paused): flashed
+                        continue
+                    if still:
                         continue
                     n = zc["led_count"]
                     pts = self._layout_points(key, n) if anim and anim["follow_layout"] else None
@@ -2146,6 +2327,14 @@ class Daemon:
                 xs = [p for pts, sp in items for p in animations.layout_positions(pts, g[1], sp)]
                 extents[g] = (min(xs), max(1.0, max(xs) - min(xs) + 1)) if xs else None
             for dev, zn, key, zc, anim, pts in plan:
+                if anim == "flash":
+                    job = self._flash_job(dev, zn, key, zc)
+                    self._anim_jobs[key] = ("flash", job)
+                    seen.add(key)
+                    keys.add(key)
+                    flash_keys.add(key)
+                    jobs_by_dev.setdefault(dev, []).append(job)
+                    continue
                 ext = extents.get((anim["effect"], anim["angle"])) if pts and anim else None
                 sig = repr((zc, anim, pts, ext, self._extracted_colors, sorted(self.custom_colors.exact_set()),
                             self.config.color_mode, self._real_zone_size(dev, zn)))
@@ -2174,7 +2363,8 @@ class Daemon:
         for k in list(self._anim_jobs):
             if k not in seen:
                 del self._anim_jobs[k]
-        stopped = self._anim_keys - keys
+        stopped = (self._anim_keys - keys) | (self._flash_keys - flash_keys)
+        self._flash_keys = flash_keys
         if stopped:
             for k in stopped:
                 self._last_sent.pop(k, None)    # back to the static pattern: send it again
@@ -2192,6 +2382,18 @@ class Daemon:
         def frame(clock: float):
             cols = self._static_rgb.get(key)
             return cols if cols is not None else self.openrgb.zone_rgb(dev, zn)
+        return Job(key, dev, zn, n, frame, None)
+
+    def _flash_job(self, dev: str, zn: str, key: str, zc: dict) -> Job:
+        """A zone the static path shows (or a paused animation), sent as frames while a
+        notification flashes on it."""
+        n = self._real_zone_size(dev, zn) or zc["led_count"]
+
+        def frame(clock: float):
+            pre = self._static_pre.get(key)
+            if pre is None or self._flash_blocked(dev, zn, key):
+                return None
+            return self._finish_rgb(key, dev, zn, zc, pre)
         return Job(key, dev, zn, n, frame, None)
 
     def _make_job(self, dev: str, zn: str, key: str, zc: dict, anim: dict, pts, extent) -> Job:
@@ -2328,7 +2530,11 @@ class Daemon:
         return correct
 
     def _finish_rgb(self, key: str, device: str, zone: str, zcfg: dict, colors: list) -> list:
-        """_finish for (r, g, b) frames: power limit, channel order, RGBW packing."""
+        """_finish for (r, g, b) frames: power limit, channel order, RGBW packing (and a
+        notification flash, over what the zone shows)."""
+        fl = self._flash
+        if fl is not None and key in fl.ranges:
+            colors = self._flash_mix(fl, key, zcfg, colors)
         stype = self._strip_type(device, zone, zcfg)
         limit = zcfg.get("power_limit", 0)
         now = time.monotonic()
@@ -2538,6 +2744,8 @@ class Daemon:
             return self._cmd_set_zone_strip(req)
         if cmd == "session":
             return self._cmd_session(req)
+        if cmd == "notify":
+            return self._cmd_notify(req)
         if cmd == "sensors":
             return self._cmd_sensors(req)
         if cmd == "updates":
@@ -2672,6 +2880,7 @@ class Daemon:
             "asleep": self._asleep,
             "night": dict(self._night_settings(), active=self._night_active),
             **self._session_status(),
+            **self._notify_status(),
             "sensors": self.sensors.values(),
             "sleep_watch": bool(self.sleepwatch and self.sleepwatch.available),
             "sleep_lights_off": bool(self.config.get("sleep.lights_off", True)),

@@ -1,0 +1,47 @@
+signal time=1792434692.190089 sender=org.freedesktop.DBus -> destination=:1.0 serial=2 path=/org/freedesktop/DBus; interface=org.freedesktop.DBus; member=NameAcquired
+   string ":1.0"
+signal time=1792434692.190129 sender=org.freedesktop.DBus -> destination=:1.0 serial=4 path=/org/freedesktop/DBus; interface=org.freedesktop.DBus; member=NameLost
+   string ":1.0"
+method call time=1792434693.695204 sender=:1.2 -> destination=org.freedesktop.Notifications serial=3 path=/org/freedesktop/Notifications; interface=org.freedesktop.Notifications; member=Notify
+   string "Signal"
+   int32 0
+   string "signal-desktop"
+   string "Alice"
+   string "Hi there"
+   array [
+      string "default"
+      string "Open"
+   ]
+   array [
+      dict entry(
+         string "urgency"
+         variant             byte 2
+      )
+      dict entry(
+         string "desktop-entry"
+         variant             string "signal-desktop"
+      )
+   ]
+   int32 -1
+method call time=1792434693.700193 sender=:1.3 -> destination=org.freedesktop.Notifications serial=3 path=/org/freedesktop/Notifications; interface=org.freedesktop.Notifications; member=Notify
+   string "Thunderbird"
+   int32 0
+   string ""
+   string "Mail"
+   string "New mail"
+   string "[]"
+   string "{}"
+   int32 5000
+method call time=1792434693.704989 sender=:1.4 -> destination=org.gtk.Notifications serial=3 path=/org/gtk/Notifications; interface=org.gtk.Notifications; member=AddNotification
+   string "org.gnome.Calendar"
+   string "ev1"
+   array [
+      dict entry(
+         string "title"
+         variant             string "Meeting"
+      )
+      dict entry(
+         string "priority"
+         variant             string "urgent"
+      )
+   ]

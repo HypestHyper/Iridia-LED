@@ -92,7 +92,8 @@ def clean_section(raw) -> dict:
         out["background"] = "dim" if raw.get("background") == "dim" else "off"
         fa = raw.get("flash_above")
         out["flash_above"] = None if fa is None or isinstance(fa, bool) else _num(fa, None)
-        out["params"] = {"reverse": True} if (raw.get("params") or {}).get("reverse") else {}
+        rp = raw.get("params") or {}
+        out["params"] = {"middle": True} if rp.get("middle") else {"reverse": True} if rp.get("reverse") else {}
     return out
 
 
@@ -278,9 +279,12 @@ def sensor_part(sec: dict, length: int, value: Optional[float], resolve: Resolve
 def _sensor_leds(sec, length, value, resolve, t):
     level = sensor_level(sec, value)
     cols = HEAT if sec.get("palette") != "colors" else _section_colors(sec, resolve)
+    spans_, total = _fill_spans(length, sec)
     if level is None:
         lv = [0.0] * length
-        lv[0] = 0.15
+        for i, (lo, _hi) in enumerate(spans_):
+            if lo == 0:
+                lv[i] = 0.15                        # where the bar starts (both middle LEDs, if even)
         return [_ramp(cols, 0.0)] * length, lv
     now_col = _ramp(cols, level)
     flash = sec.get("flash_above") is not None and value >= sec["flash_above"] and int(t * 2) % 2 == 1
@@ -288,23 +292,44 @@ def _sensor_leds(sec, length, value, resolve, t):
     if show == "color":
         out, lv = [now_col] * length, [1.0] * length
     else:
-        lit = level * length
+        lit = level * total
         dim = DIM_REST if sec.get("background") == "dim" else 0.0
         out, lv = [], []
-        for i in range(length):
-            out.append(now_col if show == "both" else _ramp(cols, (i + 0.5) / length))
-            if i + 1 <= lit:
+        for lo, hi in spans_:
+            out.append(now_col if show == "both" else _ramp(cols, (lo + hi) / 2 / total))
+            if hi <= lit:
                 lv.append(1.0)
-            elif i < lit:
-                lv.append(max(dim, lit - i))            # the LED at the tip, partly on: smooth movement
+            elif lo < lit:
+                lv.append(max(dim, (lit - lo) / (hi - lo)))   # the LED at the tip, partly on: smooth movement
             else:
                 lv.append(dim)
     if flash:
         lv = [f * 0.15 for f in lv]
-    if (sec.get("params") or {}).get("reverse"):
-        out.reverse()
-        lv.reverse()
     return out, lv
+
+
+def _fill_spans(n: int, sec: dict):
+    """Which stretch of the bar each LED shows, measured from where the bar starts: ([(lo, hi)], the
+    bar's whole length). From the start (or the other end): LED i is i to i+1 of n. From the middle the
+    bar grows both ways at once, so the length is half the part: with an even number of LEDs the two in
+    the middle share 0 to 1 and light together, with an odd number the middle one is half a step each
+    way (0 to 0.5) and fills first."""
+    p = sec.get("params") or {}
+    if p.get("middle"):
+        c = n / 2.0
+        out = []
+        for i in range(n):
+            if i + 1 <= c:
+                out.append((c - i - 1, c - i))
+            elif i >= c:
+                out.append((i - c, i + 1 - c))
+            else:
+                out.append((0.0, 0.5))
+        return out, c
+    out = [(float(i), float(i + 1)) for i in range(n)]
+    if p.get("reverse"):
+        out.reverse()
+    return out, float(n)
 
 
 def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[PatternGenerator] = None,

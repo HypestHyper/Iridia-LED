@@ -137,3 +137,29 @@ def test_readings_are_shown_with_a_steady_width():
     from iridia.sensors import format_value
     assert format_value(45.26174, "°C") == "45 °C" and format_value(7.25, "%") == "7 %"
     assert format_value(1.2345, "GB") == "1.2 GB" and format_value(None, "°C") == "-"
+
+
+def test_a_bar_from_the_middle():
+    """It grows both ways at once. With an even number of LEDs the two middle ones light together (no
+    lopsided middle); with an odd number the middle one fills first. Both sides always match."""
+    from iridia import sections as S
+
+    def bar(n, value):
+        sec = S.clean_section({"start": 0, "type": "sensor", "sensor": "ram", "show": "both", "min": 0, "max": 100,
+                               "palette": "colors", "colors": ["ffffff"], "params": {"middle": True}})
+        lv = []
+        S.sensor_part(sec, n, value, lambda e: ["ffffff"], 0.0, lv)
+        return lv
+    for n in (8, 9):
+        for v in (0, 10, 25, 37, 50, 80, 100):
+            lv = bar(n, v)
+            assert lv == lv[::-1], (n, v)                    # symmetric
+    even = bar(8, 25)                                        # 25% of 4 LEDs each way: the middle two
+    assert even[3] == even[4] == 1.0 and even[2] == 0.0
+    even = bar(8, 37.5)                                      # and the next ones half on each side
+    assert even[3] == 1.0 and abs(even[2] - 0.5) < 1e-9 and even[2] == even[5]
+    odd = bar(9, 100 * 0.5 / 4.5)                            # just the middle LED
+    assert odd[4] == 1.0 and odd[3] == 0.0
+    assert bar(8, 100) == [1.0] * 8 and bar(9, 0) == [0.0] * 9
+    assert S.clean_section({"start": 0, "type": "sensor", "sensor": "ram",
+                            "params": {"middle": True}})["params"] == {"middle": True}

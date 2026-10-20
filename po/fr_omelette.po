@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 13:58+0000\n"
+"POT-Creation-Date: 2026-10-19 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -762,11 +762,132 @@ msgstr "Rien ne bouge, tout est Garder."
 msgid "Your idle daemon says you're away."
 msgstr "Tu es en vacances."
 
-msgid "Saved."
-msgstr "Santé !"
+#, fuzzy
+msgid "Notifications"
+msgstr "Le cinéma est fermé le lundi"
+
+msgid ""
+"Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
+"what it says."
+msgstr "Les bisous clignotent quand le facteur passe. Oh là là."
+
+msgid "Flash LEDs for notifications"
+msgstr "Clignoter pour le facteur"
+
+#, fuzzy
+msgid "Which LEDs"
+msgstr "Croissant"
+
+#, fuzzy
+msgid "No strips yet"
+msgstr "Brioche"
+
+#, fuzzy
+msgid "Pulse"
+msgstr "Bonne nuit"
+
+#, fuzzy
+msgid "Flash"
+msgstr "Clignoter au-dessus"
+
+#, fuzzy
+msgid "Sweep"
+msgstr "Garder"
+
+msgid "Effect"
+msgstr "L'effet papillon"
+
+#, fuzzy
+msgid "for"
+msgstr "Baguette"
+
+#, fuzzy
+msgid "seconds"
+msgstr "La deuxième chaussette"
+
+msgid "One per app"
+msgstr "Un fromage par app"
+
+#, fuzzy
+msgid "Custom"
+msgstr "Brioche"
+
+msgid "Urgent notifications flash red"
+msgstr "Urgent : rouge comme le vin"
+
+msgid "Every app"
+msgstr "Toutes les apps"
+
+msgid "Only these"
+msgstr "Seulement celles-ci"
+
+msgid "All but these"
+msgstr "Toutes sauf celles-ci"
+
+msgid "Apps show up here once they've sent a notification."
+msgstr "Le facteur n'est pas encore passé."
+
+msgid "Not while Do Not Disturb is on"
+msgstr "Pas pendant la sieste"
+
+#, fuzzy
+msgid "Not during night mode"
+msgstr "La nuit porte conseil"
 
 msgid "Couldn't save"
 msgstr "Croissant"
+
+msgid "Flashing now."
+msgstr "Ça clignote !"
+
+msgid "Pick some LEDs first."
+msgstr "Choisis des bisous d'abord."
+
+msgid "All of it"
+msgstr "Toute la baguette"
+
+#, python-brace-format
+msgid "Part {n}"
+msgstr "Morceau {n}"
+
+#, fuzzy
+msgid "Some LEDs"
+msgstr "Bisou"
+
+#, fuzzy, python-brace-format
+msgid "part {n}"
+msgstr "Morceau {n}"
+
+#, fuzzy, python-brace-format
+msgid "LEDs {a} to {b}"
+msgstr "Cacher les LED {a} à {b}"
+
+msgid "all of it"
+msgstr "toute la baguette"
+
+msgid "Remove"
+msgstr "Baguette"
+
+msgid "None yet: pick a strip and press Add."
+msgstr "Rien encore : choisis une baguette et appuie sur Ajouter."
+
+msgid ""
+"Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
+"system with systemd's busctl."
+msgstr "Pas de facteur ici : installe dbus-monitor ou busctl. Zut."
+
+msgid "Listening for notifications."
+msgstr "On attend le facteur."
+
+msgid "Pick some LEDs to start listening."
+msgstr "Choisis des bisous pour attendre le facteur."
+
+#, fuzzy
+msgid "Off."
+msgstr "Nature"
+
+msgid "Saved."
+msgstr "Santé !"
 
 #, python-brace-format
 msgid "Saved “{name}”."
@@ -1051,9 +1172,6 @@ msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
 
 msgid "Removed."
 msgstr "Bonsoir"
-
-msgid "Remove"
-msgstr "Baguette"
 
 msgid "With Iridia"
 msgstr "Avec beaucoup de beurre"
@@ -1770,9 +1888,6 @@ msgstr "Bisou"
 msgid "Static pattern"
 msgstr "Le motif de la nappe"
 
-msgid "Effect"
-msgstr "L'effet papillon"
-
 msgid "Do"
 msgstr "Bof"
 
@@ -2336,10 +2451,6 @@ msgid_plural "{n} LEDs set"
 msgstr[0] "{n} bisou"
 msgstr[1] "{n} bisous"
 
-#, python-brace-format
-msgid "Part {n}"
-msgstr "Morceau {n}"
-
 msgid "Finding sensors…"
 msgstr "On cherche…"
 
@@ -2372,8 +2483,17 @@ msgstr "Le reste"
 msgid "Flash above"
 msgstr "Clignoter au-dessus"
 
-msgid "From the other end"
-msgstr "De l'autre côté"
+msgid "Fills from"
+msgstr "Commence par"
+
+msgid "The start"
+msgstr "Le croissant"
+
+msgid "The middle"
+msgstr "Le milieu du fromage"
+
+msgid "The other end"
+msgstr "La baguette"
 
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"

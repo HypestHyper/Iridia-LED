@@ -678,6 +678,77 @@ def cmd_session(args):
     return _report(req, _session_text)
 
 
+def _notify_text(r):
+    n = r.get("notify") or {}
+    look = {"accent": "the wallpaper colour", "app": "a colour for each app"}.get(n.get("color"), "#" + str(n.get("hex")))
+    if n.get("urgent_red"):
+        look += ", red when urgent"
+    apps = {"all": "every app", "only": "only " + ", ".join(n.get("app_list") or ["(none)"]),
+            "except": "every app but " + ", ".join(n.get("app_list") or ["(none)"])}.get(n.get("apps"), "?")
+    lines = [f"Notification flashes: {'on' if n.get('enabled') else 'off'}"
+             + (f", listening through {n.get('method')}" if n.get("listening") else ""),
+             f"Effect: {n.get('effect')}, {n.get('duration')} s, {look}", f"From: {apps}"]
+    if not n.get("method"):
+        lines.append("Can't listen here: install dbus-monitor (the dbus tools) or busctl (systemd).")
+    quiet = [w for k, w in (("dnd", "Do Not Disturb"), ("night_quiet", "night mode")) if n.get(k)]
+    if quiet:
+        lines.append("Quiet during: " + " and ".join(quiet))
+    lines.append("LEDs:" if n.get("targets") else "LEDs: none yet ('iridia notify add STRIP')")
+    for t in n.get("targets") or []:
+        where = t["device"] + (f"/{t['zone']}" if t.get("zone") else "")
+        which = (f"part {t['part'] + 1}" if "part" in t else
+                 f"LEDs {t['start']}-{t['end']}" if "start" in t else "all")
+        lines.append(f"  {where}: {which}")
+    if n.get("seen"):
+        lines.append("Apps seen: " + ", ".join(n["seen"]))
+    return "\n".join(lines)
+
+
+def cmd_notify(args):
+    """iridia notify [on|off|test|clear|add STRIP [all | part K | LEDS A-B]] [--effect ..] [--color ..]"""
+    req = {"cmd": "notify"}
+    w = list(args.words)
+    verb = w[0].lower() if w else "show"
+    if verb in ("on", "off"):
+        req["enabled"] = verb == "on"
+    elif verb == "test":
+        req["test"] = True
+        req["urgent"] = args.urgent
+    elif verb == "clear":
+        req["clear_targets"] = True
+    elif verb == "add" and len(w) >= 2:
+        add = {"target": w[1]}
+        rest = [x.lower() for x in w[2:]]
+        try:
+            if rest[:1] == ["part"]:
+                add["part"] = int(rest[1]) - 1
+            elif rest[:1] == ["leds"]:
+                a, _sep, b = rest[1].partition("-")
+                add["start"], add["end"] = int(a), int(b or a)
+            elif rest not in ([], ["all"]):
+                raise ValueError
+        except (IndexError, ValueError):
+            print("Use: iridia notify add STRIP [all | part K | leds A-B]", file=sys.stderr)
+            return 2
+        req["add_target"] = add
+    elif verb != "show":
+        print("Use: iridia notify [on | off | test | clear | add STRIP [all | part K | leds A-B]]", file=sys.stderr)
+        return 2
+    if args.effect:
+        req["effect"] = args.effect
+    if args.color:
+        c = args.color.lower().lstrip("#")
+        if c in ("accent", "wallpaper", "app"):
+            req["color"] = "accent" if c == "wallpaper" else c
+        else:
+            req["color"], req["hex"] = "custom", c
+    if args.duration is not None:
+        req["duration"] = args.duration
+    if verb == "test":
+        return _report(req, lambda r: "Flashing now.")
+    return _report(req, _notify_text)
+
+
 def cmd_update(args):
     """iridia update [--check] [--rollback] [--yes]"""
     from iridia import get_version, updater
@@ -1421,6 +1492,15 @@ def main(argv=None):
     ses_parser.add_argument("--idle", choices=["keep", "dim", "off"])
     ses_parser.add_argument("--idle-minutes", type=float)
     ses_parser.add_argument("--dim", type=int, help="brightness in percent for 'dim'")
+    nt_parser = subparsers.add_parser("notify", help="Flash LEDs when a desktop notification comes in",
+                                      description="Show or change it. Examples:  iridia notify   "
+                                                  "iridia notify add Desk part 2   iridia notify add Case leds 1-10   "
+                                                  "iridia notify on --effect sweep --color app   iridia notify test")
+    nt_parser.add_argument("words", nargs="*", help="on | off | test | clear | add STRIP [all | part K | leds A-B]")
+    nt_parser.add_argument("--effect", choices=["pulse", "flash", "sweep"])
+    nt_parser.add_argument("--color", help="wallpaper, app (one colour per app) or a hex colour")
+    nt_parser.add_argument("--duration", type=float, help="seconds (0.5 to 5)")
+    nt_parser.add_argument("--urgent", action="store_true", help="test: as an urgent notification")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
     p_mon = subparsers.add_parser("monitor", help="Which monitor's brightness strips follow: list, auto, a bus, rescan")
     p_mon.add_argument("what", nargs="?", default="list", help="list (default), auto, an I2C bus number, or rescan")
@@ -1470,7 +1550,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

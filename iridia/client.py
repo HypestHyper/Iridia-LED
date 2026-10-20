@@ -158,6 +158,11 @@ class Client:
         """Lock and idle: lock, idle (keep/dim/off), idle_minutes, dim, test (seconds), or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="session"))
 
+    def notify(self, **kw) -> dict:
+        """Notification flashes: enabled, targets, effect, color, hex, urgent_red, duration, apps,
+        app_list, dnd, night_quiet, forget, test, or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="notify"))
+
     def set_sleep(self, lights_off: bool) -> dict:
         return self._ipc.send({"cmd": "set_sleep", "lights_off": lights_off})
 

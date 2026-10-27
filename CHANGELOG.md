@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The LEDs come back after unlocking even when the unlock signal is missed.** While the desktop says
+  the screen is locked, Iridia now asks it again every 10 seconds (and at once when something asks to
+  unlock), so a missed "unlocked" signal can't keep the strips dark. Only screen savers' signals count
+  as locking now: another app's signal of the same name could lock the LEDs for good.
 - **Text in buttons no longer stays at the old size after changing the window size.** Switching
   between Compact, Default and Large left the text in buttons on the other tabs at the old size
   (GTK 4.24 doesn't recompute it for hidden widgets) until you hovered each one, so buttons seemed

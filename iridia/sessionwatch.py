@@ -6,6 +6,8 @@ dependency):
     ScreenSaver  ActiveChanged on the session bus (org.freedesktop.ScreenSaver, org.gnome.ScreenSaver)
     lockers      a screen locker that tells nobody (hyprlock, swaylock, gtklock, ...) running, seen in
                  /proc every 2 seconds, and at once when logind asks for a lock
+While the desktop says the screen is locked, whatever said so is asked again every 10 seconds (and at
+once when something asks logind to unlock), so a missed "unlocked" signal can't keep the LEDs dark.
 
 Idle time, the first that answers:
     GNOME        org.gnome.Mutter.IdleMonitor GetIdletime
@@ -28,6 +30,16 @@ logger = logging.getLogger("iridia")
 
 LOGIND = "org.freedesktop.login1"
 
+# Screen savers that announce ActiveChanged: interface -> (bus name, object path) to ask GetActive.
+# KDE and xfce4-screensaver use the freedesktop one; Cinnamon and MATE have their own.
+SCREENSAVERS = {
+    "org.freedesktop.ScreenSaver": ("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver"),
+    "org.gnome.ScreenSaver": ("org.gnome.ScreenSaver", "/org/gnome/ScreenSaver"),
+    "org.cinnamon.ScreenSaver": ("org.cinnamon.ScreenSaver", "/org/cinnamon/ScreenSaver"),
+    "org.mate.ScreenSaver": ("org.mate.ScreenSaver", "/org/mate/ScreenSaver"),
+    "org.xfce.ScreenSaver": ("org.xfce.ScreenSaver", "/org/xfce/ScreenSaver"),
+}
+
 
 # ------------------------------------------------------------- parsing (pure, tested)
 
@@ -47,6 +59,14 @@ def parse_object_path(out: str) -> Optional[str]:
     m = re.search(r"objectpath\s+'([^']+)'", out or "") or re.search(r"'(/org/freedesktop/login1/session/[^']+)'",
                                                                      out or "")
     return m.group(1) if m else None
+
+
+def screensaver_of(line: str) -> Optional[str]:
+    """The screen saver interface an ActiveChanged line comes from, if it's one of SCREENSAVERS
+    (other services have signals with that name too)."""
+    m = re.search(r"interface=([\w.]+);\s*member=ActiveChanged", line) or \
+        re.search(r"\b([\w.]+)\.ActiveChanged\b", line)
+    return m.group(1) if m and m.group(1) in SCREENSAVERS else None
 
 
 def lock_event(line: str, pending: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
@@ -70,6 +90,8 @@ def lock_event(line: str, pending: Optional[str] = None) -> Tuple[Optional[str],
     if re.search(r"login1\.Session\.Unlock\b", line):
         return "unlock", None
     if "ActiveChanged" in line:
+        if screensaver_of(line) is None:
+            return None, None
         b = parse_bool(line.split("ActiveChanged", 1)[1])
         if b is not None:
             return ("locked" if b else "unlocked"), None
@@ -141,6 +163,7 @@ class SessionWatcher:
 
     POLL_SEC = 5.0
     LOCKER_SEC = 2.0
+    VERIFY_SEC = 10.0           # while said locked: ask the one that said so again this often
 
     def __init__(self, on_change: Callable[[], None]):
         self._on_change = on_change
@@ -154,6 +177,8 @@ class SessionWatcher:
         self.idle_checked = False                    # looked for a way to read the idle time
         self.session_path: Optional[str] = None
         self._said_locked = False                    # the desktop says the screen is locked
+        self._said_by: Optional[str] = None          # "logind" or a SCREENSAVERS interface
+        self._verify_at = 0.0                        # when to ask it again
         self._locker_running = False                 # a screen locker (hyprlock, swaylock, ...) runs
         self._poke = threading.Event()
         self.lock_method: Optional[str] = None       # what reported the lock state, for the window
@@ -185,6 +210,7 @@ class SessionWatcher:
                 self._lock_gen += 1
                 self._kill_procs()
                 self._said_locked = self._locker_running = False
+                self._said_by = None
                 self._poke.set()
         if idle and not self._idle_wanted.is_set():
             self._idle_wanted.set()
@@ -217,14 +243,16 @@ class SessionWatcher:
         if self.session_path:
             hint = parse_bool(_prop(self.session_path, "org.freedesktop.login1.Session", "LockedHint") or "")
             if hint:
-                self._said_locked = True
+                self._said_locked, self._said_by = True, "logind"
                 self.lock_method = "logind"
                 self._on_change()
             if shutil.which("gdbus"):
                 self._watch(["gdbus", "monitor", "--system", "--dest", LOGIND, "--object-path", self.session_path],
                             "logind", gen)
         if shutil.which("dbus-monitor"):
-            self._watch(["dbus-monitor", "--session", "type='signal',member='ActiveChanged'"], "screensaver", gen)
+            self._watch(["dbus-monitor", "--session"] +
+                        [f"type='signal',interface='{i}',member='ActiveChanged'" for i in SCREENSAVERS],
+                        "screensaver", gen)
         threading.Thread(target=self._watch_lockers, args=(gen,), daemon=True, name="sessionwatch-lockers").start()
         logger.info("Watching for the screen lock (logind, ScreenSaver signals and screen lockers)")
 
@@ -259,17 +287,25 @@ class SessionWatcher:
                     except OSError:
                         return
                     self._procs.append(p)
-                pending = None
+                self._verify_now()                  # (re)started: anything missed meanwhile is checked
+                pending, source = None, "logind" if name == "logind" else None
                 for line in p.stdout:
                     if self._stop or gen != self._lock_gen:
                         break
+                    if name != "logind":
+                        source = screensaver_of(line) or source
                     ev, pending = lock_event(line, pending)
                     if ev in ("locked", "unlocked"):
                         self.lock_method = name
+                        if ev == "locked":
+                            self._said_by = source
+                            self._verify_at = time.monotonic() + self.VERIFY_SEC
                         if (ev == "locked") != self._said_locked:
                             self._said_locked = ev == "locked"
                             self._on_change()
-                    elif ev in ("lock", "unlock"):
+                    elif ev == "unlock":
+                        self._verify_now()          # something asked for an unlock: is it still locked?
+                    elif ev == "lock":
                         self._poke.set()            # look for the screen locker now
                 if self._stop or gen != self._lock_gen:
                     return
@@ -277,11 +313,38 @@ class SessionWatcher:
                 time.sleep(backoff)
         threading.Thread(target=loop, daemon=True, name=f"sessionwatch-{name}").start()
 
+    def _verify_now(self):
+        self._verify_at = 0.0
+        self._poke.set()
+
+    def _still_said_locked(self) -> Optional[bool]:
+        """Ask whatever said the screen is locked whether it still is; None when it doesn't answer."""
+        by = self._said_by
+        if by == "logind" and self.session_path:
+            return parse_bool(_prop(self.session_path, "org.freedesktop.login1.Session", "LockedHint") or "")
+        if by in SCREENSAVERS:
+            dest, path = SCREENSAVERS[by]
+            return parse_bool(_gdbus_call("session", dest, path, f"{by}.GetActive") or "")
+        return None
+
+    def _verify(self):
+        """While the desktop says locked: a missed "unlocked" signal (a watcher that restarted, a
+        locker that only sets the state once) mustn't keep the LEDs dark."""
+        if not self._said_locked or time.monotonic() < self._verify_at:
+            return
+        self._verify_at = time.monotonic() + self.VERIFY_SEC
+        if self._still_said_locked() is False:
+            logger.info(f"The screen is unlocked ({self._said_by} says so; its signal was missed)")
+            self._said_locked = False
+            self._on_change()
+
     def _watch_lockers(self, gen):
-        """Screen lockers that tell nobody (hyprlock, swaylock, ...): the screen is locked while one runs."""
+        """Screen lockers that tell nobody (hyprlock, swaylock, ...): the screen is locked while one runs.
+        Also asks the desktop again now and then while it says the screen is locked (_verify)."""
         import os
         uid = os.getuid()
         while not self._stop and gen == self._lock_gen:
+            self._verify()
             running = find_locker("/proc", uid) is not None
             if gen != self._lock_gen:
                 return

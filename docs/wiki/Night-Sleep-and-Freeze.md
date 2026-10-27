@@ -36,8 +36,14 @@ How Iridia sees it, without any setup:
 
 | | Seen through |
 | --- | --- |
-| Locking | logind's LockedHint (GNOME, KDE, ...), ScreenSaver signals, and screen lockers that tell nobody (hyprlock, swaylock, gtklock, waylock, i3lock, ...) for as long as they run |
+| Locking | logind's LockedHint (GNOME, KDE, ...), the screen saver's signals (freedesktop, GNOME, Cinnamon, MATE, XFCE), and screen lockers that tell nobody (hyprlock, swaylock, gtklock, waylock, i3lock, ...) for as long as they run |
+| Unlocking | the same signals, or the screen locker ending. While the desktop says the screen is locked, Iridia asks it again every 10 seconds (and at once when something asks logind to unlock), so a missed signal can't keep the LEDs dark |
 | Idle time | GNOME (Mutter), KDE and others (ScreenSaver), X11 (`xprintidle`), or logind's IdleHint |
+
+A lock screen built into a desktop shell (Noctalia, Caelestia, DankMaterialShell and other Quickshell
+shells) runs inside the shell, not as a program of its own, and may tell nobody. If the LEDs don't go
+off or don't come back with one of those, have its lock and unlock run `iridia lock on` and
+`iridia lock off`, or lock with hyprlock instead. `iridia session` shows what Iridia saw.
 
 The window shows what it found. On compositors with no idle time to read (Hyprland, Sway, ...) let
 your idle daemon tell Iridia; *Lines for hypridle or swayidle* in the same section (or

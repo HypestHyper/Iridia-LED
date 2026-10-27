@@ -96,6 +96,9 @@ button.small:active {{ border-radius: 8px; }}
 button.circle {{ padding: 0; min-width: 40px; min-height: 40px; border-radius: 20px; }}
 button.circle.small {{ min-width: 32px; min-height: 32px; border-radius: 16px; }}
 button.circle:active {{ border-radius: 10px; }}
+button.fab {{ min-height: 56px; padding: 0 24px; border-radius: 18px; font-size: 15px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4); }}
+button.fab:active {{ border-radius: 12px; }}
 button.toggled, button.filled.toggled {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-radius: 10px; }}
 
 /* connected button group (Expressive): inner corners small, outer round, selected item turns into a pill */

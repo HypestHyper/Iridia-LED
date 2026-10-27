@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:08+0000\n"
+"POT-Creation-Date: 2026-10-27 23:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -111,6 +111,9 @@ msgstr "Below Decks"
 
 msgid "Updates"
 msgstr "New charts"
+
+msgid "Try it"
+msgstr "Give it a go"
 
 msgid "Refresh"
 msgstr "Look again"
@@ -745,9 +748,6 @@ msgstr "minutes o' no hands on deck"
 msgid "Dim to"
 msgstr "Dim to"
 
-msgid "Try it"
-msgstr "Give it a go"
-
 msgid "Acting as if the screen were locked for 5 seconds."
 msgstr "Pretendin' the hatch be locked fer 5 seconds."
 
@@ -870,8 +870,8 @@ msgstr "One fer each crew"
 msgid "Custom"
 msgstr "Custom"
 
-msgid "Painted"
-msgstr "Painted"
+msgid "Pick a colour"
+msgstr "Pick a colour"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent messages flash red"
@@ -915,6 +915,12 @@ msgstr "Not durin' the night watch"
 msgid "Couldn't save"
 msgstr "Blast! Couldn't stash it"
 
+msgid "Notification colour"
+msgstr "Message colour"
+
+msgid "Colour for this app"
+msgstr "Colour fer this crew"
+
 msgid "Flashing now."
 msgstr "Flashin' now!"
 
@@ -949,9 +955,6 @@ msgstr "the wallpaper colour"
 
 msgid "its own colour"
 msgstr "its own colour"
-
-msgid "painted colours"
-msgstr "painted colours"
 
 msgid "default effect"
 msgstr "usual trick"
@@ -2232,42 +2235,14 @@ msgstr "A to B an' back"
 msgid "From the middle out"
 msgstr "From the middle out"
 
-msgid "Choose LEDs"
-msgstr "Pick lanterns"
-
-msgid "Paint"
-msgstr "Paint"
-
-msgid "Erase colour"
-msgstr "Scrub colour"
-
-msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
-msgstr "Message colours: Painted. Unpainted lanterns use the wallpaper colour."
-
-msgid "Choose some LEDs first."
-msgstr "Pick some lanterns first."
-
 msgid "All settings"
 msgstr "All settin's"
 
 msgid "Clear"
 msgstr "Clear the deck"
 
-msgid "Click or drag on the map"
-msgstr "Click or drag on the chart"
-
-msgid ""
-"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
-"first paint colour. Gradient: from the first colour to the second."
-msgstr ""
-"Pick lanterns: adds 'em, or takes 'em out if ye start on a ringed one. Paint: gives 'em the first"
-" paint colour. Gradient: from the first colour to the second."
-
-msgid "Gradient"
-msgstr "Gradient"
-
-msgid "Clear colours"
-msgstr "Scrub colours"
+msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
+msgstr "Click or drag over lanterns on the chart to pick 'em; start on a ringed one to take lanterns out."
 
 msgid "Colour"
 msgstr "Colour"
@@ -2315,8 +2290,14 @@ msgstr "Haul"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find lanterns: light one lantern on the real strip"
 
+msgid "Paint"
+msgstr "Paint"
+
 msgid "Erase (back to the zone's own color)"
 msgstr "Swab (back to the zone's own color)"
+
+msgid "Gradient"
+msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Messages: which lanterns flash, an' where a flash sails"
@@ -2833,6 +2814,9 @@ msgstr "Edges in"
 
 msgid "Alternating"
 msgstr "Alternatin'"
+
+msgid "Painted"
+msgstr "Painted"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"

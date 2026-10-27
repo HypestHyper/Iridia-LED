@@ -448,6 +448,20 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 continue
             sc, body = self._scroll_page()
             pages[key] = body
+            if key == "notify":
+                # Try it floats at the bottom right, in view wherever the page is scrolled to
+                ov = Gtk.Overlay()
+                ov.set_child(sc)
+                fab = button(_("Try it"), "bolt", "filled", self._notify_try)
+                fab.add_css_class("fab")
+                fab.set_halign(Gtk.Align.END)
+                fab.set_valign(Gtk.Align.END)
+                fab.set_margin_end(28)
+                fab.set_margin_bottom(20)
+                ov.add_overlay(fab)
+                body.set_margin_bottom(84)          # room to scroll the last setting out from under it
+                self._stack.add_named(ov, key)
+                continue
             self._stack.add_named(sc, key)
         self._status_page, self._devices_page = pages["status"], pages["devices"]
         self._settings_page, self._service_page = pages["settings"], pages["service"]
@@ -1552,16 +1566,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r.append(self._nt_dur)
         c.append(r)
         r = wrap_row(10)
-        self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom")),
-                                   ("painted", _("Painted"))],
-                                  n.get("color", "accent"), lambda v: self._notify_set(color=v))
+        self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom"))],
+                                  n.get("color", "accent"), self._notify_colour)
         r.append(hbox(10, label(_("Color"), ("body", "dim")), self._nt["color"]))
-        self._nt_hex = Gtk.Entry(text="#" + str(n.get("hex", "ffffff")), width_chars=8, max_width_chars=8,
-                                 hexpand=False)
-        self._nt_hex.connect("activate", lambda *_a: self._notify_hex())
-        fc = Gtk.EventControllerFocus()
-        fc.connect("leave", lambda *_a: self._notify_hex())
-        self._nt_hex.add_controller(fc)
+        self._nt_hex = Swatch(str(n.get("hex", "ffffff")), 32, on_click=self._notify_pick,
+                              tooltip=_("Pick a colour"))
         self._nt_hex.set_visible(n.get("color") == "custom")
         r.append(self._nt_hex)
         c.append(r)
@@ -1581,12 +1590,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r = wrap_row(10)
         self._nt_rule_app = Dropdown([], None, placeholder=_("No apps yet"))
         self._nt_rule_eff = Dropdown([_("Default effect")] + list(EFFECT_NAMES.values()), _("Default effect"))
-        self._nt_rule_col = Dropdown([_("Default colour"), _("Wallpaper"), _("One per app"), _("Custom"), _("Painted")],
-                                     _("Default colour"), lambda v: self._nt_rule_hex.set_visible(v == _("Custom")))
-        self._nt_rule_hex = Gtk.Entry(text="#00ff00", width_chars=8, max_width_chars=8, hexpand=False)
-        self._nt_rule_hex.set_visible(False)
+        self._nt_rule_col = Dropdown([_("Default colour"), _("Wallpaper"), _("One per app"), _("Custom")],
+                                     _("Default colour"), lambda v: self._nt_rule_swatch.set_visible(v == _("Custom")))
+        self._nt_rule_swatch = Swatch("00ff00", 32, on_click=self._notify_rule_pick, tooltip=_("Pick a colour"))
+        self._nt_rule_swatch.set_visible(False)
         r.append(hbox(10, self._nt_rule_app, self._nt_rule_eff))
-        r.append(hbox(10, self._nt_rule_col, self._nt_rule_hex))
+        r.append(hbox(10, self._nt_rule_col, self._nt_rule_swatch))
         r.append(button(_("Add"), "add", "tonal small", self._notify_add_rule))
         c.append(r)
         self._nt["apps"] = Group([("all", _("Every app")), ("only", _("Only these")), ("except", _("All but these"))],
@@ -1609,7 +1618,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._nt_lbl = label("", ("small", "dim"), wrap=True)
         self._nt_lbl.set_hexpand(True)
         r.append(self._nt_lbl)
-        r.append(button(_("Try it"), "bolt", "tonal small", self._notify_try))
         c.append(r)
         p.append(c)
 
@@ -1621,10 +1629,28 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self.toast(r.get("error") or _("Couldn't save"))
         self._apply_notify(r.get("notify"), None)
 
-    def _notify_hex(self):
-        t = self._nt_hex.get_text().strip().lstrip("#").lower()
-        if len(t) == 6 and all(ch in "0123456789abcdef" for ch in t):
-            self._notify_set(hex=t)
+    def _notify_colour(self, v):
+        """Custom opens the colour picker at once (the colour wheel and sliders used everywhere else)."""
+        if v == "custom":
+            self._notify_pick()
+        else:
+            self._notify_set(color=v)
+
+    def _notify_pick(self):
+        cur = str((self._status.get("notify") or {}).get("hex") or "ffffff")
+
+        def done(h):
+            if h:
+                self._notify_set(color="custom", hex=h)
+            else:                                # cancelled: back to what it was
+                self._apply_notify(self._status.get("notify"), None)
+        self.pick_color(cur, _("Notification colour"), done)
+
+    def _notify_rule_pick(self):
+        def done(h):
+            if h:
+                self._nt_rule_swatch.set_state(hex6=h)
+        self.pick_color(self._nt_rule_swatch.hex, _("Colour for this app"), done)
 
     def _notify_try(self):
         def done(r):
@@ -1698,8 +1724,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             else:
                 w.set_value(bool(n.get(k)))
         self._nt_hex.set_visible(n.get("color") == "custom")
-        if not self._nt_hex.has_focus():
-            self._nt_hex.set_text("#" + str(n.get("hex", "ffffff")))
+        self._nt_hex.set_state(hex6=str(n.get("hex", "ffffff")))
         self._nt_urg.set_value(self._nt_urg_names.get(n.get("urgent_effect", "same")))
         self._nt_band.set_quiet(n.get("band", 3))
         self._nt_dur.set_quiet(n.get("duration", 1.5))
@@ -1734,7 +1759,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._nt_rules_now = rules
             from iridia.ui.layout_notify import EFFECT_NAMES
             widgets.clear(self._nt_rules)
-            cols = {"accent": _("wallpaper colour"), "app": _("its own colour"), "painted": _("painted colours")}
+            cols = {"accent": _("wallpaper colour"), "app": _("its own colour")}
             for r_ in rules:
                 look = [EFFECT_NAMES.get(r_["effect"], _("default effect"))]
                 look.append("#" + r_["hex"] if r_["color"] == "custom" else cols.get(r_["color"], _("default colour")))
@@ -1776,9 +1801,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if not app:
             return
         eff = next((k for k, t in EFFECT_NAMES.items() if t == self._nt_rule_eff.value()), "default")
-        col = {_("Wallpaper"): "accent", _("One per app"): "app", _("Custom"): "custom", _("Painted"): "painted"}.get(
+        col = {_("Wallpaper"): "accent", _("One per app"): "app", _("Custom"): "custom"}.get(
             self._nt_rule_col.value(), "default")
-        hex6 = self._nt_rule_hex.get_text().strip().lstrip("#").lower()
+        hex6 = self._nt_rule_swatch.hex
         self._notify_set(set_rule={"app": app, "effect": eff, "color": col, "hex": hex6})
 
     def _notify_app(self, app, on):

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:08+0000\n"
+"POT-Creation-Date: 2026-10-27 23:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -111,6 +111,9 @@ msgstr "Allez !"
 
 msgid "Updates"
 msgstr "Mises à jour"
+
+msgid "Try it"
+msgstr "Champagne"
 
 msgid "Refresh"
 msgstr "Oui"
@@ -716,9 +719,6 @@ msgstr "minutes de sieste"
 msgid "Dim to"
 msgstr "Baisser à"
 
-msgid "Try it"
-msgstr "Champagne"
-
 msgid "Acting as if the screen were locked for 5 seconds."
 msgstr "Bonne nuit pour 5 secondes."
 
@@ -831,8 +831,8 @@ msgstr "Un fromage par app"
 msgid "Custom"
 msgstr "Sur mesure"
 
-msgid "Painted"
-msgstr "Santé !"
+msgid "Pick a colour"
+msgstr "Choisir une couleur"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent : rouge comme le vin"
@@ -876,6 +876,12 @@ msgstr "Pas pendant la nuit"
 msgid "Couldn't save"
 msgstr "Croissant"
 
+msgid "Notification colour"
+msgstr "Couleur du facteur"
+
+msgid "Colour for this app"
+msgstr "Couleur pour cette app"
+
 msgid "Flashing now."
 msgstr "Ça clignote !"
 
@@ -910,9 +916,6 @@ msgstr "la couleur du papier peint"
 
 msgid "its own colour"
 msgstr "sa propre couleur"
-
-msgid "painted colours"
-msgstr "couleurs peintes"
 
 msgid "default effect"
 msgstr "spectacle habituel"
@@ -2120,40 +2123,14 @@ msgstr "De A à B et retour"
 msgid "From the middle out"
 msgstr "Du milieu vers les bords"
 
-msgid "Choose LEDs"
-msgstr "Choisir des bisous"
-
-msgid "Paint"
-msgstr "Quiche"
-
-msgid "Erase colour"
-msgstr "Effacer la couleur"
-
-msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
-msgstr "Couleurs peintes. Magnifique."
-
-msgid "Choose some LEDs first."
-msgstr "Choisis des bisous d'abord."
-
 msgid "All settings"
 msgstr "Tous les réglages"
 
 msgid "Clear"
 msgstr "Bonjour"
 
-msgid "Click or drag on the map"
-msgstr "Clique ou glisse sur la carte"
-
-msgid ""
-"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
-"first paint colour. Gradient: from the first colour to the second."
-msgstr "Choisis, peins, efface. Voilà."
-
-msgid "Gradient"
-msgstr "Oh là là"
-
-msgid "Clear colours"
-msgstr "Effacer les couleurs"
+msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
+msgstr "Clique ou glisse sur les bisous pour les choisir. Voilà."
 
 msgid "Colour"
 msgstr "Couleur"
@@ -2199,8 +2176,14 @@ msgstr "Déjà vu"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Omelette du fromage"
 
+msgid "Paint"
+msgstr "Quiche"
+
 msgid "Erase (back to the zone's own color)"
 msgstr "J'ai une baguette"
+
+msgid "Gradient"
+msgstr "Oh là là"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Le facteur : quels bisous clignotent"
@@ -2692,6 +2675,9 @@ msgstr "Oui"
 
 msgid "Alternating"
 msgstr "Oh là là"
+
+msgid "Painted"
+msgstr "Santé !"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Je suis une baguette"

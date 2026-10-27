@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:08+0000\n"
+"POT-Creation-Date: 2026-10-27 23:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -111,6 +111,9 @@ msgstr "Service"
 
 msgid "Updates"
 msgstr "Updates"
+
+msgid "Try it"
+msgstr "Try it"
 
 msgid "Refresh"
 msgstr "Refresh"
@@ -745,9 +748,6 @@ msgstr "minutes without input"
 msgid "Dim to"
 msgstr "Dim to"
 
-msgid "Try it"
-msgstr "Try it"
-
 msgid "Acting as if the screen were locked for 5 seconds."
 msgstr "Acting as if the screen were locked for 5 seconds."
 
@@ -870,8 +870,8 @@ msgstr "One per app"
 msgid "Custom"
 msgstr "Custom"
 
-msgid "Painted"
-msgstr "Painted"
+msgid "Pick a colour"
+msgstr "Pick a colour"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent notifications flash red"
@@ -915,6 +915,12 @@ msgstr "Not during night mode"
 msgid "Couldn't save"
 msgstr "Couldn't save"
 
+msgid "Notification colour"
+msgstr "Notification colour"
+
+msgid "Colour for this app"
+msgstr "Colour for this app"
+
 msgid "Flashing now."
 msgstr "Flashing now."
 
@@ -949,9 +955,6 @@ msgstr "wallpaper colour"
 
 msgid "its own colour"
 msgstr "its own colour"
-
-msgid "painted colours"
-msgstr "painted colours"
 
 msgid "default effect"
 msgstr "default effect"
@@ -2230,42 +2233,14 @@ msgstr "A to B and back"
 msgid "From the middle out"
 msgstr "From the middle out"
 
-msgid "Choose LEDs"
-msgstr "Choose LEDs"
-
-msgid "Paint"
-msgstr "Paint"
-
-msgid "Erase colour"
-msgstr "Erase colour"
-
-msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
-msgstr "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
-
-msgid "Choose some LEDs first."
-msgstr "Choose some LEDs first."
-
 msgid "All settings"
 msgstr "All settings"
 
 msgid "Clear"
 msgstr "Clear"
 
-msgid "Click or drag on the map"
-msgstr "Click or drag on the map"
-
-msgid ""
-"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
-"first paint colour. Gradient: from the first colour to the second."
-msgstr ""
-"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
-"first paint colour. Gradient: from the first colour to the second."
-
-msgid "Gradient"
-msgstr "Gradient"
-
-msgid "Clear colours"
-msgstr "Clear colours"
+msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
+msgstr "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 
 msgid "Colour"
 msgstr "Colour"
@@ -2313,8 +2288,14 @@ msgstr "Arrange"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find LEDs: light one LED on the real strip"
 
+msgid "Paint"
+msgstr "Paint"
+
 msgid "Erase (back to the zone's own color)"
 msgstr "Erase (back to the zone's own colour)"
+
+msgid "Gradient"
+msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Notifications: which LEDs flash, and where a flash runs"
@@ -2831,6 +2812,9 @@ msgstr "Edges in"
 
 msgid "Alternating"
 msgstr "Alternating"
+
+msgid "Painted"
+msgstr "Painted"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"

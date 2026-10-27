@@ -108,28 +108,15 @@ def test_app_rules_and_urgent():
                    "rules": [{"app": "Signal", "effect": "sweep", "color": "custom", "hex": "00ff00"},
                              {"app": "signal", "effect": "comet"}, {"app": "Mail", "color": "app"}, {"x": 1}]})
     assert [r["app"] for r in st["rules"]] == ["Signal", "Mail"]
-    assert nf.style_for(st, "signal", False, "ffffff") == ("sweep", (0, 255, 0), False)
-    assert nf.style_for(st, "Mail", False, "ffffff") == ("pulse", nf.app_color("Mail"), False)
-    assert nf.style_for(st, "Other", False, "ffffff") == ("pulse", (0, 0, 255), False)
-    assert nf.style_for(st, "Signal", True, "ffffff") == ("flash", nf.URGENT, False)
+    assert nf.style_for(st, "signal", False, "ffffff") == ("sweep", (0, 255, 0))
+    assert nf.style_for(st, "Mail", False, "ffffff") == ("pulse", nf.app_color("Mail"))
+    assert nf.style_for(st, "Other", False, "ffffff") == ("pulse", (0, 0, 255))
+    assert nf.style_for(st, "Signal", True, "ffffff") == ("flash", nf.URGENT)
     st["urgent_red"] = False
-    assert nf.style_for(st, "Signal", True, "ffffff") == ("flash", (0, 255, 0), False)
+    assert nf.style_for(st, "Signal", True, "ffffff") == ("flash", (0, 255, 0))
 
 
-def test_painted_colours():
-    st = nf.clean({"color": "painted", "paint": {"S|": {"1": "#FF0000", "2": "00ff00", "x": "0000ff", "3": "nope"},
-                                                 "bad": {"1": "ffffff"}}})
-    assert st["paint"] == {"S|": {"1": "ff0000", "2": "00ff00"}}
-    assert nf.style_for(st, "Any", False, "123456") == ("pulse", (0x12, 0x34, 0x56), True)
-    st["urgent_red"] = True
-    assert nf.style_for(st, "Any", True, "123456")[2] is False           # urgent red wins
-    leds = nf.led_places({"S|": [(0, 4)]}, {}, "pulse", None)
-    f = nf.Flash(leds, (0, 0, 255), "pulse", 1.0, now=0.0, paint=nf.paint_rgb(st["paint"]))
-    fr = f.mix("S|", [(0, 0, 0)] * 4, now=0.25)
-    assert fr == [(0, 0, 255), (255, 0, 0), (0, 255, 0), (0, 0, 255)]     # unpainted ones: the colour given
-
-
-def test_painted_leds_become_ranges():
+def test_chosen_leds_become_ranges():
     assert nf.targets_for("D", "Z", [5, 1, 2, 3, 9, 3]) == [
         {"device": "D", "zone": "Z", "start": 2, "end": 4}, {"device": "D", "zone": "Z", "start": 6, "end": 6},
         {"device": "D", "zone": "Z", "start": 10, "end": 10}]

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:03+0000\n"
+"POT-Creation-Date: 2026-10-27 22:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -96,6 +96,9 @@ msgstr "Devices"
 
 msgid "Layout"
 msgstr "Layout"
+
+msgid "Notifications"
+msgstr "Notifications"
 
 msgid "Keybinds"
 msgstr "Keybinds"
@@ -361,6 +364,12 @@ msgstr "Times are 24 hour, like 23:00. The window can cross midnight."
 
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Turn the LEDs off while the PC sleeps"
+
+msgid "Flashing LEDs for desktop notifications has its own tab now."
+msgstr "Flashing LEDs for desktop notifications has its own tab now."
+
+msgid "Open"
+msgstr "Open"
 
 msgid "Setups and backups"
 msgstr "Setups and backups"
@@ -795,15 +804,25 @@ msgstr "Nothing is watched while both are Keep."
 msgid "Your idle daemon says you're away."
 msgstr "Your idle daemon says you're away."
 
-msgid "Notifications"
-msgstr "Notifications"
-
 msgid ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
 "what it says."
 msgstr ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
 "what it says."
+
+msgid "On the map"
+msgstr "On the map"
+
+msgid ""
+"Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
+"the Layout tab."
+msgstr ""
+"Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
+"the Layout tab."
+
+msgid "Edit on the map"
+msgstr "Edit on the map"
 
 msgid "Flash LEDs for notifications"
 msgstr "Flash LEDs for notifications"
@@ -850,6 +869,9 @@ msgstr "One per app"
 
 msgid "Custom"
 msgstr "Custom"
+
+msgid "Painted"
+msgstr "Painted"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent notifications flash red"
@@ -927,6 +949,9 @@ msgstr "wallpaper colour"
 
 msgid "its own colour"
 msgstr "its own colour"
+
+msgid "painted colours"
+msgstr "painted colours"
 
 msgid "default effect"
 msgstr "default effect"
@@ -1701,9 +1726,6 @@ msgstr "OK"
 msgid "Type a name."
 msgstr "Type a name."
 
-msgid "Open"
-msgstr "Open"
-
 msgid "Save"
 msgstr "Save"
 
@@ -2208,15 +2230,45 @@ msgstr "A to B and back"
 msgid "From the middle out"
 msgstr "From the middle out"
 
-msgid ""
-"Click or drag over LEDs to flash them for a desktop notification; start on a chosen one to take "
-"LEDs out. Drag A and B to set where a moving flash runs."
-msgstr ""
-"Click or drag over LEDs to flash them for a desktop notification; start on a chosen one to take "
-"LEDs out. Drag A and B to set where a moving flash runs."
+msgid "Choose LEDs"
+msgstr "Choose LEDs"
+
+msgid "Paint"
+msgstr "Paint"
+
+msgid "Erase colour"
+msgstr "Erase colour"
+
+msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
+msgstr "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
+
+msgid "Choose some LEDs first."
+msgstr "Choose some LEDs first."
+
+msgid "All settings"
+msgstr "All settings"
 
 msgid "Clear"
 msgstr "Clear"
+
+msgid "Click or drag on the map"
+msgstr "Click or drag on the map"
+
+msgid ""
+"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
+"first paint colour. Gradient: from the first colour to the second."
+msgstr ""
+"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
+"first paint colour. Gradient: from the first colour to the second."
+
+msgid "Gradient"
+msgstr "Gradient"
+
+msgid "Clear colours"
+msgstr "Clear colours"
+
+msgid "Colour"
+msgstr "Colour"
 
 msgid "A and B"
 msgstr "A and B"
@@ -2237,8 +2289,8 @@ msgstr "Put A and B at the ends"
 msgid "Play"
 msgstr "Play"
 
-msgid "Colours, apps and quiet times are in Settings, Notifications."
-msgstr "Colours, apps and quiet times are in Settings, Notifications."
+msgid "Apps, urgent ones and quiet times: All settings."
+msgstr "Apps, urgent ones and quiet times: All settings."
 
 #, python-brace-format
 msgid "{n} LED"
@@ -2261,14 +2313,8 @@ msgstr "Arrange"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find LEDs: light one LED on the real strip"
 
-msgid "Paint"
-msgstr "Paint"
-
 msgid "Erase (back to the zone's own color)"
 msgstr "Erase (back to the zone's own colour)"
-
-msgid "Gradient"
-msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Notifications: which LEDs flash, and where a flash runs"
@@ -2785,9 +2831,6 @@ msgstr "Edges in"
 
 msgid "Alternating"
 msgstr "Alternating"
-
-msgid "Painted"
-msgstr "Painted"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"

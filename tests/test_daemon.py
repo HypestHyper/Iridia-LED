@@ -912,3 +912,14 @@ def test_notify_rules_and_strip_removal(d):
     rules = _cmd(d, "notify")["notify"]["rules"]
     assert [(r["app"], r["effect"]) for r in rules] == [("signal", "comet"), ("Mail", "default")]
     assert _cmd(d, "notify", remove_rule="SIGNAL")["notify"]["rules"][0]["app"] == "Mail"
+
+
+
+def test_notify_paint_ops(d):
+    d.notifywatch = FakeWatcher()
+    _cmd(d, "notify", paint_set={"key": "Strip|", "leds": {"0": "ff0000", "1": "00ff00"}})
+    _cmd(d, "notify", paint_set={"key": "Strip|", "leds": {"1": None, "2": "0000ff"}})
+    _cmd(d, "notify", paint_set={"key": "Hub v1.0|A", "leds": {"0": "ffffff"}})
+    p = _cmd(d, "notify")["notify"]["paint"]
+    assert p == {"Strip|": {"0": "ff0000", "2": "0000ff"}, "Hub v1.0|A": {"0": "ffffff"}}
+    assert _cmd(d, "notify", paint_clear=True)["notify"]["paint"] == {}

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:03+0000\n"
+"POT-Creation-Date: 2026-10-27 22:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -96,6 +96,9 @@ msgstr "Baguette"
 
 msgid "Layout"
 msgstr "Croissant"
+
+msgid "Notifications"
+msgstr "Le facteur"
 
 msgid "Keybinds"
 msgstr "Moustache"
@@ -352,6 +355,12 @@ msgstr "Une grenouille dans mon café. Je ne sais quoi."
 
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Mon chien mange du camembert"
+
+msgid "Flashing LEDs for desktop notifications has its own tab now."
+msgstr "Le facteur a son propre onglet maintenant. Oh là là."
+
+msgid "Open"
+msgstr "Ooh la la"
 
 msgid "Setups and backups"
 msgstr "La baguette est trop longue"
@@ -762,13 +771,21 @@ msgstr "Rien ne bouge, tout est Garder."
 msgid "Your idle daemon says you're away."
 msgstr "Tu es en vacances."
 
-msgid "Notifications"
-msgstr "Le facteur"
-
 msgid ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
 "what it says."
 msgstr "Les bisous clignotent quand le facteur passe. Oh là là."
+
+msgid "On the map"
+msgstr "Sur la carte"
+
+msgid ""
+"Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
+"the Layout tab."
+msgstr "Choisis les bisous et peins-les, sur la carte."
+
+msgid "Edit on the map"
+msgstr "Modifier sur la carte"
 
 msgid "Flash LEDs for notifications"
 msgstr "Clignoter pour le facteur"
@@ -813,6 +830,9 @@ msgstr "Un fromage par app"
 
 msgid "Custom"
 msgstr "Sur mesure"
+
+msgid "Painted"
+msgstr "Santé !"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent : rouge comme le vin"
@@ -890,6 +910,9 @@ msgstr "la couleur du papier peint"
 
 msgid "its own colour"
 msgstr "sa propre couleur"
+
+msgid "painted colours"
+msgstr "couleurs peintes"
 
 msgid "default effect"
 msgstr "spectacle habituel"
@@ -1619,9 +1642,6 @@ msgstr "Bonne nuit"
 msgid "Type a name."
 msgstr "Café"
 
-msgid "Open"
-msgstr "Ooh la la"
-
 msgid "Save"
 msgstr "Béret"
 
@@ -2100,13 +2120,43 @@ msgstr "De A à B et retour"
 msgid "From the middle out"
 msgstr "Du milieu vers les bords"
 
-msgid ""
-"Click or drag over LEDs to flash them for a desktop notification; start on a chosen one to take "
-"LEDs out. Drag A and B to set where a moving flash runs."
-msgstr "Clique ou glisse sur les bisous pour qu'ils clignotent quand le facteur passe. Oh là là."
+msgid "Choose LEDs"
+msgstr "Choisir des bisous"
+
+msgid "Paint"
+msgstr "Quiche"
+
+msgid "Erase colour"
+msgstr "Effacer la couleur"
+
+msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
+msgstr "Couleurs peintes. Magnifique."
+
+msgid "Choose some LEDs first."
+msgstr "Choisis des bisous d'abord."
+
+msgid "All settings"
+msgstr "Tous les réglages"
 
 msgid "Clear"
 msgstr "Bonjour"
+
+msgid "Click or drag on the map"
+msgstr "Clique ou glisse sur la carte"
+
+msgid ""
+"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
+"first paint colour. Gradient: from the first colour to the second."
+msgstr "Choisis, peins, efface. Voilà."
+
+msgid "Gradient"
+msgstr "Oh là là"
+
+msgid "Clear colours"
+msgstr "Effacer les couleurs"
+
+msgid "Colour"
+msgstr "Couleur"
 
 msgid "A and B"
 msgstr "A et B"
@@ -2125,8 +2175,8 @@ msgstr "Mettre A et B aux bouts"
 msgid "Play"
 msgstr "Jouer"
 
-msgid "Colours, apps and quiet times are in Settings, Notifications."
-msgstr "Les couleurs et les apps sont dans Réglages, Le facteur."
+msgid "Apps, urgent ones and quiet times: All settings."
+msgstr "Le reste : Tous les réglages."
 
 #, python-brace-format
 msgid "{n} LED"
@@ -2149,14 +2199,8 @@ msgstr "Déjà vu"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Omelette du fromage"
 
-msgid "Paint"
-msgstr "Quiche"
-
 msgid "Erase (back to the zone's own color)"
 msgstr "J'ai une baguette"
-
-msgid "Gradient"
-msgstr "Oh là là"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Le facteur : quels bisous clignotent"
@@ -2648,9 +2692,6 @@ msgstr "Oui"
 
 msgid "Alternating"
 msgstr "Oh là là"
-
-msgid "Painted"
-msgstr "Santé !"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Je suis une baguette"

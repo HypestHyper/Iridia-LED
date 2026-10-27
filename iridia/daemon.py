@@ -479,7 +479,7 @@ class Daemon:
         now = time.monotonic()
         if self._flash is not None and now - self._flash.t0 < notifyflash.COALESCE_SEC:
             return True                     # a burst of notifications: one flash
-        effect, rgb = notifyflash.style_for(st, app, urgent, self._led_base_color() or "ffffff")
+        effect, rgb, painted = notifyflash.style_for(st, app, urgent, self._led_base_color() or "ffffff")
         ranges = self._flash_ranges(st["targets"])
         positions, spacing = {}, {}
         if st["spatial"]:
@@ -494,7 +494,8 @@ class Daemon:
             return False
         self.logger.debug(f"Notification from {app or 'an app'}: {effect} on {len(leds)} zone(s)")
         self._flash = notifyflash.Flash(leds, rgb, effect, st["duration"], now, direction=st["direction"],
-                                        band=st["band"], repeat=st["repeat"], brightness=st["brightness"])
+                                        band=st["band"], repeat=st["repeat"], brightness=st["brightness"],
+                                        paint=notifyflash.paint_rgb(st["paint"]) if painted else None)
         return True
 
     def _flash_ranges(self, targets: list) -> Dict[str, list]:
@@ -559,7 +560,7 @@ class Daemon:
         new = dict(cur if isinstance(cur, dict) else {})
         changed = False
         for k in ("enabled", "targets", "effect", "direction", "band", "repeat", "brightness", "color", "hex",
-                  "urgent_red", "urgent_effect", "duration", "apps", "app_list", "rules", "path", "spatial",
+                  "urgent_red", "urgent_effect", "duration", "apps", "app_list", "rules", "path", "spatial", "paint",
                   "dnd", "night_quiet"):
             if k in req:
                 new[k] = req[k]
@@ -568,6 +569,21 @@ class Daemon:
         if isinstance(pick, list) and len(pick) == 2 and isinstance(pick[0], str):
             names = [a for a in new.get("app_list") or [] if isinstance(a, str) and a.lower() != pick[0].lower()]
             new["app_list"] = names + ([pick[0]] if pick[1] else [])
+            changed = True
+        ps = req.get("paint_set")
+        if isinstance(ps, dict) and isinstance(ps.get("key"), str) and isinstance(ps.get("leds"), dict):
+            # LED -> colour, or None to take its colour off; other strips and LEDs stay as they are
+            paint = {k: dict(v) for k, v in notifyflash.clean_paint(new.get("paint")).items()}
+            z = paint.setdefault(ps["key"], {})
+            for i, h in ps["leds"].items():
+                if h is None:
+                    z.pop(str(i), None)
+                else:
+                    z[str(i)] = h
+            new["paint"] = paint
+            changed = True
+        if req.get("paint_clear"):
+            new["paint"] = {}
             changed = True
         rz = req.get("remove_zone")
         if isinstance(rz, list) and len(rz) == 2:

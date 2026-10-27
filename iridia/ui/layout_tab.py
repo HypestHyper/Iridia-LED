@@ -900,6 +900,11 @@ class LayoutTab(NotifyLayer, Gtk.Box):
             self._send(self.app.client.led_probe_off)
             self.cv.queue_draw()
 
+    def pick_tool(self, tool):
+        """Pick a tool from outside (the Notifications tab's Edit on the map)."""
+        self._tools.set_active(tool)
+        self._set_tool(tool)
+
     def _set_tool(self, tool):
         if tool != "find":
             self._stop_find()

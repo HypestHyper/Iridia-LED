@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 22:03+0000\n"
+"POT-Creation-Date: 2026-10-27 22:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -96,6 +96,9 @@ msgstr "Cargo"
 
 msgid "Layout"
 msgstr "Treasure Map"
+
+msgid "Notifications"
+msgstr "Messages"
 
 msgid "Keybinds"
 msgstr "Signal Flags"
@@ -361,6 +364,12 @@ msgstr "Ship's time be 24 hour, like 23:00. The watch can sail past midnight."
 
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Douse the lanterns while the ship sleeps"
+
+msgid "Flashing LEDs for desktop notifications has its own tab now."
+msgstr "Flashin' lanterns fer messages has its own tab now."
+
+msgid "Open"
+msgstr "Open"
 
 msgid "Setups and backups"
 msgstr "Charts an' buried treasure"
@@ -795,15 +804,25 @@ msgstr "Nothin' be watched while both be Hold fast."
 msgid "Your idle daemon says you're away."
 msgstr "Yer idle daemon says ye've gone ashore."
 
-msgid "Notifications"
-msgstr "Messages"
-
 msgid ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
 "what it says."
 msgstr ""
 "Flash some lanterns when a message comes aboard. Iridia only sees which crew sent it, never what "
 "it says."
+
+msgid "On the map"
+msgstr "On the chart"
+
+msgid ""
+"Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
+"the Layout tab."
+msgstr ""
+"Pick the lanterns, paint their colours an' set the A an' B points a movin' flash sails between, "
+"on the Layout tab."
+
+msgid "Edit on the map"
+msgstr "Edit on the chart"
 
 msgid "Flash LEDs for notifications"
 msgstr "Flash lanterns fer messages"
@@ -850,6 +869,9 @@ msgstr "One fer each crew"
 
 msgid "Custom"
 msgstr "Custom"
+
+msgid "Painted"
+msgstr "Painted"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent messages flash red"
@@ -927,6 +949,9 @@ msgstr "the wallpaper colour"
 
 msgid "its own colour"
 msgstr "its own colour"
+
+msgid "painted colours"
+msgstr "painted colours"
 
 msgid "default effect"
 msgstr "usual trick"
@@ -1703,9 +1728,6 @@ msgstr "Aye"
 msgid "Type a name."
 msgstr "Give it a name, matey."
 
-msgid "Open"
-msgstr "Open"
-
 msgid "Save"
 msgstr "Stash"
 
@@ -2210,15 +2232,45 @@ msgstr "A to B an' back"
 msgid "From the middle out"
 msgstr "From the middle out"
 
-msgid ""
-"Click or drag over LEDs to flash them for a desktop notification; start on a chosen one to take "
-"LEDs out. Drag A and B to set where a moving flash runs."
-msgstr ""
-"Click or drag over lanterns to flash 'em fer a message; start on a chosen one to take lanterns "
-"out. Drag A an' B to set where a movin' flash sails."
+msgid "Choose LEDs"
+msgstr "Pick lanterns"
+
+msgid "Paint"
+msgstr "Paint"
+
+msgid "Erase colour"
+msgstr "Scrub colour"
+
+msgid "Notification colours: Painted. Unpainted LEDs use the wallpaper colour."
+msgstr "Message colours: Painted. Unpainted lanterns use the wallpaper colour."
+
+msgid "Choose some LEDs first."
+msgstr "Pick some lanterns first."
+
+msgid "All settings"
+msgstr "All settin's"
 
 msgid "Clear"
 msgstr "Clear the deck"
+
+msgid "Click or drag on the map"
+msgstr "Click or drag on the chart"
+
+msgid ""
+"Choose LEDs: adds them, or takes them out if you start on a ringed one. Paint: gives them the "
+"first paint colour. Gradient: from the first colour to the second."
+msgstr ""
+"Pick lanterns: adds 'em, or takes 'em out if ye start on a ringed one. Paint: gives 'em the first"
+" paint colour. Gradient: from the first colour to the second."
+
+msgid "Gradient"
+msgstr "Gradient"
+
+msgid "Clear colours"
+msgstr "Scrub colours"
+
+msgid "Colour"
+msgstr "Colour"
 
 msgid "A and B"
 msgstr "A an' B"
@@ -2239,8 +2291,8 @@ msgstr "Put A an' B at the ends"
 msgid "Play"
 msgstr "Play"
 
-msgid "Colours, apps and quiet times are in Settings, Notifications."
-msgstr "Colours, crews an' quiet times be in Settings, Messages."
+msgid "Apps, urgent ones and quiet times: All settings."
+msgstr "Crews, urgent ones an' quiet times: All settin's."
 
 #, python-brace-format
 msgid "{n} LED"
@@ -2263,14 +2315,8 @@ msgstr "Haul"
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find lanterns: light one lantern on the real strip"
 
-msgid "Paint"
-msgstr "Paint"
-
 msgid "Erase (back to the zone's own color)"
 msgstr "Swab (back to the zone's own color)"
-
-msgid "Gradient"
-msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Messages: which lanterns flash, an' where a flash sails"
@@ -2787,9 +2833,6 @@ msgstr "Edges in"
 
 msgid "Alternating"
 msgstr "Alternatin'"
-
-msgid "Painted"
-msgstr "Painted"
 
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr "Addressable 5V (WS2812B, SK6812)"

@@ -19,7 +19,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 EFFECTS = ("pulse", "flash", "sweep", "comet", "fill", "ripple")
 MOVING = ("sweep", "comet", "fill", "ripple")       # these use the direction, the band and A/B
 DIRECTIONS = ("ab", "ba", "abba", "out")
-COLORS = ("accent", "app", "custom")
+COLORS = ("accent", "app", "custom", "painted")
+PAINT_MAX = 8192                # painted LEDs kept, in all
 APPS = ("all", "only", "except")
 SEEN_MAX = 40
 RULES_MAX = 20
@@ -30,7 +31,7 @@ BAND_MAX = 30
 DEFAULTS = {"enabled": False, "targets": [], "effect": "pulse", "direction": "ab", "band": 3,
             "repeat": 1, "brightness": 100, "color": "accent", "hex": "ffffff", "urgent_red": True,
             "urgent_effect": "same", "duration": 1.5, "apps": "all", "app_list": [], "rules": [],
-            "path": None, "spatial": False, "dnd": True, "night_quiet": False, "seen": []}
+            "path": None, "spatial": False, "paint": {}, "dnd": True, "night_quiet": False, "seen": []}
 
 
 def _hex(v, default="ffffff") -> str:
@@ -129,9 +130,31 @@ def clean(raw) -> dict:
     a, b = _clean_point(path.get("a")), _clean_point(path.get("b"))
     out["path"] = {"a": a, "b": b} if a and b else None
     out["spatial"] = bool(raw.get("spatial", False)) and out["path"] is not None
+    out["paint"] = clean_paint(raw.get("paint"))
     out["dnd"] = bool(raw.get("dnd", True))
     out["night_quiet"] = bool(raw.get("night_quiet", False))
     out["seen"] = [str(a) for a in raw.get("seen") or [] if isinstance(a, str) and a][:SEEN_MAX]
+    return out
+
+
+def clean_paint(raw) -> Dict[str, Dict[str, str]]:
+    """Colours painted on single LEDs for the flash: {"device|zone": {"LED (0-based)": "rrggbb"}}."""
+    out: Dict[str, Dict[str, str]] = {}
+    total = 0
+    if not isinstance(raw, dict):
+        return out
+    for key, leds in raw.items():
+        if not isinstance(key, str) or "|" not in key or not isinstance(leds, dict):
+            continue
+        z = {}
+        for i, h in leds.items():
+            n = _int(i)
+            h = _hex(h, "")
+            if n is not None and h and total < PAINT_MAX:
+                z[str(n)] = h
+                total += 1
+        if z:
+            out[key] = z
     return out
 
 
@@ -156,9 +179,10 @@ def _rgb(hex6: str) -> Tuple[int, int, int]:
     return int(hex6[0:2], 16), int(hex6[2:4], 16), int(hex6[4:6], 16)
 
 
-def style_for(settings: dict, app: str, urgent: bool, accent: str) -> Tuple[str, Tuple[int, int, int]]:
-    """(effect, colour) for a notification from app: an urgent one's own effect and red come first,
-    then the app's rule, then the defaults. accent is the wallpaper colour (hex)."""
+def style_for(settings: dict, app: str, urgent: bool, accent: str) -> Tuple[str, Tuple[int, int, int], bool]:
+    """(effect, colour, painted) for a notification from app: an urgent one's own effect and red come
+    first, then the app's rule, then the defaults. accent is the wallpaper colour (hex). painted: LEDs
+    with a painted colour use it, the others the colour given (the wallpaper's)."""
     rule = next((r for r in settings["rules"] if r["app"].lower() == app.lower()), None)
     effect = settings["effect"]
     if rule and rule["effect"] != "default":
@@ -166,15 +190,20 @@ def style_for(settings: dict, app: str, urgent: bool, accent: str) -> Tuple[str,
     if urgent and settings["urgent_effect"] != "same":
         effect = settings["urgent_effect"]
     if urgent and settings["urgent_red"]:
-        return effect, URGENT
+        return effect, URGENT, False
     color, hex6 = settings["color"], settings["hex"]
     if rule and rule["color"] != "default":
         color, hex6 = rule["color"], rule["hex"]
     if color == "app":
-        return effect, app_color(app)
+        return effect, app_color(app), False
     if color == "custom":
-        return effect, _rgb(hex6)
-    return effect, _rgb(_hex(accent, "ffffff"))
+        return effect, _rgb(hex6), False
+    return effect, _rgb(_hex(accent, "ffffff")), color == "painted"
+
+
+def paint_rgb(paint: Dict[str, Dict[str, str]]) -> Dict[str, Dict[int, Tuple[int, int, int]]]:
+    """The painted colours as the flash uses them: key -> {LED: (r, g, b)}."""
+    return {k: {int(i): _rgb(h) for i, h in leds.items()} for k, leds in paint.items()}
 
 
 def target_range(t: dict, n: int, sections: Sequence[dict], spans) -> Optional[Tuple[int, int]]:
@@ -262,8 +291,10 @@ class Flash:
 
     def __init__(self, leds: Dict[str, List[Tuple[int, float, float]]], rgb: Tuple[int, int, int], effect: str,
                  duration: float, now: Optional[float] = None, direction: str = "ab", band: int = 3,
-                 repeat: int = 1, brightness: int = 100):
+                 repeat: int = 1, brightness: int = 100,
+                 paint: Optional[Dict[str, Dict[int, Tuple[int, int, int]]]] = None):
         self.leds, self.rgb, self.effect, self.duration = leds, rgb, effect, duration
+        self.paint = paint or {}                 # key -> {LED: colour}: painted LEDs use theirs
         self.direction, self.band, self.repeat = direction, band, max(1, repeat)
         self.brightness = brightness / 100.0
         self.t0 = time.monotonic() if now is None else now
@@ -291,6 +322,7 @@ class Flash:
         x = (el / self.duration) % 1.0
         s = scale * self.brightness
         fr, fg, fb = (c * s for c in self.rgb)
+        own = self.paint.get(key) or {}
         out = list(frame)
         n = len(out)
         for i, t, span in leds:
@@ -299,6 +331,10 @@ class Flash:
             a = envelope(self.effect, x, t, self.direction, self.band / span, 1.0 / span)
             if a <= 0:
                 continue
+            if i in own:
+                fr, fg, fb = (c * s for c in own[i])
+            elif own:
+                fr, fg, fb = (c * s for c in self.rgb)
             r, g, b = out[i]
             out[i] = (round(r + (fr - r) * a), round(g + (fg - g) * a), round(b + (fb - b) * a))
         return out

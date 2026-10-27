@@ -424,7 +424,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._tabs = {}
         first = None
         for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
-                               ("layout", _("Layout"), "polyline"), ("keybinds", _("Keybinds"), "keyboard"),
+                               ("layout", _("Layout"), "polyline"), ("notify", _("Notifications"), "bolt"),
+                               ("keybinds", _("Keybinds"), "keyboard"),
                                ("settings", _("Settings"), "settings"), ("service", _("Service"), "build"),
                                ("updates", _("Updates"), "download")):
             b = Gtk.ToggleButton()
@@ -441,7 +442,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         self._layout_tab = LayoutTab(self)
         pages = {}
-        for key in ("status", "devices", "layout", "keybinds", "settings", "service", "updates"):
+        for key in ("status", "devices", "layout", "notify", "keybinds", "settings", "service", "updates"):
             if key == "layout":
                 self._stack.add_named(self._layout_tab, key)
                 continue
@@ -451,6 +452,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._status_page, self._devices_page = pages["status"], pages["devices"]
         self._settings_page, self._service_page = pages["settings"], pages["service"]
         self._updates_page = pages["updates"]
+        self._notify_page = pages["notify"]
         self._keybinds = KeybindsPage(self, pages["keybinds"])
         root.append(self._stack)
 
@@ -476,6 +478,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._build_status()
         self._build_devices()
         self._build_settings()
+        self._build_notify_settings(self._notify_page)
         self._build_service()
         self._build_updates()
         self._tabs["status"].set_active(True)
@@ -972,7 +975,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(row)
         p.append(c)
         self._build_session_settings(p)
-        self._build_notify_settings(p)
+        p.append(section(_("Notifications")))
+        c = card()
+        r = hbox(10, label(_("Flashing LEDs for desktop notifications has its own tab now."), ("body", "dim"),
+                           wrap=True))
+        r.get_first_child().set_hexpand(True)
+        r.append(button(_("Open"), "bolt", "tonal small", self.open_notify_settings))
+        c.append(r)
+        p.append(c)
         self._build_animation_settings(p)
 
         # setups
@@ -1472,9 +1482,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._sess_hooks.set_visible(bool(w.get("idle") and w.get("idle_checked") and not s.get("idle_method")))
 
     # ------------------------------------------------------------ notifications
+    def open_notify_settings(self):
+        self._tabs["notify"].set_active(True)
+
+    def open_notify_map(self):
+        """The Layout tab with its Notifications tool picked."""
+        self._tabs["layout"].set_active(True)
+        self._layout_tab.pick_tool("notify")
+
     def _build_notify_settings(self, p):
         p.append(section(_("Notifications"), _("Flash some LEDs when a desktop notification comes in. Iridia only "
-                                               "sees which app sent it, never what it says.")))
+                                               "sees which app sent it, never what it says."), top=4))
+        c = card(inner=False)
+        c.append(label(_("On the map"), ("heading",)))
+        c.append(label(_("Choose the LEDs, paint their colours and set the A and B points a moving flash runs "
+                         "between, on the Layout tab."), ("small", "dim"), wrap=True))
+        c.append(button(_("Edit on the map"), "polyline", "filled small", self.open_notify_map))
+        p.append(c)
         c = card()
         n = self.config.get("notify", {}) or {}
         self._nt = {}
@@ -1528,7 +1552,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r.append(self._nt_dur)
         c.append(r)
         r = wrap_row(10)
-        self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom"))],
+        self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom")),
+                                   ("painted", _("Painted"))],
                                   n.get("color", "accent"), lambda v: self._notify_set(color=v))
         r.append(hbox(10, label(_("Color"), ("body", "dim")), self._nt["color"]))
         self._nt_hex = Gtk.Entry(text="#" + str(n.get("hex", "ffffff")), width_chars=8, max_width_chars=8,
@@ -1556,7 +1581,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r = wrap_row(10)
         self._nt_rule_app = Dropdown([], None, placeholder=_("No apps yet"))
         self._nt_rule_eff = Dropdown([_("Default effect")] + list(EFFECT_NAMES.values()), _("Default effect"))
-        self._nt_rule_col = Dropdown([_("Default colour"), _("Wallpaper"), _("One per app"), _("Custom")],
+        self._nt_rule_col = Dropdown([_("Default colour"), _("Wallpaper"), _("One per app"), _("Custom"), _("Painted")],
                                      _("Default colour"), lambda v: self._nt_rule_hex.set_visible(v == _("Custom")))
         self._nt_rule_hex = Gtk.Entry(text="#00ff00", width_chars=8, max_width_chars=8, hexpand=False)
         self._nt_rule_hex.set_visible(False)
@@ -1709,7 +1734,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._nt_rules_now = rules
             from iridia.ui.layout_notify import EFFECT_NAMES
             widgets.clear(self._nt_rules)
-            cols = {"accent": _("wallpaper colour"), "app": _("its own colour")}
+            cols = {"accent": _("wallpaper colour"), "app": _("its own colour"), "painted": _("painted colours")}
             for r_ in rules:
                 look = [EFFECT_NAMES.get(r_["effect"], _("default effect"))]
                 look.append("#" + r_["hex"] if r_["color"] == "custom" else cols.get(r_["color"], _("default colour")))
@@ -1751,7 +1776,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if not app:
             return
         eff = next((k for k, t in EFFECT_NAMES.items() if t == self._nt_rule_eff.value()), "default")
-        col = {_("Wallpaper"): "accent", _("One per app"): "app", _("Custom"): "custom"}.get(
+        col = {_("Wallpaper"): "accent", _("One per app"): "app", _("Custom"): "custom", _("Painted"): "painted"}.get(
             self._nt_rule_col.value(), "default")
         hex6 = self._nt_rule_hex.get_text().strip().lstrip("#").lower()
         self._notify_set(set_rule={"app": app, "effect": eff, "color": col, "hex": hex6})

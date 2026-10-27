@@ -1,6 +1,6 @@
 # Notifications
 
-Settings, *Notifications*: flash some LEDs when a desktop notification comes in. Only the LEDs you
+The *Notifications* tab (the lightning bolt): flash some LEDs when a desktop notification comes in. Only the LEDs you
 pick flash; the rest of the strip keeps showing what it was showing, animations included. Iridia
 only sees which app sent a notification and whether it's urgent, never its title or text, and keeps
 nothing but the app's name (so you can pick apps).
@@ -17,9 +17,20 @@ Pick a strip, then which part of it, and press *Add*:
 
 Add as many as you like, on as many strips and devices as you like: they all flash together.
 
-Or pick them on the map: the **Layout tab's Notifications tool** (the lightning bolt in the toolbar).
-Click or drag over LEDs to add them; start on a ringed one to take LEDs out. *Play* shows the flash on
-the map and on your real strips.
+Or pick them on the map: *Edit on the map* opens the **Layout tab's Notifications tool** (the
+lightning bolt in its toolbar). Click or drag on the map to:
+
+| | |
+| --- | --- |
+| *Choose LEDs* | Add them, or take them out if you start on a ringed one |
+| *Paint* | Give them the first paint colour (it chooses them too) |
+| *Erase colour* | Take their painted colour off |
+
+*Gradient* paints the chosen LEDs from the first paint colour to the second: between A and B by where
+they are when *Run through the room* is on, else along each strip. With the colour set to *Painted*
+(painting sets it), each LED flashes in its own colour, and unpainted ones in the wallpaper's. The
+chosen LEDs show the colour they'll flash in, and *Play* shows the flash on the map and on your real
+strips. *All settings* goes back to the Notifications tab.
 
 ## Through the room, from A to B
 
@@ -38,7 +49,7 @@ moving flash runs along each strip's own LEDs instead.
 | *Band* | How many LEDs light at once (1 to 30): the band, the comet's tail or the ripple's ring, with about one LED of soft edge, however long the stretch |
 | *Plays*, *Length* | How many times it plays (1 to 5), each 0.5 to 5 seconds |
 | *Brightness* | 10 to 100% of the strip's brightness |
-| *Color* | *Wallpaper* (the colour your LEDs follow), *One per app* (each app gets its own colour, the same every time) or *Custom* |
+| *Colour* | *Wallpaper* (the colour your LEDs follow), *One per app* (each app gets its own colour, the same every time), *Custom* or *Painted* (painted on the map, LED by LED) |
 | *Urgent notifications flash red* | Whatever the colour setting |
 | *Urgent ones use* | The same effect, or one of their own |
 | *Apps with their own look* | An app's own effect and colour (pick the app, the effect, the colour, *Add*); every other app uses the settings above |

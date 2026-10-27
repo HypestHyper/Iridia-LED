@@ -14,6 +14,10 @@
     reads as a sweep even on a short stretch), the length (a slider), how many times it plays, a
     brightness cap, and an effect of their own for urgent notifications.
   - **Apps with their own look:** an effect and a colour for each app you pick.
+  - **Paint the flash colours:** on the map, paint LEDs (or a gradient from A to B), and with the colour
+    set to *Painted* each LED flashes in its own colour.
+  - **Their own tab:** the settings moved from Settings to a *Notifications* tab, with *Edit on the
+    map* to go to the Layout tab's tool, and *All settings* there to come back.
 - Some labels of the Notifications settings had stayed in plain English in the joke languages; they're
   translated now.
 - **The LEDs light back up fully after unlocking.** Coming back from *Off* (or *Dim*) on lock, static

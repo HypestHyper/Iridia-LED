@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **The LEDs light back up fully after unlocking.** Coming back from *Off* (or *Dim*) on lock, static
+  strips could stay almost dark: the half-second fade back was over before the daemon looked again, so
+  its last step, at a few percent, was what stayed on the strips. The final brightness is now always
+  sent, and fades run at 20 steps a second instead of one.
 - **The LEDs come back after unlocking even when the unlock signal is missed.** While the desktop says
   the screen is locked, Iridia now asks it again every 10 seconds (and at once when something asks to
   unlock), so a missed "unlocked" signal can't keep the strips dark. Only screen savers' signals count

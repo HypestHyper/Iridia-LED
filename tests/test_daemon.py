@@ -838,3 +838,37 @@ def test_notify_cli(d, monkeypatch, capsys):
     assert cli.main(["notify", "add", "nothing-here"]) == 1
     assert cli.main(["notify", "add", "Strip", "half"]) == 2
     assert cli.main(["notify", "clear"]) == 0 and d._notify_settings()["targets"] == []
+
+
+def test_the_leds_come_all_the_way_back_after_unlocking(d, monkeypatch):
+    """The main loop looks once a second: a fade shorter than that must still end at full brightness."""
+    clock = [1000.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    d.sessionwatch = None
+
+    def tick(after):
+        clock[0] += after
+        d._update_session()
+        if d._glide_active:
+            d._needs_update = True
+        if d._needs_update:
+            d._glide_active = False
+            d._update_all_devices()
+    _cmd(d, "session", lock="off")
+    tick(0)
+    _cmd(d, "session", lock_hook=True)                      # locked: fades out over 2 seconds
+    for _ in range(4):
+        tick(1.0)
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    _cmd(d, "session", lock_hook=False)                     # unlocked: half a second back up
+    tick(0.01)
+    assert d.openrgb.last("Strip") != ["ff0000"] * 4        # the first step of the fade
+    tick(1.0)
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    _cmd(d, "session", lock="dim", dim=10, lock_hook=True)
+    for _ in range(4):
+        tick(1.0)
+    _cmd(d, "session", lock_hook=False)
+    tick(0.01)
+    tick(1.0)
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4

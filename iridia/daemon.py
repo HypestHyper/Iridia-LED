@@ -226,6 +226,7 @@ class Daemon:
         self._hooks = {"lock": False, "idle": False}     # iridia lock|idle on (hypridle, swayidle, ...)
         self._sess_test_until = 0.0                     # Settings, Try it: act as if locked until then
         self._sess_ramp = (1.0, 1.0, 0.0, 0.0)          # brightness factor (from, to, start, seconds)
+        self._sess_settled = True                       # the end of the last fade has been sent
         self._sess_state = "active"
         self._frozen = bool(self.config.get("color.frozen", False))
         self.calibration = Profiles()
@@ -333,7 +334,7 @@ class Daemon:
             # Nothing animates any more, so there is never a reason to tick
             # faster than this; colours are sent only when they change.
             # brightness glides re-send static zones for a moment; otherwise nothing animates here
-            self._wake.wait(0.05 if self._glide_active else 0.5 if self._busy() else 1.0)
+            self._wake.wait(0.05 if self._glide_active or self._sess_fading() else 0.5 if self._busy() else 1.0)
             self._wake.clear()
 
         self._shutdown()
@@ -619,6 +620,10 @@ class Daemon:
                 "idle_minutes": _num(c.get("idle_minutes", 10), 10, 1, 240),
                 "dim": int(_num(c.get("dim", 20), 20, 0, 100))}
 
+    def _sess_fading(self) -> bool:
+        """A lock or idle fade is running, or its last step hasn't been sent yet."""
+        return not self._sess_settled or time.monotonic() - self._sess_ramp[2] < self._sess_ramp[3]
+
     def _session_factor(self, now: Optional[float] = None) -> float:
         frm, to, t0, dur = self._sess_ramp
         now = time.monotonic() if now is None else now
@@ -651,8 +656,15 @@ class Daemon:
         if target != self._sess_ramp[1]:
             dur = self.FADE_OUT_SEC if target < cur else self.FADE_IN_SEC
             self._sess_ramp = (cur, target, now, dur * abs(target - cur))
-        if now - self._sess_ramp[2] < self._sess_ramp[3] + 0.1:
+        if now - self._sess_ramp[2] < self._sess_ramp[3]:
             self._glide_active = True       # still fading: keep sending
+            self._sess_settled = False
+        elif not self._sess_settled:
+            # The fade is over, but the loop may have last looked partway through it (it looks only
+            # once a second when nothing else moves): send the final brightness once more, or the
+            # LEDs stay at whatever step of the fade went out last.
+            self._sess_settled = True
+            self._needs_update = True
 
     def _cmd_session(self, req: dict) -> dict:
         """Hooks (lock_hook, idle_hook: true/false), a test (test: seconds), settings (lock, idle:

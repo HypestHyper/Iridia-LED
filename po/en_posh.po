@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 18:46+0000\n"
+"POT-Creation-Date: 2026-10-27 21:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -805,9 +805,8 @@ msgstr "Nothing is observed whilst both are Leave be."
 msgid "Your idle daemon says you're away."
 msgstr "Your idle daemon reports that you have stepped away."
 
-#, fuzzy
 msgid "Notifications"
-msgstr "Animated Spectacles"
+msgstr "Correspondence"
 
 msgid ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
@@ -819,46 +818,69 @@ msgstr ""
 msgid "Flash LEDs for notifications"
 msgstr "Flash the lamps for notifications"
 
-#, fuzzy
 msgid "Which LEDs"
-msgstr "Count the lamps"
+msgstr "Which lamps"
 
-#, fuzzy
+msgid ""
+"Or pick them on the Layout tab with the Notifications tool, which also sets the A and B points a "
+"moving flash runs between."
+msgstr ""
+"Or choose them on the Layout tab with the Correspondence tool, which also sets the points A and B"
+" between which a moving flash travels."
+
 msgid "No strips yet"
-msgstr "No arrangements as yet"
-
-#, fuzzy
-msgid "Pulse"
-msgstr "Close"
-
-#, fuzzy
-msgid "Flash"
-msgstr "Flash beyond"
-
-#, fuzzy
-msgid "Sweep"
-msgstr "Leave be"
+msgstr "No strips as yet"
 
 msgid "Effect"
 msgstr "Spectacle"
 
-#, fuzzy
-msgid "for"
-msgstr "Forget"
+msgid "Direction"
+msgstr "Direction"
 
-#, fuzzy
+msgid "Band"
+msgstr "Band"
+
+msgid "Plays"
+msgstr "Performances"
+
+msgid "times"
+msgstr "times"
+
+msgid "Brightness"
+msgstr "Brightness"
+
+msgid "Length"
+msgstr "Duration"
+
 msgid "seconds"
-msgstr "Second colour"
+msgstr "seconds"
 
 msgid "One per app"
 msgstr "One for each application"
 
-#, fuzzy
 msgid "Custom"
-msgstr "A colour of one's own…"
+msgstr "Bespoke"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent notifications flash red"
+
+msgid "The same effect"
+msgstr "The same effect"
+
+msgid "Urgent ones use"
+msgstr "Urgent ones use"
+
+msgid "Apps with their own look"
+msgstr "Applications with a look of their own"
+
+msgid "No apps yet"
+msgstr "No applications as yet"
+
+msgid "Default effect"
+msgstr "Customary effect"
+
+msgid "Default colour"
+msgstr "Customary colour"
 
 msgid "Every app"
 msgstr "Every application"
@@ -875,9 +897,8 @@ msgstr "Applications appear here once they have sent a notification."
 msgid "Not while Do Not Disturb is on"
 msgstr "Not while Do Not Disturb is on"
 
-#, fuzzy
 msgid "Not during night mode"
-msgstr "Slow the spectacles at night"
+msgstr "Not during the night"
 
 msgid "Couldn't save"
 msgstr "Most regrettably, it could not be preserved"
@@ -895,17 +916,12 @@ msgstr "The whole of it"
 msgid "Part {n}"
 msgstr "Portion {n}"
 
-#, fuzzy
 msgid "Some LEDs"
-msgstr "Attend to lamps"
+msgstr "Some lamps"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "part {n}"
-msgstr "Portion {n}"
-
-#, fuzzy, python-brace-format
-msgid "LEDs {a} to {b}"
-msgstr "Conceal lamps {a} to {b}"
+msgstr "part {n}"
 
 msgid "all of it"
 msgstr "the whole of it"
@@ -915,6 +931,21 @@ msgstr "Remove"
 
 msgid "None yet: pick a strip and press Add."
 msgstr "None as yet: choose a strip and press Add."
+
+msgid "wallpaper colour"
+msgstr "the wallpaper colour"
+
+msgid "its own colour"
+msgstr "its own colour"
+
+msgid "default effect"
+msgstr "customary effect"
+
+msgid "default colour"
+msgstr "customary colour"
+
+msgid "None: every app uses the settings above."
+msgstr "None: every application follows the settings above."
 
 msgid ""
 "Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
@@ -929,9 +960,8 @@ msgstr "Listening for notifications."
 msgid "Pick some LEDs to start listening."
 msgstr "Choose some lamps to begin listening."
 
-#, fuzzy
 msgid "Off."
-msgstr "Unadorned"
+msgstr "Off."
 
 msgid "Saved."
 msgstr "Preserved."
@@ -1861,9 +1891,6 @@ msgstr "Hold each colour"
 msgid "Follow the layout"
 msgstr "Follow the arrangement"
 
-msgid "Direction"
-msgstr "Direction"
-
 msgid "Keep zones with this effect in step"
 msgstr "Keep zones with this spectacle in step"
 
@@ -2003,9 +2030,6 @@ msgstr "As you were"
 
 msgid "Pick the color"
 msgstr "Choose the colour"
-
-msgid "Brightness"
-msgstr "Brightness"
 
 msgid "Static pattern"
 msgstr "A still pattern"
@@ -2189,6 +2213,77 @@ msgstr "Everything as you were"
 msgid "Failed"
 msgstr "A failure, most regrettably"
 
+msgid "Pulse"
+msgstr "Pulse"
+
+msgid "Flash"
+msgstr "Flash"
+
+msgid "Sweep"
+msgstr "Sweep"
+
+msgid "Ripple"
+msgstr "Ripple"
+
+msgid "A to B"
+msgstr "A to B"
+
+msgid "B to A"
+msgstr "B to A"
+
+msgid "A to B and back"
+msgstr "A to B and back again"
+
+msgid "From the middle out"
+msgstr "From the middle outwards"
+
+msgid ""
+"Click or drag over LEDs to flash them for a desktop notification; start on a chosen one to take "
+"LEDs out. Drag A and B to set where a moving flash runs."
+msgstr ""
+"Click or drag across lamps to have them flash for a desktop notification; begin on a chosen one "
+"to withdraw lamps. Drag A and B to set where a moving flash travels."
+
+msgid "Clear"
+msgstr "Clear"
+
+msgid "A and B"
+msgstr "A and B"
+
+msgid "Run through the room from A to B"
+msgstr "Travel through the room from A to B"
+
+msgid ""
+"The flash runs over your LEDs by where they are, across every strip, and only between A and B "
+"(Ripple: out from A, as far as B). Off: along each strip."
+msgstr ""
+"The flash travels across your lamps by where they stand, over every strip, and only between A and"
+" B (Ripple: outwards from A, as far as B). Off: along each strip."
+
+msgid "Put A and B at the ends"
+msgstr "Place A and B at the ends"
+
+msgid "Play"
+msgstr "Perform"
+
+msgid "Colours, apps and quiet times are in Settings, Notifications."
+msgstr "Colours, applications and quiet hours are in Settings, Correspondence."
+
+#, python-brace-format
+msgid "{n} LED"
+msgid_plural "{n} LEDs"
+msgstr[0] "{n} lamp"
+msgstr[1] "{n} lamps"
+
+#, python-brace-format
+msgid "{n} strip"
+msgid_plural "{n} strips"
+msgstr[0] "{n} strip"
+msgstr[1] "{n} strips"
+
+msgid "No LEDs chosen yet."
+msgstr "No lamps chosen as yet."
+
 msgid "Arrange"
 msgstr "Arrange"
 
@@ -2203,6 +2298,9 @@ msgstr "Efface (restore the zone's own colour)"
 
 msgid "Gradient"
 msgstr "Gradient"
+
+msgid "Notifications: which LEDs flash, and where a flash runs"
+msgstr "Correspondence: which lamps flash, and where a flash travels"
 
 msgid "Paint color"
 msgstr "Paint colour"
@@ -2221,12 +2319,6 @@ msgstr "Secure the floor plan"
 
 msgid "No enabled zones yet. They show up here once the daemon reports them."
 msgstr "No zones engaged as yet. They shall appear once the daemon announces them."
-
-#, python-brace-format
-msgid "{n} LED"
-msgid_plural "{n} LEDs"
-msgstr[0] "{n} lamp"
-msgstr[1] "{n} lamps"
 
 msgid "clone"
 msgstr "twin"
@@ -2276,6 +2368,14 @@ msgid ""
 msgstr ""
 "Efface: click or drag across lamps to restore the zone's own colour (that set upon the zone or "
 "upon the Entire Household)."
+
+msgid ""
+"Notifications: click or drag over LEDs to flash them when a notification comes in (start on a "
+"ringed one to take LEDs out). Drag A and B to set where a moving flash runs; Play tries it."
+msgstr ""
+"Correspondence: click or drag across lamps to have them flash when a notification arrives (begin "
+"on a ringed one to withdraw lamps). Drag A and B to set where a moving flash travels; Perform "
+"tries it."
 
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Paint: click or drag across lamps. Painting obliges that zone to adopt the Painted pattern."
@@ -2890,9 +2990,6 @@ msgstr "For {n} RGBW lamps the OpenRGB zone requires {need}; at present the end 
 
 msgid "Erase"
 msgstr "Efface"
-
-msgid "Clear"
-msgstr "Clear"
 
 msgid "Done editing"
 msgstr "Amendments complete"

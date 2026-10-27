@@ -832,7 +832,7 @@ def test_notify_cli(d, monkeypatch, capsys):
     assert cli.main(["notify", "add", "Strip", "part", "1"]) == 0
     assert cli.main(["notify", "on", "--effect", "sweep", "--color", "#00FF00", "--duration", "2"]) == 0
     out = capsys.readouterr().out
-    assert "Hub v1.0/A: LEDs 2-2" in out and "Strip: part 1" in out and "sweep, 2.0 s, #00ff00" in out
+    assert "Hub v1.0/A: LEDs 2-2" in out and "Strip: part 1" in out and "sweep, 2.0 s, ab, band 25%, #00ff00" in out
     assert d._notify_settings()["enabled"] is True
     assert cli.main(["notify", "test"]) == 0 and d._flash is not None
     assert cli.main(["notify", "add", "nothing-here"]) == 1
@@ -872,3 +872,43 @@ def test_the_leds_come_all_the_way_back_after_unlocking(d, monkeypatch):
     tick(0.01)
     tick(1.0)
     assert d.openrgb.last("Strip") == ["ff0000"] * 4
+
+
+def test_a_flash_between_a_and_b_on_the_layout(d, monkeypatch):
+    monkeypatch.setattr("iridia.notifywatch.dnd_on", lambda: False)
+    d.notifywatch = FakeWatcher()
+    d.config.set(("devices", "Strip", "led_count"), 8)
+    pts = [[x * 10.0, 0.0] for x in range(8)]
+    monkeypatch.setattr(d, "_layout_points", lambda key, n: (pts, 10.0) if key == "Strip|" else None)
+    _cmd(d, "notify", enabled=True, targets=[{"device": "Strip"}], effect="sweep", spatial=True,
+         path={"a": [20, 0], "b": [50, 0]}, rules=[{"app": "Mail", "color": "custom", "hex": "00ff00"}])
+    d._update_all_devices()
+    d._on_notification("Mail", False)
+    d._update_notify()
+    f = d._flash
+    assert [i for i, _t in f.leds["Strip|"]] == [2, 3, 4, 5] and f.rgb == (0, 255, 0)
+    lit = set()
+    for k in range(40):
+        f.t0 = time.monotonic() - f.duration * k / 40
+        fr = _jobs(d)["Strip|"].frame(0.0)
+        lit |= {i for i, c in enumerate(fr) if c != (255, 0, 0)}
+    assert lit == {2, 3, 4, 5}                      # nothing outside A to B
+    _cmd(d, "notify", spatial=False)
+    d._flash = None
+    d._on_notification("Other", False)
+    d._update_notify()
+    assert len(d._flash.leds["Strip|"]) == 8        # without the layout: the whole strip
+
+
+def test_notify_rules_and_strip_removal(d):
+    d.notifywatch = FakeWatcher()
+    _cmd(d, "notify", targets=[{"device": "Strip", "start": 1, "end": 2}, {"device": "Strip", "start": 4, "end": 4},
+                               {"device": "Hub v1.0", "zone": "A"}])
+    r = _cmd(d, "notify", remove_zone=["Strip", ""])
+    assert r["notify"]["targets"] == [{"device": "Hub v1.0", "zone": "A"}]
+    _cmd(d, "notify", set_rule={"app": "Signal", "effect": "sweep"})
+    _cmd(d, "notify", set_rule={"app": "signal", "effect": "comet", "color": "custom", "hex": "00ff00"})
+    _cmd(d, "notify", set_rule={"app": "Mail", "color": "app"})
+    rules = _cmd(d, "notify")["notify"]["rules"]
+    assert [(r["app"], r["effect"]) for r in rules] == [("signal", "comet"), ("Mail", "default")]
+    assert _cmd(d, "notify", remove_rule="SIGNAL")["notify"]["rules"][0]["app"] == "Mail"

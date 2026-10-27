@@ -216,6 +216,7 @@ class Daemon:
         self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
         self._notify_lock = threading.Lock()
         self._flash: Optional[notifyflash.Flash] = None   # a notification flash running now
+        self._flash_sizes: Dict[str, int] = {}   # zone key -> its LED count, for the last flash's targets
         self._flash_keys: set = set()       # zones showing it through a flash job (static or paused)
         self._static_pre: Dict[str, list] = {}    # key -> the static colours before _finish, for flashes
         self._stopping = threading.Event()  # set when the daemon shuts down
@@ -478,24 +479,26 @@ class Daemon:
         now = time.monotonic()
         if self._flash is not None and now - self._flash.t0 < notifyflash.COALESCE_SEC:
             return True                     # a burst of notifications: one flash
-        if urgent and st["urgent_red"]:
-            rgb = notifyflash.URGENT
-        elif st["color"] == "app":
-            rgb = notifyflash.app_color(app)
-        elif st["color"] == "custom":
-            rgb = animations.hex_to_rgb(st["hex"])
-        else:
-            rgb = animations.hex_to_rgb(self._led_base_color() or "ffffff")
+        effect, rgb = notifyflash.style_for(st, app, urgent, self._led_base_color() or "ffffff")
         ranges = self._flash_ranges(st["targets"])
-        if not ranges:
+        positions = {}
+        if st["spatial"]:
+            for key, rs in ranges.items():
+                n = max(hi for _lo, hi in rs)
+                lp = self._layout_points(key, self._flash_sizes.get(key, n))
+                positions[key] = lp[0] if lp else None
+        leds = notifyflash.led_places(ranges, positions, effect, st["path"] if st["spatial"] else None)
+        if not leds:
             return False
-        self.logger.debug(f"Notification from {app or 'an app'}: flashing {len(ranges)} zone(s)")
-        self._flash = notifyflash.Flash(ranges, rgb, st["effect"], st["duration"], now)
+        self.logger.debug(f"Notification from {app or 'an app'}: {effect} on {len(leds)} zone(s)")
+        self._flash = notifyflash.Flash(leds, rgb, effect, st["duration"], now, direction=st["direction"],
+                                        width=st["width"], repeat=st["repeat"], brightness=st["brightness"])
         return True
 
     def _flash_ranges(self, targets: list) -> Dict[str, list]:
         """zone key -> the LEDs to flash on it, for the enabled strips the targets name."""
         out: Dict[str, list] = {}
+        self._flash_sizes = {}
         devices = self.config.devices_view
         for t in targets:
             dev_cfg = devices.get(t["device"])
@@ -515,7 +518,9 @@ class Daemon:
             else:
                 r = notifyflash.target_range(t, n, zc["sections"], zone_sections.spans)
             if r is not None:
-                out.setdefault(self._zone_key(t["device"], t["zone"]), []).append(r)
+                key = self._zone_key(t["device"], t["zone"])
+                out.setdefault(key, []).append(r)
+                self._flash_sizes[key] = n
         return out
 
     def _flash_blocked(self, device: str, zone: str, key: str) -> bool:
@@ -551,8 +556,9 @@ class Daemon:
         cur = self.config.get("notify", {})
         new = dict(cur if isinstance(cur, dict) else {})
         changed = False
-        for k in ("enabled", "targets", "effect", "color", "hex", "urgent_red", "duration", "apps",
-                  "app_list", "dnd", "night_quiet"):
+        for k in ("enabled", "targets", "effect", "direction", "width", "repeat", "brightness", "color", "hex",
+                  "urgent_red", "urgent_effect", "duration", "apps", "app_list", "rules", "path", "spatial",
+                  "dnd", "night_quiet"):
             if k in req:
                 new[k] = req[k]
                 changed = True
@@ -560,6 +566,20 @@ class Daemon:
         if isinstance(pick, list) and len(pick) == 2 and isinstance(pick[0], str):
             names = [a for a in new.get("app_list") or [] if isinstance(a, str) and a.lower() != pick[0].lower()]
             new["app_list"] = names + ([pick[0]] if pick[1] else [])
+            changed = True
+        rz = req.get("remove_zone")
+        if isinstance(rz, list) and len(rz) == 2:
+            new["targets"] = [t for t in new.get("targets") or [] if not isinstance(t, dict) or
+                              (t.get("device"), t.get("zone") or "") != (rz[0], rz[1] or "")]
+            changed = True
+        rule = notifyflash.clean_rule(req.get("set_rule"))
+        if rule is not None:
+            new["rules"] = [r for r in new.get("rules") or [] if not isinstance(r, dict) or
+                            str(r.get("app", "")).lower() != rule["app"].lower()] + [rule]
+            changed = True
+        if isinstance(req.get("remove_rule"), str):
+            new["rules"] = [r for r in new.get("rules") or [] if not isinstance(r, dict) or
+                            str(r.get("app", "")).lower() != req["remove_rule"].lower()]
             changed = True
         rm = req.get("remove_target")
         if isinstance(rm, int) and not isinstance(rm, bool):

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Notification flashes, more of them:**
+  - **On the Layout tab:** a Notifications tool (the lightning bolt) shows which LEDs flash. Click or
+    drag over LEDs to add them, or start on a ringed one to take them out. *Play* shows the flash on
+    the map and on the strips.
+  - **From A to B:** two points on the map. A moving flash then runs through the room by where your
+    LEDs really are, across every strip at once, and only between A and B. It can go A to B, B to A,
+    A to B and back, or from the middle out.
+  - **Three more effects:** *Comet*, *Fill* and *Ripple*, which spreads from A as far as B.
+  - **More settings:** the band's width, how many times it plays, a brightness cap, and an effect of
+    their own for urgent notifications.
+  - **Apps with their own look:** an effect and a colour for each app you pick.
+- Some labels of the Notifications settings had stayed in plain English in the joke languages; they're
+  translated now.
 - **The LEDs light back up fully after unlocking.** Coming back from *Off* (or *Dim*) on lock, static
   strips could stay almost dark: the half-second fade back was over before the daemon looked again, so
   its last step, at a few percent, was what stayed on the strips. The final brightness is now always

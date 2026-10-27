@@ -1482,6 +1482,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                               lambda v: self._notify_set(enabled=v))
         c.append(row)
         c.append(label(_("Which LEDs"), ("body",)))
+        c.append(label(_("Or pick them on the Layout tab with the Notifications tool, which also sets the A and B "
+                         "points a moving flash runs between."), ("small", "faint"), wrap=True))
         self._nt_list = vbox(6)
         self._nt_targets = None
         c.append(self._nt_list)
@@ -1498,12 +1500,28 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r.append(button(_("Add"), "add", "tonal small", self._notify_add))
         c.append(r)
         r = wrap_row(10)
-        self._nt["effect"] = Group([("pulse", _("Pulse")), ("flash", _("Flash")), ("sweep", _("Sweep"))],
-                                   n.get("effect", "pulse"), lambda v: self._notify_set(effect=v))
+        from iridia.ui.layout_notify import DIRECTION_NAMES, EFFECT_NAMES
+        self._nt["effect"] = Group(list(EFFECT_NAMES.items()), n.get("effect", "pulse"),
+                                   lambda v: self._notify_set(effect=v))
         r.append(hbox(10, label(_("Effect"), ("body", "dim")), self._nt["effect"]))
+        c.append(r)
+        r = wrap_row(10)
+        self._nt["direction"] = Group(list(DIRECTION_NAMES.items()), n.get("direction", "ab"),
+                                      lambda v: self._notify_set(direction=v))
+        r.append(hbox(10, label(_("Direction"), ("body", "dim")), self._nt["direction"]))
+        c.append(r)
+        r = wrap_row(10)
+        self._nt["width"] = Spin(5, 100, n.get("width", 25), lambda v: self._notify_set(width=int(v)), step=5)
+        r.append(hbox(10, label(_("Band"), ("body", "dim")), self._nt["width"], label("%", ("body", "dim"))))
+        self._nt["repeat"] = Spin(1, 5, n.get("repeat", 1), lambda v: self._notify_set(repeat=int(v)))
+        r.append(hbox(10, label(_("Plays"), ("body", "dim")), self._nt["repeat"], label(_("times"), ("body", "dim"))))
+        self._nt["brightness"] = Spin(10, 100, n.get("brightness", 100), lambda v: self._notify_set(brightness=int(v)),
+                                      step=10)
+        r.append(hbox(10, label(_("Brightness"), ("body", "dim")), self._nt["brightness"],
+                      label("%", ("body", "dim"))))
         self._nt["duration"] = Spin(0.5, 5, n.get("duration", 1.5), lambda v: self._notify_set(duration=v),
                                     step=0.5, digits=1)
-        r.append(hbox(10, label(_("for"), ("body", "dim")), self._nt["duration"],
+        r.append(hbox(10, label(_("Length"), ("body", "dim")), self._nt["duration"],
                       label(_("seconds"), ("body", "dim"))))
         c.append(r)
         r = wrap_row(10)
@@ -1522,6 +1540,27 @@ class IridiaWindow(Gtk.ApplicationWindow):
         row, self._nt["urgent_red"] = switch_row(_("Urgent notifications flash red"), bool(n.get("urgent_red", True)),
                                                  lambda v: self._notify_set(urgent_red=v))
         c.append(row)
+        urg = {"same": _("The same effect")}
+        urg.update(EFFECT_NAMES)
+        self._nt_urg_names = urg
+        self._nt_urg = Dropdown(list(urg.values()), urg.get(n.get("urgent_effect", "same"), urg["same"]),
+                                lambda v: self._notify_set(urgent_effect=next(k for k, t in urg.items() if t == v)))
+        c.append(hbox(10, label(_("Urgent ones use"), ("body", "dim")), self._nt_urg))
+        c.append(label(_("Apps with their own look"), ("body",)))
+        self._nt_rules = vbox(6)
+        self._nt_rules_now = None
+        c.append(self._nt_rules)
+        r = wrap_row(10)
+        self._nt_rule_app = Dropdown([], None, placeholder=_("No apps yet"))
+        self._nt_rule_eff = Dropdown([_("Default effect")] + list(EFFECT_NAMES.values()), _("Default effect"))
+        self._nt_rule_col = Dropdown([_("Default colour"), _("Wallpaper"), _("One per app"), _("Custom")],
+                                     _("Default colour"), lambda v: self._nt_rule_hex.set_visible(v == _("Custom")))
+        self._nt_rule_hex = Gtk.Entry(text="#00ff00", width_chars=8, max_width_chars=8, hexpand=False)
+        self._nt_rule_hex.set_visible(False)
+        r.append(hbox(10, self._nt_rule_app, self._nt_rule_eff))
+        r.append(hbox(10, self._nt_rule_col, self._nt_rule_hex))
+        r.append(button(_("Add"), "add", "tonal small", self._notify_add_rule))
+        c.append(r)
         self._nt["apps"] = Group([("all", _("Every app")), ("only", _("Only these")), ("except", _("All but these"))],
                                  n.get("apps", "all"), lambda v: self._notify_set(apps=v))
         c.append(hbox(10, label(_("From"), ("body", "dim")), self._nt["apps"]))
@@ -1633,21 +1672,49 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._nt_hex.set_visible(n.get("color") == "custom")
         if not self._nt_hex.has_focus():
             self._nt_hex.set_text("#" + str(n.get("hex", "ffffff")))
+        self._nt_urg.set_value(self._nt_urg_names.get(n.get("urgent_effect", "same")))
         targets = n.get("targets") or []
         if targets != self._nt_targets:
             self._nt_targets = targets
             widgets.clear(self._nt_list)
-            for i, t in enumerate(targets):
-                which = (_("part {n}").format(n=t["part"] + 1) if "part" in t else
-                         _("LEDs {a} to {b}").format(a=t["start"], b=t["end"]) if "start" in t else _("all of it"))
-                txt = label(f"{self._notify_strip_name(t)}: {which}", ("body",))
+            by_strip = {}
+            for t in targets:
+                by_strip.setdefault((t["device"], t.get("zone", "")), []).append(t)
+            for (dev, zn), ts in by_strip.items():
+                parts = []
+                for t in ts:
+                    if "part" in t:
+                        parts.append(_("part {n}").format(n=t["part"] + 1))
+                    elif "start" in t:
+                        parts.append(str(t["start"]) if t["start"] == t["end"] else f"{t['start']}–{t['end']}")
+                    else:
+                        parts.append(_("all of it"))
+                txt = label(f"{self._notify_strip_name(ts[0])}: " + ", ".join(parts), ("body",), wrap=True)
                 txt.set_hexpand(True)
-                rm = button(None, "close", "flat small", lambda i=i: self._notify_set(remove_target=i),
+                rm = button(None, "close", "flat small", lambda d=dev, z=zn: self._notify_set(remove_zone=[d, z]),
                             tooltip=_("Remove"))
-                row = hbox(10, txt, rm)
-                self._nt_list.append(row)
+                self._nt_list.append(hbox(10, txt, rm))
             if not targets:
                 self._nt_list.append(label(_("None yet: pick a strip and press Add."), ("small", "faint")))
+        rules = n.get("rules") or []
+        apps = sorted(set(n.get("seen") or []) | {r["app"] for r in rules}, key=str.lower)
+        self._nt_rule_app.set_items(apps, self._nt_rule_app.value() if self._nt_rule_app.value() in apps else
+                                    (apps[0] if apps else None))
+        if rules != self._nt_rules_now:
+            self._nt_rules_now = rules
+            from iridia.ui.layout_notify import EFFECT_NAMES
+            widgets.clear(self._nt_rules)
+            cols = {"accent": _("wallpaper colour"), "app": _("its own colour")}
+            for r_ in rules:
+                look = [EFFECT_NAMES.get(r_["effect"], _("default effect"))]
+                look.append("#" + r_["hex"] if r_["color"] == "custom" else cols.get(r_["color"], _("default colour")))
+                txt = label(f"{r_['app']}: " + ", ".join(look), ("body",), wrap=True)
+                txt.set_hexpand(True)
+                rm = button(None, "close", "flat small", lambda a=r_["app"]: self._notify_set(remove_rule=a),
+                            tooltip=_("Remove"))
+                self._nt_rules.append(hbox(10, txt, rm))
+            if not rules:
+                self._nt_rules.append(label(_("None: every app uses the settings above."), ("small", "faint")))
         seen = (n.get("seen") or [], n.get("app_list") or [], n.get("apps"))
         if seen != self._nt_seen:
             self._nt_seen = seen
@@ -1672,6 +1739,17 @@ class IridiaWindow(Gtk.ApplicationWindow):
             txt = _("Off.")
         if self._nt_lbl.get_label() != txt:
             self._nt_lbl.set_label(txt)
+
+    def _notify_add_rule(self):
+        from iridia.ui.layout_notify import EFFECT_NAMES
+        app = self._nt_rule_app.value()
+        if not app:
+            return
+        eff = next((k for k, t in EFFECT_NAMES.items() if t == self._nt_rule_eff.value()), "default")
+        col = {_("Wallpaper"): "accent", _("One per app"): "app", _("Custom"): "custom"}.get(
+            self._nt_rule_col.value(), "default")
+        hex6 = self._nt_rule_hex.get_text().strip().lstrip("#").lower()
+        self._notify_set(set_rule={"app": app, "effect": eff, "color": col, "hex": hex6})
 
     def _notify_app(self, app, on):
         self._notify_set(pick_app=[app, on])

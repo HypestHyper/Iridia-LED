@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 21:40+0000\n"
+"POT-Creation-Date: 2026-10-27 22:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -793,6 +793,9 @@ msgstr "Par là-bas"
 msgid "Band"
 msgstr "Bande"
 
+msgid "LEDs"
+msgstr "Café"
+
 msgid "Plays"
 msgstr "Fois"
 
@@ -804,9 +807,6 @@ msgstr "Bisou"
 
 msgid "Length"
 msgstr "Durée"
-
-msgid "seconds"
-msgstr "secondes"
 
 msgid "One per app"
 msgstr "Un fromage par app"
@@ -1723,9 +1723,6 @@ msgstr "Une nouvelle chaussette à chaque soupir"
 
 msgid "Tail length"
 msgstr "La longueur de la queue du chat"
-
-msgid "LEDs"
-msgstr "Café"
 
 msgid "Heads"
 msgstr "Les têtes de veau"

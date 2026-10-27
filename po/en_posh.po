@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 21:40+0000\n"
+"POT-Creation-Date: 2026-10-27 22:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -840,6 +840,9 @@ msgstr "Direction"
 msgid "Band"
 msgstr "Band"
 
+msgid "LEDs"
+msgstr "Lamps"
+
 msgid "Plays"
 msgstr "Performances"
 
@@ -851,9 +854,6 @@ msgstr "Brightness"
 
 msgid "Length"
 msgstr "Duration"
-
-msgid "seconds"
-msgstr "seconds"
 
 msgid "One per app"
 msgstr "One for each application"
@@ -1836,9 +1836,6 @@ msgstr "The next colour with every breath"
 
 msgid "Tail length"
 msgstr "Length of tail"
-
-msgid "LEDs"
-msgstr "Lamps"
 
 msgid "Heads"
 msgstr "Heads"

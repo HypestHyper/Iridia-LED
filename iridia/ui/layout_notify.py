@@ -8,19 +8,64 @@ import math
 import time
 from typing import Dict, Optional, Set
 
-from gi.repository import GLib
+from gi.repository import GLib, Gtk
 
 from iridia.i18n import _, ngettext
 from iridia import notifyflash, theme
 from iridia import sections as zone_sections
 from iridia.layout import led_at_path, led_points, path_points, project, split_key
-from iridia.ui.widgets import Dropdown, Spin, Toggle, button, divider, hbox, label, rgb
+from iridia.ui.widgets import Dropdown, Spin, Toggle, button, divider, hbox, label, no_scroll, rgb
 
 EFFECT_NAMES = {"pulse": _("Pulse"), "flash": _("Flash"), "sweep": _("Sweep"), "comet": _("Comet"),
                 "fill": _("Fill"), "ripple": _("Ripple")}
 DIRECTION_NAMES = {"ab": _("A to B"), "ba": _("B to A"), "abba": _("A to B and back"),
                    "out": _("From the middle out")}
 HOLD_SEC = 3.0                  # local edits win over the daemon's status for this long
+
+
+class MiniSlider(Gtk.Box):
+    """A narrow slider with its value, for side panels: name, slider, value. The callback comes once
+    the slider rests (not on every step of a drag); the mouse wheel scrolls the page, not the value."""
+
+    def __init__(self, text, lo, hi, value, step, unit, cb):
+        super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self._cb, self._unit, self._job, self._quiet = cb, unit, None, False
+        self._digits = 0 if step >= 1 else 1
+        self.append(label(text, ("body", "dim")))
+        self.scale = no_scroll(Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, lo, hi, step))
+        self.scale.set_draw_value(False)
+        self.scale.set_hexpand(True)
+        self.scale.set_size_request(110, -1)
+        self.scale.set_value(value)
+        self.scale.connect("value-changed", self._changed)
+        self.append(self.scale)
+        self._lbl = label("", ("body", "tnum"), xalign=1.0)
+        self._lbl.set_width_chars(7)
+        self.append(self._lbl)
+        self._show()
+
+    def _show(self):
+        self._lbl.set_label(f"{self.scale.get_value():.{self._digits}f} {self._unit}")
+
+    def _changed(self, *_a):
+        self._show()
+        if self._quiet:
+            return
+        if self._job:
+            GLib.source_remove(self._job)
+        self._job = GLib.timeout_add(250, self._fire)
+
+    def _fire(self):
+        self._job = None
+        self._cb(round(self.scale.get_value(), self._digits))
+        return False
+
+    def set_quiet(self, v):
+        if self._job is None and abs(self.scale.get_value() - v) > 1e-9:
+            self._quiet = True
+            self.scale.set_value(v)
+            self._show()
+            self._quiet = False
 
 
 class NotifyLayer:
@@ -204,7 +249,7 @@ class NotifyLayer:
         st = self._nt
         accent = self.status.get("led_color") or (self.status.get("extracted_colors") or ["ffffff"])[0]
         effect, color = notifyflash.style_for(st, "Iridia", False, accent)
-        ranges, positions = {}, {}
+        ranges, positions, spacing = {}, {}, {}
         for s in self.layout.strips:
             if s.get("clone") or s["zone"] not in self._enabled:
                 continue
@@ -213,13 +258,14 @@ class NotifyLayer:
             if chosen:
                 ranges[s["zone"]] = [(i, i + 1) for i in chosen]
                 positions[s["zone"]] = led_points(s, n)
+                spacing[s["zone"]] = s["segments"][0]["spacing"]
         # ranges here are single LEDs; along a strip, t still has to run over the whole chosen run
         leds = notifyflash.led_places(self._nt_runs(ranges), positions, effect,
-                                      st["path"] if st["spatial"] else None)
+                                      st["path"] if st["spatial"] else None, spacing)
         if not leds:
             return
         self._nt_preview = notifyflash.Flash(leds, color, effect, st["duration"], direction=st["direction"],
-                                             width=st["width"], repeat=st["repeat"], brightness=st["brightness"])
+                                             band=st["band"], repeat=st["repeat"], brightness=st["brightness"])
         if self._nt_job is None:
             self._nt_job = GLib.timeout_add(33, self._nt_tick)
         self._send(lambda: self.app.client.notify(test=True))
@@ -276,11 +322,12 @@ class NotifyLayer:
                       lambda v: self._nt_set(direction=self._key_of(DIRECTION_NAMES, v)))
         self._ntw["direction"] = dr
         p.append(hbox(10, label(_("Direction"), ("body", "dim")), dr))
-        self._ntw["width"] = Spin(5, 100, st["width"], lambda v: self._nt_set(width=int(v)), step=5)
-        p.append(hbox(10, label(_("Band"), ("body", "dim")), self._ntw["width"], label("%", ("body", "dim"))))
-        self._ntw["duration"] = Spin(0.5, 5, st["duration"], lambda v: self._nt_set(duration=v), step=0.5, digits=1)
-        p.append(hbox(10, label(_("Length"), ("body", "dim")), self._ntw["duration"],
-                      label(_("seconds"), ("body", "dim"))))
+        self._ntw["band"] = MiniSlider(_("Band"), 1, notifyflash.BAND_MAX, st["band"], 1, _("LEDs"),
+                                       lambda v: self._nt_set(band=int(v)))
+        p.append(self._ntw["band"])
+        self._ntw["duration"] = MiniSlider(_("Length"), 0.5, 5, st["duration"], 0.1, "s",
+                                           lambda v: self._nt_set(duration=v))
+        p.append(self._ntw["duration"])
         self._ntw["repeat"] = Spin(1, 5, st["repeat"], lambda v: self._nt_set(repeat=int(v)))
         p.append(hbox(10, label(_("Plays"), ("body", "dim")), self._ntw["repeat"], label(_("times"), ("body", "dim"))))
         p.append(divider())
@@ -316,6 +363,6 @@ class NotifyLayer:
         w["direction"].set_value(DIRECTION_NAMES[st["direction"]])
         moving = st["effect"] in notifyflash.MOVING
         w["direction"].set_sensitive(moving and st["effect"] != "ripple")
-        w["width"].set_sensitive(moving)
-        for k in ("width", "duration", "repeat"):
+        w["band"].set_sensitive(moving)
+        for k in ("band", "duration", "repeat"):
             w[k].set_quiet(st[k])

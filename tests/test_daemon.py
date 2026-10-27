@@ -832,7 +832,7 @@ def test_notify_cli(d, monkeypatch, capsys):
     assert cli.main(["notify", "add", "Strip", "part", "1"]) == 0
     assert cli.main(["notify", "on", "--effect", "sweep", "--color", "#00FF00", "--duration", "2"]) == 0
     out = capsys.readouterr().out
-    assert "Hub v1.0/A: LEDs 2-2" in out and "Strip: part 1" in out and "sweep, 2.0 s, ab, band 25%, #00ff00" in out
+    assert "Hub v1.0/A: LEDs 2-2" in out and "Strip: part 1" in out and "sweep, 2.0 s, ab, band 3 LEDs, #00ff00" in out
     assert d._notify_settings()["enabled"] is True
     assert cli.main(["notify", "test"]) == 0 and d._flash is not None
     assert cli.main(["notify", "add", "nothing-here"]) == 1
@@ -886,7 +886,7 @@ def test_a_flash_between_a_and_b_on_the_layout(d, monkeypatch):
     d._on_notification("Mail", False)
     d._update_notify()
     f = d._flash
-    assert [i for i, _t in f.leds["Strip|"]] == [2, 3, 4, 5] and f.rgb == (0, 255, 0)
+    assert [i for i, _t, _s in f.leds["Strip|"]] == [2, 3, 4, 5] and f.rgb == (0, 255, 0)
     lit = set()
     for k in range(40):
         f.t0 = time.monotonic() - f.duration * k / 40

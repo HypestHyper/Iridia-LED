@@ -6,7 +6,10 @@ the same code for its preview.
 Every LED a flash lights gets a place t from 0 to 1 along it. With two points A and B set on the
 Layout tab, a moving effect runs through the room: t is where the LED lies between A and B, and LEDs
 outside that stretch stay out of it. Without them, t goes along each strip's LEDs. The direction then
-says how the band travels over t: A to B, B to A, A to B and back, or from the middle out."""
+says how the band travels over t: A to B, B to A, A to B and back, or from the middle out.
+
+Each LED also carries how many LEDs long its stretch is, so the band (and the comet's tail, the
+ripple's ring) is a number of LEDs, whatever the stretch's length, with about one LED of soft edge."""
 import colorsys
 import math
 import time
@@ -14,7 +17,7 @@ import zlib
 from typing import Dict, List, Optional, Sequence, Tuple
 
 EFFECTS = ("pulse", "flash", "sweep", "comet", "fill", "ripple")
-MOVING = ("sweep", "comet", "fill", "ripple")       # these use the direction, the width and A/B
+MOVING = ("sweep", "comet", "fill", "ripple")       # these use the direction, the band and A/B
 DIRECTIONS = ("ab", "ba", "abba", "out")
 COLORS = ("accent", "app", "custom")
 APPS = ("all", "only", "except")
@@ -23,7 +26,8 @@ RULES_MAX = 20
 COALESCE_SEC = 0.8              # notifications this close together are one flash
 URGENT = (255, 0, 0)
 
-DEFAULTS = {"enabled": False, "targets": [], "effect": "pulse", "direction": "ab", "width": 25,
+BAND_MAX = 30
+DEFAULTS = {"enabled": False, "targets": [], "effect": "pulse", "direction": "ab", "band": 3,
             "repeat": 1, "brightness": 100, "color": "accent", "hex": "ffffff", "urgent_red": True,
             "urgent_effect": "same", "duration": 1.5, "apps": "all", "app_list": [], "rules": [],
             "path": None, "spatial": False, "dnd": True, "night_quiet": False, "seen": []}
@@ -103,7 +107,7 @@ def clean(raw) -> dict:
     out["targets"] = targets[:256]
     out["effect"] = raw.get("effect") if raw.get("effect") in EFFECTS else "pulse"
     out["direction"] = raw.get("direction") if raw.get("direction") in DIRECTIONS else "ab"
-    out["width"] = int(_num(raw.get("width"), 25, 5, 100))
+    out["band"] = int(_num(raw.get("band"), 3, 1, BAND_MAX))
     out["repeat"] = int(_num(raw.get("repeat"), 1, 1, 5))
     out["brightness"] = int(_num(raw.get("brightness"), 100, 10, 100))
     out["color"] = raw.get("color") if raw.get("color") in COLORS else "accent"
@@ -205,14 +209,17 @@ def targets_for(device: str, zone: str, leds) -> List[dict]:
 
 
 def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Optional[list]],
-               effect: str, path: Optional[dict]) -> Dict[str, List[Tuple[int, float]]]:
-    """key -> [(LED, t)]: where each LED of the flash lies along it, 0 to 1.
+               effect: str, path: Optional[dict], spacing: Optional[Dict[str, float]] = None
+               ) -> Dict[str, List[Tuple[int, float, float]]]:
+    """key -> [(LED, t, span)]: where each LED of the flash lies along it, 0 to 1, and how many LEDs
+    long its stretch is (so a band can be a number of LEDs).
 
     path ({"a": [x, y], "b": [x, y]}, layout units) and positions (key -> each LED's [x, y] on the
     Layout tab, or None) make a moving effect run through the room: t is the LED's place between A
     and B (the ripple: its distance from A, with B on the edge), and LEDs outside that stretch are
-    left out. Otherwise, and for strips not on the Layout tab, t goes along each range's LEDs (the
-    ripple: out from its middle)."""
+    left out (spacing: key -> the distance between two of its LEDs there, for the span). Otherwise,
+    and for strips not on the Layout tab, t goes along each range's LEDs (the ripple: out from its
+    middle)."""
     out: Dict[str, List[Tuple[int, float]]] = {}
     a = b = None
     if path and effect in MOVING:
@@ -221,6 +228,9 @@ def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Op
             a = b = None
     for key, rs in ranges.items():
         pts = positions.get(key) if a else None
+        if pts is not None:
+            gap = (spacing or {}).get(key) or 16.6
+            span = max(1.0, math.hypot(b[0] - a[0], b[1] - a[1]) / gap)
         leds, seen = [], set()
         for lo, hi in rs:
             for i in range(lo, hi):
@@ -235,23 +245,26 @@ def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Op
                     else:
                         t = ((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy)
                     if -1e-9 <= t <= 1 + 1e-9:
-                        leds.append((i, min(1.0, max(0.0, t))))
+                        leds.append((i, min(1.0, max(0.0, t)), span))
                 else:
                     t = (i - lo + 0.5) / (hi - lo)
-                    leds.append((i, abs(2 * t - 1) if effect == "ripple" else t))
+                    if effect == "ripple":
+                        leds.append((i, abs(2 * t - 1), max(1.0, (hi - lo) / 2)))
+                    else:
+                        leds.append((i, t, float(hi - lo)))
         if leds:
             out[key] = leds
     return out
 
 
 class Flash:
-    """One flash, started now: leds is key -> [(LED, t)] from led_places()."""
+    """One flash, started now: leds is key -> [(LED, t, span)] from led_places(); band is in LEDs."""
 
-    def __init__(self, leds: Dict[str, List[Tuple[int, float]]], rgb: Tuple[int, int, int], effect: str,
-                 duration: float, now: Optional[float] = None, direction: str = "ab", width: int = 25,
+    def __init__(self, leds: Dict[str, List[Tuple[int, float, float]]], rgb: Tuple[int, int, int], effect: str,
+                 duration: float, now: Optional[float] = None, direction: str = "ab", band: int = 3,
                  repeat: int = 1, brightness: int = 100):
         self.leds, self.rgb, self.effect, self.duration = leds, rgb, effect, duration
-        self.direction, self.width, self.repeat = direction, width / 100.0, max(1, repeat)
+        self.direction, self.band, self.repeat = direction, band, max(1, repeat)
         self.brightness = brightness / 100.0
         self.t0 = time.monotonic() if now is None else now
 
@@ -280,10 +293,10 @@ class Flash:
         fr, fg, fb = (c * s for c in self.rgb)
         out = list(frame)
         n = len(out)
-        for i, t in leds:
+        for i, t, span in leds:
             if i >= n:
                 continue
-            a = envelope(self.effect, x, t, self.direction, self.width)
+            a = envelope(self.effect, x, t, self.direction, self.band / span, 1.0 / span)
             if a <= 0:
                 continue
             r, g, b = out[i]
@@ -291,17 +304,22 @@ class Flash:
         return out
 
 
-def envelope(effect: str, x: float, t: float, direction: str = "ab", width: float = 0.25) -> float:
+def _soft(v: float) -> float:
+    return max(0.0, min(1.0, v))
+
+
+def envelope(effect: str, x: float, t: float, direction: str = "ab", band: float = 0.25,
+             edge: float = 0.05) -> float:
     """How much of the flash colour an LED at t (0 to 1 along the flash) shows at x (0 to 1 through
-    one play)."""
+    one play). band and edge are parts of the way: the band's length and its soft edge (an LED)."""
     if effect == "flash":
         return 1.0 if (x * 3) % 1.0 < 0.5 else 0.0              # three blinks
     if effect == "pulse":
         return math.sin(2 * math.pi * x) ** 2                     # two soft swells
-    w = max(0.02, width)
+    w, e = max(1e-3, band), max(1e-3, edge)
     if effect == "ripple":                                       # a ring spreading out
-        c = -w / 2 + x * (1 + w)
-        return max(0.0, 1.0 - abs(t - c) / (w / 2))
+        head = -w / 2 - e + x * (1 + w + 2 * e)
+        return _soft((w / 2 + e / 2 - abs(t - head)) / e)
     if direction == "out":
         t = abs(2 * t - 1)                                       # from the middle out to both ends
     if direction == "ba":
@@ -310,16 +328,16 @@ def envelope(effect: str, x: float, t: float, direction: str = "ab", width: floa
     c = (2 * x if x < 0.5 else 2 - 2 * x) if direction == "abba" else x
     if effect == "fill":
         if direction == "abba":
-            edge = c                                             # fills to B, then empties back to A
-            fade = 1.0
+            edge_at, fade = -e + c * (1 + 2 * e), 1.0             # fills to B, then empties back to A
         else:
-            edge = min(1.0, x / 0.6)                             # fills, then fades out
+            edge_at = -e + min(1.0, x / 0.6) * (1 + 2 * e)       # fills, then fades out
             fade = 1.0 if x < 0.6 else max(0.0, (1 - x) / 0.4)
-        return fade * max(0.0, min(1.0, (edge - t) / 0.04 + 0.5))
-    head = -w / 2 + c * (1 + w)
+        return fade * _soft((edge_at - t) / e + 0.5)
     if effect == "comet":                                        # a bright head with a tail behind it
+        head = -e + c * (1 + w + 2 * e)
         d = (t - head) if back else (head - t)                   # how far behind the head
         if d < 0:
-            return max(0.0, 1.0 + d / 0.03)
+            return _soft(1.0 + d / e)
         return max(0.0, 1.0 - d / w) ** 2
-    return max(0.0, 1.0 - abs(t - head) / (w / 2))                # sweep: a band running along
+    head = -w / 2 - e + c * (1 + w + 2 * e)                       # sweep: a band running along
+    return _soft((w / 2 + e / 2 - abs(t - head)) / e)

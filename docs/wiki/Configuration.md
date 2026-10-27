@@ -67,7 +67,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `session.idle_minutes`, `session.dim` | `10`, `20` | Minutes without input; brightness in percent for `dim` |
 | `notify.enabled`, `notify.targets` | `false`, `[]` | Flash LEDs for notifications; which LEDs: `{"device", "zone"}` plus `"part"` (0 = the first) or `"start"`/`"end"` (LED numbers from 1), or neither for the whole strip (see [Notifications](Notifications.md)) |
 | `notify.effect`, `notify.duration` | `pulse`, `1.5` | `pulse`, `flash`, `sweep`, `comet`, `fill` or `ripple`; seconds (0.5 to 5) |
-| `notify.direction`, `notify.width`, `notify.repeat`, `notify.brightness` | `ab`, `25`, `1`, `100` | `ab`, `ba`, `abba` or `out`; band width in percent; plays (1 to 5); percent |
+| `notify.direction`, `notify.band`, `notify.repeat`, `notify.brightness` | `ab`, `3`, `1`, `100` | `ab`, `ba`, `abba` or `out`; how many LEDs light at once (1 to 30); plays (1 to 5); percent |
 | `notify.path`, `notify.spatial` | `null`, `false` | `{"a": [x, y], "b": [x, y]}` in layout units, and whether a moving flash runs between them |
 | `notify.urgent_effect`, `notify.rules` | `same`, `[]` | an effect for urgent ones; `[{"app", "effect", "color", "hex"}]` per app (`default` keeps the general setting) |
 | `notify.color`, `notify.hex`, `notify.urgent_red` | `accent`, `ffffff`, `true` | `accent` (the wallpaper colour), `app` (one per app) or `custom` (`notify.hex`); urgent ones red |

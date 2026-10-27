@@ -35,7 +35,7 @@ moving flash runs along each strip's own LEDs instead.
 | --- | --- |
 | *Effect* | *Pulse* (two soft swells), *Flash* (three blinks), *Sweep* (a band running along), *Comet* (a bright head with a tail), *Fill* (fills up, then fades) or *Ripple* (a ring spreading out) |
 | *Direction* | For the moving ones: *A to B*, *B to A*, *A to B and back*, or *From the middle out* |
-| *Band* | How wide the band, the comet's tail or the ripple's ring is, as a part of the way |
+| *Band* | How many LEDs light at once (1 to 30): the band, the comet's tail or the ripple's ring, with about one LED of soft edge, however long the stretch |
 | *Plays*, *Length* | How many times it plays (1 to 5), each 0.5 to 5 seconds |
 | *Brightness* | 10 to 100% of the strip's brightness |
 | *Color* | *Wallpaper* (the colour your LEDs follow), *One per app* (each app gets its own colour, the same every time) or *Custom* |
@@ -72,7 +72,7 @@ iridia notify                           # settings, and what it's listening with
 iridia notify add Desk part 2           # a strip's name, Device/Zone, a device or all
 iridia notify add Case leds 1-10
 iridia notify on --effect sweep --color app --duration 2
-iridia notify --effect comet --direction abba --band 30 --plays 2 --brightness 80
+iridia notify --effect comet --direction abba --band 4 --plays 2 --brightness 80
 iridia notify --layout on                # run from A to B (set them on the Layout tab)
 iridia notify test                      # flash now (--urgent: as an urgent one)
 iridia notify clear                     # no LEDs

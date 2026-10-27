@@ -689,7 +689,7 @@ def _notify_text(r):
              + (f", listening through {n.get('method')}" if n.get("listening") else ""),
              f"Effect: {n.get('effect')}, {n.get('duration')} s"
              + (f" x{n['repeat']}" if n.get("repeat", 1) > 1 else "")
-             + (f", {n.get('direction')}, band {n.get('width')}%" if n.get("effect") in
+             + (f", {n.get('direction')}, band {n.get('band')} LEDs" if n.get("effect") in
                 ("sweep", "comet", "fill", "ripple") else "") + f", {look}",
              f"From: {apps}"]
     if n.get("path"):
@@ -744,7 +744,7 @@ def cmd_notify(args):
         return 2
     if args.effect:
         req["effect"] = args.effect
-    for name, key in (("direction", "direction"), ("band", "width"), ("plays", "repeat"),
+    for name, key in (("direction", "direction"), ("band", "band"), ("plays", "repeat"),
                       ("brightness", "brightness")):
         if getattr(args, name) is not None:
             req[key] = getattr(args, name)
@@ -1503,7 +1503,7 @@ def main(argv=None):
     nt_parser.add_argument("--effect", choices=["pulse", "flash", "sweep", "comet", "fill", "ripple"])
     nt_parser.add_argument("--direction", choices=["ab", "ba", "abba", "out"],
                            help="moving effects: A to B, B to A, A to B and back, or from the middle out")
-    nt_parser.add_argument("--band", type=int, help="moving effects: the band's width, 5 to 100 (percent)")
+    nt_parser.add_argument("--band", type=int, help="moving effects: how many LEDs light at once, 1 to 30")
     nt_parser.add_argument("--plays", type=int, help="how many times it plays, 1 to 5")
     nt_parser.add_argument("--brightness", type=int, help="10 to 100 (percent)")
     nt_parser.add_argument("--layout", choices=["on", "off"],

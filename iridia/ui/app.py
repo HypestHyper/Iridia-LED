@@ -1511,18 +1511,21 @@ class IridiaWindow(Gtk.ApplicationWindow):
         r.append(hbox(10, label(_("Direction"), ("body", "dim")), self._nt["direction"]))
         c.append(r)
         r = wrap_row(10)
-        self._nt["width"] = Spin(5, 100, n.get("width", 25), lambda v: self._notify_set(width=int(v)), step=5)
-        r.append(hbox(10, label(_("Band"), ("body", "dim")), self._nt["width"], label("%", ("body", "dim"))))
+        from iridia.ui.layout_notify import MiniSlider
+        self._nt_band = MiniSlider(_("Band"), 1, 30, n.get("band", 3), 1, _("LEDs"),
+                                   lambda v: self._notify_set(band=int(v)))
+        self._nt_band.set_size_request(300, -1)
+        r.append(self._nt_band)
         self._nt["repeat"] = Spin(1, 5, n.get("repeat", 1), lambda v: self._notify_set(repeat=int(v)))
         r.append(hbox(10, label(_("Plays"), ("body", "dim")), self._nt["repeat"], label(_("times"), ("body", "dim"))))
         self._nt["brightness"] = Spin(10, 100, n.get("brightness", 100), lambda v: self._notify_set(brightness=int(v)),
                                       step=10)
         r.append(hbox(10, label(_("Brightness"), ("body", "dim")), self._nt["brightness"],
                       label("%", ("body", "dim"))))
-        self._nt["duration"] = Spin(0.5, 5, n.get("duration", 1.5), lambda v: self._notify_set(duration=v),
-                                    step=0.5, digits=1)
-        r.append(hbox(10, label(_("Length"), ("body", "dim")), self._nt["duration"],
-                      label(_("seconds"), ("body", "dim"))))
+        self._nt_dur = MiniSlider(_("Length"), 0.5, 5, n.get("duration", 1.5), 0.1, "s",
+                                  lambda v: self._notify_set(duration=v))
+        self._nt_dur.set_size_request(300, -1)
+        r.append(self._nt_dur)
         c.append(r)
         r = wrap_row(10)
         self._nt["color"] = Group([("accent", _("Wallpaper")), ("app", _("One per app")), ("custom", _("Custom"))],
@@ -1673,6 +1676,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if not self._nt_hex.has_focus():
             self._nt_hex.set_text("#" + str(n.get("hex", "ffffff")))
         self._nt_urg.set_value(self._nt_urg_names.get(n.get("urgent_effect", "same")))
+        self._nt_band.set_quiet(n.get("band", 3))
+        self._nt_dur.set_quiet(n.get("duration", 1.5))
         targets = n.get("targets") or []
         if targets != self._nt_targets:
             self._nt_targets = targets

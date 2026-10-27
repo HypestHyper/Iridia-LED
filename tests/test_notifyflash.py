@@ -59,7 +59,7 @@ def test_directions():
         assert (_head(f, 20, 0.25) < _head(f, 20, 0.75)) == (d == "ab")
     f = nf.Flash(leds, (255, 0, 0), "sweep", 1.0, now=0.0, direction="abba")
     assert _head(f, 20, 0.45) > 14 and _head(f, 20, 0.95) < 6          # there and back
-    f = nf.Flash(leds, (255, 0, 0), "sweep", 1.0, now=0.0, direction="out", width=10)
+    f = nf.Flash(leds, (255, 0, 0), "sweep", 1.0, now=0.0, direction="out", band=2)
     assert _lit(f, "k", 20, 0.05) <= set(range(7, 13))                  # starts in the middle
     assert _lit(f, "k", 20, 0.9) <= set(range(0, 3)) | set(range(17, 20))
 
@@ -69,22 +69,23 @@ def test_a_to_b_runs_through_the_room_and_leaves_out_what_is_outside():
     pos = {"s1": [[x * 10.0, 0.0] for x in range(10)], "s2": [[x * 10.0, 50.0] for x in range(10)]}
     path = {"a": [20.0, 0.0], "b": [70.0, 0.0]}
     leds = nf.led_places({"s1": [(0, 10)], "s2": [(0, 10)]}, pos, "sweep", path)
-    assert [i for i, _t in leds["s1"]] == list(range(2, 8))              # only between A and B
-    assert dict(leds["s1"])[2] == 0.0 and dict(leds["s1"])[7] == 1.0
-    assert dict(leds["s1"]) == dict(leds["s2"])                          # the wave crosses both at once
+    t1 = {i: t for i, t, _s in leds["s1"]}
+    assert list(t1) == list(range(2, 8))                                 # only between A and B
+    assert t1[2] == 0.0 and t1[7] == 1.0
+    assert t1 == {i: t for i, t, _s in leds["s2"]}                       # the wave crosses both at once
     # a strip not on the layout runs along its own LEDs
     leds = nf.led_places({"s1": [(0, 10)], "x": [(0, 4)]}, {"s1": pos["s1"], "x": None}, "sweep", path)
-    assert [round(t, 3) for _i, t in leds["x"]] == [0.125, 0.375, 0.625, 0.875]
+    assert [round(t, 3) for _i, t, _s in leds["x"]] == [0.125, 0.375, 0.625, 0.875]
     # pulse and flash light every chosen LED, A and B or not
     assert len(nf.led_places({"s1": [(0, 10)]}, pos, "pulse", path)["s1"]) == 10
     # the ripple: distance from A, with B on the edge
-    rip = dict(nf.led_places({"s1": [(0, 10)]}, pos, "ripple", path)["s1"])
+    rip = {i: t for i, t, _s in nf.led_places({"s1": [(0, 10)]}, pos, "ripple", path)["s1"]}
     assert rip[2] == 0.0 and rip[7] == 1.0 and rip[0] == 0.4 and 8 not in rip
 
 
 def test_comet_has_a_tail_and_fill_fills():
     leds = nf.led_places({"k": [(0, 20)]}, {}, "comet", None)
-    f = nf.Flash(leds, (255, 0, 0), "comet", 1.0, now=0.0, width=40)
+    f = nf.Flash(leds, (255, 0, 0), "comet", 1.0, now=0.0, band=8)
     fr = f.mix("k", [(0, 0, 0)] * 20, now=0.5)
     h = max(range(20), key=lambda i: fr[i][0])
     assert fr[h - 2][0] > fr[h - 5][0] > 0 and fr[min(19, h + 2)][0] == 0   # tail behind, dark ahead
@@ -98,7 +99,8 @@ def test_repeat_and_brightness():
     f = nf.Flash(leds, (200, 0, 0), "pulse", 1.0, now=0.0, repeat=3, brightness=50)
     assert not f.done(now=2.9) and f.done(now=3.0)
     assert f.mix("k", [(0, 0, 0)] * 4, now=2.25)[0] == (100, 0, 0)           # the third play, at half
-    assert nf.clean({"repeat": 9, "brightness": 1, "width": 500})["repeat"] == 5
+    c = nf.clean({"repeat": 9, "brightness": 1, "band": 500})
+    assert (c["repeat"], c["brightness"], c["band"]) == (5, 10, nf.BAND_MAX)
 
 
 def test_app_rules_and_urgent():
@@ -121,3 +123,27 @@ def test_painted_leds_become_ranges():
     assert nf.clean({"path": {"a": [1, 2], "b": [3, "x"]}, "spatial": True})["spatial"] is False
     st = nf.clean({"path": {"a": [1, 2], "b": [3, 4]}, "spatial": True})
     assert st["path"] == {"a": [1.0, 2.0], "b": [3.0, 4.0]} and st["spatial"] is True
+
+
+def test_the_band_is_a_number_of_leds_however_long_the_stretch():
+    for n in (10, 20, 60, 150):
+        for eff in ("sweep", "ripple"):
+            leds = nf.led_places({"k": [(0, n)]}, {}, eff, None)
+            f = nf.Flash(leds, (255, 0, 0), eff, 1.0, now=0.0, band=3)
+            most = 0
+            for k in range(400):
+                fr = f.mix("k", [(0, 0, 0)] * n, now=k / 400)
+                full = sum(1 for c in fr if c[0] >= 250)
+                lit = sum(1 for c in fr if c[0] > 0)
+                most = max(most, lit)                   # a ripple on a strip: two rings, both counted
+                assert full <= (6 if eff == "ripple" else 3), (n, eff)
+            assert most <= (10 if eff == "ripple" else 5), (n, eff, most)  # 3 LEDs and a soft LED each side
+
+
+def test_between_a_and_b_the_band_is_counted_in_leds_too():
+    pos = {"s": [[x * 10.0, 0.0] for x in range(40)]}
+    leds = nf.led_places({"s": [(0, 40)]}, pos, "sweep", {"a": [0, 0], "b": [390, 0]}, {"s": 10.0})
+    assert leds["s"][0][2] == 39.0                       # 39 LED gaps from A to B
+    f = nf.Flash(leds, (255, 0, 0), "sweep", 1.0, now=0.0, band=4)
+    fr = f.mix("s", [(0, 0, 0)] * 40, now=0.5)
+    assert 3 <= sum(1 for c in fr if c[0] >= 250) <= 4

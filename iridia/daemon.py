@@ -481,18 +481,20 @@ class Daemon:
             return True                     # a burst of notifications: one flash
         effect, rgb = notifyflash.style_for(st, app, urgent, self._led_base_color() or "ffffff")
         ranges = self._flash_ranges(st["targets"])
-        positions = {}
+        positions, spacing = {}, {}
         if st["spatial"]:
             for key, rs in ranges.items():
                 n = max(hi for _lo, hi in rs)
                 lp = self._layout_points(key, self._flash_sizes.get(key, n))
                 positions[key] = lp[0] if lp else None
-        leds = notifyflash.led_places(ranges, positions, effect, st["path"] if st["spatial"] else None)
+                if lp:
+                    spacing[key] = lp[1]
+        leds = notifyflash.led_places(ranges, positions, effect, st["path"] if st["spatial"] else None, spacing)
         if not leds:
             return False
         self.logger.debug(f"Notification from {app or 'an app'}: {effect} on {len(leds)} zone(s)")
         self._flash = notifyflash.Flash(leds, rgb, effect, st["duration"], now, direction=st["direction"],
-                                        width=st["width"], repeat=st["repeat"], brightness=st["brightness"])
+                                        band=st["band"], repeat=st["repeat"], brightness=st["brightness"])
         return True
 
     def _flash_ranges(self, targets: list) -> Dict[str, list]:
@@ -556,7 +558,7 @@ class Daemon:
         cur = self.config.get("notify", {})
         new = dict(cur if isinstance(cur, dict) else {})
         changed = False
-        for k in ("enabled", "targets", "effect", "direction", "width", "repeat", "brightness", "color", "hex",
+        for k in ("enabled", "targets", "effect", "direction", "band", "repeat", "brightness", "color", "hex",
                   "urgent_red", "urgent_effect", "duration", "apps", "app_list", "rules", "path", "spatial",
                   "dnd", "night_quiet"):
             if k in req:

@@ -10,8 +10,9 @@
     LEDs really are, across every strip at once, and only between A and B. It can go A to B, B to A,
     A to B and back, or from the middle out.
   - **Three more effects:** *Comet*, *Fill* and *Ripple*, which spreads from A as far as B.
-  - **More settings:** the band's width, how many times it plays, a brightness cap, and an effect of
-    their own for urgent notifications.
+  - **More settings:** the band (how many LEDs light at once, 1 to 30, with crisp edges, so a sweep
+    reads as a sweep even on a short stretch), the length (a slider), how many times it plays, a
+    brightness cap, and an effect of their own for urgent notifications.
   - **Apps with their own look:** an effect and a colour for each app you pick.
 - Some labels of the Notifications settings had stayed in plain English in the joke languages; they're
   translated now.

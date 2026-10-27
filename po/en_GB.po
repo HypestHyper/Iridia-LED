@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 23:05+0000\n"
+"POT-Creation-Date: 2026-10-27 23:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -840,6 +840,9 @@ msgstr ""
 msgid "No strips yet"
 msgstr "No strips yet"
 
+msgid "Remove"
+msgstr "Remove"
+
 msgid "Effect"
 msgstr "Effect"
 
@@ -943,9 +946,6 @@ msgstr "part {n}"
 
 msgid "all of it"
 msgstr "all of it"
-
-msgid "Remove"
-msgstr "Remove"
 
 msgid "None yet: pick a strip and press Add."
 msgstr "None yet: pick a strip and press Add."
@@ -2889,6 +2889,13 @@ msgstr "Reverse"
 msgid "Mirror"
 msgstr "Mirror"
 
+msgid ""
+"Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
+"tab."
+msgstr ""
+"Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
+"tab."
+
 msgid "Follow monitor brightness"
 msgstr "Follow monitor brightness"
 
@@ -2958,6 +2965,13 @@ msgstr "Stop test"
 #, python-brace-format
 msgid "Asked OpenRGB for {need} LEDs on this zone"
 msgstr "Asked OpenRGB for {need} LEDs on this zone"
+
+#, python-brace-format
+msgid "Notifications: LEDs {leds}"
+msgstr "Notifications: LEDs {leds}"
+
+msgid "(off)"
+msgstr "(off)"
 
 #, python-brace-format
 msgid "(looks like: {type})"

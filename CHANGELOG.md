@@ -19,6 +19,10 @@
     the bottom right, in view wherever the page is scrolled to.
   - **A custom colour is picked with the colour wheel and sliders,** as everywhere else, for the main
     colour and for each app.
+  - **Remove** next to *Add* takes LEDs out again (some LEDs, a part or the whole strip), keeping the
+    rest of that strip's chosen LEDs.
+  - **On the Devices tab,** a thin line under a strip's preview marks the LEDs that flash for
+    notifications, with a shortcut to the Notifications tab under it.
 - Some labels of the Notifications settings had stayed in plain English in the joke languages; they're
   translated now.
 - **The LEDs light back up fully after unlocking.** Coming back from *Off* (or *Dim*) on lock, static

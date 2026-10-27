@@ -809,6 +809,7 @@ class StripEditor(Gtk.DrawingArea):
         self._painting = False
         self._x0 = 0.0
         self.ruler = RULER_H                  # 0: no LED numbers (a preview that isn't a real strip)
+        self.notify_leds: set = set()        # LEDs that flash for notifications: marked under the strip
         self.set_content_height(self.STRIP_H + 8 + RULER_H)
         self.set_draw_func(self._draw)
         g = Gtk.GestureDrag()
@@ -826,6 +827,12 @@ class StripEditor(Gtk.DrawingArea):
 
     def set_flags(self, reverse, mirror):
         self.reverse, self.mirror = bool(reverse), bool(mirror)
+
+    def set_notify(self, leds):
+        leds = set(leds)
+        if leds != self.notify_leds:
+            self.notify_leds = leds
+            self.queue_draw()
 
     def _twin(self):
         return self.pattern in ("center_out", "edges_in") or self.mirror
@@ -905,6 +912,18 @@ class StripEditor(Gtk.DrawingArea):
             r = min(4.0, cw / 2.5)
             _rounded(cr, x0 + i * cw, y0, max(1.0, cw - gap), self.STRIP_H, r)
             cr.fill()
+        if self.notify_leds:
+            # a thin line under the LEDs that flash for notifications (only shows; clicks pass through)
+            cr.set_source_rgb(*rgb("TERTIARY"))
+            run = None
+            for i in list(range(n)) + [n]:
+                on = i < n and i in self.notify_leds
+                if on and run is None:
+                    run = i
+                elif not on and run is not None:
+                    _rounded(cr, x0 + run * cw + 1, y0 + self.STRIP_H + 2, (i - run) * cw - 2, 3, 1.5)
+                    cr.fill()
+                    run = None
         if self.ruler:
             _ruler(cr, x0, x1, n, h - RULER_H)
         if self.layout_mode and not self.paint_mode:

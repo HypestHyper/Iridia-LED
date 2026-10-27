@@ -7,7 +7,8 @@ nothing but the app's name (so you can pick apps).
 
 ## Which LEDs
 
-Pick a strip, then which part of it, and press *Add*:
+Pick a strip, then which part of it, and press *Add* (or *Remove*, to take those LEDs out again: say,
+LEDs 5 to 6 out of 3 to 7):
 
 | | |
 | --- | --- |
@@ -15,7 +16,9 @@ Pick a strip, then which part of it, and press *Add*:
 | *Part N* | One of the parts you split the strip into (the *Advanced* part of its card). If you split it differently later, part N is whatever part N is then |
 | *Some LEDs* | A range, like LEDs 3 to 12 (numbers start at 1) |
 
-Add as many as you like, on as many strips and devices as you like: they all flash together.
+Add as many as you like, on as many strips and devices as you like: they all flash together. On the
+Devices tab, a thin line under a strip's preview marks the LEDs that flash, and *Notifications: LEDs …*
+under it opens this tab.
 
 Or pick them on the map: *Edit on the map* opens the **Layout tab's Notifications tool** (the
 lightning bolt in its toolbar). Click or drag over LEDs to choose them; start on a ringed one to take

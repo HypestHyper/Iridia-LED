@@ -569,6 +569,26 @@ class Daemon:
             names = [a for a in new.get("app_list") or [] if isinstance(a, str) and a.lower() != pick[0].lower()]
             new["app_list"] = names + ([pick[0]] if pick[1] else [])
             changed = True
+        drop = notifyflash.clean_target(req.get("remove_leds"))
+        if drop is not None:
+            # take these LEDs (a range, a part or the whole strip) out of the strip's chosen ones
+            dev, zone = drop["device"], drop["zone"]
+            zc = clean_zone_cfg(self._zone_cfg(dev, zone))
+            n, secs = zc["led_count"], zc["sections"]
+            mine = [t for t in notifyflash.clean({"targets": new.get("targets")})["targets"]
+                    if (t["device"], t["zone"]) == (dev, zone)]
+            chosen = set()
+            for t in mine:
+                r = notifyflash.target_range(t, n, secs, zone_sections.spans)
+                if r:
+                    chosen.update(range(*r))
+            r = notifyflash.target_range(drop, n, secs, zone_sections.spans)
+            if r:
+                chosen.difference_update(range(*r))
+            others = [t for t in new.get("targets") or [] if not isinstance(t, dict) or
+                      (t.get("device"), t.get("zone") or "") != (dev, zone)]
+            new["targets"] = others + notifyflash.targets_for(dev, zone, chosen)
+            changed = True
         rz = req.get("remove_zone")
         if isinstance(rz, list) and len(rz) == 2:
             new["targets"] = [t for t in new.get("targets") or [] if not isinstance(t, dict) or

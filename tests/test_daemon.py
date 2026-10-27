@@ -912,3 +912,18 @@ def test_notify_rules_and_strip_removal(d):
     rules = _cmd(d, "notify")["notify"]["rules"]
     assert [(r["app"], r["effect"]) for r in rules] == [("signal", "comet"), ("Mail", "default")]
     assert _cmd(d, "notify", remove_rule="SIGNAL")["notify"]["rules"][0]["app"] == "Mail"
+
+
+def test_notify_remove_some_leds(d):
+    d.notifywatch = FakeWatcher()
+    d.config.set(("devices", "Strip", "led_count"), 10)
+    _cmd(d, "notify", targets=[{"device": "Strip", "start": 2, "end": 9}, {"device": "Hub v1.0", "zone": "A"}])
+    r = _cmd(d, "notify", remove_leds={"device": "Strip", "zone": "", "start": 4, "end": 5})
+    assert r["notify"]["targets"] == [{"device": "Hub v1.0", "zone": "A"},
+                                      {"device": "Strip", "zone": "", "start": 2, "end": 3},
+                                      {"device": "Strip", "zone": "", "start": 6, "end": 9}]
+    _cmd(d, "notify", targets=[{"device": "Strip"}])                       # the whole strip, then a hole in it
+    r = _cmd(d, "notify", remove_leds={"device": "Strip", "start": 1, "end": 1})
+    assert r["notify"]["targets"] == [{"device": "Strip", "zone": "", "start": 2, "end": 10}]
+    r = _cmd(d, "notify", remove_leds={"device": "Strip"})                 # all of it
+    assert r["notify"]["targets"] == []

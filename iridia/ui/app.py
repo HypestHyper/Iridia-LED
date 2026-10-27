@@ -1496,6 +1496,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._sess_hooks.set_visible(bool(w.get("idle") and w.get("idle_checked") and not s.get("idle_method")))
 
     # ------------------------------------------------------------ notifications
+    def _mark_notify_leds(self, n):
+        """The Devices tab: which LEDs of each strip flash for notifications."""
+        from iridia import notifyflash
+        from iridia import sections as zone_sections
+        targets = n.get("targets") or []
+        for key, c in self._zone_cards.items():
+            d, _sep, z = key.partition("|")
+            count = int(c.cfg.get("led_count") or 0)
+            leds = set()
+            for t in targets:
+                if (t.get("device"), t.get("zone") or "") == (d, z):
+                    r = notifyflash.target_range(t, count, zone_sections.clean(c.cfg.get("sections"), count),
+                                                 zone_sections.spans)
+                    if r:
+                        leds.update(range(*r))
+            c.set_notify(leds, bool(n.get("enabled")))
+
     def open_notify_settings(self):
         self._tabs["notify"].set_active(True)
 
@@ -1535,7 +1552,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._nt_range.set_visible(False)
         r.append(hbox(10, self._nt_strip, self._nt_which))
         r.append(self._nt_range)
-        r.append(button(_("Add"), "add", "tonal small", self._notify_add))
+        r.append(hbox(6, button(_("Add"), "add", "tonal small", self._notify_add),
+                      button(_("Remove"), "remove", "tonal small", lambda: self._notify_add(remove=True))))
         c.append(r)
         r = wrap_row(10)
         from iridia.ui.layout_notify import DIRECTION_NAMES, EFFECT_NAMES
@@ -1674,7 +1692,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _notify_range_shown(self):
         self._nt_range.set_visible(self._nt_which.value() == _("Some LEDs"))
 
-    def _notify_add(self):
+    def _notify_add(self, remove=False):
+        """Add the LEDs picked in the row (a whole strip, a part or some LEDs), or take them out."""
         info = self._nt_strips.get(self._nt_strip.value())
         if not info:
             return
@@ -1686,7 +1705,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
             items = [_("Part {n}").format(n=k + 1) for k in range(info[3])]
             if which in items:
                 t["part"] = items.index(which)
-        self._notify_set(add_target=t)
+        if remove:
+            self._notify_set(remove_leds=t)
+        else:
+            self._notify_set(add_target=t)
 
     def _notify_strip_name(self, t) -> str:
         for text, info in self._nt_strips.items():
@@ -2571,6 +2593,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             c = self._zone_cards.get(k)
             if c is not None:
                 c.set_strip_info(info)
+        self._mark_notify_leds(st.get("notify") or {})
         self._layout_tab.update_status(st)
         self._keybinds.update_status(st)
         self._render_daemon_status()

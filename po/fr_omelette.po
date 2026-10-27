@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-27 23:05+0000\n"
+"POT-Creation-Date: 2026-10-27 23:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -801,6 +801,9 @@ msgstr "Ou choisis-les sur la carte, avec l'outil du facteur. Oh là là."
 msgid "No strips yet"
 msgstr "Pas encore de baguettes"
 
+msgid "Remove"
+msgstr "Baguette"
+
 msgid "Effect"
 msgstr "L'effet papillon"
 
@@ -904,9 +907,6 @@ msgstr "morceau {n}"
 
 msgid "all of it"
 msgstr "toute la baguette"
-
-msgid "Remove"
-msgstr "Baguette"
 
 msgid "None yet: pick a strip and press Add."
 msgstr "Rien encore : choisis une baguette et appuie sur Ajouter."
@@ -2744,6 +2744,11 @@ msgstr "Éclair"
 msgid "Mirror"
 msgstr "Ratatouille"
 
+msgid ""
+"Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
+"tab."
+msgstr "Ces bisous clignotent pour le facteur. Oh là là."
+
 msgid "Follow monitor brightness"
 msgstr "La crêpe est tombée par terre"
 
@@ -2807,6 +2812,13 @@ msgstr "Bonjour"
 #, python-brace-format
 msgid "Asked OpenRGB for {need} LEDs on this zone"
 msgstr "Mon oncle est un champignon"
+
+#, python-brace-format
+msgid "Notifications: LEDs {leds}"
+msgstr "Le facteur : bisous {leds}"
+
+msgid "(off)"
+msgstr "(éteint)"
 
 #, python-brace-format
 msgid "(looks like: {type})"

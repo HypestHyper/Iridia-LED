@@ -14,7 +14,7 @@ LEDs 5 to 6 out of 3 to 7):
 | --- | --- |
 | *All of it* | The whole strip |
 | *Part N* | One of the parts you split the strip into (the *Advanced* part of its card). If you split it differently later, part N is whatever part N is then |
-| *Some LEDs* | A range, like LEDs 3 to 12 (numbers start at 1) |
+| *Some LEDs* | A range, like LEDs 3 to 12 (numbers start at 1). Next to it: how many that is, how many the strip has, and its middle LED (two LEDs, like 10–11, when the count is even) |
 
 Add as many as you like, on as many strips and devices as you like: they all flash together. On the
 Devices tab, a thin line under a strip's preview marks the LEDs that flash, and *Notifications: LEDs …*

@@ -158,6 +158,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._pause_n = 0
         self._poll_count = 0
         self._zone_cards = {}
+        self._hw_sizes = {}             # (device, zone) -> LED count OpenRGB reports
         self._global_card = None
         self._last_device_keys = None
         self._last_swatch_key = None
@@ -860,6 +861,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
             zones = d.get("zones") or []
             sizes = {z.get("name", ""): z.get("led_count") for z in zones} if zones else {"": d.get("led_count")}
             for z, n in sizes.items():
+                self._hw_sizes[(d.get("name"), z)] = int(n or 0)
+            for z, n in sizes.items():
                 c = self._zone_cards.get(f"{d.get('name')}|{z}")
                 if c is not None:
                     c.set_hw(n, single)
@@ -1548,7 +1551,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._nt_which = Dropdown([], None, lambda _v: self._notify_range_shown(), placeholder="")
         self._nt_from = Spin(1, 9999, 1)
         self._nt_to = Spin(1, 9999, 10)
-        self._nt_range = hbox(8, self._nt_from, label(_("to"), ("body", "dim")), self._nt_to)
+        self._nt_from.connect("value-changed", lambda *_a: self._notify_range_note())
+        self._nt_to.connect("value-changed", lambda *_a: self._notify_range_note())
+        self._nt_count = label("", ("small", "dim"))
+        self._nt_range = hbox(8, self._nt_from, label(_("to"), ("body", "dim")), self._nt_to, self._nt_count)
         self._nt_range.set_visible(False)
         r.append(hbox(10, self._nt_strip, self._nt_which))
         r.append(self._nt_range)
@@ -1683,14 +1689,30 @@ class IridiaWindow(Gtk.ApplicationWindow):
         items = [_("All of it")]
         if info:
             items += [_("Part {n}").format(n=k + 1) for k in range(info[3] if info[3] > 1 else 0)]
-            self._nt_from.set_range(1, max(1, info[2]))
-            self._nt_to.set_range(1, max(1, info[2]))
+            n = max(1, info[2])
+            self._nt_from.set_range(1, n)
+            self._nt_to.set_range(1, n)
+            if self._nt_to.get_value() < self._nt_from.get_value():
+                self._nt_to.set_value(n)
         items.append(_("Some LEDs"))
         self._nt_which.set_items(items, self._nt_which.value() if self._nt_which.value() in items else items[0])
         self._notify_range_shown()
 
     def _notify_range_shown(self):
         self._nt_range.set_visible(self._nt_which.value() == _("Some LEDs"))
+        self._notify_range_note()
+
+    def _notify_range_note(self):
+        """How many LEDs the strip has and where its middle is, next to the range."""
+        info = self._nt_strips.get(self._nt_strip.value())
+        n = info[2] if info else 0
+        if n < 1:
+            self._nt_count.set_label("")
+            return
+        mid = str((n + 1) // 2) if n % 2 else f"{n // 2}–{n // 2 + 1}"
+        a, b = sorted((int(self._nt_from.get_value()), int(self._nt_to.get_value())))
+        self._nt_count.set_label(_("{picked} of {count} LEDs · middle {mid}").format(
+            picked=b - a + 1, count=n, mid=mid))
 
     def _notify_add(self, remove=False):
         """Add the LEDs picked in the row (a whole strip, a part or some LEDs), or take them out."""
@@ -1732,7 +1754,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
             dup = {x[0] for x in names if [y[0] for y in names].count(x[0]) > 1}
             for name, dev, zn, zc in names:
                 text = f"{dev} / {name}" if name in dup else name
-                strips[text] = (dev, zn, int(zc.get("led_count") or 0), len(zc.get("sections") or []))
+                count = int(zc.get("led_count") or 0) or self._hw_sizes.get((dev, zn), 0)
+                strips[text] = (dev, zn, count, len(zc.get("sections") or []))
             if strips != self._nt_strips:
                 self._nt_strips = strips
                 cur = self._nt_strip.value()

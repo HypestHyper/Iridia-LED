@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **KDE Plasma (or GNOME, ...) installed next to Hyprland:** the wallpaper is now the desktop's own.
+  Before, Caelestia's or hyprpaper's files from the Hyprland session were asked first and kept naming
+  the old wallpaper.
 - **Notification flashes, more of them:**
   - **On the Layout tab:** a Notifications tool (the lightning bolt) shows which LEDs flash. Click or
     drag over LEDs to add them, or start on a ringed one to take them out. *Play* shows the flash on

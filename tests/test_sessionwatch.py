@@ -79,3 +79,45 @@ def test_nothing_runs_until_something_is_switched_on(monkeypatch):
     w.set_needs(lock=False, idle=False)
     assert not w.want_idle and w.idle_seconds() is None
     w.stop()
+
+
+def test_only_screen_savers_count_as_locking():
+    ev = W.lock_event
+    other = "signal time=1.2 sender=:1.9 -> destination=(null destination) serial=4 path=/Player; " \
+            "interface=org.example.Player; member=ActiveChanged"
+    assert W.screensaver_of(other) is None and ev(other) == (None, None)
+    assert ev("/org/example: org.example.Thing.ActiveChanged (true,)") == (None, None)
+    for iface in W.SCREENSAVERS:
+        assert W.screensaver_of(f"path=/x; interface={iface}; member=ActiveChanged") == iface
+    assert W.screensaver_of("/org/cinnamon/ScreenSaver: org.cinnamon.ScreenSaver.ActiveChanged (true,)") == \
+        "org.cinnamon.ScreenSaver"
+
+
+def test_a_missed_unlock_is_noticed(monkeypatch):
+    changes = []
+    w = W.SessionWatcher(lambda: changes.append(1))
+    w.watching_lock = True
+    w._said_locked, w._said_by = True, "org.freedesktop.ScreenSaver"
+    answers = iter([True, None, False])                 # still locked, no answer, unlocked
+    monkeypatch.setattr(w, "_still_said_locked", lambda: next(answers))
+    for expect in (True, True, False):
+        w._verify_at = 0.0
+        w._verify()
+        assert w.locked is expect
+    assert changes == [1]
+    w._said_locked, w._verify_at = True, W.time.monotonic() + 60
+    w._verify()                                         # not due yet: nothing asked
+    assert w.locked
+
+
+def test_asks_the_one_that_said_locked(monkeypatch):
+    calls = []
+    monkeypatch.setattr(W, "_gdbus_call", lambda *a: calls.append(a) or "(false,)")
+    w = W.SessionWatcher(lambda: None)
+    w._said_by = "org.gnome.ScreenSaver"
+    assert w._still_said_locked() is False
+    assert calls[-1][1:] == ("org.gnome.ScreenSaver", "/org/gnome/ScreenSaver", "org.gnome.ScreenSaver.GetActive")
+    w._said_by, w.session_path = "logind", "/org/freedesktop/login1/session/_31"
+    assert w._still_said_locked() is False and calls[-1][1] == W.LOGIND
+    w._said_by = None
+    assert w._still_said_locked() is None

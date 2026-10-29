@@ -292,6 +292,12 @@ class ZoneCard(Gtk.Box):
         self._mir_row, self._mirror = switch_row(_("Mirror"), bool(self._params.get("mirror")), self._on_mirror)
         self._layout_row.append(self._rev_row)
         self._layout_row.append(self._mir_row)
+        self._nt_chip = button("", "bolt", "text small", lambda: self.app.open_notify_settings(),
+                               tooltip=_("Some LEDs of this strip flash for notifications (the line under them). "
+                                         "Opens the Notifications tab."))
+        self._nt_chip.set_visible(False)
+        self._nt_chip.set_halign(Gtk.Align.START)
+        d.insert_child_after(self._nt_chip, self._strip)
         d.append(self._layout_row)
         # segments: how many LEDs each colour gets, and a button to split them evenly
         self._split_row = hbox(10)
@@ -466,6 +472,28 @@ class ZoneCard(Gtk.Box):
             return
         self._call(lambda: self.client.resize_zone(self.device_name, self.zone_name, need, keep_count=True))
         self.app.toast(_('Asked OpenRGB for {need} LEDs on this zone').format(need=need))
+
+    def set_notify(self, leds, on: bool):
+        """Mark the LEDs that flash for notifications, with a way to the Notifications tab."""
+        if self.global_mode or not hasattr(self, "_nt_chip"):
+            return
+        self._strip.set_notify(leds)
+        if not leds:
+            self._nt_chip.set_visible(False)
+            return
+        runs, start = [], None
+        ordered = sorted(leds)
+        for k, i in enumerate(ordered):
+            if start is None:
+                start = i
+            if k + 1 == len(ordered) or ordered[k + 1] != i + 1:
+                runs.append(f"{start + 1}" if start == i else f"{start + 1}–{i + 1}")
+                start = None
+        text = _("Notifications: LEDs {leds}").format(leds=", ".join(runs[:4]) + ("…" if len(runs) > 4 else ""))
+        if not on:
+            text += " " + _("(off)")
+        set_button_text(self._nt_chip, text, "bolt")
+        self._nt_chip.set_visible(True)
 
     def set_strip_info(self, info):
         info = dict(info or {})

@@ -27,11 +27,13 @@ from iridia.ui import dialogs, fonts, serial
 from iridia.ui.widgets import (Dropdown, Group, QuickColors, Spin, Swatch, SwatchPicker, Toggle, button, divider, hbox, icon,
                                label, rgb, set_button_text, themed, vbox)
 from iridia.ui.zonecard import PATTERN_KEYS, PATTERN_NAMES
+from iridia.ui.layout_notify import NotifyLayer
 
 GRID = 20.0
 TOOLS = (("arrange", _("Arrange"), "open_with"), ("find", _("Find LEDs: light one LED on the real strip"), "target"),
          ("paint", _("Paint"), "brush"), ("erase", _("Erase (back to the zone's own color)"), "ink_eraser"),
-         ("fill", _("Fill"), "format_color_fill"), ("gradient", _("Gradient"), "gradient"))
+         ("fill", _("Fill"), "format_color_fill"), ("gradient", _("Gradient"), "gradient"),
+         ("notify", _("Notifications: which LEDs flash, and where a flash runs"), "bolt"))
 
 
 PAINT_TOOLS = ("paint", "fill", "gradient")
@@ -43,7 +45,7 @@ def _mix(c1, c2, t):
     return "%02x%02x%02x" % tuple(int(round(x + (y - x) * t)) for x, y in zip(a, b))
 
 
-class LayoutTab(Gtk.Box):
+class LayoutTab(NotifyLayer, Gtk.Box):
     def __init__(self, app):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.app = app
@@ -65,6 +67,7 @@ class LayoutTab(Gtk.Box):
         self._visible = False
         self._dirty = True
         self._snap = True
+        self._nt_init()
         self._build()
 
     # ================================================================ UI
@@ -186,16 +189,19 @@ class LayoutTab(Gtk.Box):
                 if dc.get("enabled", True) and zc.get("enabled", True):
                     keys.append(k)
         self._enabled = set(keys)
+        self._nt_update(status)
         if self.layout.ensure_zones(keys):
             self._schedule_save()
         sig = repr((sorted(self._cfg.items()), status.get("extracted_colors"), status.get("identify"),
-                    status.get("probe"), status.get("lights_off"), status.get("asleep")))
+                    status.get("probe"), status.get("lights_off"), status.get("asleep"),
+                    self._nt if self.tool == "notify" else None))
         self._ensure_anim()
         if sig != getattr(self, "_sig", None):
             self._sig = sig
             if self._visible and self._drag is None:
                 self.cv.queue_draw()
                 self._refresh_panel_values()
+                self._nt_refresh_panel()
             else:
                 self._dirty = True
 
@@ -339,6 +345,8 @@ class LayoutTab(Gtk.Box):
         sel = self.layout.get(self._sel) if self._sel else None
         if sel and sel in strips:
             self._draw_strip(cr, sel)
+        if self.tool == "notify":
+            self._nt_draw(cr)
         if not strips:
             self._text(cr, w / 2, h / 2, _("No enabled zones yet. They show up here once the daemon reports them."),
                        "ON_SURFACE_VARIANT", 14, center=True)
@@ -605,6 +613,9 @@ class LayoutTab(Gtk.Box):
         self.app.note_activity()
         self._start = (x, y)
         h = self._hit_handle(x, y)
+        if h and h[0] in ("nt_a", "nt_b"):
+            self._drag = {"kind": h[0]}
+            return
         if h:
             kind, sid, idx = h
             self._sel = sid
@@ -645,6 +656,8 @@ class LayoutTab(Gtk.Box):
         elif self.tool == "find":
             self._drag = {"kind": "find", "sid": s["id"]}
             self._find_at(s, n, k)
+        elif self.tool == "notify":
+            self._nt_press(s, n, k)
         else:
             self._drag = {"kind": "paint", "sid": s["id"], "last": None}
             self._paint_at(s, n, k, start=True)
@@ -660,6 +673,10 @@ class LayoutTab(Gtk.Box):
         kind = dr["kind"]
         if kind == "pan":
             self.layout.view["pan"] = [dr["pan"][0] + ox, dr["pan"][1] + oy]
+            self.cv.queue_draw()
+            return
+        if kind in ("nt_a", "nt_b"):
+            self._nt_drag_point(kind[3], x, y)
             self.cv.queue_draw()
             return
         s = self.layout.get(dr.get("sid", ""))
@@ -722,6 +739,8 @@ class LayoutTab(Gtk.Box):
             f, d = project([self.w2s(a, b) for a, b in path_points(s, n)], x, y)
             if self.tool in ("paint", "erase") and d < 40:
                 self._paint_at(s, n, int(round(f)))
+        elif kind == "ntpaint":
+            self._nt_motion(s, n, x, y)
         self.cv.queue_draw()
 
     def _release(self, g, ox, oy):
@@ -736,6 +755,10 @@ class LayoutTab(Gtk.Box):
             self._send(self.app.client.set_zone_pattern_params, d, z, {"stops": dr["stops"]})
         elif dr["kind"] == "paint":
             self._commit_paint(self.layout.get(dr["sid"]))
+        elif dr["kind"] == "ntpaint":
+            self._nt_release(self.layout.get(dr["sid"]))
+        elif dr["kind"] in ("nt_a", "nt_b"):
+            self._nt_drop_point()
 
     def _pan_start(self, x, y):
         self._pan0 = list(self.layout.view["pan"])
@@ -877,12 +900,17 @@ class LayoutTab(Gtk.Box):
             self._send(self.app.client.led_probe_off)
             self.cv.queue_draw()
 
+    def pick_tool(self, tool):
+        """Pick a tool from outside (the Notifications tab's Edit on the map)."""
+        self._tools.set_active(tool)
+        self._set_tool(tool)
+
     def _set_tool(self, tool):
         if tool != "find":
             self._stop_find()
-        was = self.tool in PAINT_TOOLS
+        was = (self.tool in PAINT_TOOLS, self.tool == "notify")
         self.tool = tool
-        if was != (tool in PAINT_TOOLS):
+        if was != (tool in PAINT_TOOLS, tool == "notify"):
             self._build_panel()
         self._grad_anchor = None
         self.cv.set_cursor(Gdk.Cursor.new_from_name("move" if tool == "arrange" else "crosshair"))
@@ -907,6 +935,9 @@ class LayoutTab(Gtk.Box):
         elif self.tool == "erase":
             t = _("Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone "
                   "or on Everything).")
+        elif self.tool == "notify":
+            t = _("Notifications: click or drag over LEDs to flash them when a notification comes in (start on a "
+                  "ringed one to take LEDs out). Drag A and B to set where a moving flash runs; Play tries it.")
         else:
             t = _("Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern.")
         self._hint.set_label(t)
@@ -1057,6 +1088,9 @@ class LayoutTab(Gtk.Box):
         p = self._panel
         s = self.layout.get(self._sel) if self._sel else None
         self._pv = {}
+        if self.tool == "notify":
+            self._nt_build_panel(p)
+            return
         if self.tool in PAINT_TOOLS:
             p.append(label(_("Paint colors"), ("subheading",)))
             p.append(QuickColors(self.app.saved_colors, self.app.recent_colors,

@@ -687,7 +687,15 @@ def _notify_text(r):
             "except": "every app but " + ", ".join(n.get("app_list") or ["(none)"])}.get(n.get("apps"), "?")
     lines = [f"Notification flashes: {'on' if n.get('enabled') else 'off'}"
              + (f", listening through {n.get('method')}" if n.get("listening") else ""),
-             f"Effect: {n.get('effect')}, {n.get('duration')} s, {look}", f"From: {apps}"]
+             f"Effect: {n.get('effect')}, {n.get('duration')} s"
+             + (f" x{n['repeat']}" if n.get("repeat", 1) > 1 else "")
+             + (f", {n.get('direction')}, band {n.get('band')} LEDs" if n.get("effect") in
+                ("sweep", "comet", "fill", "ripple") else "") + f", {look}",
+             f"From: {apps}"]
+    if n.get("path"):
+        lines.append("A to B on the layout: " + ("on" if n.get("spatial") else "off"))
+    for r in n.get("rules") or []:
+        lines.append(f"  {r['app']}: {r['effect']}, " + (f"#{r['hex']}" if r["color"] == "custom" else r["color"]))
     if not n.get("method"):
         lines.append("Can't listen here: install dbus-monitor (the dbus tools) or busctl (systemd).")
     quiet = [w for k, w in (("dnd", "Do Not Disturb"), ("night_quiet", "night mode")) if n.get(k)]
@@ -736,6 +744,12 @@ def cmd_notify(args):
         return 2
     if args.effect:
         req["effect"] = args.effect
+    for name, key in (("direction", "direction"), ("band", "band"), ("plays", "repeat"),
+                      ("brightness", "brightness")):
+        if getattr(args, name) is not None:
+            req[key] = getattr(args, name)
+    if args.layout:
+        req["spatial"] = args.layout == "on"
     if args.color:
         c = args.color.lower().lstrip("#")
         if c in ("accent", "wallpaper", "app"):
@@ -1486,7 +1500,14 @@ def main(argv=None):
                                                   "iridia notify add Desk part 2   iridia notify add Case leds 1-10   "
                                                   "iridia notify on --effect sweep --color app   iridia notify test")
     nt_parser.add_argument("words", nargs="*", help="on | off | test | clear | add STRIP [all | part K | leds A-B]")
-    nt_parser.add_argument("--effect", choices=["pulse", "flash", "sweep"])
+    nt_parser.add_argument("--effect", choices=["pulse", "flash", "sweep", "comet", "fill", "ripple"])
+    nt_parser.add_argument("--direction", choices=["ab", "ba", "abba", "out"],
+                           help="moving effects: A to B, B to A, A to B and back, or from the middle out")
+    nt_parser.add_argument("--band", type=int, help="moving effects: how many LEDs light at once, 1 to 30")
+    nt_parser.add_argument("--plays", type=int, help="how many times it plays, 1 to 5")
+    nt_parser.add_argument("--brightness", type=int, help="10 to 100 (percent)")
+    nt_parser.add_argument("--layout", choices=["on", "off"],
+                           help="run through the room from A to B (set A and B on the Layout tab)")
     nt_parser.add_argument("--color", help="wallpaper, app (one colour per app) or a hex colour")
     nt_parser.add_argument("--duration", type=float, help="seconds (0.5 to 5)")
     nt_parser.add_argument("--urgent", action="store_true", help="test: as an urgent notification")

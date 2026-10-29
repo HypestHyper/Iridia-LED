@@ -1,7 +1,43 @@
 # Changelog
 
-## Unreleased
+## 1.3.6 — 2026-10-29
 
+- **KDE Plasma (or GNOME, ...) installed next to Hyprland:** the wallpaper is now the desktop's own.
+  Before, Caelestia's or hyprpaper's files from the Hyprland session were asked first and kept naming
+  the old wallpaper.
+- **Notification flashes, more of them:**
+  - **On the Layout tab:** a Notifications tool (the lightning bolt) shows which LEDs flash. Click or
+    drag over LEDs to add them, or start on a ringed one to take them out. *Play* shows the flash on
+    the map and on the strips.
+  - **From A to B:** two points on the map. A moving flash then runs through the room by where your
+    LEDs really are, across every strip at once, and only between A and B. It can go A to B, B to A,
+    A to B and back, or from the middle out.
+  - **Three more effects:** *Comet*, *Fill* and *Ripple*, which spreads from A as far as B.
+  - **More settings:** the band (how many LEDs light at once, 1 to 30, with crisp edges, so a sweep
+    reads as a sweep even on a short stretch), the length (a slider), how many times it plays, a
+    brightness cap, and an effect of their own for urgent notifications.
+  - **Apps with their own look:** an effect and a colour for each app you pick.
+  - **Their own tab:** the settings moved from Settings to a *Notifications* tab, with *Edit on the
+    map* to go to the Layout tab's tool, *All settings* there to come back, and *Try it* floating at
+    the bottom right, in view wherever the page is scrolled to.
+  - **A custom colour is picked with the colour wheel and sliders,** as everywhere else, for the main
+    colour and for each app.
+  - **Remove** next to *Add* takes LEDs out again (some LEDs, a part or the whole strip), keeping the
+    rest of that strip's chosen LEDs. Next to the range: how many LEDs it covers, the strip's count and
+    its middle LED (the two middle ones, like 10–11, on an even count). The range goes up to the strip's
+    size as OpenRGB reports it when the strip's own size isn't saved. Switched-off strips aren't listed.
+  - **On the Devices tab,** a thin line under a strip's preview marks the LEDs that flash for
+    notifications, with a shortcut to the Notifications tab under it.
+- Some labels of the Notifications settings had stayed in plain English in the joke languages; they're
+  translated now.
+- **The LEDs light back up fully after unlocking.** Coming back from *Off* (or *Dim*) on lock, static
+  strips could stay almost dark: the half-second fade back was over before the daemon looked again, so
+  its last step, at a few percent, was what stayed on the strips. The final brightness is now always
+  sent, and fades run at 20 steps a second instead of one.
+- **The LEDs come back after unlocking even when the unlock signal is missed.** While the desktop says
+  the screen is locked, Iridia now asks it again every 10 seconds (and at once when something asks to
+  unlock), so a missed "unlocked" signal can't keep the strips dark. Only screen savers' signals count
+  as locking now: another app's signal of the same name could lock the LEDs for good.
 - **Text in buttons no longer stays at the old size after changing the window size.** Switching
   between Compact, Default and Large left the text in buttons on the other tabs at the old size
   (GTK 4.24 doesn't recompute it for hidden widgets) until you hovered each one, so buttons seemed

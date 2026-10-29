@@ -37,6 +37,12 @@ later checks ask only that one:
 5. feh, nitrogen, xwallpaper, waypaper
 6. The newest image in `wallpaper.watch_folder`
 
+On a full desktop (KDE Plasma, GNOME, XFCE, Cinnamon, MATE, COSMIC, LXQt) that desktop is asked first,
+and the Wayland shells' leftovers (Caelestia, Noctalia, hyprpaper, swaybg, waypaper) aren't asked at
+all: with Plasma installed next to Hyprland, Hyprland's state files would still name its old wallpaper.
+The desktop comes from `XDG_CURRENT_DESKTOP`, or, when the daemon wasn't told, from its process
+running (plasmashell, gnome-shell, ...) with no Hyprland or Sway.
+
 A fixed `wallpaper.manual_path` skips all of this. File watchers (inotify) notice changes right away;
 tools that need a command are asked every few seconds, and when nothing answers at all Iridia backs off
 to every 30 seconds instead of running every tool over and over.

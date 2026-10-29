@@ -22,7 +22,7 @@
   - **Remove** next to *Add* takes LEDs out again (some LEDs, a part or the whole strip), keeping the
     rest of that strip's chosen LEDs. Next to the range: how many LEDs it covers, the strip's count and
     its middle LED (the two middle ones, like 10–11, on an even count). The range goes up to the strip's
-    size as OpenRGB reports it when the strip's own size isn't saved.
+    size as OpenRGB reports it when the strip's own size isn't saved. Switched-off strips aren't listed.
   - **On the Devices tab,** a thin line under a strip's preview marks the LEDs that flash for
     notifications, with a shortcut to the Notifications tab under it.
 - Some labels of the Notifications settings had stayed in plain English in the joke languages; they're

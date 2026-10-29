@@ -1744,12 +1744,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if devices is not None:
             strips, names = {}, []
             for dev, cfg in sorted(devices.items()):
-                if not isinstance(cfg, dict):
-                    continue
+                if not isinstance(cfg, dict) or not cfg.get("enabled", True):
+                    continue                      # switched-off devices and strips aren't offered
                 zones = cfg.get("zones")
                 items = list(zones.items()) if isinstance(zones, dict) and zones else [("", cfg)]
                 for zn, zc in items:
-                    if isinstance(zc, dict):
+                    if isinstance(zc, dict) and zc.get("enabled", True):
                         names.append((zc.get("display_name") or zn or dev, dev, zn, zc))
             dup = {x[0] for x in names if [y[0] for y in names].count(x[0]) > 1}
             for name, dev, zn, zc in names:

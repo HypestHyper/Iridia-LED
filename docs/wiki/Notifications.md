@@ -7,7 +7,7 @@ nothing but the app's name (so you can pick apps).
 
 ## Which LEDs
 
-Pick a strip, then which part of it, and press *Add* (or *Remove*, to take those LEDs out again: say,
+Pick a strip (switched-off ones aren't listed), then which part of it, and press *Add* (or *Remove*, to take those LEDs out again: say,
 LEDs 5 to 6 out of 3 to 7):
 
 | | |

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.6 — 2026-10-29
 
 - **KDE Plasma (or GNOME, ...) installed next to Hyprland:** the wallpaper is now the desktop's own.
   Before, Caelestia's or hyprpaper's files from the Hyprland session were asked first and kept naming

@@ -104,6 +104,9 @@ def env(tmp_path, monkeypatch):
     def foreign(*args):
         """An OpenRGB that Iridia didn't start."""
         p = subprocess.Popen([str(bin_ / "openrgb"), *args], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Its start line is written once Python runs and has renamed itself "openrgb": before that,
+        # between the shell wrapper and the rename, a process scan can miss it for a moment.
+        assert wait_for(lambda: any(ln.split()[0] == str(p.pid) for ln in starts_()))
         assert wait_for(lambda: any(pid == p.pid for pid, _ in osrv.processes()))
         return p
 

@@ -426,7 +426,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         first = None
         for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
                                ("layout", _("Layout"), "polyline"), ("notify", _("Notifications"), "bolt"),
-                               ("keybinds", _("Keybinds"), "keyboard"),
+                               ("scenes", _("Scenes"), "sports_esports"), ("keybinds", _("Keybinds"), "keyboard"),
                                ("settings", _("Settings"), "settings"), ("service", _("Service"), "build"),
                                ("updates", _("Updates"), "download")):
             b = Gtk.ToggleButton()
@@ -443,7 +443,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         self._layout_tab = LayoutTab(self)
         pages = {}
-        for key in ("status", "devices", "layout", "notify", "keybinds", "settings", "service", "updates"):
+        for key in ("status", "devices", "layout", "notify", "scenes", "keybinds", "settings", "service", "updates"):
             if key == "layout":
                 self._stack.add_named(self._layout_tab, key)
                 continue
@@ -469,6 +469,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._updates_page = pages["updates"]
         self._notify_page = pages["notify"]
         self._keybinds = KeybindsPage(self, pages["keybinds"])
+        from iridia.ui.scenes_tab import ScenesPage
+        self._scenes = ScenesPage(self, pages["scenes"])
         root.append(self._stack)
 
         bot = hbox(8)
@@ -2619,6 +2621,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._mark_notify_leds(st.get("notify") or {})
         self._layout_tab.update_status(st)
         self._keybinds.update_status(st)
+        self._scenes.update_status(st)
         self._render_daemon_status()
         if st.get("openrgb_connected"):
             self._orgb_status.set_label(_('Connected, but not seeing: {devices}').format(devices=', '.join(missing)) if missing else

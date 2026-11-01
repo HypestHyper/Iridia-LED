@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-28 00:01+0000\n"
+"POT-Creation-Date: 2026-11-01 21:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -101,6 +101,9 @@ msgstr "Floor Plan"
 
 msgid "Notifications"
 msgstr "Correspondence"
+
+msgid "Scenes"
+msgstr "Tableaux"
 
 msgid "Keybinds"
 msgstr "Key Bindings"
@@ -2626,6 +2629,137 @@ msgid ""
 msgstr ""
 "A name for this twin of {strip}. It appears only on the Layout tab. Leave it empty to use the "
 "strip's own name."
+
+msgid "Nothing"
+msgstr "Nothing whatsoever"
+
+msgid "Dimmer"
+msgstr "Softer"
+
+msgid "One colour"
+msgstr "A single colour"
+
+msgid "Hyprland says which window is in front."
+msgstr "Hyprland informs us which window is foremost."
+
+msgid "Sway says which window is in front."
+msgstr "Sway informs us which window is foremost."
+
+msgid ""
+"KDE Plasma says which window is in front (through a small KWin script Iridia loads while this is "
+"on)."
+msgstr ""
+"KDE Plasma informs us which window is foremost (by way of a modest KWin script Iridia loads "
+"whilst this is on)."
+
+msgid "The X server says which window is in front."
+msgstr "The X server informs us which window is foremost."
+
+msgid ""
+"This desktop doesn't tell other apps which window is in front, so Iridia looks at the programs "
+"running instead: the apps below get their look while they run, and \"anything fullscreen\" can't "
+"be told."
+msgstr ""
+"This desktop declines to say which window is foremost, so Iridia consults the programmes running "
+"instead: the applications below receive their look whilst they run, and \"anything fullscreen\" "
+"cannot be discerned."
+
+#, python-brace-format
+msgid "Dimmer, {n}%"
+msgstr "Softer, {n}%"
+
+#, python-brace-format
+msgid "#{hex}, {n}%"
+msgstr "#{hex}, {n}%"
+
+#, python-brace-format
+msgid "{effect}, {n}%"
+msgstr "{effect}, {n}%"
+
+msgid "Scene colour"
+msgstr "Tableau colour"
+
+msgid ""
+"A different look for the lights while a game or a film is fullscreen. They go back when it's "
+"gone, and your settings don't change."
+msgstr ""
+"A different look for the lamps whilst a game or a picture is fullscreen. They return once it has "
+"gone, and your settings remain quite untouched."
+
+msgid "Change the lights for fullscreen apps"
+msgstr "Alter the lamps for fullscreen applications"
+
+msgid "When anything is fullscreen"
+msgstr "Whenever anything is fullscreen"
+
+msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
+msgstr "Whilst one of these is foremost, fullscreen or not, it receives its own look instead."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "Application name, such as mpv or steam_app_1091500"
+
+msgid "Never for this app"
+msgstr "Never for this application"
+
+msgid "Never for these"
+msgstr "Never for these"
+
+msgid "Timing"
+msgstr "Timing"
+
+msgid "Comes on after"
+msgstr "Commences after"
+
+msgid "Goes back after"
+msgstr "Returns after"
+
+msgid "Check every"
+msgstr "Enquire every"
+
+msgid "A short wait keeps the lights steady when you switch away from a game for a moment."
+msgstr "A brief pause keeps the lamps composed when one steps away from a game for a moment."
+
+msgid "Nothing to show: pick a look first."
+msgstr "Nothing to present: do choose a look first."
+
+msgid "Showing it for 5 seconds."
+msgstr "Presenting it for 5 seconds."
+
+msgid "Couldn't show it"
+msgstr "One could not present it"
+
+msgid "Type the app's name, or pick one it has seen."
+msgstr "Do type the application's name, or choose one it has seen."
+
+msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
+msgstr "Nothing to watch for as yet: choose a look for fullscreen applications, or add one."
+
+#, python-brace-format
+msgid "In front now: {app}{fs}."
+msgstr "Foremost at present: {app}{fs}."
+
+msgid "nothing"
+msgstr "nothing"
+
+msgid " (fullscreen)"
+msgstr " (fullscreen)"
+
+#, python-brace-format
+msgid "Running now: {apps}."
+msgstr "Running at present: {apps}."
+
+#, python-brace-format
+msgid "Showing: {look}."
+msgstr "Presenting: {look}."
+
+msgid "None yet."
+msgstr "None as yet."
+
+msgid "None."
+msgstr "None."
+
+msgid "Use this name"
+msgstr "Use this name"
 
 msgid "Same as the strip"
 msgstr "As the rest of the strip"

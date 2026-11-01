@@ -10,5 +10,5 @@ power sync tune wallpaper image info help troubleshoot bug_report terminal link 
 chevron_right remove add_circle more_vert bolt auto_awesome contrast invert_colors linear_scale arrow_forward
 arrow_back tag format_list_numbered target highlight autorenew monitor done_all report undo redo unfold_more
 space_dashboard keyboard language grid_on article inventory_2 cable texture motion_photos_on minimize crop_square
-filter_none
+filter_none sports_esports fullscreen block
 """.split()

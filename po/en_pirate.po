@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-28 00:01+0000\n"
+"POT-Creation-Date: 2026-11-01 21:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -99,6 +99,9 @@ msgstr "Treasure Map"
 
 msgid "Notifications"
 msgstr "Messages"
+
+msgid "Scenes"
+msgstr "Scenes"
 
 msgid "Keybinds"
 msgstr "Signal Flags"
@@ -2601,6 +2604,137 @@ msgid ""
 msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
+
+msgid "Nothing"
+msgstr "Nothin'"
+
+msgid "Dimmer"
+msgstr "Dimmer"
+
+msgid "One colour"
+msgstr "One colour"
+
+msgid "Hyprland says which window is in front."
+msgstr "Hyprland tells which window be up front."
+
+msgid "Sway says which window is in front."
+msgstr "Sway tells which window be up front."
+
+msgid ""
+"KDE Plasma says which window is in front (through a small KWin script Iridia loads while this is "
+"on)."
+msgstr ""
+"KDE Plasma tells which window be up front (through a wee KWin script Iridia loads while this be "
+"on)."
+
+msgid "The X server says which window is in front."
+msgstr "The X server tells which window be up front."
+
+msgid ""
+"This desktop doesn't tell other apps which window is in front, so Iridia looks at the programs "
+"running instead: the apps below get their look while they run, and \"anything fullscreen\" can't "
+"be told."
+msgstr ""
+"This deck won't tell other crews which window be up front, so Iridia looks at the programs "
+"sailin' instead: the apps below get their look while they run, an' \"anythin' fullscreen\" can't "
+"be told."
+
+#, python-brace-format
+msgid "Dimmer, {n}%"
+msgstr "Dimmer, {n}%"
+
+#, python-brace-format
+msgid "#{hex}, {n}%"
+msgstr "#{hex}, {n}%"
+
+#, python-brace-format
+msgid "{effect}, {n}%"
+msgstr "{effect}, {n}%"
+
+msgid "Scene colour"
+msgstr "Scene colour"
+
+msgid ""
+"A different look for the lights while a game or a film is fullscreen. They go back when it's "
+"gone, and your settings don't change."
+msgstr ""
+"A different look fer the lanterns while a game or a picture be fullscreen. They go back when it's"
+" gone, an' yer settin's don't change."
+
+msgid "Change the lights for fullscreen apps"
+msgstr "Change the lanterns fer fullscreen apps"
+
+msgid "When anything is fullscreen"
+msgstr "When anythin' be fullscreen"
+
+msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
+msgstr "While one o' these be up front, fullscreen or not, it gets its own look instead."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "App name, like mpv or steam_app_1091500"
+
+msgid "Never for this app"
+msgstr "Never fer this app"
+
+msgid "Never for these"
+msgstr "Never fer these"
+
+msgid "Timing"
+msgstr "Timin'"
+
+msgid "Comes on after"
+msgstr "Comes on after"
+
+msgid "Goes back after"
+msgstr "Goes back after"
+
+msgid "Check every"
+msgstr "Check every"
+
+msgid "A short wait keeps the lights steady when you switch away from a game for a moment."
+msgstr "A short wait keeps the lanterns steady when ye sail away from a game fer a moment."
+
+msgid "Nothing to show: pick a look first."
+msgstr "Nothin' to show: pick a look first."
+
+msgid "Showing it for 5 seconds."
+msgstr "Showin' it fer 5 seconds."
+
+msgid "Couldn't show it"
+msgstr "Couldn't show it"
+
+msgid "Type the app's name, or pick one it has seen."
+msgstr "Type the app's name, or pick one it's spotted."
+
+msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
+msgstr "Nothin' to watch fer yet: pick a look fer fullscreen apps, or add an app."
+
+#, python-brace-format
+msgid "In front now: {app}{fs}."
+msgstr "Up front now: {app}{fs}."
+
+msgid "nothing"
+msgstr "nothin'"
+
+msgid " (fullscreen)"
+msgstr " (fullscreen)"
+
+#, python-brace-format
+msgid "Running now: {apps}."
+msgstr "Sailin' now: {apps}."
+
+#, python-brace-format
+msgid "Showing: {look}."
+msgstr "Showin': {look}."
+
+msgid "None yet."
+msgstr "None yet."
+
+msgid "None."
+msgstr "None."
+
+msgid "Use this name"
+msgstr "Use this name"
 
 msgid "Same as the strip"
 msgstr "Same as the rest o' the ship"

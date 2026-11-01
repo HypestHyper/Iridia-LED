@@ -24,6 +24,7 @@ from iridia.patterns import PatternGenerator
 from iridia import animations
 from iridia import sections as zone_sections
 from iridia import notifyflash
+from iridia import scenes
 from iridia.animator import Animator, Job
 from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
@@ -213,6 +214,12 @@ class Daemon:
         self.sleepwatch = None
         self.sessionwatch = None
         self.notifywatch = None
+        self.focuswatch = None
+        self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
+        self._scene_look: Optional[dict] = None
+        self._scene_delay = scenes.Delay()
+        self._scene_try = None                    # (look, until): Try it
+        self._scene_soon = False                  # a look is about to come on or go: tick sooner
         self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
         self._notify_lock = threading.Lock()
         self._flash: Optional[notifyflash.Flash] = None   # a notification flash running now
@@ -325,6 +332,8 @@ class Daemon:
         self._start_sessionwatch()
         from iridia.notifywatch import NotifyWatcher
         self.notifywatch = NotifyWatcher(self._on_notification)
+        from iridia.focuswatch import FocusWatch
+        self.focuswatch = FocusWatch(self._wake.set)
         threading.Thread(target=self._update_check, daemon=True, name="update-check").start()
 
         while self.running:
@@ -335,7 +344,8 @@ class Daemon:
             # Nothing animates any more, so there is never a reason to tick
             # faster than this; colours are sent only when they change.
             # brightness glides re-send static zones for a moment; otherwise nothing animates here
-            self._wake.wait(0.05 if self._glide_active or self._sess_fading() else 0.5 if self._busy() else 1.0)
+            self._wake.wait(0.05 if self._glide_active or self._sess_fading() else
+                            0.5 if self._busy() or self._scene_soon else 1.0)
             self._wake.clear()
 
         self._shutdown()
@@ -442,6 +452,105 @@ class Daemon:
     def _cmd_sensors(self, req: dict) -> dict:
         return {"ok": True, "sensors": self.sensors.listing(), "values": self.sensors.values()}
 
+    # ------------------------------------------------------------- scenes
+    TRY_SEC = 5.0
+
+    def _scene_settings(self) -> dict:
+        return scenes.clean(self.config.get("scenes", {}))
+
+    def _update_scenes(self):
+        """The look for what's in front (after its delay), on every strip."""
+        st = self._scene_settings()
+        w = self.focuswatch
+        if w is not None:
+            w.set_needed(st["enabled"] and (st["look"] is not None or bool(st["apps"])), st["interval"],
+                         [r["app"] for r in st["apps"]])
+        front, fs, running = w.state() if w is not None and w.running_flag else ("", False, set())
+        if fs and front and scenes.app_key(front) not in {scenes.app_key(a) for a in st["seen"]}:
+            st["seen"] = [front] + st["seen"][:scenes.SEEN_MAX - 1]
+            cur = self.config.get("scenes", {})
+            self.config.set("scenes", dict(cur if isinstance(cur, dict) else {}, seen=st["seen"]))
+        now = time.monotonic()
+        want = scenes.pick(st, front, fs, running)
+        if not st["enabled"]:
+            self._scene_delay.force(None)       # switched off: back at once, not after the wait
+        shown = self._scene_delay.update(want, now, st["on_delay"], st["off_delay"])
+        self._scene_soon = shown != want
+        if self._scene_try is not None:
+            if now < self._scene_try[1]:
+                shown = self._scene_try[0]
+                self._scene_soon = True
+            else:
+                self._scene_try = None
+        if shown != self._scene_look:
+            if shown is None:
+                self.logger.info("Scene off: back to normal")
+            else:
+                self.logger.info(f"Scene: {shown['kind']} ({front or ', '.join(sorted(running)) or 'try'})")
+            self._scene_look = shown
+            self._scene_ov = scenes.overlay(shown)
+            self._last_sent = {}
+            self._needs_update = True
+
+    def _scenes_status(self) -> dict:
+        w = self.focuswatch
+        on = bool(w and w.running_flag)
+        return {"scenes": dict(self._scene_settings(), watching=on,
+                               method=(w.method if on else None),
+                               front=(w.front if on else ""), fullscreen=bool(on and w.fullscreen),
+                               running=sorted(w.running) if on else [],
+                               active=self._scene_look)}
+
+    def _cmd_scenes(self, req: dict) -> dict:
+        """Scene settings: any of the settings' keys; set_app {app, look} / remove_app; ignore /
+        unignore an app; forget a seen app; test: show a look (or the fullscreen one) for a moment."""
+        cur = self.config.get("scenes", {})
+        new = dict(cur if isinstance(cur, dict) else {})
+        changed = False
+        for k in ("enabled", "on_delay", "off_delay", "interval"):
+            if k in req:
+                new[k] = req[k]
+                changed = True
+        if "look" in req:
+            look = scenes.clean_look(req["look"])
+            if req["look"] is not None and look is None:
+                return {"ok": False, "error": "a look is off, dim, color or effect"}
+            new["look"] = look
+            changed = True
+        if isinstance(req.get("set_app"), dict):
+            app = str(req["set_app"].get("app") or "").strip()
+            look = scenes.clean_look(req["set_app"].get("look"))
+            if not app or look is None:
+                return {"ok": False, "error": "give an app and a look"}
+            rules = [r for r in new.get("apps") or []
+                     if isinstance(r, dict) and scenes.app_key(r.get("app")) != scenes.app_key(app)]
+            new["apps"] = rules + [{"app": app, "look": look}]
+            changed = True
+        if "remove_app" in req:
+            key = scenes.app_key(req["remove_app"])
+            new["apps"] = [r for r in new.get("apps") or []
+                           if isinstance(r, dict) and scenes.app_key(r.get("app")) != key]
+            changed = True
+        for op, add in (("ignore", True), ("unignore", False)):
+            if op in req:
+                key = scenes.app_key(req[op])
+                ign = [a for a in new.get("ignore") or [] if scenes.app_key(a) != key]
+                new["ignore"] = ign + ([str(req[op]).strip()] if add and key else [])
+                changed = True
+        if "forget" in req:
+            key = scenes.app_key(req["forget"])
+            new["seen"] = [a for a in new.get("seen") or [] if scenes.app_key(a) != key]
+            changed = True
+        if changed:
+            self.config.set("scenes", scenes.clean(new))
+        if req.get("test"):
+            look = scenes.clean_look(req["test"]) if isinstance(req["test"], dict) else self._scene_settings()["look"]
+            if look is None:
+                return {"ok": False, "error": "no look to show"}
+            self._scene_try = (look, time.monotonic() + self.TRY_SEC)
+        self._wake.set()
+        return dict(self._scenes_status(), ok=True)
+
     # ------------------------------------------------------------- notifications
     def _notify_settings(self) -> dict:
         return notifyflash.clean(self.config.get("notify", {}))
@@ -539,7 +648,7 @@ class Daemon:
         return bool(ov and ("power" in ov or "hex" in ov))
 
     def _flash_mix(self, fl, key: str, zcfg: dict, colors: list) -> list:
-        ov = self._overlays.get(key) or {}
+        ov = self._ov(key) or {}
         b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zcfg)
         if b <= 0:
             return colors                   # a strip that's dark (locked, brightness 0) stays dark
@@ -827,6 +936,8 @@ class Daemon:
             self.sessionwatch.stop()
         if self.notifywatch:
             self.notifywatch.stop()
+        if self.focuswatch:
+            self.focuswatch.stop()
         self.sensors.stop()
         self.ipc.stop()
         if self._observer:
@@ -999,6 +1110,7 @@ class Daemon:
 
         self._update_session()
         self._update_notify()
+        self._update_scenes()
         self._update_sensors()
         self._refresh_animations(connected)
         if self._glide_active:
@@ -2171,7 +2283,7 @@ class Daemon:
         levels = None                                        # sensor parts: each LED's level, applied last
 
         override = self._override_colors(device_name, zone_name, led_count)
-        ov = self._overlays.get(key) or {}
+        ov = self._ov(key) or {}
         power = ov.get("power")
         if override is not None:
             final_colors = override
@@ -2268,8 +2380,8 @@ class Daemon:
                 "night_pause": bool(a.get("night_pause", False)), "night_slow": bool(a.get("night_slow", False))}
 
     def _zone_animation(self, key: str, zcfg: dict) -> Optional[dict]:
-        """The zone's effect (a keybind's effect wins), or None for a static pattern."""
-        ov = self._overlays.get(key) or {}
+        """The zone's effect (a keybind's or a scene's effect wins), or None for a static pattern."""
+        ov = self._ov(key) or {}
         if "effect" in ov:
             return animations.clean(ov["effect"]) if ov["effect"] else None
         a = zcfg.get("animation")
@@ -2285,7 +2397,7 @@ class Daemon:
         test = self._rgbtest
         if test and (test[0], test[1] or "") == (device, zone or ""):
             return True
-        ov = self._overlays.get(key)
+        ov = self._ov(key)
         if ov and ("power" in ov or "hex" in ov):
             return True                     # a keybind's brightness alone keeps the animation
         s = self._anim_cfg
@@ -2295,6 +2407,20 @@ class Daemon:
         if key in self._flash_keys:
             return not self._flash_blocked(device, zone, key)
         return key in self._anim_keys and not self._anim_blocked(device, zone, key)
+
+    def _ov(self, key: str) -> Optional[dict]:
+        """What's on top of a zone's own settings: a keybind's change, else the scene's look (whose
+        brightness still fades on lock and keeps under night mode's cap)."""
+        ov = self._overlays.get(key)
+        sc = self._scene_ov
+        if ov is not None or sc is None:
+            return ov
+        if "bright" in sc:
+            b = sc["bright"] * self._session_factor()
+            if self._night_active:
+                b = min(b, self._night_cap)
+            sc = dict(sc, bright=int(round(b)))
+        return sc
 
     def _brightness_now(self, key: str, zcfg: dict) -> float:
         """The zone's brightness, faded down while the screen is locked or you're away (unless the
@@ -2475,7 +2601,7 @@ class Daemon:
             def still(clock: float):
                 if self._anim_blocked(dev, zn, key):
                     return None
-                ov = self._overlays.get(key) or {}
+                ov = self._ov(key) or {}
                 b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
                 lv = [1.0] * n
                 frame = correct(parts.frame(base, clock, lv), b)
@@ -2508,7 +2634,7 @@ class Daemon:
             if parts is not None:
                 lv = [1.0] * n
                 raw = parts.frame(raw, clock, lv)
-            ov = self._overlays.get(key) or {}
+            ov = self._ov(key) or {}
             b = ov["bright"] if ov.get("bright") is not None else self._brightness_now(key, zc)
             out = correct(raw, b)
             return self._finish_rgb(key, dev, zn, zc, self._levels_rgb(out, lv) if lv else out)
@@ -2808,6 +2934,8 @@ class Daemon:
             return self._cmd_set_zone_sections(req)
         if cmd == "set_zone_animation":
             return self._cmd_set_zone_animation(req)
+        if cmd == "scenes":
+            return self._cmd_scenes(req)
         if cmd == "animations":
             return self._cmd_animations(req)
         if cmd == "test_colors":
@@ -2935,6 +3063,7 @@ class Daemon:
             "night": dict(self._night_settings(), active=self._night_active),
             **self._session_status(),
             **self._notify_status(),
+            **self._scenes_status(),
             "sensors": self.sensors.values(),
             "sleep_watch": bool(self.sleepwatch and self.sleepwatch.available),
             "sleep_lights_off": bool(self.config.get("sleep.lights_off", True)),

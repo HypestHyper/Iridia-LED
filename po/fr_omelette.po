@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-28 00:01+0000\n"
+"POT-Creation-Date: 2026-11-01 21:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -99,6 +99,9 @@ msgstr "Croissant"
 
 msgid "Notifications"
 msgstr "Le facteur"
+
+msgid "Scenes"
+msgstr "Scènes"
 
 msgid "Keybinds"
 msgstr "Moustache"
@@ -2468,6 +2471,132 @@ msgid ""
 msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
+
+msgid "Nothing"
+msgstr "Rien"
+
+msgid "Dimmer"
+msgstr "Plus doux"
+
+msgid "One colour"
+msgstr "Une couleur"
+
+msgid "Hyprland says which window is in front."
+msgstr "Hyprland dit quelle fenêtre est devant."
+
+msgid "Sway says which window is in front."
+msgstr "Sway dit quelle fenêtre est devant."
+
+msgid ""
+"KDE Plasma says which window is in front (through a small KWin script Iridia loads while this is "
+"on)."
+msgstr "KDE Plasma dit quelle fenêtre est devant (avec un petit script KWin). Très chic."
+
+msgid "The X server says which window is in front."
+msgstr "Le serveur X dit quelle fenêtre est devant."
+
+msgid ""
+"This desktop doesn't tell other apps which window is in front, so Iridia looks at the programs "
+"running instead: the apps below get their look while they run, and \"anything fullscreen\" can't "
+"be told."
+msgstr ""
+"Ce bureau ne dit rien, alors Iridia regarde les programmes qui tournent : les apps ci-dessous ont"
+" leur look pendant qu'elles tournent. Le « plein écran » ? Mystère."
+
+#, python-brace-format
+msgid "Dimmer, {n}%"
+msgstr "Plus doux, {n}%"
+
+#, python-brace-format
+msgid "#{hex}, {n}%"
+msgstr "#{hex}, {n}%"
+
+#, python-brace-format
+msgid "{effect}, {n}%"
+msgstr "{effect}, {n}%"
+
+msgid "Scene colour"
+msgstr "Couleur de la scène"
+
+msgid ""
+"A different look for the lights while a game or a film is fullscreen. They go back when it's "
+"gone, and your settings don't change."
+msgstr "Un autre look pour les bisous pendant un jeu ou un film en plein écran. Tout revient après. Voilà."
+
+msgid "Change the lights for fullscreen apps"
+msgstr "Changer les bisous en plein écran"
+
+msgid "When anything is fullscreen"
+msgstr "Quand quelque chose est en plein écran"
+
+msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
+msgstr "Quand une de ces apps est devant, elle a son propre look."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "Nom de l'app, comme mpv ou steam_app_1091500"
+
+msgid "Never for this app"
+msgstr "Jamais pour cette app"
+
+msgid "Never for these"
+msgstr "Jamais pour celles-ci"
+
+msgid "Timing"
+msgstr "Timing"
+
+msgid "Comes on after"
+msgstr "Arrive après"
+
+msgid "Goes back after"
+msgstr "Repart après"
+
+msgid "Check every"
+msgstr "Regarder toutes les"
+
+msgid "A short wait keeps the lights steady when you switch away from a game for a moment."
+msgstr "Une petite pause, et les bisous restent calmes quand tu quittes le jeu un instant."
+
+msgid "Nothing to show: pick a look first."
+msgstr "Rien à montrer : choisis un look d'abord."
+
+msgid "Showing it for 5 seconds."
+msgstr "Pendant 5 secondes. Oh là là."
+
+msgid "Couldn't show it"
+msgstr "Impossible de le montrer"
+
+msgid "Type the app's name, or pick one it has seen."
+msgstr "Tape le nom de l'app, ou choisis-en une déjà vue."
+
+msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
+msgstr "Rien à surveiller : choisis un look ou ajoute une app."
+
+#, python-brace-format
+msgid "In front now: {app}{fs}."
+msgstr "Devant : {app}{fs}."
+
+msgid "nothing"
+msgstr "rien"
+
+msgid " (fullscreen)"
+msgstr " (plein écran)"
+
+#, python-brace-format
+msgid "Running now: {apps}."
+msgstr "En cours : {apps}."
+
+#, python-brace-format
+msgid "Showing: {look}."
+msgstr "Montré : {look}."
+
+msgid "None yet."
+msgstr "Rien encore."
+
+msgid "None."
+msgstr "Rien."
+
+msgid "Use this name"
+msgstr "Utiliser ce nom"
 
 msgid "Same as the strip"
 msgstr "Comme le fromage"

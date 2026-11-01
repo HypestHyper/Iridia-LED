@@ -216,6 +216,7 @@ class Daemon:
         self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
         self._notify_lock = threading.Lock()
         self._flash: Optional[notifyflash.Flash] = None   # a notification flash running now
+        self._flash_sizes: Dict[str, int] = {}   # zone key -> its LED count, for the last flash's targets
         self._flash_keys: set = set()       # zones showing it through a flash job (static or paused)
         self._static_pre: Dict[str, list] = {}    # key -> the static colours before _finish, for flashes
         self._stopping = threading.Event()  # set when the daemon shuts down
@@ -226,6 +227,7 @@ class Daemon:
         self._hooks = {"lock": False, "idle": False}     # iridia lock|idle on (hypridle, swayidle, ...)
         self._sess_test_until = 0.0                     # Settings, Try it: act as if locked until then
         self._sess_ramp = (1.0, 1.0, 0.0, 0.0)          # brightness factor (from, to, start, seconds)
+        self._sess_settled = True                       # the end of the last fade has been sent
         self._sess_state = "active"
         self._frozen = bool(self.config.get("color.frozen", False))
         self.calibration = Profiles()
@@ -333,7 +335,7 @@ class Daemon:
             # Nothing animates any more, so there is never a reason to tick
             # faster than this; colours are sent only when they change.
             # brightness glides re-send static zones for a moment; otherwise nothing animates here
-            self._wake.wait(0.05 if self._glide_active else 0.5 if self._busy() else 1.0)
+            self._wake.wait(0.05 if self._glide_active or self._sess_fading() else 0.5 if self._busy() else 1.0)
             self._wake.clear()
 
         self._shutdown()
@@ -477,24 +479,28 @@ class Daemon:
         now = time.monotonic()
         if self._flash is not None and now - self._flash.t0 < notifyflash.COALESCE_SEC:
             return True                     # a burst of notifications: one flash
-        if urgent and st["urgent_red"]:
-            rgb = notifyflash.URGENT
-        elif st["color"] == "app":
-            rgb = notifyflash.app_color(app)
-        elif st["color"] == "custom":
-            rgb = animations.hex_to_rgb(st["hex"])
-        else:
-            rgb = animations.hex_to_rgb(self._led_base_color() or "ffffff")
+        effect, rgb = notifyflash.style_for(st, app, urgent, self._led_base_color() or "ffffff")
         ranges = self._flash_ranges(st["targets"])
-        if not ranges:
+        positions, spacing = {}, {}
+        if st["spatial"]:
+            for key, rs in ranges.items():
+                n = max(hi for _lo, hi in rs)
+                lp = self._layout_points(key, self._flash_sizes.get(key, n))
+                positions[key] = lp[0] if lp else None
+                if lp:
+                    spacing[key] = lp[1]
+        leds = notifyflash.led_places(ranges, positions, effect, st["path"] if st["spatial"] else None, spacing)
+        if not leds:
             return False
-        self.logger.debug(f"Notification from {app or 'an app'}: flashing {len(ranges)} zone(s)")
-        self._flash = notifyflash.Flash(ranges, rgb, st["effect"], st["duration"], now)
+        self.logger.debug(f"Notification from {app or 'an app'}: {effect} on {len(leds)} zone(s)")
+        self._flash = notifyflash.Flash(leds, rgb, effect, st["duration"], now, direction=st["direction"],
+                                        band=st["band"], repeat=st["repeat"], brightness=st["brightness"])
         return True
 
     def _flash_ranges(self, targets: list) -> Dict[str, list]:
         """zone key -> the LEDs to flash on it, for the enabled strips the targets name."""
         out: Dict[str, list] = {}
+        self._flash_sizes = {}
         devices = self.config.devices_view
         for t in targets:
             dev_cfg = devices.get(t["device"])
@@ -514,7 +520,9 @@ class Daemon:
             else:
                 r = notifyflash.target_range(t, n, zc["sections"], zone_sections.spans)
             if r is not None:
-                out.setdefault(self._zone_key(t["device"], t["zone"]), []).append(r)
+                key = self._zone_key(t["device"], t["zone"])
+                out.setdefault(key, []).append(r)
+                self._flash_sizes[key] = n
         return out
 
     def _flash_blocked(self, device: str, zone: str, key: str) -> bool:
@@ -550,8 +558,9 @@ class Daemon:
         cur = self.config.get("notify", {})
         new = dict(cur if isinstance(cur, dict) else {})
         changed = False
-        for k in ("enabled", "targets", "effect", "color", "hex", "urgent_red", "duration", "apps",
-                  "app_list", "dnd", "night_quiet"):
+        for k in ("enabled", "targets", "effect", "direction", "band", "repeat", "brightness", "color", "hex",
+                  "urgent_red", "urgent_effect", "duration", "apps", "app_list", "rules", "path", "spatial",
+                  "dnd", "night_quiet"):
             if k in req:
                 new[k] = req[k]
                 changed = True
@@ -559,6 +568,40 @@ class Daemon:
         if isinstance(pick, list) and len(pick) == 2 and isinstance(pick[0], str):
             names = [a for a in new.get("app_list") or [] if isinstance(a, str) and a.lower() != pick[0].lower()]
             new["app_list"] = names + ([pick[0]] if pick[1] else [])
+            changed = True
+        drop = notifyflash.clean_target(req.get("remove_leds"))
+        if drop is not None:
+            # take these LEDs (a range, a part or the whole strip) out of the strip's chosen ones
+            dev, zone = drop["device"], drop["zone"]
+            zc = clean_zone_cfg(self._zone_cfg(dev, zone))
+            n, secs = zc["led_count"], zc["sections"]
+            mine = [t for t in notifyflash.clean({"targets": new.get("targets")})["targets"]
+                    if (t["device"], t["zone"]) == (dev, zone)]
+            chosen = set()
+            for t in mine:
+                r = notifyflash.target_range(t, n, secs, zone_sections.spans)
+                if r:
+                    chosen.update(range(*r))
+            r = notifyflash.target_range(drop, n, secs, zone_sections.spans)
+            if r:
+                chosen.difference_update(range(*r))
+            others = [t for t in new.get("targets") or [] if not isinstance(t, dict) or
+                      (t.get("device"), t.get("zone") or "") != (dev, zone)]
+            new["targets"] = others + notifyflash.targets_for(dev, zone, chosen)
+            changed = True
+        rz = req.get("remove_zone")
+        if isinstance(rz, list) and len(rz) == 2:
+            new["targets"] = [t for t in new.get("targets") or [] if not isinstance(t, dict) or
+                              (t.get("device"), t.get("zone") or "") != (rz[0], rz[1] or "")]
+            changed = True
+        rule = notifyflash.clean_rule(req.get("set_rule"))
+        if rule is not None:
+            new["rules"] = [r for r in new.get("rules") or [] if not isinstance(r, dict) or
+                            str(r.get("app", "")).lower() != rule["app"].lower()] + [rule]
+            changed = True
+        if isinstance(req.get("remove_rule"), str):
+            new["rules"] = [r for r in new.get("rules") or [] if not isinstance(r, dict) or
+                            str(r.get("app", "")).lower() != req["remove_rule"].lower()]
             changed = True
         rm = req.get("remove_target")
         if isinstance(rm, int) and not isinstance(rm, bool):
@@ -619,6 +662,10 @@ class Daemon:
                 "idle_minutes": _num(c.get("idle_minutes", 10), 10, 1, 240),
                 "dim": int(_num(c.get("dim", 20), 20, 0, 100))}
 
+    def _sess_fading(self) -> bool:
+        """A lock or idle fade is running, or its last step hasn't been sent yet."""
+        return not self._sess_settled or time.monotonic() - self._sess_ramp[2] < self._sess_ramp[3]
+
     def _session_factor(self, now: Optional[float] = None) -> float:
         frm, to, t0, dur = self._sess_ramp
         now = time.monotonic() if now is None else now
@@ -651,8 +698,15 @@ class Daemon:
         if target != self._sess_ramp[1]:
             dur = self.FADE_OUT_SEC if target < cur else self.FADE_IN_SEC
             self._sess_ramp = (cur, target, now, dur * abs(target - cur))
-        if now - self._sess_ramp[2] < self._sess_ramp[3] + 0.1:
+        if now - self._sess_ramp[2] < self._sess_ramp[3]:
             self._glide_active = True       # still fading: keep sending
+            self._sess_settled = False
+        elif not self._sess_settled:
+            # The fade is over, but the loop may have last looked partway through it (it looks only
+            # once a second when nothing else moves): send the final brightness once more, or the
+            # LEDs stay at whatever step of the fade went out last.
+            self._sess_settled = True
+            self._needs_update = True
 
     def _cmd_session(self, req: dict) -> dict:
         """Hooks (lock_hook, idle_hook: true/false), a test (test: seconds), settings (lock, idle:

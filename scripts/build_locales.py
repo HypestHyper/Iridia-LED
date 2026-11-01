@@ -88,7 +88,9 @@ def main():
             if p:
                 problems += p
                 msg.string = "" if not isinstance(msg.id, (list, tuple)) else ("",) * len(msg.string)
-            if not msg.string or (isinstance(msg.string, (list, tuple)) and not all(msg.string)):
+            # a fuzzy entry (a guess from a similar old string) isn't used, so it counts as missing
+            if not msg.string or (isinstance(msg.string, (list, tuple)) and not all(msg.string)) \
+                    or "fuzzy" in msg.flags:
                 missing += 1
         os.makedirs(os.path.join(OUT, code, "LC_MESSAGES"), exist_ok=True)
         with open(os.path.join(OUT, code, "LC_MESSAGES", "iridia.mo"), "wb") as f:

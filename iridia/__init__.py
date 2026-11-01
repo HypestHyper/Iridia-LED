@@ -2,7 +2,7 @@
 
 APP_ID = "io.github.HypestHyper.Iridia"
 APP_NAME = "Iridia"
-VERSION = "1.3.5"
+VERSION = "1.3.6"
 __version__ = VERSION
 
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-19 18:46+0000\n"
+"POT-Creation-Date: 2026-10-28 00:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -97,6 +97,9 @@ msgstr "Baguette"
 msgid "Layout"
 msgstr "Croissant"
 
+msgid "Notifications"
+msgstr "Le facteur"
+
 msgid "Keybinds"
 msgstr "Moustache"
 
@@ -108,6 +111,9 @@ msgstr "Allez !"
 
 msgid "Updates"
 msgstr "Mises à jour"
+
+msgid "Try it"
+msgstr "Champagne"
 
 msgid "Refresh"
 msgstr "Oui"
@@ -352,6 +358,12 @@ msgstr "Une grenouille dans mon café. Je ne sais quoi."
 
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Mon chien mange du camembert"
+
+msgid "Flashing LEDs for desktop notifications has its own tab now."
+msgstr "Le facteur a son propre onglet maintenant. Oh là là."
+
+msgid "Open"
+msgstr "Ooh la la"
 
 msgid "Setups and backups"
 msgstr "La baguette est trop longue"
@@ -707,9 +719,6 @@ msgstr "minutes de sieste"
 msgid "Dim to"
 msgstr "Baisser à"
 
-msgid "Try it"
-msgstr "Champagne"
-
 msgid "Acting as if the screen were locked for 5 seconds."
 msgstr "Bonne nuit pour 5 secondes."
 
@@ -762,58 +771,92 @@ msgstr "Rien ne bouge, tout est Garder."
 msgid "Your idle daemon says you're away."
 msgstr "Tu es en vacances."
 
-#, fuzzy
-msgid "Notifications"
-msgstr "Le cinéma est fermé le lundi"
-
 msgid ""
 "Flash some LEDs when a desktop notification comes in. Iridia only sees which app sent it, never "
 "what it says."
 msgstr "Les bisous clignotent quand le facteur passe. Oh là là."
 
+msgid "On the map"
+msgstr "Sur la carte"
+
+msgid ""
+"Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
+"the Layout tab."
+msgstr "Choisis les bisous et peins-les, sur la carte."
+
+msgid "Edit on the map"
+msgstr "Modifier sur la carte"
+
 msgid "Flash LEDs for notifications"
 msgstr "Clignoter pour le facteur"
 
-#, fuzzy
 msgid "Which LEDs"
-msgstr "Croissant"
+msgstr "Quels bisous"
 
-#, fuzzy
+msgid ""
+"Or pick them on the Layout tab with the Notifications tool, which also sets the A and B points a "
+"moving flash runs between."
+msgstr "Ou choisis-les sur la carte, avec l'outil du facteur. Oh là là."
+
 msgid "No strips yet"
-msgstr "Brioche"
+msgstr "Pas encore de baguettes"
 
-#, fuzzy
-msgid "Pulse"
-msgstr "Bonne nuit"
-
-#, fuzzy
-msgid "Flash"
-msgstr "Clignoter au-dessus"
-
-#, fuzzy
-msgid "Sweep"
-msgstr "Garder"
+msgid "Remove"
+msgstr "Baguette"
 
 msgid "Effect"
 msgstr "L'effet papillon"
 
-#, fuzzy
-msgid "for"
-msgstr "Baguette"
+msgid "Direction"
+msgstr "Par là-bas"
 
-#, fuzzy
-msgid "seconds"
-msgstr "La deuxième chaussette"
+msgid "Band"
+msgstr "Bande"
+
+msgid "LEDs"
+msgstr "Café"
+
+msgid "Plays"
+msgstr "Fois"
+
+msgid "times"
+msgstr "fois"
+
+msgid "Brightness"
+msgstr "Bisou"
+
+msgid "Length"
+msgstr "Durée"
 
 msgid "One per app"
 msgstr "Un fromage par app"
 
-#, fuzzy
 msgid "Custom"
-msgstr "Brioche"
+msgstr "Sur mesure"
+
+msgid "Pick a colour"
+msgstr "Choisir une couleur"
 
 msgid "Urgent notifications flash red"
 msgstr "Urgent : rouge comme le vin"
+
+msgid "The same effect"
+msgstr "Le même spectacle"
+
+msgid "Urgent ones use"
+msgstr "Les urgents font"
+
+msgid "Apps with their own look"
+msgstr "Les apps avec leur fromage"
+
+msgid "No apps yet"
+msgstr "Pas encore d'apps"
+
+msgid "Default effect"
+msgstr "Spectacle habituel"
+
+msgid "Default colour"
+msgstr "Couleur habituelle"
 
 msgid "Every app"
 msgstr "Toutes les apps"
@@ -830,12 +873,17 @@ msgstr "Le facteur n'est pas encore passé."
 msgid "Not while Do Not Disturb is on"
 msgstr "Pas pendant la sieste"
 
-#, fuzzy
 msgid "Not during night mode"
-msgstr "La nuit porte conseil"
+msgstr "Pas pendant la nuit"
 
 msgid "Couldn't save"
 msgstr "Croissant"
+
+msgid "Notification colour"
+msgstr "Couleur du facteur"
+
+msgid "Colour for this app"
+msgstr "Couleur pour cette app"
 
 msgid "Flashing now."
 msgstr "Ça clignote !"
@@ -850,26 +898,37 @@ msgstr "Toute la baguette"
 msgid "Part {n}"
 msgstr "Morceau {n}"
 
-#, fuzzy
 msgid "Some LEDs"
-msgstr "Bisou"
+msgstr "Quelques bisous"
 
-#, fuzzy, python-brace-format
+#, python-brace-format
+msgid "{picked} of {count} LEDs · middle {mid}"
+msgstr "{picked} sur {count} bisous · le milieu {mid}"
+
+#, python-brace-format
 msgid "part {n}"
-msgstr "Morceau {n}"
-
-#, fuzzy, python-brace-format
-msgid "LEDs {a} to {b}"
-msgstr "Cacher les LED {a} à {b}"
+msgstr "morceau {n}"
 
 msgid "all of it"
 msgstr "toute la baguette"
 
-msgid "Remove"
-msgstr "Baguette"
-
 msgid "None yet: pick a strip and press Add."
 msgstr "Rien encore : choisis une baguette et appuie sur Ajouter."
+
+msgid "wallpaper colour"
+msgstr "la couleur du papier peint"
+
+msgid "its own colour"
+msgstr "sa propre couleur"
+
+msgid "default effect"
+msgstr "spectacle habituel"
+
+msgid "default colour"
+msgstr "couleur habituelle"
+
+msgid "None: every app uses the settings above."
+msgstr "Rien : toutes les apps font pareil."
 
 msgid ""
 "Can't listen for notifications here: install dbus-monitor (the dbus tools package) or use a "
@@ -882,9 +941,8 @@ msgstr "On attend le facteur."
 msgid "Pick some LEDs to start listening."
 msgstr "Choisis des bisous pour attendre le facteur."
 
-#, fuzzy
 msgid "Off."
-msgstr "Nature"
+msgstr "Éteint."
 
 msgid "Saved."
 msgstr "Santé !"
@@ -1591,9 +1649,6 @@ msgstr "Bonne nuit"
 msgid "Type a name."
 msgstr "Café"
 
-msgid "Open"
-msgstr "Ooh la la"
-
 msgid "Save"
 msgstr "Béret"
 
@@ -1696,9 +1751,6 @@ msgstr "Une nouvelle chaussette à chaque soupir"
 msgid "Tail length"
 msgstr "La longueur de la queue du chat"
 
-msgid "LEDs"
-msgstr "Café"
-
 msgid "Heads"
 msgstr "Les têtes de veau"
 
@@ -1749,9 +1801,6 @@ msgstr "Tenir chaque couleur comme un parapluie"
 
 msgid "Follow the layout"
 msgstr "Suivre le plan du métro"
-
-msgid "Direction"
-msgstr "Par là-bas"
 
 msgid "Keep zones with this effect in step"
 msgstr "Tout le monde danse la même valse"
@@ -1881,9 +1930,6 @@ msgstr "Bisou"
 
 msgid "Pick the color"
 msgstr "Éclair"
-
-msgid "Brightness"
-msgstr "Bisou"
 
 msgid "Static pattern"
 msgstr "Le motif de la nappe"
@@ -2057,6 +2103,77 @@ msgstr "Les moules sont délicieuses"
 msgid "Failed"
 msgstr "Moustache"
 
+msgid "Pulse"
+msgstr "Bisou"
+
+msgid "Flash"
+msgstr "Clin d'œil"
+
+msgid "Sweep"
+msgstr "Vague"
+
+msgid "Ripple"
+msgstr "Ricochet"
+
+msgid "A to B"
+msgstr "De A à B"
+
+msgid "B to A"
+msgstr "De B à A"
+
+msgid "A to B and back"
+msgstr "De A à B et retour"
+
+msgid "From the middle out"
+msgstr "Du milieu vers les bords"
+
+msgid "All settings"
+msgstr "Tous les réglages"
+
+msgid "Clear"
+msgstr "Bonjour"
+
+msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
+msgstr "Clique ou glisse sur les bisous pour les choisir. Voilà."
+
+msgid "Colour"
+msgstr "Couleur"
+
+msgid "A and B"
+msgstr "A et B"
+
+msgid "Run through the room from A to B"
+msgstr "Traverser la pièce de A à B"
+
+msgid ""
+"The flash runs over your LEDs by where they are, across every strip, and only between A and B "
+"(Ripple: out from A, as far as B). Off: along each strip."
+msgstr "La vague traverse la pièce, de A à B. Magnifique."
+
+msgid "Put A and B at the ends"
+msgstr "Mettre A et B aux bouts"
+
+msgid "Play"
+msgstr "Jouer"
+
+msgid "Apps, urgent ones and quiet times: All settings."
+msgstr "Le reste : Tous les réglages."
+
+#, python-brace-format
+msgid "{n} LED"
+msgid_plural "{n} LEDs"
+msgstr[0] "Bisou"
+msgstr[1] "Bisou"
+
+#, python-brace-format
+msgid "{n} strip"
+msgid_plural "{n} strips"
+msgstr[0] "{n} baguette"
+msgstr[1] "{n} baguettes"
+
+msgid "No LEDs chosen yet."
+msgstr "Aucun bisou choisi."
+
 msgid "Arrange"
 msgstr "Déjà vu"
 
@@ -2071,6 +2188,9 @@ msgstr "J'ai une baguette"
 
 msgid "Gradient"
 msgstr "Oh là là"
+
+msgid "Notifications: which LEDs flash, and where a flash runs"
+msgstr "Le facteur : quels bisous clignotent"
 
 msgid "Paint color"
 msgstr "Santé !"
@@ -2089,12 +2209,6 @@ msgstr "Hop là"
 
 msgid "No enabled zones yet. They show up here once the daemon reports them."
 msgstr "Le pamplemousse est dans le jardin. Il était une fois un croissant."
-
-#, python-brace-format
-msgid "{n} LED"
-msgid_plural "{n} LEDs"
-msgstr[0] "Bisou"
-msgstr[1] "Bisou"
 
 msgid "clone"
 msgstr "Bonne nuit"
@@ -2135,6 +2249,11 @@ msgid ""
 "Erase: click or drag over LEDs to give them back the zone's own color (the one set on the zone or"
 " on Everything)."
 msgstr "Ma tante joue de l'accordéon. La baguette est trop longue."
+
+msgid ""
+"Notifications: click or drag over LEDs to flash them when a notification comes in (start on a "
+"ringed one to take LEDs out). Drag A and B to set where a moving flash runs; Play tries it."
+msgstr "Le facteur : clique sur les bisous. Zut alors."
 
 msgid "Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern."
 msgstr "Mon aéroglisseur est plein d'anguilles. Bonjour, je m'appelle Jacques."
@@ -2629,6 +2748,11 @@ msgstr "Éclair"
 msgid "Mirror"
 msgstr "Ratatouille"
 
+msgid ""
+"Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
+"tab."
+msgstr "Ces bisous clignotent pour le facteur. Oh là là."
+
 msgid "Follow monitor brightness"
 msgstr "La crêpe est tombée par terre"
 
@@ -2694,6 +2818,13 @@ msgid "Asked OpenRGB for {need} LEDs on this zone"
 msgstr "Mon oncle est un champignon"
 
 #, python-brace-format
+msgid "Notifications: LEDs {leds}"
+msgstr "Le facteur : bisous {leds}"
+
+msgid "(off)"
+msgstr "(éteint)"
+
+#, python-brace-format
 msgid "(looks like: {type})"
 msgstr "Fromage"
 
@@ -2715,9 +2846,6 @@ msgstr "Un verre de vin rouge, merci. J'ai une baguette."
 
 msgid "Erase"
 msgstr "Béret"
-
-msgid "Clear"
-msgstr "Bonjour"
 
 msgid "Done editing"
 msgstr "Ratatouille"

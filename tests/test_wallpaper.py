@@ -129,3 +129,32 @@ def test_settings_files_are_watched_instead_of_polled(home):
     assert d.slow_interval == WallpaperDetector.WATCHED_SLOW_SEC
     d.set_watched(False)
     assert d.slow_interval == 3.0
+
+
+def test_desktop_comes_before_another_sessions_leftovers(home, monkeypatch):
+    """Hyprland with caelestia one day, Plasma the next: caelestia's state file still names the
+    old wallpaper, but on Plasma, Plasma says what's shown."""
+    tmp, tool, image = home
+    old, new = image("old.png"), image("new.png")
+    state = tmp / ".local/state/caelestia/wallpaper"
+    state.mkdir(parents=True)
+    (state / "path.txt").write_text(old)
+    (tmp / ".config").mkdir()
+    (tmp / ".config/plasma-org.kde.plasma.desktop-appletsrc").write_text(
+        f"[Containments][1][Wallpaper][org.kde.image][General]\nImage=file://{new}\n")
+    cache = tmp / ".config/iridia/detection_cache.json"
+    cache.parent.mkdir(parents=True)
+    cache.write_text('{"backend": "caelestia"}')
+    tool("ps", "echo /usr/bin/plasmashell")
+    monkeypatch.setenv("XDG_CURRENT_DESKTOP", "KDE")
+    assert WallpaperDetector(cache_path=str(cache)).detect() == new
+    assert '"kde"' in cache.read_text()
+    # a service started without the desktop's name: plasmashell running says it
+    monkeypatch.delenv("XDG_CURRENT_DESKTOP")
+    monkeypatch.delenv("HYPRLAND_INSTANCE_SIGNATURE", raising=False)
+    cache.write_text('{"backend": "caelestia"}')
+    assert WallpaperDetector(cache_path=str(cache)).detect() == new
+    # on Hyprland, caelestia still wins
+    tool("ps", "printf '/usr/bin/Hyprland\\n/usr/bin/plasmashell\\n'")
+    cache.write_text('{"backend": "caelestia"}')
+    assert WallpaperDetector(cache_path=str(cache)).detect() == old

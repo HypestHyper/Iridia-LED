@@ -218,6 +218,30 @@ class WallpaperDetector:
             return "i3"
         return "unknown"
 
+    # Full desktops that keep the wallpaper themselves: XDG_CURRENT_DESKTOP name -> backend.
+    DESKTOPS = {"kde": "kde", "gnome": "gnome", "x-cinnamon": "cinnamon", "cinnamon": "cinnamon",
+                "xfce": "xfce", "mate": "mate", "cosmic": "cosmic", "lxqt": "lxqt"}
+    # What a Wayland shell or compositor leaves behind (state files, a config): stale on a full desktop.
+    SHELLS = ("caelestia", "noctalia", "hyprland", "sway", "waypaper")
+
+    # Each full desktop's own process, for when the environment doesn't say which one runs (a
+    # service started from another session).
+    DESKTOP_PROCS = {"plasmashell": "kde", "gnome-shell": "gnome", "cinnamon": "cinnamon",
+                     "xfdesktop": "xfce", "caja": "mate", "cosmic-bg": "cosmic", "pcmanfm-qt": "lxqt"}
+    COMPOSITOR_PROCS = ("Hyprland", "sway", "niri", "river", "labwc", "wayfire")
+
+    def _native(self):
+        """The backend of the desktop running now, when it's a full desktop (KDE, GNOME, ...)."""
+        for part in self._de.split(":"):
+            if part in self.DESKTOPS:
+                return self.DESKTOPS[part]
+        procs = {os.path.basename(line.split()[0]) for line in self._run(["ps", "-eo", "args"]).splitlines()
+                 if line.strip()}
+        if procs & set(self.COMPOSITOR_PROCS):
+            return None
+        found = {b for p, b in self.DESKTOP_PROCS.items() if p in procs}
+        return found.pop() if len(found) == 1 else None
+
     @property
     def last_backend(self):
         return self._last_successful_method
@@ -233,7 +257,12 @@ class WallpaperDetector:
         try:
             with open(self.cache_path, "r", encoding="utf-8") as f:
                 name = json.load(f).get("backend")
-            if isinstance(name, str) and name in self._table():
+            native = self._native()
+            if native and name != native and name in self.SHELLS:
+                # Remembered from another session (Hyprland, say): its state files are still
+                # there but say nothing about this desktop's wallpaper.
+                logger.info(f"Cached wallpaper backend '{name}' belongs to another session; using '{native}'")
+            elif isinstance(name, str) and name in self._table():
                 self._sticky = name
                 logger.info(f"Using cached wallpaper backend '{name}' (Settings > reset to re-detect)")
         except (OSError, ValueError):
@@ -315,6 +344,11 @@ class WallpaperDetector:
                 _mtime(os.path.join(state, "caelestia", "wallpaper", "path.txt")):
             order.remove("noctalia")
             order.insert(0, "noctalia")
+        native = self._native()
+        if native:
+            # On KDE, GNOME and the like the desktop itself says what's shown; a Wayland shell's
+            # leftovers from another session would only give an old wallpaper.
+            order = [native] + [n for n in order if n != native and n not in self.SHELLS]
         return order
 
     def _query(self, name, slow_due):

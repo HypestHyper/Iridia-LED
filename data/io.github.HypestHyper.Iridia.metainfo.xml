@@ -47,6 +47,16 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.6" date="2026-10-29">
+      <description>
+        <ul>
+          <li>Notification flashes on the Layout tab, from A to B, with more effects and settings, in their own tab</li>
+          <li>The wallpaper is found on KDE Plasma installed next to Hyprland</li>
+          <li>The LEDs light back up fully after unlocking</li>
+          <li>Button text keeps the right size after changing the window size</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.5" date="2026-10-20">
       <description>
         <ul>

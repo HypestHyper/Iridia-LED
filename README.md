@@ -3,7 +3,7 @@
 <p align="center">Sets the RGB lights in your room and PC to the colours of your wallpaper, through OpenRGB.
 It can also animate them, map them to your room, follow your monitor's brightness and show sensors.</p>
 <p align="center">
-  <img alt="Version 1.3.5" src="https://img.shields.io/badge/version-1.3.5-1f9e80">
+  <img alt="Version 1.3.6" src="https://img.shields.io/badge/version-1.3.6-1f9e80">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Platform Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">

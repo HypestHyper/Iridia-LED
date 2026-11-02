@@ -10,7 +10,8 @@ if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] || [ -z "${IRIDIA_DESKTOP_INNER:-}" ];
     IRIDIA_DESKTOP_INNER=1 exec dbus-run-session -- sh "$0" "$PY"
 fi
 WORK=$(mktemp -d)
-trap 'kill $KWIN $DAEMON 2>/dev/null; rm -rf "$WORK"' EXIT
+# stop KWin and the daemon and let them finish writing before the folder goes; never changes the result
+trap 'kill $KWIN $DAEMON 2>/dev/null; wait 2>/dev/null; rm -rf "$WORK" 2>/dev/null || true' EXIT
 export HOME="$WORK/home" XDG_RUNTIME_DIR="$WORK/run" XDG_CONFIG_HOME="" XDG_CACHE_HOME="" XDG_STATE_HOME=""
 unset XDG_CONFIG_HOME XDG_CACHE_HOME XDG_STATE_HOME DISPLAY WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE SWAYSOCK
 mkdir -p "$HOME" "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"

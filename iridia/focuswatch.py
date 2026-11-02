@@ -56,7 +56,12 @@ function hook(w) {
     // going fullscreen always changes the size too: a second way to hear it
     if (w.frameGeometryChanged) w.frameGeometryChanged.connect(changed);
 }
-function onActive(w) { log("activated " + (w ? w.resourceClass : "none")); hook(w); send(w); }
+function onActive(w) {
+    if (w) log("activated " + w.resourceClass + " id=" + key(w) + " fullScreen=" + w.fullScreen +
+               " signals: " + typeof w.fullScreenChanged + "/" + typeof w.frameGeometryChanged);
+    hook(w);
+    send(w);
+}
 function onRemoved(w) { if (w) delete hooked[key(w)]; changed(); }
 if (workspace.windowActivated) workspace.windowActivated.connect(onActive);
 else workspace.clientActivated.connect(onActive);
@@ -182,6 +187,7 @@ class FocusWatch:
         self.wanted: Set[str] = set()           # apps worth looking for in the fallback
         self.script_log = []                    # what the KWin script says it saw (IRIDIA_KWIN_DEBUG)
         self._kde_window = ""                   # KDE: the id of the window in front
+        self._debug_kwin = bool(os.environ.get("IRIDIA_KWIN_DEBUG"))
 
     # -- state
     def _set(self, front: str, fullscreen: bool, running: Optional[Set[str]] = None):
@@ -328,9 +334,7 @@ class FocusWatch:
                     self._kde_window = str(wid)
                     self._set(str(app), bool(fs))
                 elif method == "Log":               # the script's own lines, with IRIDIA_KWIN_DEBUG
-                    self.script_log.append(str(params.unpack()[0]))
-                    del self.script_log[:-50]
-                    logger.debug(f"KWin script: {self.script_log[-1]}")
+                    self._script_said(str(params.unpack()[0]))
                 inv.return_value(None)
             reg = conn.register_object(BUS_PATH, node.interfaces[0], call, None, None)
             own = Gio.bus_own_name_on_connection(conn, BUS_NAME, Gio.BusNameOwnerFlags.REPLACE, None, None)
@@ -346,10 +350,13 @@ class FocusWatch:
                                            GLib.Variant("(s)", (wid,)), GLib.VariantType("(a{sv})"),
                                            Gio.DBusCallFlags.NONE, 1000, None)
                         info = r.unpack()[0]
+                        if self._debug_kwin:
+                            self._script_said(f"asked KWin about {wid}: fullscreen={info.get('fullscreen')!r}")
                         if info:
                             self._set(str(info.get("resourceClass") or self.front), bool(info.get("fullscreen")))
-                    except GLib.Error:
-                        pass                        # gone meanwhile, or a KWin without getWindowInfo
+                    except GLib.Error as e:
+                        if self._debug_kwin:
+                            self._script_said(f"asking KWin about {wid} failed: {e.message}")
                 return gen == self._gen
             tick = GLib.timeout_source_new(KWIN_ASK_MS)
             tick.set_callback(lambda *_a: ask())
@@ -368,6 +375,11 @@ class FocusWatch:
             ctx.pop_thread_default()
         if gen == self._gen:
             raise OSError("KWin script stopped")
+
+    def _script_said(self, line: str):
+        self.script_log.append(line)
+        del self.script_log[:-50]
+        logger.debug(f"KWin script: {line}")
 
     # -- X11
     def _loop_x11(self, gen):

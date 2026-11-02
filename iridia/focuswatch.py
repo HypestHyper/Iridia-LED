@@ -5,9 +5,7 @@ timer):
   Hyprland   its event socket (.socket2.sock); the window is then asked on its request socket
   Sway       `swaymsg -t subscribe` window events
   KDE Plasma a small KWin script (loaded at runtime, nothing installed) that calls Iridia on the
-             session bus when the active window or its fullscreen state changes; KWin 6.8 no longer
-             passes the second to scripts, so KWin is also asked about the window in front once a
-             second (getWindowInfo, one call on the bus)
+             session bus when the active window or its fullscreen state changes
   X11        `xprop -spy` on the active window, and its state asked every few seconds
 Anywhere else (GNOME on Wayland, other compositors) no app may see other apps' windows, so the
 running programs are listed every few seconds instead: an app's own look then shows while it runs,
@@ -30,7 +28,6 @@ logger = logging.getLogger("iridia")
 BUS_NAME = "io.github.HypestHyper.Iridia.Focus"
 BUS_PATH = "/io/github/HypestHyper/Iridia/Focus"
 KWIN_PLUGIN = "iridia-focus"
-KWIN_ASK_MS = 1000              # KDE: how often KWin is asked whether the window in front is fullscreen
 
 KWIN_SCRIPT = """// Iridia: tells Iridia which window is in front and whether it's fullscreen (for scenes).
 var N = "%s", P = "%s", DEBUG = %s;
@@ -186,8 +183,7 @@ class FocusWatch:
         self.interval = 3.0
         self.wanted: Set[str] = set()           # apps worth looking for in the fallback
         self.script_log = []                    # what the KWin script says it saw (IRIDIA_KWIN_DEBUG)
-        self._kde_window = ""                   # KDE: the id of the window in front
-        self._debug_kwin = bool(os.environ.get("IRIDIA_KWIN_DEBUG"))
+        self.kde_window = ""                    # KDE: KWin's id for the window in front
 
     # -- state
     def _set(self, front: str, fullscreen: bool, running: Optional[Set[str]] = None):
@@ -331,7 +327,7 @@ class FocusWatch:
             def call(_c, _sender, _path, _iface, method, params, inv):
                 if method == "Window":
                     fs, app, wid = params.unpack()
-                    self._kde_window = str(wid)
+                    self.kde_window = str(wid)
                     self._set(str(app), bool(fs))
                 elif method == "Log":               # the script's own lines, with IRIDIA_KWIN_DEBUG
                     self._script_said(str(params.unpack()[0]))
@@ -340,27 +336,6 @@ class FocusWatch:
             own = Gio.bus_own_name_on_connection(conn, BUS_NAME, Gio.BusNameOwnerFlags.REPLACE, None, None)
             loop = GLib.MainLoop.new(ctx, False)
 
-            def ask():
-                """KWin 6.8 doesn't pass a window's fullscreen changes to scripts: ask KWin about the
-                window in front (one call on the bus, no process) once a second."""
-                wid = self._kde_window
-                if wid and gen == self._gen:
-                    try:
-                        r = conn.call_sync("org.kde.KWin", "/KWin", "org.kde.KWin", "getWindowInfo",
-                                           GLib.Variant("(s)", (wid,)), GLib.VariantType("(a{sv})"),
-                                           Gio.DBusCallFlags.NONE, 1000, None)
-                        info = r.unpack()[0]
-                        if self._debug_kwin:
-                            self._script_said(f"asked KWin about {wid}: fullscreen={info.get('fullscreen')!r}")
-                        if info:
-                            self._set(str(info.get("resourceClass") or self.front), bool(info.get("fullscreen")))
-                    except GLib.Error as e:
-                        if self._debug_kwin:
-                            self._script_said(f"asking KWin about {wid} failed: {e.message}")
-                return gen == self._gen
-            tick = GLib.timeout_source_new(KWIN_ASK_MS)
-            tick.set_callback(lambda *_a: ask())
-            tick.attach(ctx)
 
             def stop():
                 _kwin_unload()

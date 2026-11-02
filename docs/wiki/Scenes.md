@@ -49,7 +49,7 @@ lights stay dark while the PC sleeps or *lights off* is on.
 | --- | --- | --- |
 | Hyprland | Its event socket says when the window in front or fullscreen changes | No |
 | Sway | Its window events | No |
-| KDE Plasma | A small KWin script Iridia loads while scenes are on (nothing is installed; it's gone when they're off) says which window is in front; whether it's fullscreen is asked from KWin once a second (Plasma 6.8 doesn't tell scripts) | Once a second, a single call to KWin |
+| KDE Plasma | A small KWin script Iridia loads while scenes are on (nothing is installed; it's gone when they're off) | No |
 | X11 (XFCE, Cinnamon, MATE, KDE on X11, i3, ...) | `xprop` on the window in front | Every few seconds as well, for fullscreen switched in place |
 | Anything else (GNOME on Wayland, other compositors) | The running programs | Yes, every *Check every* seconds |
 

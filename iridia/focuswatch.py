@@ -31,7 +31,7 @@ KWIN_PLUGIN = "iridia-focus"
 
 KWIN_SCRIPT = """// Iridia: tells Iridia which window is in front and whether it's fullscreen (for scenes).
 var N = "%s", P = "%s", DEBUG = %s;
-function log(t) { if (DEBUG) print("iridia: " + t); }
+function log(t) { if (DEBUG) callDBus(N, P, N, "Log", String(t)); }
 function active() { return workspace.activeWindow !== undefined ? workspace.activeWindow : workspace.activeClient; }
 var last = null;
 function send(w) {
@@ -64,11 +64,12 @@ onActive(active());
 
 
 def kwin_script(debug: bool = False) -> str:
-    """The KWin script; debug: it also writes what it sees to KWin's log ("iridia: ...")."""
+    """The KWin script; debug: it also tells Iridia what it sees (FocusWatch.script_log)."""
     return KWIN_SCRIPT % (BUS_NAME, BUS_PATH, "true" if debug else "false")
 
 BUS_XML = f"""<node><interface name="{BUS_NAME}">
 <method name="Window"><arg type="b" direction="in"/><arg type="s" direction="in"/></method>
+<method name="Log"><arg type="s" direction="in"/></method>
 </interface></node>"""
 
 
@@ -176,6 +177,7 @@ class FocusWatch:
         self.running: Set[str] = set()
         self.interval = 3.0
         self.wanted: Set[str] = set()           # apps worth looking for in the fallback
+        self.script_log = []                    # what the KWin script says it saw (IRIDIA_KWIN_DEBUG)
 
     # -- state
     def _set(self, front: str, fullscreen: bool, running: Optional[Set[str]] = None):
@@ -320,6 +322,10 @@ class FocusWatch:
                 if method == "Window":
                     fs, app = params.unpack()
                     self._set(str(app), bool(fs))
+                elif method == "Log":               # the script's own lines, with IRIDIA_KWIN_DEBUG
+                    self.script_log.append(str(params.unpack()[0]))
+                    del self.script_log[:-50]
+                    logger.debug(f"KWin script: {self.script_log[-1]}")
                 inv.return_value(None)
             reg = conn.register_object(BUS_PATH, node.interfaces[0], call, None, None)
             own = Gio.bus_own_name_on_connection(conn, BUS_NAME, Gio.BusNameOwnerFlags.REPLACE, None, None)

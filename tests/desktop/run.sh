@@ -14,7 +14,7 @@ trap 'kill $KWIN $DAEMON 2>/dev/null; rm -rf "$WORK"' EXIT
 export HOME="$WORK/home" XDG_RUNTIME_DIR="$WORK/run" XDG_CONFIG_HOME="" XDG_CACHE_HOME="" XDG_STATE_HOME=""
 unset XDG_CONFIG_HOME XDG_CACHE_HOME XDG_STATE_HOME DISPLAY WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE SWAYSOCK
 mkdir -p "$HOME" "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR"
-export IRIDIA_KWIN_DEBUG=1          # the KWin script writes what it sees to KWin's log
+export IRIDIA_KWIN_DEBUG=1          # the KWin script tells what it sees (printed when the check fails)
 export XDG_CURRENT_DESKTOP=KDE KDE_FULL_SESSION=true GTK_A11Y=none NO_AT_BRIDGE=1 PYTHONPATH="$ROOT"
 
 # kwin_wayland carries a file capability (CAP_SYS_NICE) that containers refuse: a plain copy hasn't it
@@ -39,7 +39,7 @@ fail=0
 
 if ! "$PY" "$HERE/focus_check.py" > "$WORK/focus.log" 2>&1; then
     fail=1
-    echo "KWin's log (the script's own lines start with iridia:):"
+    echo "KWin's log:"
     grep -v "MESA\|EGL\|aurorae\|^ *\^\|^ *$" "$WORK/kwin.log" | tail -40
 fi
 cat "$WORK/focus.log"

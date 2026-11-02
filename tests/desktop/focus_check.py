@@ -81,7 +81,9 @@ if len(steps) == 6 and all(ok == (n != "gtk says fullscreen" or i == 2) for i, (
     out = F._gdbus_kwin("/Scripting", "org.kde.kwin.Scripting.isScriptLoaded", F.KWIN_PLUGIN)
     if "false" not in out:
         sys.exit(f"the KWin script is still loaded after stopping: {out.strip()}")
-    print("focus: open, fullscreen, unfullscreen, close all seen; script unloaded")
+    print("focus: open, fullscreen, unfullscreen, close all seen; script unloaded"
+          f" ({len(w.script_log)} lines from the script)")
     sys.exit(0)
 print("focus: steps", steps, "seen", seen, file=sys.stderr)
+print("focus: the KWin script said:", *w.script_log, sep="\n  ", file=sys.stderr)
 sys.exit(1)

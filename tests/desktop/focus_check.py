@@ -33,6 +33,14 @@ steps = []
 runner = []
 
 
+def on_gtk(fn):
+    """fn() run on GTK's thread (GTK isn't thread-safe), its result here."""
+    box, done = [], threading.Event()
+    GLib.idle_add(lambda: (box.append(fn()), done.set(), False)[2])
+    done.wait(5)
+    return box[0] if box else None
+
+
 def script(win, app):
     """Runs off the GTK thread: each step waits for the watcher before the next one."""
     for name, act, want in (("open", None, (APP_ID, False)),
@@ -43,6 +51,9 @@ def script(win, app):
             GLib.idle_add(lambda a=act: (a(), False)[1])
         ok = wait(lambda w=want: bool(seen) and seen[-1] == w)
         steps.append((name, ok))
+        if name in ("fullscreen", "unfullscreen"):
+            # what the compositor told GTK: tells "KWin didn't do it" from "Iridia didn't hear it"
+            steps.append(("gtk says fullscreen", on_gtk(win.is_fullscreen)))
         if not ok:
             GLib.idle_add(lambda: (app.quit(), False)[1])
             return
@@ -62,7 +73,7 @@ app.connect("activate", activate)
 app.run([])
 for t in runner:
     t.join(20)                          # the last step (the window gone) is checked after the app quits
-if len(steps) == 4 and all(ok for _, ok in steps):
+if len(steps) == 6 and all(ok == (n != "gtk says fullscreen" or i == 2) for i, (n, ok) in enumerate(steps)):
     # after the window has gone, the watcher has to say so too (checked in the loop above);
     # switching scenes off has to unload the script from KWin
     w.stop()

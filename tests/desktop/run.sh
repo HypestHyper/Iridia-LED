@@ -36,7 +36,11 @@ echo "KWin $("$WORK/kwin_wayland" --version 2>/dev/null | tail -1) is up"
 export WAYLAND_DISPLAY=wayland-iridia GDK_BACKEND=wayland
 fail=0
 
-"$PY" "$HERE/focus_check.py" > "$WORK/focus.log" 2>&1 || fail=1
+if ! "$PY" "$HERE/focus_check.py" > "$WORK/focus.log" 2>&1; then
+    fail=1
+    echo "KWin's log (script errors show up here):"
+    grep -iE "js:|script|iridia|error" "$WORK/kwin.log" | grep -v "MESA\|EGL" | tail -30
+fi
 cat "$WORK/focus.log"
 
 # the daemon, with the fake OpenRGB first on PATH (it starts it by itself)

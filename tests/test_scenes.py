@@ -87,7 +87,8 @@ def test_running_programs(tmp_path):
 
 
 def test_kwin_script_names_the_bus():
-    assert F.BUS_NAME in F.KWIN_SCRIPT and "fullScreenChanged" in F.KWIN_SCRIPT
+    assert F.BUS_NAME in F.kwin_script() and "fullScreenChanged" in F.kwin_script()
+    assert "DEBUG = false" in F.kwin_script() and "DEBUG = true" in F.kwin_script(debug=True)
     assert os.path.basename(F.BUS_PATH) == "Focus"
 
 

@@ -30,29 +30,42 @@ BUS_PATH = "/io/github/HypestHyper/Iridia/Focus"
 KWIN_PLUGIN = "iridia-focus"
 
 KWIN_SCRIPT = """// Iridia: tells Iridia which window is in front and whether it's fullscreen (for scenes).
-var N = "%s", P = "%s";
+var N = "%s", P = "%s", DEBUG = %s;
+function log(t) { if (DEBUG) print("iridia: " + t); }
 function active() { return workspace.activeWindow !== undefined ? workspace.activeWindow : workspace.activeClient; }
+var last = null;
 function send(w) {
-    callDBus(N, P, N, "Window", !!(w && w.fullScreen), w ? String(w.resourceClass || "") : "");
+    var fs = !!(w && w.fullScreen), app = w ? String(w.resourceClass || "") : "";
+    if (last !== null && last[0] === fs && last[1] === app) return;    // only changes (resizes are many)
+    last = [fs, app];
+    log("send " + app + " fullscreen=" + fs);
+    callDBus(N, P, N, "Window", fs, app);
 }
 // Windows are told apart by their id: KWin may hand out a new JavaScript object for the same window
-// (6.8 does), so comparing objects says "another window" and nothing would be sent.
+// (6.8 does). Each one watched is kept here too, so its signal connections live as long as it does.
 var hooked = {};
 function key(w) { return String(w.internalId); }
+function changed() { send(active()); }      // whichever window changed, what counts is the one in front
 function hook(w) {
     if (!w || hooked[key(w)]) return;
-    hooked[key(w)] = true;
-    // whichever window changed, what counts is the one in front
-    w.fullScreenChanged.connect(function () { send(active()); });
+    hooked[key(w)] = w;
+    w.fullScreenChanged.connect(function () { log("fullScreenChanged"); changed(); });
+    // going fullscreen always changes the size too: a second way to hear it
+    if (w.frameGeometryChanged) w.frameGeometryChanged.connect(changed);
 }
-function onActive(w) { hook(w); send(w); }
-function onRemoved(w) { if (w) delete hooked[key(w)]; send(active()); }
+function onActive(w) { log("activated " + (w ? w.resourceClass : "none")); hook(w); send(w); }
+function onRemoved(w) { if (w) delete hooked[key(w)]; changed(); }
 if (workspace.windowActivated) workspace.windowActivated.connect(onActive);
 else workspace.clientActivated.connect(onActive);
 if (workspace.windowRemoved) workspace.windowRemoved.connect(onRemoved);
 else if (workspace.clientRemoved) workspace.clientRemoved.connect(onRemoved);
 onActive(active());
-""" % (BUS_NAME, BUS_PATH)
+"""
+
+
+def kwin_script(debug: bool = False) -> str:
+    """The KWin script; debug: it also writes what it sees to KWin's log ("iridia: ...")."""
+    return KWIN_SCRIPT % (BUS_NAME, BUS_PATH, "true" if debug else "false")
 
 BUS_XML = f"""<node><interface name="{BUS_NAME}">
 <method name="Window"><arg type="b" direction="in"/><arg type="s" direction="in"/></method>
@@ -418,7 +431,7 @@ def _kwin_script_file() -> str:
     os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, "kwin-focus.js")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(KWIN_SCRIPT)
+        f.write(kwin_script(bool(os.environ.get("IRIDIA_KWIN_DEBUG"))))
     return path
 
 

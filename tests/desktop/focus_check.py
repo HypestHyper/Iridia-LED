@@ -1,6 +1,7 @@
 """Scenes on a real KWin: a GTK window opens, goes fullscreen, comes back and closes, and Iridia's
 focus watcher (the KWin script, iridia/focuswatch.py) has to see each step. Run by run.sh inside a
 headless kwin_wayland; exits 1 with what it saw when something's missing."""
+import os
 import sys
 import threading
 import time
@@ -33,6 +34,22 @@ steps = []
 runner = []
 
 
+def kwin_fullscreen(on):
+    """Have KWin itself make the window in front fullscreen (or not), through a one-off KWin script.
+    A headless KWin 6.8 doesn't grant a window's own fullscreen request, so the window asks (as a
+    game would) and KWin is told as well: what Iridia has to follow is KWin's state."""
+    path = os.path.join(os.environ["XDG_RUNTIME_DIR"], "iridia-check-fs.js")
+    with open(path, "w") as f:
+        f.write("var w = workspace.activeWindow !== undefined ? workspace.activeWindow : workspace.activeClient;\n"
+                f"if (w) w.fullScreen = {'true' if on else 'false'};\n")
+    F._gdbus_kwin("/Scripting", "org.kde.kwin.Scripting.unloadScript", "iridia-check-fs")
+    out = F._gdbus_kwin("/Scripting", "org.kde.kwin.Scripting.loadScript", path, "iridia-check-fs")
+    sid = out.strip("()\n ,")
+    for obj in (f"/Scripting/Script{sid}", f"/{sid}"):
+        if F._gdbus_kwin(obj, "org.kde.kwin.Script.run").strip() == "()":
+            break
+
+
 def on_gtk(fn):
     """fn() run on GTK's thread (GTK isn't thread-safe), its result here."""
     box, done = [], threading.Event()
@@ -49,6 +66,9 @@ def script(win, app):
                             ("close", win.close, ("", False))):
         if act is not None:
             GLib.idle_add(lambda a=act: (a(), False)[1])
+            if name in ("fullscreen", "unfullscreen"):
+                time.sleep(0.3)
+                kwin_fullscreen(name == "fullscreen")
         ok = wait(lambda w=want: bool(seen) and seen[-1] == w)
         steps.append((name, ok))
         if name in ("fullscreen", "unfullscreen"):

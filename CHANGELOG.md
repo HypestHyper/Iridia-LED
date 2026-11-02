@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.7 — 2026-11-02
 
 - **Iridia needs Python 3.10 or newer now** (3.8 and 3.9 are no longer supported by Python itself).
   Updating an install made with an older Python builds its environment again with a newer one, by

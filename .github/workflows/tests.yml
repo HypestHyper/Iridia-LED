@@ -3,29 +3,31 @@ name: Tests
 on:
   push:
   pull_request:
+  schedule:
+    - cron: "17 4 * * 1"          # Mondays: Arch's new Plasma and GTK show up here even without a push
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - run: pip install ruff
       - run: ruff check iridia scripts tests
       - name: shellcheck
-        run: shellcheck install.sh uninstall.sh tests/validate-desktop.sh
+        run: shellcheck install.sh uninstall.sh tests/validate-desktop.sh tests/desktop/run.sh
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.10", "3.12", "3.13"]
+        python-version: ["3.10", "3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
@@ -36,8 +38,40 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install the validators
         run: sudo apt-get update -q && sudo apt-get install -y -q desktop-file-utils appstream libglib2.0-bin
       - name: Desktop entry, metadata, icons and versions
         run: sh tests/validate-desktop.sh
+
+  desktop:
+    # A real KWin (headless): scenes' focus watcher with a real window, then the window itself against
+    # the daemon and the fake OpenRGB, every tab at every size (tests/desktop/run.sh). Arch has the
+    # newest Plasma and GTK, Ubuntu 24.04 Plasma 5 and an older GTK. A new Arch package can break
+    # this without anything changing here, so that row may fail without failing the run.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["archlinux:latest", "ubuntu:24.04"]
+    continue-on-error: ${{ matrix.image == 'archlinux:latest' }}
+    container: ${{ matrix.image }}
+    steps:
+      - name: Install KWin, GTK 4 and Python
+        run: |
+          if command -v pacman >/dev/null; then
+            pacman -Syu --noconfirm --needed git kwin python python-gobject python-cairo gtk4 python-pillow \
+              python-watchdog glib2 dbus
+          else
+            apt-get update -q
+            DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends git ca-certificates \
+              kwin-wayland python3-venv python3-gi python3-gi-cairo python3-cairo gir1.2-gtk-4.0 python3-pil \
+              python3-watchdog dbus libglib2.0-bin
+          fi
+      - uses: actions/checkout@v7
+      - name: Install Iridia
+        run: |
+          python3 -m venv --system-site-packages /tmp/venv
+          /tmp/venv/bin/pip install -q -e .
+      - name: Desktop checks
+        run: sh tests/desktop/run.sh /tmp/venv/bin/python

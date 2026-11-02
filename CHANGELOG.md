@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **Iridia needs Python 3.10 or newer now** (3.8 and 3.9 are no longer supported by Python itself).
+  Updating an install made with an older Python builds its environment again with a newer one, by
+  itself; if there's none, the update stops and says so, and the installed version keeps working.
 - **Scenes:** a different look for the lights while a game or a film is fullscreen, or while an app you
   pick is in front: off, dimmer, one colour or an effect, at a brightness. The lights go back when it's
   gone (after a short wait, so switching away for a moment doesn't make them flicker), and your

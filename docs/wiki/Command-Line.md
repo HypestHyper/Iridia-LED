@@ -80,6 +80,9 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia notify` | Notification flashes: settings and what Iridia listens with |
 | `iridia notify add STRIP [all / part K / leds A-B]`, `iridia notify clear` | Which LEDs flash (see [Notifications](Notifications.md)) |
 | `iridia notify on / off / test [--effect pulse/flash/sweep] [--color wallpaper/app/HEX] [--duration S]` | Turn it on or off, flash now (`--urgent`: as an urgent one) |
+| `iridia scenes` | Scenes: settings, what's in front, what's showing |
+| `iridia scenes on / off / test [LOOK]`, `iridia scenes look LOOK` | LOOK: `off`, `dim N`, `color HEX [N]`, `effect NAME [N]` or `none` (see [Scenes](Scenes.md)) |
+| `iridia scenes app NAME LOOK`, `remove NAME`, `ignore NAME`, `unignore NAME` | An app's own look; apps that never get one |
 | `iridia idle on / off`, `iridia lock on / off` | For idle daemons and screen lockers Iridia can't see by itself |
 | `iridia zone list` | Strip names to use with `iridia zone` |
 | `iridia zone NAME[,NAME] [on/off] [color HEX] [bright N] [--set]` | Temporary strip changes; see [Keybinds](Keybinds.md) |

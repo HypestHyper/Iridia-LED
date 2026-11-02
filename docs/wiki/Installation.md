@@ -5,7 +5,7 @@
 | What | Needed for | Notes |
 | --- | --- | --- |
 | Linux | everything | Any desktop or compositor, Wayland or X11 |
-| Python 3.8 or newer, with `venv` | everything | The installer creates its own virtual environment |
+| Python 3.10 or newer, with `venv` | everything | The installer creates its own virtual environment |
 | [OpenRGB](https://openrgb.org/) with its SDK server running | talking to the LEDs | 0.9 or newer; 1.0 recommended for animations |
 | GTK 4.6 or newer, PyGObject, pycairo | the window | From your distribution; the daemon and the command line work without them |
 | [ddcutil](https://www.ddcutil.com/) | following monitor brightness | Optional |
@@ -83,7 +83,7 @@ sudo dnf install python3 gtk4 python3-gobject python3-cairo openrgb ddcutil
 sudo zypper install python3 typelib-1_0-Gtk-4_0 python3-gobject python3-gobject-cairo python3-cairo OpenRGB ddcutil
 ```
 
-**openSUSE Leap 15** (its `python3` is 3.6; Iridia needs 3.8 or newer, so it uses Python 3.11)
+**openSUSE Leap 15** (its `python3` is 3.6; Iridia needs 3.10 or newer, so it uses Python 3.11)
 ```bash
 sudo zypper install python311 typelib-1_0-Gtk-4_0 python311-gobject python311-gobject-cairo python311-pycairo ddcutil
 ```

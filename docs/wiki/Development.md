@@ -11,7 +11,7 @@ python3 -m venv --system-site-packages .venv   # sees your distribution's GTK 4 
 .venv/bin/iridia-gui         # terminal 2
 ```
 
-Python 3.8 or newer. Only one daemon can run per user, so stop an installed one before starting yours.
+Python 3.10 or newer. Only one daemon can run per user, so stop an installed one before starting yours.
 
 ## Project layout
 
@@ -127,8 +127,18 @@ The pure parts (patterns, colors, layout geometry, config repair, calibration, I
 command handling and rendering (with OpenRGB and DDC replaced by fakes) have unit tests
 that need no hardware or GTK. `tests/fakes/` holds stand-ins for `openrgb` (a real process that answers
 the SDK handshake with zero devices, stays silent, or crashes) and `systemctl`, so starting, supervising
-and restarting OpenRGB is tested end to end. CI runs everything on Python 3.8 to 3.13, along with ruff
-and shellcheck:
+and restarting OpenRGB is tested end to end. CI runs everything on Python 3.10 to 3.14, along with ruff
+and shellcheck.
+
+`tests/desktop/run.sh` checks against a real desktop: it starts KWin headless (`kwin_wayland --virtual`),
+checks that scenes see a real window open, go fullscreen, come back and close (through the KWin script),
+then opens the window against the daemon and the fake OpenRGB and visits every tab at every window size,
+failing on any Python error or GTK critical. CI runs it on Arch (the newest Plasma and GTK) and Ubuntu
+24.04 (Plasma 5), and every Monday as well, so a new Plasma or GTK that breaks something shows up before
+you do. Locally it needs `kwin_wayland`, `dbus-run-session` and `gdbus`:
+`sh tests/desktop/run.sh .venv/bin/python`.
+
+The unit tests:
 
 ```bash
 .venv/bin/pip install -e ".[dev]"

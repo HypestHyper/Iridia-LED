@@ -39,7 +39,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.remove == ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Work out the version
         run: |
           v=$(sed -n 's/^VERSION = "\(.*\)"/\1/p' iridia/__init__.py)
@@ -48,7 +48,7 @@ jobs:
           fi
           grep -q "^## $v " CHANGELOG.md || { echo "CHANGELOG.md has no '## $v' section"; exit 1; }
           echo "VERSION=$v" >> "$GITHUB_ENV"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Run the tests

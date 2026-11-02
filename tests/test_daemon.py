@@ -927,3 +927,82 @@ def test_notify_remove_some_leds(d):
     assert r["notify"]["targets"] == [{"device": "Strip", "zone": "", "start": 2, "end": 10}]
     r = _cmd(d, "notify", remove_leds={"device": "Strip"})                 # all of it
     assert r["notify"]["targets"] == []
+
+
+# ----------------------------------------------------------------- scenes
+
+class FakeFocus:
+    def __init__(self):
+        self.running_flag, self.method = False, "hyprland"
+        self.front, self.fullscreen, self.running = "", False, set()
+
+    def set_needed(self, on, interval=3, wanted=()):
+        self.running_flag = on
+
+    def state(self):
+        return self.front, self.fullscreen, set(self.running)
+
+    def stop(self):
+        self.running_flag = False
+
+
+def test_a_fullscreen_app_gets_the_scene_and_the_lights_come_back(d, monkeypatch):
+    d.focuswatch = FakeFocus()
+    clock = [100.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    r = _cmd(d, "scenes", enabled=True, look={"kind": "color", "hex": "0000ff", "bright": 50}, on_delay=1,
+             off_delay=2, set_app={"app": "mpv", "look": {"kind": "off"}})
+    assert r["ok"] and r["scenes"]["apps"] == [{"app": "mpv", "look": {"kind": "off"}}]
+    d._update_scenes()
+    assert d.focuswatch.running_flag
+    d.focuswatch.front, d.focuswatch.fullscreen = "steam_app_10", True
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4            # not yet: it has to stay a second
+    clock[0] += 1.0
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00007f"] * 4            # the colour, at 50%
+    assert d.config.get(("devices", "Strip", "pattern_colors")) == ["ff0000"]     # settings untouched
+    assert _cmd(d, "status")["scenes"]["seen"] == ["steam_app_10"]
+    d.focuswatch.front, d.focuswatch.fullscreen = "mpv", False   # an app with its own look
+    d._update_scenes()
+    clock[0] += 1.0
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    d.focuswatch.front = "kitty"
+    d._update_scenes()
+    clock[0] += 2.0
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4            # back to normal
+    _cmd(d, "zone_action", target="Strip", actions=["color", "00ff00"])
+    d.focuswatch.front, d.focuswatch.fullscreen = "mpv", True
+    d._update_scenes()
+    clock[0] += 1.0
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4            # a keybind wins over a scene
+
+
+def test_scene_try_it_and_cli(d, monkeypatch, capsys):
+    from iridia import cli
+    d.focuswatch = FakeFocus()
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    assert cli.main(["scenes", "on"]) == 0
+    assert cli.main(["scenes", "look", "dim", "15"]) == 0
+    assert cli.main(["scenes", "app", "mpv", "effect", "rainbow", "60"]) == 0
+    assert cli.main(["scenes", "ignore", "firefox"]) == 0
+    out = capsys.readouterr().out
+    assert "Anything fullscreen: dim to 15%" in out and "mpv: rainbow at 60%" in out and "Never for: firefox" in out
+    assert cli.main(["scenes", "look", "sparkly"]) == 2
+    assert cli.main(["scenes", "test"]) == 0
+    d._update_scenes()
+    assert d._scene_ov == {"bright": 15}
+    assert cli.main(["scenes", "remove", "mpv"]) == 0
+    assert d._scene_settings()["apps"] == []

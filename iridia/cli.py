@@ -763,6 +763,119 @@ def cmd_notify(args):
     return _report(req, _notify_text)
 
 
+def _look_words(words):
+    """off | dim N | color HEX [N] | effect NAME [N] | none -> (look or None, error)."""
+    from iridia import animations
+    w = [x.lower() for x in words]
+    if not w:
+        return None, "give a look: off, dim N, color HEX [N], effect NAME [N] or none"
+    kind, rest = w[0], w[1:]
+    try:
+        if kind == "none" and not rest:
+            return {}, None
+        if kind == "off" and not rest:
+            return {"kind": "off"}, None
+        if kind == "dim" and len(rest) == 1:
+            return {"kind": "dim", "bright": int(rest[0].rstrip("%"))}, None
+        if kind in ("color", "colour") and 1 <= len(rest) <= 2:
+            look = {"kind": "color", "hex": rest[0].lstrip("#")}
+            if len(rest) == 2:
+                look["bright"] = int(rest[1].rstrip("%"))
+            return look, None
+        if kind == "effect" and 1 <= len(rest) <= 2 and rest[0] in animations.EFFECTS:
+            look = {"kind": "effect", "effect": rest[0]}
+            if len(rest) == 2:
+                look["bright"] = int(rest[1].rstrip("%"))
+            return look, None
+    except ValueError:
+        pass
+    return None, ("a look is: off, dim N, color HEX [N], effect NAME [N] (" + ", ".join(animations.EFFECTS) +
+                  ") or none")
+
+
+def _look_text(look) -> str:
+    if not look:
+        return "nothing"
+    k = look["kind"]
+    if k == "off":
+        return "off"
+    if k == "dim":
+        return f"dim to {look['bright']}%"
+    if k == "color":
+        return f"#{look['hex']} at {look['bright']}%"
+    return f"{look['effect']} at {look['bright']}%"
+
+
+def _scenes_text(r):
+    n = r.get("scenes") or {}
+    how = {"hyprland": "Hyprland", "sway": "Sway", "kde": "KDE Plasma (a KWin script)", "x11": "X11 (xprop)",
+           "processes": "running programs (this desktop doesn't say which window is in front)"}
+    lines = [f"Scenes: {'on' if n.get('enabled') else 'off'}"
+             + (f", watching through {how.get(n.get('method'), n.get('method'))}" if n.get("watching") else ""),
+             f"Anything fullscreen: {_look_text(n.get('look'))}"]
+    for a in n.get("apps") or []:
+        lines.append(f"  {a['app']}: {_look_text(a['look'])}")
+    if n.get("ignore"):
+        lines.append("Never for: " + ", ".join(n["ignore"]))
+    lines.append(f"Comes on after {n.get('on_delay')} s, goes after {n.get('off_delay')} s"
+                 + (f", checks every {n.get('interval')} s" if n.get("method") in ("processes", "x11") else ""))
+    if n.get("watching"):
+        front = n.get("front") or "nothing"
+        lines.append(f"In front now: {front}{' (fullscreen)' if n.get('fullscreen') else ''}"
+                     + (f"; running: {', '.join(n['running'])}" if n.get("running") else ""))
+    lines.append("Showing now: " + _look_text(n.get("active")))
+    if n.get("seen"):
+        lines.append("Seen fullscreen: " + ", ".join(n["seen"]))
+    return "\n".join(lines)
+
+
+def cmd_scenes(args):
+    """iridia scenes [on | off | test [LOOK] | look LOOK | app NAME LOOK | remove NAME | ignore NAME |
+    unignore NAME]"""
+    req = {"cmd": "scenes"}
+    w = list(args.words)
+    verb = w[0].lower() if w else "show"
+    use = ("Use: iridia scenes [on | off | test [LOOK] | look LOOK | app NAME LOOK | remove NAME | "
+           "ignore NAME | unignore NAME]")
+    if verb in ("on", "off"):
+        req["enabled"] = verb == "on"
+    elif verb == "test":
+        if len(w) > 1:
+            look, err = _look_words(w[1:])
+            if err or not look:
+                print(err or "test needs a look", file=sys.stderr)
+                return 2
+            req["test"] = look
+        else:
+            req["test"] = True
+    elif verb == "look" and len(w) >= 2:
+        look, err = _look_words(w[1:])
+        if err:
+            print(err, file=sys.stderr)
+            return 2
+        req["look"] = look or None
+    elif verb == "app" and len(w) >= 3:
+        look, err = _look_words(w[2:])
+        if err:
+            print(err, file=sys.stderr)
+            return 2
+        if look:
+            req["set_app"] = {"app": w[1], "look": look}
+        else:
+            req["remove_app"] = w[1]
+    elif verb in ("remove", "ignore", "unignore") and len(w) == 2:
+        req["remove_app" if verb == "remove" else verb] = w[1]
+    elif verb != "show":
+        print(use, file=sys.stderr)
+        return 2
+    for name, key in (("on_delay", "on_delay"), ("off_delay", "off_delay"), ("interval", "interval")):
+        if getattr(args, name) is not None:
+            req[key] = getattr(args, name)
+    if verb == "test":
+        return _report(req, lambda r: "Showing it for 5 seconds.")
+    return _report(req, _scenes_text)
+
+
 def cmd_update(args):
     """iridia update [--check] [--rollback] [--yes]"""
     from iridia import get_version, updater
@@ -1511,6 +1624,20 @@ def main(argv=None):
     nt_parser.add_argument("--color", help="wallpaper, app (one colour per app) or a hex colour")
     nt_parser.add_argument("--duration", type=float, help="seconds (0.5 to 5)")
     nt_parser.add_argument("--urgent", action="store_true", help="test: as an urgent notification")
+    sc_parser = subparsers.add_parser("scenes", help="A different look while something is fullscreen, or for an app",
+                                      description="Show or change it. A LOOK is: off, dim N, color HEX [N], "
+                                                  "effect NAME [N] or none. Examples:  iridia scenes on   "
+                                                  "iridia scenes look dim 20   iridia scenes app mpv off   "
+                                                  "iridia scenes app steam_app_1091500 effect embers 80   "
+                                                  "iridia scenes ignore firefox   iridia scenes test")
+    sc_parser.add_argument("words", nargs="*",
+                           help="on | off | test [LOOK] | look LOOK | app NAME LOOK | remove NAME | ignore NAME | "
+                                "unignore NAME")
+    sc_parser.add_argument("--on-delay", dest="on_delay", type=float, help="seconds before a look comes on (0 to 10)")
+    sc_parser.add_argument("--off-delay", dest="off_delay", type=float,
+                           help="seconds before the lights go back (0 to 10)")
+    sc_parser.add_argument("--interval", type=int,
+                           help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
     p_mon = subparsers.add_parser("monitor", help="Which monitor's brightness strips follow: list, auto, a bus, rescan")
     p_mon.add_argument("what", nargs="?", default="list", help="list (default), auto, an I2C bus number, or rescan")
@@ -1560,7 +1687,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

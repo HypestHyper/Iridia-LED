@@ -69,10 +69,10 @@ The daemon works without GTK; the window needs that shell (or a Nix package of I
 NIX
     if [ -z "${IN_NIX_SHELL:-}" ]; then exit 1; fi
 fi
-# Python 3.8 or newer (openSUSE Leap's python3 is 3.6; its newer Python is python3.11)
+# Python 3.10 or newer (openSUSE Leap's python3 is 3.6, RHEL 9's 3.9: their newer ones are python3.11, 3.12)
 PY3=""
-for c in python3 python3.13 python3.12 python3.11 python3.10 python3.9 python3.8; do
-    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null; then
+for c in python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
+    if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 10))' 2>/dev/null; then
         PY3="$c"; break
     fi
 done
@@ -109,7 +109,8 @@ pkgname() {
         pacman:gtk)    echo gtk4 python-gobject python-cairo ;;
         apt:python)    echo python3 ;;     apt:venv) echo python3-venv ;;
         apt:gtk)       echo gir1.2-gtk-4.0 python3-gi python3-gi-cairo ;;
-        dnf:python)    echo python3 ;;     dnf:venv) ;;
+        dnf:python)    if [ "$OS_ID" = fedora ]; then echo python3; else echo python3.12; fi ;;   # RHEL 9: 3.9
+        dnf:venv) ;;
         dnf:gtk)       echo gtk4 python3-gobject python3-cairo ;;
         zypper:python) if [ "$OS_ID" = opensuse-leap ]; then echo python311; else echo python3; fi ;;
         zypper:venv) ;;
@@ -196,7 +197,7 @@ if [ ${#MISSING[@]} -gt 0 ] && [ "$SKIP_DEPS" -eq 0 ]; then
         echo "$ATOMIC"
     elif [ -z "$PM" ]; then
         echo "Couldn't detect your package manager. Please install these yourself:"
-        echo "  python 3.8+ (with venv), GTK 4 with PyGObject and pycairo, openrgb, ddcutil, gdbus (glib)"
+        echo "  python 3.10+ (with venv), GTK 4 with PyGObject and pycairo, openrgb, ddcutil, gdbus (glib)"
     elif [ "$(id -u)" -ne 0 ] && [ "${INSTALL_CMD[0]}" = sudo ] && ! sudo -v; then
         echo "sudo isn't set up for $USER. As root, run:"
         echo "  ${INSTALL_CMD[*]:1} ${PKGS[*]}"
@@ -240,14 +241,14 @@ fi
 
 # the Python just installed (Leap: python3.11)
 if [ -z "$PY3" ]; then
-    for c in python3 python3.13 python3.12 python3.11 python3.10 python3.9 python3.8; do
-        if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 8))' 2>/dev/null; then
+    for c in python3 python3.14 python3.13 python3.12 python3.11 python3.10; do
+        if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys; sys.exit(sys.version_info < (3, 10))' 2>/dev/null; then
             PY3="$c"; break
         fi
     done
 fi
 if [ -z "$PY3" ]; then
-    echo "ERROR: Iridia needs Python 3.8 or newer, and none was found$(command -v python3 >/dev/null 2>&1 && echo " (python3 is $(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null))")."
+    echo "ERROR: Iridia needs Python 3.10 or newer, and none was found$(command -v python3 >/dev/null 2>&1 && echo " (python3 is $(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null))")."
     exit 1
 fi
 if ! "$PY3" -c "$GTK_CHECK" >/dev/null 2>&1; then
@@ -358,6 +359,10 @@ if [ "$UPDATE" -eq 0 ] && [ -x "$VENV_DIR/bin/python" ] \
     UPDATE=1
 elif [ "$UPDATE" -eq 1 ] && ! "$VENV_DIR/bin/python" -c 'import iridia, PIL' >/dev/null 2>&1; then
     echo "Python changed since Iridia was installed: building its environment again."
+    UPDATE=0
+elif [ "$UPDATE" -eq 1 ] && ! "$VENV_DIR/bin/python" -c 'import sys; sys.exit(sys.version_info < (3, 10))'; then
+    # installed with Python 3.8 or 3.9, which this version no longer runs on
+    echo "Iridia now needs Python 3.10 or newer: building its environment again with $("$PY3" --version 2>&1)."
     UPDATE=0
 fi
 # if anything below fails, the daemon stopped above comes back

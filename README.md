@@ -6,7 +6,7 @@ It can also animate them, map them to your room, follow your monitor's brightnes
   <img alt="Version 1.3.6" src="https://img.shields.io/badge/version-1.3.6-1f9e80">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Platform Linux" src="https://img.shields.io/badge/platform-Linux-informational">
-  <img alt="Python 3.8+" src="https://img.shields.io/badge/python-3.8%2B-3776AB">
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB">
   <img alt="GTK 4" src="https://img.shields.io/badge/GTK-4-4A86CF">
   <img alt="Material 3 Expressive" src="https://img.shields.io/badge/style-Material%203%20Expressive-8f7ae0">
 </p>
@@ -57,7 +57,7 @@ cd Iridia-LED
 bash install.sh
 ```
 
-You need [OpenRGB](https://openrgb.org/) 0.9 or newer (1.0 recommended), Python 3.8+ and GTK 4.6+;
+You need [OpenRGB](https://openrgb.org/) 0.9 or newer (1.0 recommended), Python 3.10+ and GTK 4.6+;
 ddcutil is optional, for monitor brightness. The installer finds what's missing, shows the command for
 your package manager (pacman, apt, dnf, zypper, xbps or apk) and asks before running it. It installs
 Iridia into `~/.local/share/iridia-venv`, links `iridia` and `iridia-gui` into `~/.local/bin`, and asks

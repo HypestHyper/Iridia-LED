@@ -1,7 +1,7 @@
 """Locate bundled package assets (icon, etc.) at runtime.
 
 Uses a plain __file__-relative path rather than importlib.resources so
-this works identically on Python 3.8+ regardless of install method
+this works identically on Python 3.10+ regardless of install method
 (venv, pipx, editable install, system package) with no extra API surface
 to get wrong.
 """

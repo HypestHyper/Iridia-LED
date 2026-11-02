@@ -35,14 +35,18 @@ function active() { return workspace.activeWindow !== undefined ? workspace.acti
 function send(w) {
     callDBus(N, P, N, "Window", !!(w && w.fullScreen), w ? String(w.resourceClass || "") : "");
 }
-var hooked = [];
+// Windows are told apart by their id: KWin may hand out a new JavaScript object for the same window
+// (6.8 does), so comparing objects says "another window" and nothing would be sent.
+var hooked = {};
+function key(w) { return String(w.internalId); }
 function hook(w) {
-    if (!w || hooked.indexOf(w) >= 0) return;
-    hooked.push(w);
-    w.fullScreenChanged.connect(function () { if (active() === w) send(w); });
+    if (!w || hooked[key(w)]) return;
+    hooked[key(w)] = true;
+    // whichever window changed, what counts is the one in front
+    w.fullScreenChanged.connect(function () { send(active()); });
 }
 function onActive(w) { hook(w); send(w); }
-function onRemoved(w) { var i = hooked.indexOf(w); if (i >= 0) hooked.splice(i, 1); if (!active()) send(null); }
+function onRemoved(w) { if (w) delete hooked[key(w)]; send(active()); }
 if (workspace.windowActivated) workspace.windowActivated.connect(onActive);
 else workspace.clientActivated.connect(onActive);
 if (workspace.windowRemoved) workspace.windowRemoved.connect(onRemoved);

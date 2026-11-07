@@ -214,6 +214,8 @@ class Daemon:
         self.sleepwatch = None
         self.sessionwatch = None
         self.notifywatch = None
+        from iridia.netlights import NetLights
+        self.netlights = NetLights()              # WiZ and Govee lights on the network (off until switched on)
         self.focuswatch = None
         self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
         self._scene_look: Optional[dict] = None
@@ -293,7 +295,7 @@ class Daemon:
         self._last_wallpaper_event = 0.0
 
         # animations (see animations.py and animator.py)
-        self._animator = Animator(self.openrgb.send_frames)
+        self._animator = Animator(self._send_frames)
         self._anim_keys: set = set()      # zones the animator sends (unless paused for a moment)
         self._anim_jobs: Dict[str, tuple] = {}    # key -> (signature, Job)
         self._static_rgb: Dict[str, list] = {}    # key -> what the static path shows on that zone
@@ -936,6 +938,7 @@ class Daemon:
             self.sessionwatch.stop()
         if self.notifywatch:
             self.notifywatch.stop()
+        self.netlights.stop()
         if self.focuswatch:
             self.focuswatch.stop()
         self.sensors.stop()
@@ -1105,6 +1108,11 @@ class Daemon:
             self._autoadd_devices()
             self._check_missing_devices()
 
+        self.netlights.set_enabled(bool(self._netlight_settings()["enabled"]))
+        if self.netlights.lights:
+            self._autoadd_devices(self.netlights.list_devices())
+        out = connected or bool(self.netlights.lights)     # something to send to
+
         self._detect_wallpaper()
         self._read_brightness()
 
@@ -1112,14 +1120,14 @@ class Daemon:
         self._update_notify()
         self._update_scenes()
         self._update_sensors()
-        self._refresh_animations(connected)
+        self._refresh_animations(out)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
-        if connected and (self._needs_update or self._force_refresh):
+        if out and (self._needs_update or self._force_refresh):
             self._glide_active = False
             self._sensor_zones = set()
             self._update_all_devices()
-        elif connected and self._sensor_zones:
+        elif out and self._sensor_zones:
             self._update_sensor_zones()
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
@@ -1180,13 +1188,14 @@ class Daemon:
             self._last_sent.clear()
             self._needs_update = True
 
-    def _autoadd_devices(self):
-        """Devices OpenRGB reports that aren't in the config yet get a
-        sensible default entry, so a fresh install works with no hand-editing."""
-        try:
-            found = self.openrgb.list_devices()
-        except Exception:
-            return
+    def _autoadd_devices(self, found=None):
+        """Devices OpenRGB reports (or the network lights in found) that aren't in the config yet get
+        a sensible default entry, so a fresh install works with no hand-editing."""
+        if found is None:
+            try:
+                found = self.openrgb.list_devices()
+            except Exception:
+                return
         known = self.config.devices
         if not isinstance(known, dict):
             known = {}
@@ -1236,6 +1245,11 @@ class Daemon:
                 empty = sum(1 for z in dev["zones"] if z["led_count"] == 0)
                 self.logger.info(f"Found new device '{dev['name']}' with {len(zones)} zone(s)"
                                  + (f", {empty} without a size yet (off)" if empty else "") + "; added to config")
+            elif dev.get("net"):
+                # a WiZ or Govee light: one colour, sent over the network
+                devices[dev["name"]] = dict(fresh(1), strip_type="single", net=dev["net"]["kind"])
+                self.logger.info(f"Found network light '{dev['name']}' ({dev['net']['ip']}); added to config")
+                continue
             else:
                 # Whole-device control (mice, some GPUs and RAM report no zones).
                 devices[dev["name"]] = dict(fresh(max(1, dev.get("led_count") or 1)))
@@ -1257,7 +1271,8 @@ class Daemon:
         """
         self._reconcile_zones()
         now = time.time()
-        configured = [name for name, cfg in self.config.devices_view.items() if cfg.get("enabled", True)]
+        configured = [name for name, cfg in self.config.devices_view.items()
+                      if cfg.get("enabled", True) and not cfg.get("net")]    # network lights aren't OpenRGB's
         for name in configured:
             if name in self.openrgb.devices:
                 self._device_missing_since.pop(name, None)
@@ -2234,6 +2249,8 @@ class Daemon:
             return
         t = time.time() - self._start_time
         for name, dev_cfg in devices_cfg.items():
+            if isinstance(dev_cfg, dict) and dev_cfg.get("net") and not self.netlights.has(name):
+                continue                    # a network light that hasn't answered (yet)
             self._update_device(name, dev_cfg, t)
         self._needs_update = False
         self._force_refresh = False
@@ -2365,7 +2382,7 @@ class Daemon:
         # off means sending black, and the sender skips disabled zones.
         send_cfg = dict(zcfg, enabled=True)
         zones_config = {zone_name: send_cfg} if zone_name else None
-        if self.openrgb.send(device_name, final_colors, zones_config):
+        if self._out(device_name).send(device_name, final_colors, zones_config):
             self._last_sent[key] = color_hash
             self.logger.debug(f"Sent to '{device_name}/{zone_name}' | pattern={pattern} | mode={mode} | "
                               f"brightness={brightness}% | LEDs={len(final_colors)}{' | off' if off else ''}")
@@ -2473,7 +2490,8 @@ class Daemon:
         flash_on = set(self._flash.ranges) if self._flash is not None else set()
         flash_keys = set()
         if connected:
-            real = {d["name"]: [z["name"] for z in d["zones"]] for d in self.openrgb.list_devices()}
+            real = {d["name"]: [z["name"] for z in d["zones"]]
+                    for d in self.openrgb.list_devices() + self.netlights.list_devices()}
             layout_groups: Dict[tuple, list] = {}
             plan = []
             for dev, dev_cfg in self.config.devices_view.items():
@@ -2936,6 +2954,8 @@ class Daemon:
             return self._cmd_set_zone_animation(req)
         if cmd == "scenes":
             return self._cmd_scenes(req)
+        if cmd == "netlights":
+            return self._cmd_netlights(req)
         if cmd == "animations":
             return self._cmd_animations(req)
         if cmd == "test_colors":
@@ -3042,6 +3062,35 @@ class Daemon:
             items.append({"from": c, "to": to, "name": name})
         return {"mode": mode, "profile": zcfg.get("calibration_profile", "WS2812B"), "items": items}
 
+    # ------------------------------------------------------------- network lights
+    def _out(self, device: str):
+        """Who sends a device's colours: the network lights, or OpenRGB."""
+        return self.netlights if self.netlights.has(device) else self.openrgb
+
+    def _send_frames(self, device: str, frames):
+        return self._out(device).send_frames(device, frames)
+
+    def _netlight_settings(self) -> dict:
+        n = self.config.get("netlights", {})
+        return {"enabled": bool(n.get("enabled", False)) if isinstance(n, dict) else False}
+
+    def _netlights_status(self) -> dict:
+        return dict(self._netlight_settings(), found=self.netlights.list_devices(), error=self.netlights.error)
+
+    def _cmd_netlights(self, req: dict) -> dict:
+        """Network lights: enabled (look for WiZ and Govee lights), scan (look again now)."""
+        if "enabled" in req:
+            cur = self.config.get("netlights", {})
+            self.config.set("netlights", dict(cur if isinstance(cur, dict) else {}, enabled=bool(req["enabled"])))
+            self.netlights.set_enabled(bool(req["enabled"]))
+        if req.get("scan"):
+            if not self.netlights.enabled:
+                return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")
+            self.netlights.scan()
+            self.netlights.resend()
+        self._wake.set()
+        return dict(self._netlights_status(), ok=True)
+
     def _cmd_status(self) -> Dict[str, Any]:
         ident, probe = self._identify, self._probe
         missing = [
@@ -3102,7 +3151,8 @@ class Daemon:
             "openrgb_connected_since": self.openrgb.connected_since,
             "openrgb_last_error": self.openrgb.last_error,
             "openrgb_missing_devices": missing,
-            "devices": self.openrgb.list_devices(),
+            "devices": self.openrgb.list_devices() + self.netlights.list_devices(),
+            "netlights": self._netlights_status(),
             "device_configs": {n: (dict(c, zones={zn: clean_zone_cfg(zc) for zn, zc in c["zones"].items()})
                                    if c.get("zones") else clean_zone_cfg(c))
                                for n, c in self.config.devices_view.items()},

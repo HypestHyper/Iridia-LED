@@ -36,6 +36,7 @@ what doesn't work.
 | [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md) | Brightness caps at night, lock and idle, LEDs off while the PC sleeps, freezing colors |
 | [Notifications](Notifications.md) | Flashing chosen LEDs when a desktop notification comes in |
 | [Scenes](Scenes.md) | A different look while a game or a film is fullscreen, or for an app |
+| [Network lights](Network-Lights.md) | Philips WiZ and Govee lights on your Wi-Fi |
 | [Setups and backups](Setups-and-Backups.md) | Saving everything under a name, automatic backups, moving to another PC |
 | [Updates](Updates.md) | Checking for new versions, updating from the window, going back |
 | [Start at login](Start-at-Login.md) | systemd, compositor lines, XDG autostart |

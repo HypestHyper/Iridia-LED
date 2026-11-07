@@ -163,6 +163,10 @@ class Client:
         app_list, dnd, night_quiet, forget, test, or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="notify"))
 
+    def netlights(self, **kw) -> dict:
+        """Network lights (WiZ, Govee): enabled, scan, or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="netlights"))
+
     def scenes(self, **kw) -> dict:
         """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,
         forget, test, or nothing to ask."""

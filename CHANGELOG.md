@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Philips WiZ and Govee lights on your Wi-Fi:** Devices tab, *Network lights* (or `iridia netlights
+  on`). Iridia finds them over the network with their own local protocols, with nothing to pair, and
+  each becomes a device like a strip: wallpaper colours, brightness, scenes, night mode, lock and sleep.
+  They keep working in their own apps and in Google Home. Govee lights need *LAN Control* on in the
+  Govee app.
+
 ## 1.3.7 — 2026-11-02
 
 - **Iridia needs Python 3.10 or newer now** (3.8 and 3.9 are no longer supported by Python itself).

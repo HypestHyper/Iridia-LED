@@ -1,0 +1,163 @@
+"""WiZ and Govee lights over the network: stand-ins for both on localhost, speaking their protocols."""
+import json
+import socket
+import threading
+import time
+
+import pytest
+
+from iridia import netlights as N
+
+
+def test_colour_and_brightness_split():
+    assert N.split_brightness((40, 20, 0)) == ((255, 128, 0), 16)
+    assert N.split_brightness((0, 0, 0)) == ((0, 0, 0), 0)
+    assert N.average(["ff0000", "0000ff"]) == (128, 0, 128)
+    assert N.wiz_command((0, 0, 0)) == {"method": "setState", "params": {"state": False}}
+    p = N.wiz_command((255, 0, 0))["params"]
+    assert (p["r"], p["g"], p["b"], p["dimming"]) == (255, 0, 0, 100)
+    assert N.wiz_command((2, 0, 0))["params"]["dimming"] == 10          # WiZ can't go below 10%
+    cmds = N.govee_commands((0, 128, 0), was_on=None)
+    assert [c["msg"]["cmd"] for c in cmds] == ["turn", "colorwc", "brightness"]
+    assert cmds[1]["msg"]["data"]["color"] == {"r": 0, "g": 255, "b": 0} and cmds[2]["msg"]["data"]["value"] == 50
+    assert [c["msg"]["cmd"] for c in N.govee_commands((9, 9, 9), was_on=True)] == ["colorwc", "brightness"]
+    assert N.govee_commands((0, 0, 0), was_on=False) == []                # already off
+
+
+def _udp(port=0):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("127.0.0.1", port))
+    s.settimeout(0.1)
+    return s
+
+
+class Fakes:
+    """A WiZ light, and a Govee light (its scan port and its command port)."""
+
+    def __init__(self):
+        self.wiz, self.gscan, self.gcmd = _udp(), _udp(), _udp()
+        probe = _udp()
+        self.glisten = probe.getsockname()[1]
+        probe.close()
+        self.wiz_got, self.govee_got = [], []
+        self.running = True
+        threading.Thread(target=self._loop, daemon=True).start()
+
+    def _loop(self):
+        while self.running:
+            for s in (self.wiz, self.gscan, self.gcmd):
+                try:
+                    data, addr = s.recvfrom(4096)
+                except (socket.timeout, OSError):
+                    continue
+                msg = json.loads(data)
+                if s is self.wiz:
+                    if msg.get("method") == "getSystemConfig":
+                        s.sendto(json.dumps({"method": "getSystemConfig", "env": "pro", "result": {
+                            "mac": "a8bb50d1e2f3", "moduleName": "ESP01_SHRGB_03"}}).encode(), addr)
+                    else:
+                        self.wiz_got.append(msg)
+                elif s is self.gscan:      # the answer goes to port 4002 (here: glisten), as the doc says
+                    self.gscan.sendto(json.dumps({"msg": {"cmd": "scan", "data": {
+                        "ip": "127.0.0.1", "device": "1F:80:C5:32:32:36:72:4E", "sku": "H6159",
+                        "bleVersionHard": "3.01.01", "wifiVersionSoft": "1.02.03"}}}).encode(),
+                        ("127.0.0.1", self.glisten))
+                else:
+                    self.govee_got.append(msg["msg"])
+
+    def point(self, nl):
+        nl.targets = {"wiz": ("127.0.0.1", self.wiz.getsockname()[1]),
+                      "govee": ("127.0.0.1", self.gscan.getsockname()[1]),
+                      "govee_cmd": self.gcmd.getsockname()[1], "govee_listen": self.glisten}
+
+    def close(self):
+        self.running = False
+        time.sleep(0.15)
+        for s in (self.wiz, self.gscan, self.gcmd):
+            s.close()
+
+
+@pytest.fixture
+def fakes():
+    f = Fakes()
+    yield f
+    f.close()
+
+
+def wait(pred, timeout=3.0):
+    end = time.monotonic() + timeout
+    while time.monotonic() < end and not pred():
+        time.sleep(0.02)
+    return pred()
+
+
+def test_finds_and_drives_both(fakes):
+    nl = N.NetLights()
+    fakes.point(nl)
+    nl.set_enabled(True)
+    try:
+        assert wait(lambda: len(nl.lights) == 2)
+        assert set(nl.lights) == {"WiZ D1E2F3", "Govee H6159 36724E"}
+        dev = {d["name"]: d for d in nl.list_devices()}
+        assert dev["Govee H6159 36724E"]["net"]["ip"] == "127.0.0.1" and dev["WiZ D1E2F3"]["led_count"] == 1
+        nl.send("WiZ D1E2F3", ["800000"] * 3)
+        nl.send("Govee H6159 36724E", ["0000ff"])
+        assert wait(lambda: fakes.wiz_got and len(fakes.govee_got) >= 3)
+        p = fakes.wiz_got[-1]["params"]
+        assert fakes.wiz_got[-1]["method"] == "setPilot" and (p["r"], p["dimming"]) == (255, 50)
+        assert [m["cmd"] for m in fakes.govee_got[:3]] == ["turn", "colorwc", "brightness"]
+        # a burst of colours: the light gets the last one, not all of them
+        n = len(fakes.wiz_got)
+        for i in range(20):
+            nl.send("WiZ D1E2F3", ["%02x0000" % (i * 10 + 50)])
+        assert wait(lambda: fakes.wiz_got[-1]["params"].get("r") == 255
+                    and fakes.wiz_got[-1]["params"]["dimming"] == round(240 * 100 / 255))
+        assert len(fakes.wiz_got) - n < 8
+        nl.send("WiZ D1E2F3", ["000000"])
+        assert wait(lambda: fakes.wiz_got[-1]["method"] == "setState")
+    finally:
+        nl.stop()
+
+
+def test_the_daemon_adds_them_and_shows_its_colours(fakes, tmp_path, monkeypatch):
+    from tests.test_daemon import DEVICES, FakeDDC, FakeOpenRGB
+    from iridia import daemon as daemon_mod
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    monkeypatch.setattr("iridia.setups.CONFIG_DIR", str(tmp_path / ".config" / "iridia"))
+    monkeypatch.setattr(daemon_mod, "OpenRGBController", FakeOpenRGB)
+    monkeypatch.setattr(daemon_mod, "DDCController", FakeDDC)
+    cfg = tmp_path / ".config" / "iridia"
+    cfg.mkdir(parents=True)
+    (cfg / "config.json").write_text(json.dumps({"devices": DEVICES}))
+    d = daemon_mod.Daemon()
+    try:
+        fakes.point(d.netlights)
+        assert not d._cmd_netlights({"scan": True})["ok"]               # off: nothing to look with
+        assert d._cmd_netlights({"enabled": True})["enabled"]
+        assert wait(lambda: len(d.netlights.lights) == 2)
+        d._autoadd_devices(d.netlights.list_devices())
+        conf = d.config.get(("devices", "WiZ D1E2F3"))
+        assert conf["net"] == "wiz" and conf["strip_type"] == "single" and conf["led_count"] == 1
+        d._extracted_colors = ["00ff00"]
+        d._update_all_devices()
+        assert wait(lambda: fakes.wiz_got and fakes.wiz_got[-1]["params"].get("g") == 255)
+        d._check_missing_devices()
+        assert "WiZ D1E2F3" not in d._device_missing_since                # not an OpenRGB device
+        st = d._cmd_status()
+        assert {x["name"] for x in st["netlights"]["found"]} == {"WiZ D1E2F3", "Govee H6159 36724E"}
+        _ = d.handle_command({"cmd": "zone_action", "target": "WiZ D1E2F3", "actions": ["off"]})
+        d._update_all_devices()
+        assert wait(lambda: fakes.wiz_got[-1]["method"] == "setState")
+    finally:
+        d.netlights.stop()
+        d.ipc.stop()
+
+
+def test_cli_text():
+    from iridia.cli import _netlights_text
+    t = _netlights_text({"netlights": {"enabled": True, "found": [{"name": "WiZ D1E2F3", "net": {"ip": "10.0.0.5"}}]}})
+    assert "looking" in t and "WiZ D1E2F3  10.0.0.5" in t
+    assert "LAN Control" in _netlights_text({"enabled": True, "found": []})
+    assert "off" in _netlights_text({"enabled": False})

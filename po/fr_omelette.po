@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-01 21:50+0000\n"
+"POT-Creation-Date: 2026-11-07 01:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -278,6 +278,10 @@ msgstr "Bof"
 
 msgid "Disabled"
 msgstr "Bonsoir"
+
+#, python-brace-format
+msgid "Network light ({brand})"
+msgstr "Lampe réseau ({brand})"
 
 msgid "Whole device"
 msgstr "Oh là là"
@@ -2471,6 +2475,33 @@ msgid ""
 msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
+
+msgid "Network lights"
+msgstr "Lampes réseau"
+
+msgid ""
+"Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
+"and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
+"lights need LAN Control switched on (Govee app, the light's settings)."
+msgstr ""
+"Les lampes WiZ et Govee sur ton Wi-Fi, trouvées toutes seules. Rien à appairer. Une couleur "
+"chacune. Govee : active LAN Control dans l'app. Voilà."
+
+msgid "Look for WiZ and Govee lights"
+msgstr "Chercher les lampes WiZ et Govee"
+
+msgid "Off: nothing is sent to the network."
+msgstr "Éteint : rien ne part sur le réseau."
+
+msgid ""
+"Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
+" switched on in the Govee app."
+msgstr "Je cherche… Une lampe Govee absente ? LAN Control dans l'app Govee. Oh là là."
+
+msgid ""
+"Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
+"the same."
+msgstr "Chaque lampe a sa carte au-dessus, comme une bande."
 
 msgid "Nothing"
 msgstr "Rien"

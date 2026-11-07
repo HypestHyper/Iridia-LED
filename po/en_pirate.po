@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-01 21:50+0000\n"
+"POT-Creation-Date: 2026-11-07 01:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -285,6 +285,10 @@ msgstr "The Whole Fleet"
 
 msgid "Disabled"
 msgstr "Marooned"
+
+#, python-brace-format
+msgid "Network light ({brand})"
+msgstr "Lantern on the network ({brand})"
 
 msgid "Whole device"
 msgstr "The whole vessel"
@@ -2604,6 +2608,38 @@ msgid ""
 msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
+
+msgid "Network lights"
+msgstr "Lanterns on the network"
+
+msgid ""
+"Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
+"and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
+"lights need LAN Control switched on (Govee app, the light's settings)."
+msgstr ""
+"Philips WiZ an' Govee lanterns on yer Wi-Fi, found an' steered over the network: nothin' to pair,"
+" an' they keep sailin' in their own apps an' in Google Home. Each shows one colour. Govee "
+"lanterns need LAN Control on (Govee app, the lantern's settin's)."
+
+msgid "Look for WiZ and Govee lights"
+msgstr "Look fer WiZ an' Govee lanterns"
+
+msgid "Off: nothing is sent to the network."
+msgstr "Off: nothin' be sent to the network."
+
+msgid ""
+"Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
+" switched on in the Govee app."
+msgstr ""
+"Lookin'… Lanterns answer within a few seconds. A Govee lantern that don't show needs LAN Control "
+"on in the Govee app."
+
+msgid ""
+"Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
+"the same."
+msgstr ""
+"Each lantern has its own card above, like a strip: pattern, brightness, scenes an' the rest work "
+"the same."
 
 msgid "Nothing"
 msgstr "Nothin'"

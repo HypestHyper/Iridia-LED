@@ -184,7 +184,9 @@ class NetLights:
         self._thread: Optional[threading.Thread] = None
         self._sock: Optional[socket.socket] = None          # WiZ, and commands to Govee
         self._govee: Optional[socket.socket] = None         # Govee's answers to a scan (port 4002)
-        self._last_scan = 0.0
+        # never searched: due at once (not "60 s after time 0": the monotonic clock starts at boot, so a
+        # daemon started right at login would wait for a minute)
+        self._last_scan = float("-inf")
         self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
         self.keep_color: set = set()                # lights whose own colour stays: brightness and on/off only
         self.on_demand: set = set()                 # "only when I change it": never on/off, never re-sent
@@ -240,7 +242,7 @@ class NetLights:
     # ---------------------------------------------------------------- finding them
     def scan(self):
         """Look for lights now (they answer within a second)."""
-        self._last_scan = 0.0
+        self._last_scan = float("-inf")
         self._wake.set()
 
     def _send_scan(self):

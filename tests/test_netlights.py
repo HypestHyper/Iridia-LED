@@ -303,3 +303,17 @@ def test_only_when_i_change_it(fakes, tmp_path, monkeypatch):
     finally:
         d.netlights.stop()
         d.ipc.stop()
+
+
+def test_searches_at_once_on_a_machine_that_just_started(fakes, monkeypatch):
+    """time.monotonic() counts from boot: right after it, "60 s since the last search" mustn't hold
+    the first search back (a daemon started at login, or a fresh CI machine)."""
+    t0 = time.monotonic()
+    monkeypatch.setattr(N.time, "monotonic", lambda: time.perf_counter() - t0 + 5.0)     # 5 s after boot
+    nl = N.NetLights()
+    fakes.point(nl)
+    nl.set_enabled(True)
+    try:
+        assert wait(lambda: len(nl.lights) == 2)
+    finally:
+        nl.stop()

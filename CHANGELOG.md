@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **Favourites:** a tab (right after Status) with the controls you use most, as tiles you arrange
+  yourself: strips and lights (on/off, brightness, colour), looks, setups and switches (all lights,
+  freeze, night mode, animations, scenes, notification flashes, network lights). *Add* lists everything;
+  the ★ on a strip's card adds it too; *Arrange* moves, resizes and removes tiles.
+- **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:
+  off, dimmer, one colour or an effect. On and back off like a keybind, so settings don't change. From
+  a key too: the Keybinds tab, or `iridia look NAME`.
+
 ## 1.3.8 — 2026-11-07
 
 - **Philips WiZ and Govee lights on your Wi-Fi:** Devices tab, *Network lights* (or `iridia netlights

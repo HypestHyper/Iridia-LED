@@ -21,6 +21,7 @@
 "chevron_left": 58376,
 "chevron_right": 58377,
 "close": 57676,
+"close_fullscreen": 61903,
 "colorize": 58296,
 "compare": 58297,
 "content_copy": 57677,
@@ -71,6 +72,7 @@
 "more_vert": 58836,
 "motion_photos_on": 59841,
 "nightlight": 61278,
+"open_in_full": 61902,
 "open_with": 59551,
 "palette": 58295,
 "pan_tool": 59685,
@@ -91,6 +93,7 @@
 "settings_backup_restore": 59578,
 "space_dashboard": 58987,
 "sports_esports": 59116,
+"star": 59448,
 "stop": 57415,
 "straighten": 58396,
 "swap_horiz": 59604,
@@ -110,6 +113,7 @@
 "wallpaper": 57788,
 "warning": 57346,
 "wb_sunny": 58416,
+"wifi": 58942,
 "zoom_in": 59647,
 "zoom_out": 59648
 }

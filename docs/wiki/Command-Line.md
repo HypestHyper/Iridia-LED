@@ -82,6 +82,7 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia notify on / off / test [--effect pulse/flash/sweep] [--color wallpaper/app/HEX] [--duration S]` | Turn it on or off, flash now (`--urgent`: as an urgent one) |
 | `iridia netlights add / remove ADDRESS` | Also ask an address or network directly (lights on another VLAN) |
 | `iridia netlights [on / off / scan]` | Philips WiZ and Govee lights on the network (see [Network lights](Network-Lights.md)) |
+| `iridia looks`, `iridia look NAME [on / off / toggle]` | Your looks (see [Favourites and looks](Favourites.md)) |
 | `iridia scenes` | Scenes: settings, what's in front, what's showing |
 | `iridia scenes on / off / test [LOOK]`, `iridia scenes look LOOK` | LOOK: `off`, `dim N`, `color HEX [N]`, `effect NAME [N]` or `none` (see [Scenes](Scenes.md)) |
 | `iridia scenes app NAME LOOK`, `remove NAME`, `ignore NAME`, `unignore NAME` | An app's own look; apps that never get one |

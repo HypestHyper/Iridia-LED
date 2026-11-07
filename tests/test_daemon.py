@@ -1033,3 +1033,77 @@ def test_a_device_iridia_leaves_alone_or_that_is_on_its_own(d):
     d._update_all_devices()
     assert d.openrgb.last("Strip") == ["00ff00"] * 4
     assert d.openrgb.last("Hub v1.0") == ["000000"] * 2                  # the others go dark
+
+
+# ----------------------------------------------------------------- looks and favourites
+
+def test_looks_go_over_their_strips_and_come_off_again(d):
+    from iridia import looks as L
+    assert not _cmd(d, "looks", set={"name": "", "look": {"kind": "off"}})["ok"]
+    r = _cmd(d, "looks", set={"name": "Movie", "targets": ["*"], "look": {"kind": "dim", "bright": 10}})
+    movie = r["looks"][0]
+    assert movie["name"] == "Movie" and not movie["active"] and L.find(r["looks"], "movie")
+    r = _cmd(d, "looks", set={"name": "Desk red", "targets": ["Strip|"],
+                              "look": {"kind": "color", "hex": "ff0000", "bright": 100}})
+    assert not _cmd(d, "looks", set={"name": "movie", "look": {"kind": "off"}})["ok"]       # same name
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    r = _cmd(d, "looks", apply={"look": "Movie"})
+    assert [lk["active"] for lk in r["looks"]] == [True, False]
+    assert all(d._overlays.get(k) == {"bright": 10} for k in ("Strip|", "Hub v1.0|A", "Hub v1.0|B"))
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["190000"] * 4                    # everything at 10%
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 100      # settings untouched
+    _cmd(d, "looks", apply={"look": "desk red", "on": True})            # over Movie on its own strip
+    r = _cmd(d, "looks")
+    assert [lk["active"] for lk in r["looks"]] == [False, True]
+    _cmd(d, "looks", apply={"look": "Movie", "on": False})              # Movie's own strips go back
+    assert "Hub v1.0|A" not in d._overlays and d._overlays["Strip|"]["hex"] == "ff0000"   # Desk red stays
+    r = _cmd(d, "looks", remove=r["looks"][1]["id"])
+    assert [lk["name"] for lk in r["looks"]] == ["Movie"]
+
+
+def test_favorites_keep_their_order_and_drop_doubles(d):
+    r = _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})
+    _cmd(d, "favorites", add={"type": "switch", "what": "lights"})
+    _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})       # already there
+    assert not _cmd(d, "favorites", add={"type": "switch", "what": "toaster"})["ok"]
+    r = _cmd(d, "favorites")
+    assert [t["type"] for t in r["favorites"]] == ["device", "switch"]
+    r = _cmd(d, "favorites", set=list(reversed(r["favorites"])) + [{"type": "setup", "name": "Evening", "size": "w"}])
+    assert [t["type"] for t in r["favorites"]] == ["switch", "device", "setup"] and r["favorites"][2]["size"] == "w"
+    r = _cmd(d, "favorites", remove="device:Strip|")
+    assert [t["type"] for t in r["favorites"]] == ["switch", "setup"]
+    lk = _cmd(d, "looks", set={"name": "Off", "look": {"kind": "off"}})["looks"][0]
+    _cmd(d, "favorites", add={"type": "look", "id": lk["id"]})
+    r = _cmd(d, "looks", remove=lk["id"])                               # its tile goes with it
+    assert [t["type"] for t in r["favorites"]] == ["switch", "setup"]
+
+
+def test_look_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    assert cli.main(["looks"]) == 0
+    assert "No looks yet" in capsys.readouterr().out
+    _cmd(d, "looks", set={"name": "Movie", "look": {"kind": "dim", "bright": 15}})
+    assert cli.main(["look", "Movie"]) == 0
+    assert "Movie: on" in capsys.readouterr().out
+    assert cli.main(["looks"]) == 0
+    assert "* Movie: dim to 15% (everything)" in capsys.readouterr().out
+    assert cli.main(["look", "Movie", "off"]) == 0
+    assert cli.main(["look", "Nope"]) == 1
+
+
+def test_trying_a_look_shows_it_on_its_strips_for_a_moment(d, monkeypatch):
+    clock = [100.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    r = _cmd(d, "looks", **{"try": {"targets": ["Strip|"], "look": {"kind": "off"}}})
+    assert r["ok"] and d._overlays == {"Strip|": {"power": "off"}}       # only its strip
+    d._end_look_try(clock[0] + 1)
+    assert d._overlays                                                   # still showing
+    d._end_look_try(clock[0] + 10)
+    assert d._overlays == {}                                             # back

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:18+0000\n"
+"POT-Creation-Date: 2026-11-07 21:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -90,6 +90,9 @@ msgstr "Freeze colours"
 
 msgid "Status"
 msgstr "Status"
+
+msgid "Favourites"
+msgstr "Favourites"
 
 msgid "Devices"
 msgstr "Devices"
@@ -1959,6 +1962,144 @@ msgstr ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
 "where the LEDs are on the Layout tab."
 
+msgid "All lights"
+msgstr "All lights"
+
+msgid "Freeze colours"
+msgstr "Freeze colours"
+
+msgid "Scenes (fullscreen)"
+msgstr "Scenes (fullscreen)"
+
+msgid "Notification flashes"
+msgstr "Notification flashes"
+
+msgid "Network lights"
+msgstr "Network lights"
+
+msgid ""
+"The controls you use most, from everywhere in Iridia: strips, your own looks, setups and "
+"switches. Add them, then arrange them as you like."
+msgstr ""
+"The controls you use most, from everywhere in Iridia: strips, your own looks, setups and "
+"switches. Add them, then arrange them as you like."
+
+msgid "New look"
+msgstr "New look"
+
+msgid "Arrange"
+msgstr "Arrange"
+
+msgid "Nothing here yet"
+msgstr "Nothing here yet"
+
+msgid ""
+"Add a strip to switch it and set its brightness and colour from here, your own looks (like "
+"\"Movie: everything at 15%\") to switch with one tap, setups, and switches like all lights or "
+"night mode. A strip's ★ on the Devices tab adds it too."
+msgstr ""
+"Add a strip to switch it and set its brightness and colour from here, your own looks (like "
+"\"Movie: everything at 15%\") to switch with one tap, setups, and switches like all lights or "
+"night mode. A strip's ★ on the Devices tab adds it too."
+
+msgid "Couldn't do that"
+msgstr "Couldn't do that"
+
+msgid "Not there any more"
+msgstr "Not there any more"
+
+msgid "Follows the monitor's brightness"
+msgstr "Follows the monitor's brightness"
+
+#, python-brace-format
+msgid "Wallpaper colour {n}"
+msgstr "Wallpaper colour {n}"
+
+msgid "Saved colour"
+msgstr "Saved colour"
+
+#, python-brace-format
+msgid "Colour for {name}"
+msgstr "Colour for {name}"
+
+msgid "Turn on"
+msgstr "Turn on"
+
+msgid "On: tap to go back"
+msgstr "On: tap to go back"
+
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} strips"
+
+#, python-brace-format
+msgid "Loaded {name} (the settings before were backed up)"
+msgstr "Loaded {name} (the settings before were backed up)"
+
+msgid "Move left"
+msgstr "Move left"
+
+msgid "Move right"
+msgstr "Move right"
+
+msgid "Smaller"
+msgstr "Smaller"
+
+msgid "Wider"
+msgstr "Wider"
+
+msgid "Change this look"
+msgstr "Change this look"
+
+msgid "Take off Favourites"
+msgstr "Take off Favourites"
+
+msgid "Add to Favourites"
+msgstr "Add to Favourites"
+
+msgid "None yet."
+msgstr "None yet."
+
+msgid "Strips and lights"
+msgstr "Strips and lights"
+
+msgid "Your looks"
+msgstr "Your looks"
+
+msgid "Setups"
+msgstr "Setups"
+
+msgid "Switches"
+msgstr "Switches"
+
+msgid ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+msgstr ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+
+msgid "Name, like Movie or Gaming"
+msgstr "Name, like Movie or Gaming"
+
+msgid "Which strips"
+msgstr "Which strips"
+
+msgid "What they do"
+msgstr "What they do"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Pick the strips it's for, or Everything."
+
+msgid "Showing it for 5 seconds."
+msgstr "Showing it for 5 seconds."
+
+msgid "Couldn't show it"
+msgstr "Couldn't show it"
+
+msgid "Give the look a name."
+msgstr "Give the look a name."
+
 msgid "All lights off / on"
 msgstr "All lights off / on"
 
@@ -1973,6 +2114,9 @@ msgstr "Pause / resume animations"
 
 msgid "Load a setup"
 msgstr "Load a setup"
+
+msgid "Turn a look on or off"
+msgstr "Turn a look on or off"
 
 msgid "No modifier"
 msgstr "No modifier"
@@ -2029,9 +2173,6 @@ msgstr "Power"
 msgid "Leave as is"
 msgstr "Leave as is"
 
-msgid "Turn on"
-msgstr "Turn on"
-
 msgid "Back to normal"
 msgstr "Back to normal"
 
@@ -2043,6 +2184,12 @@ msgstr "Static pattern"
 
 msgid "Do"
 msgstr "Do"
+
+msgid "No looks yet"
+msgstr "No looks yet"
+
+msgid "Look"
+msgstr "Look"
 
 msgid "Command"
 msgstr "Command"
@@ -2198,6 +2345,9 @@ msgstr "Same key pauses every animated effect, then lets them run again."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Loads the setup and keeps it (an automatic backup is made first)."
 
+msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+msgstr "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+
 msgid "Keybind color"
 msgstr "Keybind colour"
 
@@ -2292,9 +2442,6 @@ msgstr[1] "{n} strips"
 
 msgid "No LEDs chosen yet."
 msgstr "No LEDs chosen yet."
-
-msgid "Arrange"
-msgstr "Arrange"
 
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find LEDs: light one LED on the real strip"
@@ -2607,9 +2754,6 @@ msgstr ""
 "A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
 "strip's name."
 
-msgid "Network lights"
-msgstr "Network lights"
-
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
@@ -2805,12 +2949,6 @@ msgstr "A short wait keeps the lights steady when you switch away from a game fo
 msgid "Nothing to show: pick a look first."
 msgstr "Nothing to show: pick a look first."
 
-msgid "Showing it for 5 seconds."
-msgstr "Showing it for 5 seconds."
-
-msgid "Couldn't show it"
-msgstr "Couldn't show it"
-
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Type the app's name, or pick one it has seen."
 
@@ -2834,9 +2972,6 @@ msgstr "Running now: {apps}."
 #, python-brace-format
 msgid "Showing: {look}."
 msgstr "Showing: {look}."
-
-msgid "None yet."
-msgstr "None yet."
 
 msgid "None."
 msgstr "None."

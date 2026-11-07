@@ -39,6 +39,7 @@ It can also animate them, map them to your room, follow your monitor's brightnes
 - Follows your monitor's brightness (DDC/CI) or the laptop screen, dims at night, and goes off when the
   screen locks or the PC sleeps.
 - Sensor bars for CPU temperature, load and memory; chosen LEDs flash for desktop notifications.
+- Favourites: your controls in one tab, and one-tap looks you make yourself.
 - Scenes: a different look while a game or a film is fullscreen.
 - Philips WiZ and Govee lights on your Wi-Fi, next to what OpenRGB drives.
 - WS2812B, WS2811, plain 12V RGB and RGBW strips, with colour order, colour correction and power limits.

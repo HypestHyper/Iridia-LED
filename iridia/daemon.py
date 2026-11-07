@@ -1126,6 +1126,7 @@ class Daemon:
         self._update_session()
         self._update_notify()
         self._update_scenes()
+        self._end_look_try(time.monotonic())
         self._update_sensors()
         self._refresh_animations(out)
         if self._glide_active:
@@ -3024,6 +3025,10 @@ class Daemon:
             return self._cmd_scenes(req)
         if cmd == "netlights":
             return self._cmd_netlights(req)
+        if cmd == "looks":
+            return self._cmd_looks(req)
+        if cmd == "favorites":
+            return self._cmd_favorites(req)
         if cmd == "animations":
             return self._cmd_animations(req)
         if cmd == "test_colors":
@@ -3129,6 +3134,121 @@ class Daemon:
                 to, name = c, ""
             items.append({"from": c, "to": to, "name": name})
         return {"mode": mode, "profile": zcfg.get("calibration_profile", "WS2812B"), "items": items}
+
+    # ------------------------------------------------------------- looks and favourites
+    def _looks(self) -> list:
+        from iridia.looks import clean_looks
+        return clean_looks(self.config.get("looks", []))
+
+    def _look_keys(self, look: dict) -> list:
+        """The zones a look covers: its own list, or every enabled zone for "*"."""
+        if look["targets"] != ["*"]:
+            return list(look["targets"])
+        devices = self.config.devices_view
+        return [self._zone_key(d, z) for d, z, zc in self._iter_zone_targets(devices)
+                if isinstance(zc, dict) and zc.get("enabled", True) and devices.get(d, {}).get("enabled", True)]
+
+    def _look_active(self, look: dict) -> bool:
+        ov = scenes.overlay(look["look"])
+        keys = self._look_keys(look)
+        return bool(keys) and all(self._overlays.get(k) == ov for k in keys)
+
+    def _looks_status(self) -> dict:
+        from iridia.looks import clean_favorites
+        return {"looks": [dict(lk, active=self._look_active(lk)) for lk in self._looks()],
+                "favorites": clean_favorites(self.config.get("favorites", []))}
+
+    def _cmd_looks(self, req: dict) -> dict:
+        """Looks: set (a look; a new one without an id), remove (an id), apply ({look: id or name, on:
+        true, false or "toggle"}). On puts the look over its strips like a keybind; off takes it away."""
+        from iridia.looks import clean_look, find
+        looks = self._looks()
+        if isinstance(req.get("set"), dict):
+            lk = clean_look(req["set"])
+            if lk is None:
+                return {"ok": False, "error": "a look needs a name, its strips and what it does"}
+            other = find(looks, lk["name"])
+            if other is not None and other["id"] != lk["id"]:
+                return {"ok": False, "error": f"there's already a look called {lk['name']}"}
+            old = next((x for x in looks if x["id"] == lk["id"]), None)
+            if old is not None and self._look_active(old):
+                self._apply_look(old, False)        # changed while on: shown again as it is now
+                self._apply_look(lk, True)
+            looks = [lk if x["id"] == lk["id"] else x for x in looks] if old else looks + [lk]
+            self.config.set("looks", looks)
+        if "remove" in req:
+            gone = find(looks, req["remove"])
+            if gone is not None:
+                if self._look_active(gone):
+                    self._apply_look(gone, False)
+                self.config.set("looks", [x for x in looks if x["id"] != gone["id"]])
+                favs = self.config.get("favorites", [])
+                self.config.set("favorites", [t for t in favs if not (isinstance(t, dict) and
+                                                                      t.get("type") == "look" and t.get("id") == gone["id"])])
+        if isinstance(req.get("try"), dict):
+            # Try it while making a look: on its strips for a few seconds, then back
+            lk = clean_look(dict(req["try"], name=req["try"].get("name") or "try"))
+            if lk is None:
+                return {"ok": False, "error": "nothing to try"}
+            self._end_look_try()
+            ov = scenes.overlay(lk["look"])
+            keys = self._look_keys(lk)
+            for k in keys:
+                self._overlays[k] = dict(ov)
+            self._look_try = (keys, ov, time.monotonic() + self.TRY_SEC)
+            self._last_sent = {}
+            self._needs_update = True
+        if isinstance(req.get("apply"), dict):
+            lk = find(self._looks(), req["apply"].get("look"))
+            if lk is None:
+                return {"ok": False, "error": f"no look called {req['apply'].get('look')}"}
+            on = req["apply"].get("on", "toggle")
+            on = (not self._look_active(lk)) if on == "toggle" else bool(on)
+            self._apply_look(lk, on)
+        return dict(self._looks_status(), ok=True)
+
+    def _end_look_try(self, now: Optional[float] = None):
+        t = getattr(self, "_look_try", None)
+        if t is None or (now is not None and now < t[2]):
+            return
+        self._look_try = None
+        for k in t[0]:
+            if self._overlays.get(k) == t[1]:
+                self._overlays.pop(k, None)
+        self._last_sent = {}
+        self._needs_update = True
+
+    def _apply_look(self, look: dict, on: bool):
+        ov = scenes.overlay(look["look"])
+        keys = self._look_keys(look)
+        for k in keys:
+            if on:
+                self._overlays[k] = dict(ov)
+            elif self._overlays.get(k) == ov:
+                self._overlays.pop(k, None)
+        self.logger.info(f"Look '{look['name']}' {'on' if on else 'off'} ({len(keys)} zone(s))")
+        self._last_sent = {}
+        self._needs_update = True
+
+    def _cmd_favorites(self, req: dict) -> dict:
+        """The Favourites tab's tiles: set (the whole list, in order), add (a tile), remove (a tile, or its
+        id like "device:Desk|")."""
+        from iridia.looks import clean_favorites, clean_tile, tile_id
+        favs = clean_favorites(self.config.get("favorites", []))
+        if "set" in req:
+            favs = clean_favorites(req["set"])
+        if "add" in req:
+            t = clean_tile(req["add"])
+            if t is None:
+                return dict(self._looks_status(), ok=False, error="not something a tile can show")
+            if tile_id(t) not in {tile_id(x) for x in favs}:
+                favs.append(t)
+        if "remove" in req:
+            rid = req["remove"] if isinstance(req["remove"], str) else tile_id(clean_tile(req["remove"]) or {"type": "?"})
+            favs = [t for t in favs if tile_id(t) != rid]
+        if any(k in req for k in ("set", "add", "remove")):
+            self.config.set("favorites", clean_favorites(favs))
+        return dict(self._looks_status(), ok=True)
 
     # ------------------------------------------------------------- network lights
     def _out(self, device: str):
@@ -3278,6 +3398,7 @@ class Daemon:
             "openrgb_missing_devices": missing,
             "devices": self.openrgb.list_devices() + self.netlights.list_devices(),
             "netlights": self._netlights_status(),
+            **self._looks_status(),
             "device_configs": {n: (dict(c, zones={zn: clean_zone_cfg(zc) for zn, zc in c["zones"].items()})
                                    if c.get("zones") else clean_zone_cfg(c))
                                for n, c in self.config.devices_view.items()},

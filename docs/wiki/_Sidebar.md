@@ -5,6 +5,7 @@
 - [Getting started](Getting-Started.md)
 
 **Using Iridia**
+- [Favourites and looks](Favourites.md)
 - [Devices, patterns and colors](Devices-and-Patterns.md)
 - [Animations](Animations.md)
 - [Layout](Layout.md)

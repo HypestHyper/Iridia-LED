@@ -170,6 +170,14 @@ class Client:
         # a test waits for the light's answer (up to about 3 seconds)
         return self._ipc.send(dict(kw, cmd="netlights"), timeout=8.0 if kw.get("probe") else None)
 
+    def looks(self, **kw) -> dict:
+        """Looks: set (a look), remove (an id), apply ({look, on}), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="looks"))
+
+    def favorites(self, **kw) -> dict:
+        """Favourites tiles: set (the whole list), add (a tile), remove (a tile id), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="favorites"))
+
     def scenes(self, **kw) -> dict:
         """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,
         forget, test, or nothing to ask."""

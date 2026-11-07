@@ -954,6 +954,28 @@ def cmd_netlights(args):
     return _report(req, _netlights_text)
 
 
+def _looks_text(r):
+    from iridia.looks import describe
+    looks = r.get("looks") or []
+    if not looks:
+        return "No looks yet: make them on the Favourites tab."
+    lines = []
+    for lk in looks:
+        where = "everything" if lk["targets"] == ["*"] else ", ".join(t.rstrip("|").replace("|", "/") for t in lk["targets"])
+        lines.append(f"{'*' if lk.get('active') else ' '} {lk['name']}: {describe(lk['look'])} ({where})")
+    return "\n".join(lines)
+
+
+def cmd_look(args):
+    """iridia look NAME [on | off | toggle]; iridia looks: the list (* = on now)."""
+    if args.command == "looks" or not args.name:
+        return _report({"cmd": "looks"}, _looks_text)
+    on = {"on": True, "off": False}.get(args.state, "toggle")
+    return _report({"cmd": "looks", "apply": {"look": args.name, "on": on}},
+                   lambda r: next((f"{lk['name']}: {'on' if lk.get('active') else 'off'}" for lk in r.get("looks", [])
+                                   if lk["name"].lower() == args.name.lower() or lk["id"] == args.name), "done"))
+
+
 def cmd_update(args):
     """iridia update [--check] [--rollback] [--yes]"""
     from iridia import get_version, updater
@@ -1716,6 +1738,12 @@ def main(argv=None):
                            help="seconds before the lights go back (0 to 10)")
     sc_parser.add_argument("--interval", type=int,
                            help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
+    lk_parser = subparsers.add_parser("look", help="Turn one of your looks on or off (made on the Favourites tab)",
+                                      description="A look is a one-tap change you name yourself, like 'Movie': "
+                                                  "everything at 15%%. Run it again to go back. For a keybind.")
+    lk_parser.add_argument("name", nargs="?", help="the look's name")
+    lk_parser.add_argument("state", nargs="?", choices=["on", "off", "toggle"], default="toggle")
+    subparsers.add_parser("looks", help="Your looks, and which are on")
     nl_parser = subparsers.add_parser("netlights", help="Philips WiZ and Govee lights on the network",
                                       description="on: look for them (they become devices like any strip); "
                                                   "scan: look again now; off: stop; add ADDRESS: also ask an "
@@ -1779,7 +1807,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "netlights": cmd_netlights, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "look": cmd_look, "looks": cmd_look, "netlights": cmd_netlights, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

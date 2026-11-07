@@ -70,6 +70,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `notify.direction`, `notify.band`, `notify.repeat`, `notify.brightness` | `ab`, `3`, `1`, `100` | `ab`, `ba`, `abba` or `out`; how many LEDs light at once (1 to 30); plays (1 to 5); percent |
 | `notify.path`, `notify.spatial` | `null`, `false` | `{"a": [x, y], "b": [x, y]}` in layout units, and whether a moving flash runs between them |
 | zone `hands_off`, `independent`, `keep_color` | absent | Iridia sends it nothing; it ignores the monitor's brightness, night mode, lock and sleep; a network light keeps its own colour (brightness and on/off only) |
+| `looks`, `favorites` | `[]`, `[]` | Your looks and the Favourites tab's tiles, in order (see [Favourites and looks](Favourites.md)) |
 | `netlights.manual` | `[]` | Lights added by address, driven without hearing from them: `[{"kind": "govee", "ip": "192.168.20.31"}]` |
 | `netlights.hosts` | `[]` | Addresses or networks (`"192.168.20.0/24"`) also asked directly, for lights on another VLAN or subnet |
 | `netlights.enabled` | `false` | Look for Philips WiZ and Govee lights on the network; each one found becomes a device with `"net": "wiz"` or `"govee"` (see [Network lights](Network-Lights.md)) |

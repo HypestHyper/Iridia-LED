@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:18+0000\n"
+"POT-Creation-Date: 2026-11-07 21:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -90,6 +90,9 @@ msgstr "Camembert"
 
 msgid "Status"
 msgstr "Fromage"
+
+msgid "Favourites"
+msgstr "Favoris"
 
 msgid "Devices"
 msgstr "Baguette"
@@ -1865,6 +1868,137 @@ msgid ""
 "where the LEDs are on the Layout tab."
 msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
 
+msgid "All lights"
+msgstr "Tous les bisous"
+
+msgid "Freeze colours"
+msgstr "Geler les couleurs"
+
+msgid "Scenes (fullscreen)"
+msgstr "Scènes (plein écran)"
+
+msgid "Notification flashes"
+msgstr "Flashs du facteur"
+
+msgid "Network lights"
+msgstr "Lampes réseau"
+
+msgid ""
+"The controls you use most, from everywhere in Iridia: strips, your own looks, setups and "
+"switches. Add them, then arrange them as you like."
+msgstr "Tes boutons préférés, au même endroit. Voilà."
+
+msgid "New look"
+msgstr "Nouveau look"
+
+msgid "Arrange"
+msgstr "Déjà vu"
+
+msgid "Nothing here yet"
+msgstr "Rien encore"
+
+msgid ""
+"Add a strip to switch it and set its brightness and colour from here, your own looks (like "
+"\"Movie: everything at 15%\") to switch with one tap, setups, and switches like all lights or "
+"night mode. A strip's ★ on the Devices tab adds it too."
+msgstr "Ajoute des bandes, des looks, des setups. Le ★ sur une carte marche aussi."
+
+msgid "Couldn't do that"
+msgstr "Impossible"
+
+msgid "Not there any more"
+msgstr "N'est plus là"
+
+msgid "Follows the monitor's brightness"
+msgstr "Suit l'écran"
+
+#, python-brace-format
+msgid "Wallpaper colour {n}"
+msgstr "Couleur du fond {n}"
+
+msgid "Saved colour"
+msgstr "Couleur gardée"
+
+#, python-brace-format
+msgid "Colour for {name}"
+msgstr "Couleur pour {name}"
+
+msgid "Turn on"
+msgstr "C'est la vie"
+
+msgid "On: tap to go back"
+msgstr "Allumé : touche pour revenir"
+
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} bandes"
+
+#, python-brace-format
+msgid "Loaded {name} (the settings before were backed up)"
+msgstr "{name} chargé. Voilà."
+
+msgid "Move left"
+msgstr "À gauche"
+
+msgid "Move right"
+msgstr "À droite"
+
+msgid "Smaller"
+msgstr "Plus petit"
+
+msgid "Wider"
+msgstr "Plus large"
+
+msgid "Change this look"
+msgstr "Changer ce look"
+
+msgid "Take off Favourites"
+msgstr "Retirer des favoris"
+
+msgid "Add to Favourites"
+msgstr "Ajouter aux favoris"
+
+msgid "None yet."
+msgstr "Rien encore."
+
+msgid "Strips and lights"
+msgstr "Bandes et bisous"
+
+msgid "Your looks"
+msgstr "Tes looks"
+
+msgid "Setups"
+msgstr "Setups"
+
+msgid "Switches"
+msgstr "Interrupteurs"
+
+msgid ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+msgstr "Une touche pour, une touche contre. Voilà."
+
+msgid "Name, like Movie or Gaming"
+msgstr "Nom, comme Film"
+
+msgid "Which strips"
+msgstr "Quelles bandes"
+
+msgid "What they do"
+msgstr "Ce qu'elles font"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Choisis des bandes."
+
+msgid "Showing it for 5 seconds."
+msgstr "Pendant 5 secondes. Oh là là."
+
+msgid "Couldn't show it"
+msgstr "Impossible de le montrer"
+
+msgid "Give the look a name."
+msgstr "Donne-lui un nom."
+
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
 
@@ -1879,6 +2013,9 @@ msgstr "Pause café / reprise du travail"
 
 msgid "Load a setup"
 msgstr "Quiche"
+
+msgid "Turn a look on or off"
+msgstr "Allumer ou éteindre un look"
 
 msgid "No modifier"
 msgstr "Café"
@@ -1929,9 +2066,6 @@ msgstr "Quiche"
 msgid "Leave as is"
 msgstr "Brioche"
 
-msgid "Turn on"
-msgstr "C'est la vie"
-
 msgid "Back to normal"
 msgstr "Bisou"
 
@@ -1943,6 +2077,12 @@ msgstr "Le motif de la nappe"
 
 msgid "Do"
 msgstr "Bof"
+
+msgid "No looks yet"
+msgstr "Pas encore de looks"
+
+msgid "Look"
+msgstr "Look"
 
 msgid "Command"
 msgstr "Bonjour"
@@ -2088,6 +2228,9 @@ msgstr "La même touche arrête la musique, puis la relance."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Il pleut des cordes. Le béret de mon grand-père."
 
+msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+msgstr "Même touche : look, puis normal. Voilà."
+
 msgid "Keybind color"
 msgstr "Ratatouille"
 
@@ -2180,9 +2323,6 @@ msgstr[1] "{n} baguettes"
 
 msgid "No LEDs chosen yet."
 msgstr "Aucun bisou choisi."
-
-msgid "Arrange"
-msgstr "Déjà vu"
 
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Omelette du fromage"
@@ -2476,9 +2616,6 @@ msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
-msgid "Network lights"
-msgstr "Lampes réseau"
-
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
@@ -2658,12 +2795,6 @@ msgstr "Une petite pause, et les bisous restent calmes quand tu quittes le jeu u
 msgid "Nothing to show: pick a look first."
 msgstr "Rien à montrer : choisis un look d'abord."
 
-msgid "Showing it for 5 seconds."
-msgstr "Pendant 5 secondes. Oh là là."
-
-msgid "Couldn't show it"
-msgstr "Impossible de le montrer"
-
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Tape le nom de l'app, ou choisis-en une déjà vue."
 
@@ -2687,9 +2818,6 @@ msgstr "En cours : {apps}."
 #, python-brace-format
 msgid "Showing: {look}."
 msgstr "Montré : {look}."
-
-msgid "None yet."
-msgstr "Rien encore."
 
 msgid "None."
 msgstr "Rien."

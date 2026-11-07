@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.8 — 2026-11-07
 
 - **Philips WiZ and Govee lights on your Wi-Fi:** Devices tab, *Network lights* (or `iridia netlights
   on`). Iridia finds them over the network with their own local protocols, with nothing to pair, and

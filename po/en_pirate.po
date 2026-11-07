@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 21:55+0000\n"
+"POT-Creation-Date: 2026-11-07 22:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -295,6 +295,19 @@ msgstr "Lantern on the network ({brand})"
 
 msgid "Whole device"
 msgstr "The whole vessel"
+
+#, python-brace-format
+msgid "Hidden ({n})"
+msgid_plural "Hidden ({n})"
+msgstr[0] "Stowed in the Hold ({n})"
+msgstr[1] "Stowed in the Hold ({n})"
+
+msgid ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
+msgstr ""
+"Strips ye've stowed: a channel with nothin' plugged in, belike. They keep their settings and stay"
+" out o' lists elsewhere. The eye on a card brings 'em back on deck."
 
 msgid "Animations"
 msgstr "Dancin' lanterns"
@@ -1979,12 +1992,57 @@ msgstr "Message flashes"
 msgid "Network lights"
 msgstr "Lanterns on the network"
 
+msgid "On and off"
+msgstr "Light 'n' douse"
+
+msgid "Colours"
+msgstr "Colours"
+
+msgid "Follow the monitor's brightness"
+msgstr "Follow the monitor's glow"
+
+msgid "Stay lit when the screen locks"
+msgstr "Stay lit when the hatch is battened"
+
+msgid "Looks"
+msgstr "Looks"
+
+msgid "Switches"
+msgstr "Switches"
+
+msgid "Small"
+msgstr "Dinghy"
+
+msgid "Wide"
+msgstr "Sloop"
+
+msgid "Tall"
+msgstr "Mast"
+
+msgid "Colour card"
+msgstr "Colour chart"
+
+msgid "Brightness card"
+msgstr "Glow chart"
+
+msgid "Looks card"
+msgstr "Looks chart"
+
+msgid "Switches card"
+msgstr "Levers chart"
+
+msgid "Static"
+msgstr "Becalmed"
+
 msgid ""
-"The controls you use most, from everywhere in Iridia: strips, your own looks, setups and "
-"switches. Add them, then arrange them as you like."
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
 msgstr ""
-"The controls ye use most, from all o' Iridia: strips, yer own looks, setups an' switches. Add "
-"'em, then stow 'em as ye like."
+"Yer quick panel: charts for the strips ye pick with just the controls ye want, looks, setups and "
+"levers. Haul 'em where ye like in Haul."
+
+msgid "New card"
+msgstr "New chart"
 
 msgid "New look"
 msgstr "New look"
@@ -1996,33 +2054,55 @@ msgid "Nothing here yet"
 msgstr "Nothin' here yet"
 
 msgid ""
-"Add a strip to switch it and set its brightness and colour from here, your own looks (like "
-"\"Movie: everything at 15%\") to switch with one tap, setups, and switches like all lights or "
-"night mode. A strip's ★ on the Devices tab adds it too."
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
 msgstr ""
-"Add a strip to switch it an' set its brightness an' colour from here, yer own looks (like "
-"\"Movie: everything at 15%\") fer one tap, setups, an' switches like all lanterns or night watch."
-" A strip's ★ on the Devices tab adds it too."
+"Make a chart for some strips (or the whole fleet) with the controls ye want on it: light 'n' "
+"douse, glow, colours, follow the monitor, a trick, yer looks, levers. Or add a look, a setup or a"
+" lever on its own. A strip's ★ on the Devices tab makes a chart for it."
 
 msgid "Couldn't do that"
 msgstr "Couldn't do that"
 
-msgid "Not there any more"
-msgstr "Gone overboard"
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} strips"
 
-msgid "Follows the monitor's brightness"
-msgstr "Follows the monitor's brightness"
+msgid "Its strips aren't there any more."
+msgstr "Its strips have gone overboard."
+
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
+
+msgid "Stay lit when locked"
+msgstr "Stay lit when battened"
+
+msgid "All colours"
+msgstr "All the colours o' the sea"
+
+msgid "Colour"
+msgstr "Colour"
 
 #, python-brace-format
 msgid "Wallpaper colour {n}"
 msgstr "Wallpaper colour {n}"
 
-msgid "Saved colour"
-msgstr "Stowed colour"
+msgid "Wallpaper colours"
+msgstr "Wallpaper colours"
+
+msgid "Saved colours"
+msgstr "Hoarded colours"
 
 #, python-brace-format
 msgid "Colour for {name}"
 msgstr "Colour fer {name}"
+
+msgid "Colour wheel…"
+msgstr "Ship's wheel o' colours…"
+
+msgid "No looks picked: Arrange, ✏ on this card."
+msgstr "No looks picked: Haul, ✏ on this chart."
 
 msgid "Turn on"
 msgstr "Light 'em"
@@ -2031,24 +2111,15 @@ msgid "On: tap to go back"
 msgstr "On: tap to sail back"
 
 #, python-brace-format
-msgid "{n} strips"
-msgstr "{n} strips"
-
-#, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr "Loaded {name} (the old settin's be stowed)"
 
-msgid "Move left"
-msgstr "Move to port"
+#, python-brace-format
+msgid "Size: {size}"
+msgstr "Size: {size}"
 
-msgid "Move right"
-msgstr "Move to starboard"
-
-msgid "Smaller"
-msgstr "Smaller"
-
-msgid "Wider"
-msgstr "Wider"
+msgid "Change this card"
+msgstr "Change this chart"
 
 msgid "Change this look"
 msgstr "Change this look"
@@ -2062,17 +2133,47 @@ msgstr "Add to Treasures"
 msgid "None yet."
 msgstr "None yet."
 
-msgid "Strips and lights"
-msgstr "Strips an' lanterns"
+msgid "A card for one strip"
+msgstr "A chart for one strip"
 
-msgid "Your looks"
-msgstr "Yer looks"
+msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
+msgstr "Light 'n' douse, glow and colours; change it later. New chart makes one for several strips."
+
+msgid "A look on its own"
+msgstr "A look on its lonesome"
 
 msgid "Setups"
 msgstr "Setups"
 
-msgid "Switches"
-msgstr "Switches"
+msgid "A switch on its own"
+msgstr "A lever on its lonesome"
+
+msgid "Start from"
+msgstr "Set sail from"
+
+msgid "Title (optional), like Desk or Room"
+msgstr "Name (if ye like), like Desk or Cabin"
+
+msgid "Which strips"
+msgstr "Which strips"
+
+msgid "What's on it"
+msgstr "What's aboard"
+
+msgid "Its looks (if Looks is on)"
+msgstr "Its looks (if Looks be on)"
+
+msgid "None yet: New look makes one."
+msgstr "None yet: New look makes one."
+
+msgid "Its switches (if Switches is on)"
+msgstr "Its levers (if Switches be on)"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Pick the strips it be fer, or Everything."
+
+msgid "Pick what goes on the card."
+msgstr "Pick what goes on the chart."
 
 msgid ""
 "One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
@@ -2084,14 +2185,8 @@ msgstr ""
 msgid "Name, like Movie or Gaming"
 msgstr "Name, like Movie or Gaming"
 
-msgid "Which strips"
-msgstr "Which strips"
-
 msgid "What they do"
 msgstr "What they do"
-
-msgid "Pick the strips it's for, or Everything."
-msgstr "Pick the strips it be fer, or Everything."
 
 msgid "Showing it for 5 seconds."
 msgstr "Showin' it fer 5 seconds."
@@ -2404,9 +2499,6 @@ msgstr "Clear the deck"
 
 msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 msgstr "Click or drag over lanterns on the chart to pick 'em; start on a ringed one to take lanterns out."
-
-msgid "Colour"
-msgstr "Colour"
 
 msgid "A and B"
 msgstr "A an' B"
@@ -3244,6 +3336,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (normal)"
 
+msgid "Show again"
+msgstr "Bring back on deck"
+
+msgid "Hide this strip (it keeps working)"
+msgstr "Stow this strip (it keeps workin')"
+
 msgid "mixed"
 msgstr "motley"
 
@@ -3255,9 +3353,6 @@ msgstr "palette"
 
 msgid "calibrated"
 msgstr "calibrated"
-
-msgid "Static"
-msgstr "Becalmed"
 
 msgid "Animated"
 msgstr "Dancin'"

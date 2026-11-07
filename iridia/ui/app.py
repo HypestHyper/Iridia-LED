@@ -824,7 +824,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         keys = []
         for d, dc in devices.items():
             zones = dc.get("zones", {})
-            keys += [(d, z) for z in zones] if zones else [(d, "")]
+            keys += ([(d, z, bool((zc or {}).get("hidden"))) for z, zc in zones.items()] if zones
+                     else [(d, "", bool(dc.get("hidden")))])
         return tuple(keys)
 
     def _rebuild_devices(self, devices, extracted, custom):
@@ -852,20 +853,42 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if getattr(self, "_ddc_menu", None):
             self._global_card.set_monitors(*self._ddc_menu)
         self._dev_box.append(self._global_card)
+        hidden_box = vbox(10)
+        n_hidden = 0
         for d, dc in devices.items():
             sub = None if dc.get("enabled", True) else _("Disabled")
             if dc.get("net"):
                 brand = {"wiz": "WiZ", "govee": "Govee"}.get(dc["net"], dc["net"])
                 sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else f" · {sub}")
-            self._dev_box.append(section(d, sub))
             zones = dc.get("zones", {})
-            for z, zc in (zones.items() if zones else [("", dc)]):
-                key = f"{d}|{z}"
-                cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
-                                 expanded=expanded.get(key, False))
-                cardw.zone_name = z
-                self._dev_box.append(cardw)
-                self._zone_cards[key] = cardw
+            items = list(zones.items()) if zones else [("", dc)]
+            # strips you hid (a channel with nothing plugged in, say) go to Hidden at the bottom
+            shown = [(z, zc) for z, zc in items if not (zc or {}).get("hidden")]
+            gone = [(z, zc) for z, zc in items if (zc or {}).get("hidden")]
+            for box, group in ((self._dev_box, shown), (hidden_box, gone)):
+                if not group:
+                    continue
+                box.append(section(d, sub))
+                for z, zc in group:
+                    key = f"{d}|{z}"
+                    cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
+                                     expanded=expanded.get(key, False))
+                    cardw.zone_name = z
+                    if box is hidden_box:
+                        cardw.set_opacity(0.7)
+                        n_hidden += 1
+                    box.append(cardw)
+                    self._zone_cards[key] = cardw
+        if n_hidden:
+            exp = Gtk.Expander(label=ngettext("Hidden ({n})", "Hidden ({n})", n_hidden).format(n=n_hidden),
+                               expanded=getattr(self, "_hidden_open", False))
+            exp.connect("notify::expanded", lambda e, _p: setattr(self, "_hidden_open", e.get_expanded()))
+            exp.set_margin_top(18)
+            hint = label(_("Strips you hid: a channel with nothing plugged in, say. They keep their settings and "
+                           "are left out of lists elsewhere. The eye on a card shows it again."), ("small", "dim"),
+                         wrap=True)
+            exp.set_child(vbox(10, hint, hidden_box))
+            self._dev_box.append(exp)
         self._dev_box.append(self._net_card.widget)
 
     def _apply_hw(self, hw):
@@ -1785,7 +1808,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 zones = cfg.get("zones")
                 items = list(zones.items()) if isinstance(zones, dict) and zones else [("", cfg)]
                 for zn, zc in items:
-                    if isinstance(zc, dict) and zc.get("enabled", True):
+                    if isinstance(zc, dict) and zc.get("enabled", True) and not zc.get("hidden"):
                         names.append((zc.get("display_name") or zn or dev, dev, zn, zc))
             dup = {x[0] for x in names if [y[0] for y in names].count(x[0]) > 1}
             for name, dev, zn, zc in names:

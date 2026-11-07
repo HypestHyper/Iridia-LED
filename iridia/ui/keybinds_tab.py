@@ -418,6 +418,8 @@ class KeybindsPage:
         for dev, cfg in cfgs.items():
             zs = cfg.get("zones") or {"": cfg}
             for zn, zc in zs.items():
+                if (zc or {}).get("hidden"):
+                    continue                    # hidden on the Devices tab: not offered here either
                 zones.append((dev, zn, (zc or {}).get("display_name") or zn or dev))
         counts = {}
         for _d, _z, n in zones:

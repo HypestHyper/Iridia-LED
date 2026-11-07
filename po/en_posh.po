@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 21:55+0000\n"
+"POT-Creation-Date: 2026-11-07 22:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -299,6 +299,19 @@ msgstr "A lamp upon the network ({brand})"
 
 msgid "Whole device"
 msgstr "The entire device"
+
+#, python-brace-format
+msgid "Hidden ({n})"
+msgid_plural "Hidden ({n})"
+msgstr[0] "Discreetly Tucked Away ({n})"
+msgstr[1] "Discreetly Tucked Away ({n})"
+
+msgid ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
+msgstr ""
+"Strips one has hidden: a channel with nothing plugged in, perhaps. They keep their settings and "
+"are kept out of lists elsewhere. The eye on a card brings it back."
 
 msgid "Animations"
 msgstr "Animated Spectacles"
@@ -2000,12 +2013,57 @@ msgstr "Correspondence flashes"
 msgid "Network lights"
 msgstr "Lamps upon the network"
 
+msgid "On and off"
+msgstr "On and off"
+
+msgid "Colours"
+msgstr "Colours"
+
+msgid "Follow the monitor's brightness"
+msgstr "Defer to the monitor's brightness"
+
+msgid "Stay lit when the screen locks"
+msgstr "Remain lit when the screen locks"
+
+msgid "Looks"
+msgstr "Looks"
+
+msgid "Switches"
+msgstr "Switches"
+
+msgid "Small"
+msgstr "Modest"
+
+msgid "Wide"
+msgstr "Broad"
+
+msgid "Tall"
+msgstr "Lofty"
+
+msgid "Colour card"
+msgstr "Colour card"
+
+msgid "Brightness card"
+msgstr "Brightness card"
+
+msgid "Looks card"
+msgstr "Looks card"
+
+msgid "Switches card"
+msgstr "Switches card"
+
+msgid "Static"
+msgstr "Still"
+
 msgid ""
-"The controls you use most, from everywhere in Iridia: strips, your own looks, setups and "
-"switches. Add them, then arrange them as you like."
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
 msgstr ""
-"The controls one uses most, from all about Iridia: strips, one's own looks, setups and switches. "
-"Add them, then arrange them as one pleases."
+"One's quick panel: cards for the strips of one's choosing with just the controls one wants, "
+"looks, setups and switches. Arrange them as one pleases."
+
+msgid "New card"
+msgstr "New card"
 
 msgid "New look"
 msgstr "New look"
@@ -2017,33 +2075,55 @@ msgid "Nothing here yet"
 msgstr "Nothing here as yet"
 
 msgid ""
-"Add a strip to switch it and set its brightness and colour from here, your own looks (like "
-"\"Movie: everything at 15%\") to switch with one tap, setups, and switches like all lights or "
-"night mode. A strip's ★ on the Devices tab adds it too."
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
 msgstr ""
-"Add a strip to switch it and set its brightness and colour from here, your own looks (such as "
-"\"Movie: everything at 15%\") to switch with a single tap, setups, and switches such as all lamps"
-" or night mode. A strip's ★ upon the Devices tab adds it as well."
+"Make a card for some strips (or all of them) with the controls one wishes on it: on and off, "
+"brightness, colours, defer to the monitor, an effect, one's looks, switches. Or add a look, a "
+"setup or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
 
 msgid "Couldn't do that"
 msgstr "One could not do that"
 
-msgid "Not there any more"
-msgstr "No longer present"
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} strips"
 
-msgid "Follows the monitor's brightness"
-msgstr "Follows the monitor's brightness"
+msgid "Its strips aren't there any more."
+msgstr "Its strips have regrettably departed."
+
+msgid "Follow the monitor"
+msgstr "Defer to the monitor"
+
+msgid "Stay lit when locked"
+msgstr "Remain lit when locked"
+
+msgid "All colours"
+msgstr "Every colour"
+
+msgid "Colour"
+msgstr "Colour"
 
 #, python-brace-format
 msgid "Wallpaper colour {n}"
 msgstr "Wallpaper colour {n}"
 
-msgid "Saved colour"
-msgstr "Saved colour"
+msgid "Wallpaper colours"
+msgstr "The wallpaper's colours"
+
+msgid "Saved colours"
+msgstr "Saved colours"
 
 #, python-brace-format
 msgid "Colour for {name}"
 msgstr "Colour for {name}"
+
+msgid "Colour wheel…"
+msgstr "Colour wheel…"
+
+msgid "No looks picked: Arrange, ✏ on this card."
+msgstr "No looks chosen: Arrange, then ✏ on this card."
 
 msgid "Turn on"
 msgstr "Kindle"
@@ -2052,24 +2132,15 @@ msgid "On: tap to go back"
 msgstr "On: tap to return"
 
 #, python-brace-format
-msgid "{n} strips"
-msgstr "{n} strips"
-
-#, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr "Loaded {name} (the previous settings were backed up)"
 
-msgid "Move left"
-msgstr "Move left"
+#, python-brace-format
+msgid "Size: {size}"
+msgstr "Proportions: {size}"
 
-msgid "Move right"
-msgstr "Move right"
-
-msgid "Smaller"
-msgstr "Smaller"
-
-msgid "Wider"
-msgstr "Wider"
+msgid "Change this card"
+msgstr "Alter this card"
 
 msgid "Change this look"
 msgstr "Alter this look"
@@ -2083,17 +2154,47 @@ msgstr "Add to Favourites"
 msgid "None yet."
 msgstr "None as yet."
 
-msgid "Strips and lights"
-msgstr "Strips and lamps"
+msgid "A card for one strip"
+msgstr "A card for one strip"
 
-msgid "Your looks"
-msgstr "Your looks"
+msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
+msgstr "On and off, brightness and colours; alter it later. New card makes one for several strips."
+
+msgid "A look on its own"
+msgstr "A look on its own"
 
 msgid "Setups"
 msgstr "Setups"
 
-msgid "Switches"
-msgstr "Switches"
+msgid "A switch on its own"
+msgstr "A switch on its own"
+
+msgid "Start from"
+msgstr "Begin with"
+
+msgid "Title (optional), like Desk or Room"
+msgstr "Title (optional), such as Study or Drawing Room"
+
+msgid "Which strips"
+msgstr "Which strips"
+
+msgid "What's on it"
+msgstr "What it bears"
+
+msgid "Its looks (if Looks is on)"
+msgstr "Its looks (if Looks is on)"
+
+msgid "None yet: New look makes one."
+msgstr "None as yet: New look makes one."
+
+msgid "Its switches (if Switches is on)"
+msgstr "Its switches (if Switches is on)"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Do choose the strips it is for, or Everything."
+
+msgid "Pick what goes on the card."
+msgstr "Kindly choose what goes on the card."
 
 msgid ""
 "One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
@@ -2105,14 +2206,8 @@ msgstr ""
 msgid "Name, like Movie or Gaming"
 msgstr "Name, such as Movie or Gaming"
 
-msgid "Which strips"
-msgstr "Which strips"
-
 msgid "What they do"
 msgstr "What they do"
-
-msgid "Pick the strips it's for, or Everything."
-msgstr "Do choose the strips it is for, or Everything."
 
 msgid "Showing it for 5 seconds."
 msgstr "Presenting it for 5 seconds."
@@ -2428,9 +2523,6 @@ msgstr "Clear"
 
 msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 msgstr "Click or drag across lamps upon the map to choose them; begin on a ringed one to withdraw lamps."
-
-msgid "Colour"
-msgstr "Colour"
 
 msgid "A and B"
 msgstr "A and B"
@@ -3275,6 +3367,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (customary)"
 
+msgid "Show again"
+msgstr "Reveal once more"
+
+msgid "Hide this strip (it keeps working)"
+msgstr "Discreetly hide this strip (it carries on working)"
+
 msgid "mixed"
 msgstr "assorted"
 
@@ -3286,9 +3384,6 @@ msgstr "palette"
 
 msgid "calibrated"
 msgstr "calibrated"
-
-msgid "Static"
-msgstr "Still"
 
 msgid "Animated"
 msgstr "Animated"

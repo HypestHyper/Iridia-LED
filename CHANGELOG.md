@@ -2,10 +2,14 @@
 
 ## Unreleased
 
-- **Favourites:** a tab (right after Status) with the controls you use most, as tiles you arrange
-  yourself: strips and lights (on/off, brightness, colour), looks, setups and switches (all lights,
-  freeze, night mode, animations, scenes, notification flashes, network lights). *Add* lists everything;
-  the ★ on a strip's card adds it too; *Arrange* moves, resizes and removes tiles.
+- **Favourites:** a tab (right after Status) with the controls you use most, on a grid you arrange
+  yourself. *Cards* you make: a title, some strips or all of them, and just the controls you want (on/off,
+  one brightness, colours with a popup for saved colours and the colour wheel, follow the monitor,
+  stay lit, effect, look chips, switch chips); presets for a colour, brightness, looks or switches
+  card. Looks, setups and switches can go there on their own too. Tiles are small, wide, tall or large;
+  *Arrange* drags them into place. The ★ on a strip's card makes a card for it.
+- **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
+  it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
 - **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:
   off, dimmer, one colour or an effect. On and back off like a keybind, so settings don't change. From
   a key too: the Keybinds tab, or `iridia look NAME`.

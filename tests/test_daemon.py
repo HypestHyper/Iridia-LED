@@ -1064,15 +1064,20 @@ def test_looks_go_over_their_strips_and_come_off_again(d):
 
 
 def test_favorites_keep_their_order_and_drop_doubles(d):
-    r = _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})
+    r = _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})   # an old one-strip tile: a card now
+    card = r["favorites"][0]
+    assert card["type"] == "card" and card["targets"] == ["Strip|"] and card["controls"] == ["power", "brightness",
+                                                                                              "colors"]
     _cmd(d, "favorites", add={"type": "switch", "what": "lights"})
-    _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})       # already there
+    _cmd(d, "favorites", add={"type": "switch", "what": "lights"})       # already there
     assert not _cmd(d, "favorites", add={"type": "switch", "what": "toaster"})["ok"]
+    assert not _cmd(d, "favorites", add={"type": "card", "targets": ["*"], "controls": []})["ok"]
     r = _cmd(d, "favorites")
-    assert [t["type"] for t in r["favorites"]] == ["device", "switch"]
-    r = _cmd(d, "favorites", set=list(reversed(r["favorites"])) + [{"type": "setup", "name": "Evening", "size": "w"}])
-    assert [t["type"] for t in r["favorites"]] == ["switch", "device", "setup"] and r["favorites"][2]["size"] == "w"
-    r = _cmd(d, "favorites", remove="device:Strip|")
+    assert [t["type"] for t in r["favorites"]] == ["card", "switch"]
+    r = _cmd(d, "favorites", set=list(reversed(r["favorites"])) + [{"type": "setup", "name": "Evening", "size": "l"}])
+    assert [t["type"] for t in r["favorites"]] == ["switch", "card", "setup"] and r["favorites"][2]["size"] == "l"
+    assert r["favorites"][1]["id"] == card["id"]                          # a card keeps its id
+    r = _cmd(d, "favorites", remove=f"card:{card['id']}")
     assert [t["type"] for t in r["favorites"]] == ["switch", "setup"]
     lk = _cmd(d, "looks", set={"name": "Off", "look": {"kind": "off"}})["looks"][0]
     _cmd(d, "favorites", add={"type": "look", "id": lk["id"]})
@@ -1107,3 +1112,24 @@ def test_trying_a_look_shows_it_on_its_strips_for_a_moment(d, monkeypatch):
     assert d._overlays                                                   # still showing
     d._end_look_try(clock[0] + 10)
     assert d._overlays == {}                                             # back
+
+
+def test_one_change_for_several_strips(d):
+    r = _cmd(d, "set_zones", targets=["Strip|", "Hub v1.0|A"], set={"brightness": 40, "color": "00ffff",
+                                                                    "brightness_sync": False, "session_ignore": True})
+    assert r["ok"] and r["zones"] == 2 and not r["errors"]
+    for path in (("devices", "Strip"), ("devices", "Hub v1.0", "zones", "A")):
+        z = d.config.get(path)
+        assert z["manual_brightness"] == 40 and z["pattern"] == "solid" and z["pattern_colors"] == ["00ffff"]
+        assert z["session_ignore"] is True
+    assert d.config.get(("devices", "Hub v1.0", "zones", "B", "manual_brightness")) == 100      # not on the card
+    r = _cmd(d, "set_zones", targets=["*"], set={"enabled": False})
+    assert r["zones"] == 3 and not d.config.get(("devices", "Hub v1.0", "zones", "B", "enabled"))
+    r = _cmd(d, "set_zones", targets=["Strip|"], set={"effect": "rainbow"})
+    assert d.config.get(("devices", "Strip", "animation"))["effect"] == "rainbow"
+    _cmd(d, "set_zones", targets=["Strip|"], set={"effect": None})
+    assert d.config.get(("devices", "Strip", "animation")) is None
+    assert not _cmd(d, "set_zones", targets=["Strip|"], set={"pattern": "x"})["ok"]
+    assert not _cmd(d, "set_zones", targets=[], set={"enabled": True})["ok"]
+    assert _cmd(d, "set_zone_strip", device="Strip", zone="", hidden=True)["ok"]
+    assert d.config.get(("devices", "Strip", "hidden")) is True

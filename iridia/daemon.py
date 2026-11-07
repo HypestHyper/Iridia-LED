@@ -2053,6 +2053,8 @@ class Daemon:
             changes["session_ignore"] = True if req["session_ignore"] else None
         if "independent" in req:               # on its own: ignores the monitor, night mode, lock and sleep
             changes["independent"] = True if req["independent"] else None
+        if "hidden" in req:                    # out of sight on the Devices tab and in lists (still sent to)
+            changes["hidden"] = True if req["hidden"] else None
         if "on_demand" in req:                 # only when changed on its card; never on or off
             changes["on_demand"] = True if req["on_demand"] else None
         if "hands_off" in req:                 # Iridia sends it nothing (it keeps what it shows)
@@ -3029,6 +3031,8 @@ class Daemon:
             return self._cmd_looks(req)
         if cmd == "favorites":
             return self._cmd_favorites(req)
+        if cmd == "set_zones":
+            return self._cmd_set_zones(req)
         if cmd == "animations":
             return self._cmd_animations(req)
         if cmd == "test_colors":
@@ -3229,6 +3233,48 @@ class Daemon:
         self.logger.info(f"Look '{look['name']}' {'on' if on else 'off'} ({len(keys)} zone(s))")
         self._last_sent = {}
         self._needs_update = True
+
+    def _cmd_set_zones(self, req: dict) -> dict:
+        """One change for several strips at once (a Favourites card): targets (zone keys, or ["*"] for
+        every strip) and set, any of: enabled, brightness (0-100), color (a wallpaper colour's number
+        or a hex: one solid colour), brightness_sync, session_ignore, effect (an animation, or null for
+        static). Each goes through the strip's own command."""
+        targets = req.get("targets") or []
+        devices = self.config.devices_view
+        if targets == ["*"]:
+            keys = [self._zone_key(d, z) for d, z, _zc in self._iter_zone_targets(devices)]
+        else:
+            keys = [k for k in targets if isinstance(k, str) and "|" in k]
+        if not keys:
+            return {"ok": False, "error": "no strips"}
+        changes = req.get("set") if isinstance(req.get("set"), dict) else {}
+        cmds = []
+        for f, v in changes.items():
+            if f == "enabled":
+                cmds.append({"cmd": "set_zone_enabled", "enabled": bool(v)})
+            elif f == "brightness":
+                cmds.append({"cmd": "set_zone_manual_brightness", "value": v})
+            elif f == "color":
+                cmds += [{"cmd": "set_zone_pattern", "pattern": "solid"}, {"cmd": "set_zone_colors", "indices": [v]}]
+            elif f == "brightness_sync":
+                cmds.append({"cmd": "set_zone_brightness_sync", "enabled": bool(v)})
+            elif f == "session_ignore":
+                cmds.append({"cmd": "set_zone_strip", "session_ignore": bool(v)})
+            elif f == "effect":
+                cmds.append({"cmd": "set_zone_animation", "animation": {"effect": v} if v else None})
+            else:
+                return {"ok": False, "error": f"can't set {f} on several strips"}
+        errors = []
+        for k in keys:
+            dev, _sep, zone = k.partition("|")
+            for c in cmds:
+                r = self._dispatch(dict(c, device=dev, zone=zone))
+                if not r.get("ok"):
+                    errors.append(f"{k.rstrip('|')}: {r.get('error')}")
+                    break
+        self._needs_update = True
+        return {"ok": not errors or len(errors) < len(keys), "zones": len(keys), "errors": errors,
+                "error": "; ".join(errors[:3]) if errors else None}
 
     def _cmd_favorites(self, req: dict) -> dict:
         """The Favourites tab's tiles: set (the whole list, in order), add (a tile), remove (a tile, or its

@@ -3,19 +3,49 @@
 The *Favourites* tab (the star, right after Status) holds the controls you use most, from everywhere
 in Iridia, as tiles you arrange yourself.
 
-## Tiles
+## Cards
+
+A card is a few controls for the strips you choose: one strip, a few, or *Everything*. *New card*: a
+title, its strips, and what's on it, in any mix:
 
 | | |
 | --- | --- |
-| A strip or light | On and off, its brightness, and its colour: a wallpaper colour, a saved colour, or any colour (+). Changes are its own settings, like on its card |
+| On and off | All its strips at once |
+| Brightness | One slider; every strip on the card gets the same brightness |
+| Colours | The wallpaper's colours as swatches, and 🎨 for a popup with your saved colours and the colour wheel; the card's strips all take that one colour |
+| Follow the monitor's brightness | On or off for its strips |
+| Stay lit when the screen locks | On or off for its strips |
+| Effect | An effect for its strips (or *Static*) |
+| Looks | Chips that turn looks on and off |
+| Switches | Chips for all lights, freeze colours, night mode, animations, scenes, notification flashes, network lights |
+
+*Start from* fills it in for you: a colour card, a brightness card, a looks card, a switches card.
+Changes on a card are its strips' own settings, the same as on the Devices tab.
+
+The ★ on a strip's card on the Devices tab makes a card for just that strip (or takes it off).
+
+## Other tiles
+
+| | |
+| --- | --- |
 | A look | One tap puts it on, one more tap puts things back (see below) |
 | A setup | Loads it (the settings before are backed up first) |
-| A switch | All lights, freeze colours, night mode, animations, scenes (fullscreen), notification flashes, network lights |
+| A switch | One of the switches above, on its own |
 
-*Add* lists everything that can go on the tab (what's already there is greyed out). The ★ on a strip's
-card on the Devices tab adds or removes it too. *Arrange* shows, on each tile, arrows to move it, a
-button to make it wider or smaller, ✕ to take it off, and for a look, a pencil to change it. *Done*
-when you're finished.
+*Add* lists everything that can go on the tab (what's already there is greyed out).
+
+## Sizes and order
+
+Tiles sit on a grid of squares that fits the window: *small* (one square), *wide* (two across), *tall*
+(two down) or *large* (two by two). *Arrange* shows, on each tile, a handle to drag it onto another
+one's place, the size, a pencil to change it, and ✕ to take it off. *Done* when you're finished.
+
+## Hiding strips
+
+Iridia can't tell a channel with nothing plugged in from one with a strip, so it shows every channel
+the controller has. The eye on a strip's card (Devices tab) hides it: it goes into *Hidden* at the
+bottom of the Devices tab, and it's left out of the lists elsewhere (cards, keybinds, notifications).
+It keeps its settings and still gets its colours. The eye again shows it.
 
 ## Looks
 

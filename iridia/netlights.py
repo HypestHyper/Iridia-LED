@@ -96,13 +96,22 @@ def wiz_command(rgb) -> dict:
                                              "dimming": max(10, bright)}}
 
 
-def govee_commands(rgb, was_on: Optional[bool]) -> List[dict]:
+def wiz_brightness(rgb) -> dict:
+    """Brightness and on/off only: the colour stays what the WiZ app set."""
+    _full, bright = split_brightness(rgb)
+    if bright == 0:
+        return {"method": "setState", "params": {"state": False}}
+    return {"method": "setPilot", "params": {"state": True, "dimming": max(10, bright)}}
+
+
+def govee_commands(rgb, was_on: Optional[bool], keep_color: bool = False) -> List[dict]:
     full, bright = split_brightness(rgb)
     if bright == 0:
         return [] if was_on is False else [{"msg": {"cmd": "turn", "data": {"value": 0}}}]
     out = [] if was_on else [{"msg": {"cmd": "turn", "data": {"value": 1}}}]
-    out.append({"msg": {"cmd": "colorwc", "data": {"color": {"r": full[0], "g": full[1], "b": full[2]},
-                                                   "colorTemInKelvin": 0}}})
+    if not keep_color:
+        out.append({"msg": {"cmd": "colorwc", "data": {"color": {"r": full[0], "g": full[1], "b": full[2]},
+                                                       "colorTemInKelvin": 0}}})
     out.append({"msg": {"cmd": "brightness", "data": {"value": bright}}})
     return out
 
@@ -139,6 +148,7 @@ class NetLights:
         self._govee: Optional[socket.socket] = None         # Govee's answers to a scan (port 4002)
         self._last_scan = 0.0
         self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
+        self.keep_color: set = set()                # lights whose own colour stays: brightness and on/off only
         self.targets = {"wiz": (BROADCAST, WIZ_PORT), "govee": GOVEE_SCAN, "govee_cmd": GOVEE_CMD,
                         "govee_listen": GOVEE_LISTEN}       # tests point these at localhost
 
@@ -324,19 +334,36 @@ class NetLights:
         if s is None:
             return
         try:
+            keep = self._name_of(light) in self.keep_color
             if light.kind == "wiz":
-                s.sendto(json.dumps(wiz_command(rgb)).encode(), (light.ip, self.targets["wiz"][1]))
+                cmd = wiz_brightness(rgb) if keep else wiz_command(rgb)
+                s.sendto(json.dumps(cmd).encode(), (light.ip, self.targets["wiz"][1]))
             else:
-                for cmd in govee_commands(rgb, light.on):
+                for cmd in govee_commands(rgb, light.on, keep_color=keep):
                     s.sendto(json.dumps(cmd).encode(), (light.ip, self.targets["govee_cmd"]))
                 light.on = split_brightness(rgb)[1] > 0
         except OSError as e:
             logger.debug(f"Couldn't send to {light.name} at {light.ip}: {e}")
 
-    def resend(self):
-        """Send every light its colour again (after a light came back, or Iridia restarted)."""
+    def _name_of(self, light: Light) -> str:
+        return next((n for n, x in self.lights.items() if x is light), light.name)
+
+    def set_keep_color(self, names):
+        """Lights whose colour stays as their own app set it; a change sends them their state again."""
+        names = set(names)
+        if names != self.keep_color:
+            changed = names ^ self.keep_color
+            self.keep_color = names
+            for n in changed:
+                self.resend(n)
+
+    def resend(self, name: Optional[str] = None):
+        """Send every light (or the one named) its colour again: after a light came back, after it was
+        set in its own app meanwhile, or after Iridia restarted."""
         with self._lock:
-            for light in self.lights.values():
+            for n, light in self.lights.items():
+                if name is not None and n != name:
+                    continue
                 if light.sent is not None:
                     light.pending, light.sent = light.sent, None
                 light.on = None

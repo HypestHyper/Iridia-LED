@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 13:26+0000\n"
+"POT-Creation-Date: 2026-11-07 13:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -3105,6 +3105,22 @@ msgstr "Gamma correction"
 
 msgid "Stay lit when the screen locks or you're away"
 msgstr "Stay lit when the screen locks or you're away"
+
+msgid "Let Iridia control it"
+msgstr "Let Iridia control it"
+
+msgid ""
+"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
+"switch at the top of the card turns it off instead."
+msgstr ""
+"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
+"switch at the top of the card turns it off instead."
+
+msgid "On its own: ignore the monitor, night mode, lock and sleep"
+msgstr "On its own: ignore the monitor, night mode, lock and sleep"
+
+msgid "Keep its own colour (Iridia sets only brightness and on/off)"
+msgstr "Keep its own colour (Iridia sets only brightness and on/off)"
 
 msgid "Strip type and wiring"
 msgstr "Strip type and wiring"

@@ -51,20 +51,25 @@ class Fakes:
                     data, addr = s.recvfrom(4096)
                 except (socket.timeout, OSError):
                     continue
-                msg = json.loads(data)
-                if s is self.wiz:
-                    if msg.get("method") == "getSystemConfig":
-                        s.sendto(json.dumps({"method": "getSystemConfig", "env": "pro", "result": {
-                            "mac": "a8bb50d1e2f3", "moduleName": "ESP01_SHRGB_03"}}).encode(), addr)
-                    else:
-                        self.wiz_got.append(msg)
-                elif s is self.gscan:      # the answer goes to port 4002 (here: glisten), as the doc says
-                    self.gscan.sendto(json.dumps({"msg": {"cmd": "scan", "data": {
-                        "ip": "127.0.0.1", "device": "1F:80:C5:32:32:36:72:4E", "sku": "H6159",
-                        "bleVersionHard": "3.01.01", "wifiVersionSoft": "1.02.03"}}}).encode(),
-                        ("127.0.0.1", self.glisten))
-                else:
-                    self.govee_got.append(msg["msg"])
+                try:
+                    self._answer(s, json.loads(data), addr)
+                except OSError:
+                    pass                        # closed while answering: the test is over
+
+    def _answer(self, s, msg, addr):
+        if s is self.wiz:
+            if msg.get("method") == "getSystemConfig":
+                s.sendto(json.dumps({"method": "getSystemConfig", "env": "pro", "result": {
+                    "mac": "a8bb50d1e2f3", "moduleName": "ESP01_SHRGB_03"}}).encode(), addr)
+            else:
+                self.wiz_got.append(msg)
+        elif s is self.gscan:      # the answer goes to port 4002 (here: glisten), as the doc says
+            self.gscan.sendto(json.dumps({"msg": {"cmd": "scan", "data": {
+                "ip": "127.0.0.1", "device": "1F:80:C5:32:32:36:72:4E", "sku": "H6159",
+                "bleVersionHard": "3.01.01", "wifiVersionSoft": "1.02.03"}}}).encode(),
+                ("127.0.0.1", self.glisten))
+        else:
+            self.govee_got.append(msg["msg"])
 
     def point(self, nl):
         nl.targets = {"wiz": ("127.0.0.1", self.wiz.getsockname()[1]),
@@ -187,5 +192,25 @@ def test_lights_on_another_network_are_asked_directly(fakes):
         nl.hosts = ["127.0.0.1"]
         nl.scan()
         assert wait(lambda: len(nl.lights) == 2)
+    finally:
+        nl.stop()
+
+
+def test_keep_its_own_colour():
+    assert N.wiz_brightness((0, 0, 128)) == {"method": "setPilot", "params": {"state": True, "dimming": 50}}
+    assert N.wiz_brightness((0, 0, 0))["method"] == "setState"
+    assert [c["msg"]["cmd"] for c in N.govee_commands((90, 90, 90), was_on=None, keep_color=True)] == \
+        ["turn", "brightness"]
+
+
+def test_keep_colour_on_a_light(fakes):
+    nl = N.NetLights()
+    fakes.point(nl)
+    nl.set_enabled(True)
+    try:
+        assert wait(lambda: "WiZ D1E2F3" in nl.lights)
+        nl.set_keep_color({"WiZ D1E2F3"})
+        nl.send("WiZ D1E2F3", ["808080"])
+        assert wait(lambda: fakes.wiz_got and fakes.wiz_got[-1]["params"] == {"state": True, "dimming": 50})
     finally:
         nl.stop()

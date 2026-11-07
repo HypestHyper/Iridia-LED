@@ -216,6 +216,7 @@ class Daemon:
         self.notifywatch = None
         from iridia.netlights import NetLights
         self.netlights = NetLights()              # WiZ and Govee lights on the network (off until switched on)
+        self._left_alone: set = set()             # zone keys Iridia doesn't control right now ("hands_off")
         self.focuswatch = None
         self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
         self._scene_look: Optional[dict] = None
@@ -2045,6 +2046,12 @@ class Daemon:
             changes["color_order"] = co
         if "session_ignore" in req:            # stays lit when the screen locks or you're away
             changes["session_ignore"] = True if req["session_ignore"] else None
+        if "independent" in req:               # on its own: ignores the monitor, night mode, lock and sleep
+            changes["independent"] = True if req["independent"] else None
+        if "hands_off" in req:                 # Iridia sends it nothing (it keeps what it shows)
+            changes["hands_off"] = True if req["hands_off"] else None
+        if "keep_color" in req:                # a network light: its own app's colour stays
+            changes["keep_color"] = True if req["keep_color"] else None
         for key, lo, hi in (("leds_per_pixel", 1, 20), ("power_limit", 0, 100), ("ma_per_led", 1, 500)):
             if key in req:
                 try:
@@ -2250,6 +2257,8 @@ class Daemon:
             self._needs_update = False
             return
         t = time.time() - self._start_time
+        self.netlights.set_keep_color(n for n, c in devices_cfg.items()
+                                      if isinstance(c, dict) and c.get("net") and c.get("keep_color"))
         for name, dev_cfg in devices_cfg.items():
             if isinstance(dev_cfg, dict) and dev_cfg.get("net") and not self.netlights.has(name):
                 continue                    # a network light that hasn't answered (yet)
@@ -2265,6 +2274,16 @@ class Daemon:
         targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
                    if isinstance(zones, dict) and zones else [("", dev_cfg)])
         for zname, zcfg in targets:
+            key = self._zone_key(name, zname)
+            if zcfg.get("hands_off"):
+                # not controlled by Iridia right now: nothing is sent, it keeps what it shows
+                self._left_alone.add(key)
+                continue
+            if key in self._left_alone:
+                self._left_alone.discard(key)
+                self._last_sent.pop(key, None)      # back with Iridia: its colours again
+                if self.netlights.has(name):
+                    self.netlights.resend(name)
             # One broken zone (a hand-edited config, odd hardware) must not stop the others.
             try:
                 self._update_zone(name, zname, clean_zone_cfg(zcfg), t,
@@ -2301,7 +2320,7 @@ class Daemon:
         exact = False                                        # send the colours untouched
         levels = None                                        # sensor parts: each LED's level, applied last
 
-        override = self._override_colors(device_name, zone_name, led_count)
+        override = self._override_colors(device_name, zone_name, led_count, bool(zcfg.get("independent")))
         ov = self._ov(key) or {}
         power = ov.get("power")
         if override is not None:
@@ -2445,7 +2464,7 @@ class Daemon:
         """The zone's brightness, faded down while the screen is locked or you're away (unless the
         zone ignores that)."""
         b = self._brightness_glide(key, zcfg)
-        return b if zcfg.get("session_ignore") else b * self._session_factor()
+        return b if zcfg.get("session_ignore") or zcfg.get("independent") else b * self._session_factor()
 
     def _brightness_glide(self, key: str, zcfg: dict) -> float:
         """The zone's brightness (monitor or manual, range, invert, night cap), gliding to a new
@@ -2505,6 +2524,8 @@ class Daemon:
                 for zn, raw in targets:
                     if zn and not raw.get("enabled", True):
                         continue
+                    if raw.get("hands_off"):
+                        continue                    # not Iridia's right now
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
@@ -2771,9 +2792,11 @@ class Daemon:
                 return len(z.leds)
         return None
 
-    def _override_colors(self, device: str, zone: str, led_count: int) -> Optional[List[str]]:
-        """Colours that replace everything else: lights off, identify, LED counting."""
-        if self._lights_off or self._asleep:
+    def _override_colors(self, device: str, zone: str, led_count: int,
+                         independent: bool = False) -> Optional[List[str]]:
+        """Colours that replace everything else: lights off, identify, LED counting. A zone on its own
+        stays as it is while the PC sleeps."""
+        if self._lights_off or (self._asleep and not independent):
             return ["000000"] * led_count
         ident, probe, test = self._identify, self._probe, self._rgbtest   # IPC threads may clear them
         if test and (test[0], test[1] or "") == (device, zone or ""):
@@ -2799,6 +2822,9 @@ class Daemon:
         return None
 
     def _get_zone_brightness(self, zcfg: Dict[str, Any]) -> int:
+        if zcfg.get("independent"):
+            # on its own: its own brightness, whatever the monitor and night mode say
+            return zcfg.get("manual_brightness", 100)
         b = self._zone_brightness_raw(zcfg)
         if self._night_active:
             b = min(b, self._night_cap)

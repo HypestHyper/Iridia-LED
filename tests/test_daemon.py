@@ -1006,3 +1006,30 @@ def test_scene_try_it_and_cli(d, monkeypatch, capsys):
     assert d._scene_ov == {"bright": 15}
     assert cli.main(["scenes", "remove", "mpv"]) == 0
     assert d._scene_settings()["apps"] == []
+
+
+def test_a_device_iridia_leaves_alone_or_that_is_on_its_own(d):
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    assert _cmd(d, "set_zone_strip", device="Strip", zone="", hands_off=True)["ok"]
+    n = len(d.openrgb.sent)
+    d.config.set(("devices", "Strip", "pattern_colors"), ["00ff00"])
+    d._update_all_devices()
+    assert not [x for x in d.openrgb.sent[n:] if x[0] == "Strip"]        # nothing sent: it keeps what it shows
+    assert _cmd(d, "set_zone_strip", device="Strip", zone="", hands_off=False)["ok"]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4                     # Iridia's again
+    # on its own: night mode's cap and sleep don't reach it
+    d._night_active, d._night_cap = True, 10
+    d._glide = {}                                                       # no glide: straight to the cap
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["001900"] * 4                     # capped at 10%
+    _cmd(d, "set_zone_strip", device="Strip", zone="", independent=True)
+    d._glide = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4
+    d._asleep = True
+    d._last_sent = {}
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4
+    assert d.openrgb.last("Hub v1.0") == ["000000"] * 2                  # the others go dark

@@ -127,7 +127,9 @@ class Client:
 
     def set_zone_strip(self, device: str, zone: str, **fields) -> dict:
         """strip_type (addressable, addressable12, single, rgbw or auto), color_order, leds_per_pixel,
-        power_limit (A, 0 = none), ma_per_led."""
+        power_limit (A, 0 = none), ma_per_led, session_ignore, hands_off (Iridia sends it nothing),
+        independent (ignores the monitor, night mode, lock and sleep), keep_color (a network light's own
+        colour stays)."""
         return self._ipc.send(dict(fields, cmd="set_zone_strip", device=device, zone=zone))
 
     def set_zone_sections(self, device: str, zone: str, **fields) -> dict:

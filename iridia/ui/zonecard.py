@@ -361,6 +361,22 @@ class ZoneCard(Gtk.Box):
             row5, self._sess_ignore = switch_row(_("Stay lit when the screen locks or you're away"),
                                                  bool(self.cfg.get("session_ignore")), self._on_session_ignore)
             br.append(row5)
+            # for using a device only now and then: Iridia leaves it alone, or keeps out of its way
+            row6, self._control = switch_row(_("Let Iridia control it"), not self.cfg.get("hands_off"),
+                                             lambda v: self._strip_set(hands_off=not v))
+            br.append(row6)
+            br.append(label(_("Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app "
+                              "can set it). The switch at the top of the card turns it off instead."), ("small", "faint"), wrap=True))
+            row7, self._indep = switch_row(_("On its own: ignore the monitor, night mode, lock and sleep"),
+                                           bool(self.cfg.get("independent")),
+                                           lambda v: self._strip_set(independent=bool(v)))
+            br.append(row7)
+            self._keep = None
+            if self.cfg.get("net"):
+                row8, self._keep = switch_row(_("Keep its own colour (Iridia sets only brightness and on/off)"),
+                                              bool(self.cfg.get("keep_color")),
+                                              lambda v: self._strip_set(keep_color=bool(v)))
+                br.append(row8)
         r4 = hbox(10)
         r4.set_margin_top(6)
         r4.append(label(_("Color correction"), ("small", "dim")))
@@ -1036,6 +1052,10 @@ class ZoneCard(Gtk.Box):
         self._gamma.set_value(zcfg.get("gamma_correction", False))
         if hasattr(self, "_sess_ignore"):
             self._sess_ignore.set_value(bool(zcfg.get("session_ignore")))
+            self._control.set_value(not zcfg.get("hands_off"))
+            self._indep.set_value(bool(zcfg.get("independent")))
+            if self._keep is not None:
+                self._keep.set_value(bool(zcfg.get("keep_color")))
         mode = zcfg.get("mode", "full")
         self._profile.set_items(self.PROFILES, zcfg.get("calibration_profile", "WS2812B"))
         if mode != self._mode_val or self._mixed != getattr(self, "_shown_mixed", set()):

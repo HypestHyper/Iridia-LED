@@ -32,6 +32,17 @@ at the wall shows it again within a minute).
   firewall has to let those through; for lights on another VLAN, see below. If another program
   already uses port 4002, Govee lights can't answer, and the card says so.
 
+## Using a light only now and then
+
+Three switches on each device's card (under Brightness) decide how much Iridia does with it. They work
+for any device; the third is for network lights only.
+
+| | |
+| --- | --- |
+| *Let Iridia control it* | Off: Iridia sends it nothing at all, so it keeps whatever it shows, and its own app (Govee, WiZ, Google Home) can set it. On again: Iridia's colours come back. The switch at the top of the card is different: it turns the device *off* (dark) |
+| *On its own: ignore the monitor, night mode, lock and sleep* | Its own brightness (the Manual value), whatever the monitor's brightness, night mode, the lock screen or sleep say. Keybinds, scenes and notifications still reach it |
+| *Keep its own colour* | Iridia sets only its brightness and switches it on and off; the colour stays what its own app set. With *On its own* as well, that's only when you ask (a keybind, a scene that turns it off) |
+
 ## Lights on another VLAN or subnet
 
 The search (a broadcast for WiZ, a multicast for Govee) stays on your PC's own network: routers don't

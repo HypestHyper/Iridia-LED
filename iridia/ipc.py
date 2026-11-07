@@ -89,9 +89,10 @@ class IPCClient:
         self.socket_path = socket_path
         self.timeout = timeout
 
-    def send(self, cmd):
+    def send(self, cmd, timeout=None):
+        """One request and its answer; timeout: longer for requests that wait on something (a light)."""
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.settimeout(self.timeout)
+        sock.settimeout(self.timeout if timeout is None else timeout)
         try:
             sock.connect(self.socket_path)
             sock.sendall(json.dumps(cmd).encode("utf-8") + b"\n")
@@ -102,7 +103,10 @@ class IPCClient:
                     break
                 data += chunk
             return json.loads(data.decode("utf-8"))
-        except (socket.timeout, ConnectionRefusedError, FileNotFoundError):
+        except socket.timeout:
+            # connected (or still connecting) but no answer in time: running, just slow or busy
+            return {"ok": False, "error": "the daemon didn't answer in time"}
+        except (ConnectionRefusedError, FileNotFoundError):
             return {"ok": False, "error": "daemon not running"}
         except json.JSONDecodeError as e:
             return {"ok": False, "error": f"bad response: {e}"}

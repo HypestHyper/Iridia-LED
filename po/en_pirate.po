@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-01 21:50+0000\n"
+"POT-Creation-Date: 2026-11-07 14:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -285,6 +285,10 @@ msgstr "The Whole Fleet"
 
 msgid "Disabled"
 msgstr "Marooned"
+
+#, python-brace-format
+msgid "Network light ({brand})"
+msgstr "Lantern on the network ({brand})"
 
 msgid "Whole device"
 msgstr "The whole vessel"
@@ -2605,6 +2609,112 @@ msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
 
+msgid "Network lights"
+msgstr "Lanterns on the network"
+
+msgid ""
+"Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
+"and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
+"lights need LAN Control switched on (Govee app, the light's settings)."
+msgstr ""
+"Philips WiZ an' Govee lanterns on yer Wi-Fi, found an' steered over the network: nothin' to pair,"
+" an' they keep sailin' in their own apps an' in Google Home. Each shows one colour. Govee "
+"lanterns need LAN Control on (Govee app, the lantern's settin's)."
+
+msgid "Look for WiZ and Govee lights"
+msgstr "Look fer WiZ an' Govee lanterns"
+
+msgid "Other networks"
+msgstr "Other waters"
+
+msgid ""
+"Lights on another VLAN or subnet (an IoT network, say) don't hear the search. Give their address,"
+" or the whole network, and they're asked directly. The router has to let this PC reach them (UDP "
+"38899 for WiZ, 4001 and 4003 for Govee) and Govee's answers back to it (UDP 4002)."
+msgstr ""
+"Lanterns on another VLAN or subnet (an IoT network, say) don't hear the search. Give their "
+"address, or the whole network, an' they be asked direct. The router must let this PC reach 'em "
+"(UDP 38899 fer WiZ, 4001 an' 4003 fer Govee) an' Govee's answers back (UDP 4002)."
+
+msgid "Address or network, like 192.168.20.0/24"
+msgstr "Address or network, like 192.168.20.0/24"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Add as a Govee light"
+msgstr "Add as a Govee lantern"
+
+msgid "Add as a WiZ light"
+msgstr "Add as a WiZ lantern"
+
+msgid "Type the light's address first."
+msgstr "Type the lantern's address first."
+
+#, python-brace-format
+msgid "Asking {ip}…"
+msgstr "Hailin' {ip}…"
+
+msgid "Couldn't test it"
+msgstr "Couldn't test it"
+
+#, python-brace-format
+msgid ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+msgstr ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it be in other"
+" waters."
+
+#, python-brace-format
+msgid ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+msgstr ""
+"No answer from {ip}. Either no lantern with LAN Control be there, or its answers don't make it "
+"back to this PC: the router must let the lanterns reach this PC on UDP port 4002 (a WiZ lantern "
+"answers from 38899)."
+
+#, python-brace-format
+msgid "This PC's own firewall ({fw}) is on and can drop them too."
+msgstr "This PC's own firewall ({fw}) be on an' can sink 'em too."
+
+msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+msgstr "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+
+msgid "Its card shows up in a moment, once Iridia has added it."
+msgstr "Its card shows up in a moment, once Iridia's added it."
+
+msgid "Added: this is its card. Settings next to it in Network lights comes back here."
+msgstr "Added: this be its card. Settings next to it in Network lanterns brings ye back."
+
+msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
+msgstr "Added. Its card be above the Network lanterns card: Settings next to it sails there."
+
+msgid "added by address"
+msgstr "added by address"
+
+msgid "Its card: colours, brightness, on and off"
+msgstr "Its card: colours, brightness, on an' off"
+
+msgid "Off: nothing is sent to the network."
+msgstr "Off: nothin' be sent to the network."
+
+msgid ""
+"Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
+" switched on in the Govee app."
+msgstr ""
+"Lookin'… Lanterns answer within a few seconds. A Govee lantern that don't show needs LAN Control "
+"on in the Govee app."
+
+msgid ""
+"Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
+"the same."
+msgstr ""
+"Each lantern has its own card above, like a strip: pattern, brightness, scenes an' the rest work "
+"the same."
+
 msgid "Nothing"
 msgstr "Nothin'"
 
@@ -3055,6 +3165,34 @@ msgstr "Gamma correction"
 msgid "Stay lit when the screen locks or you're away"
 msgstr "Stay lit when the hatch locks or ye go ashore"
 
+msgid "With the rest"
+msgstr "With the crew"
+
+msgid "Only when I change it"
+msgstr "Only when I change it"
+
+msgid "Not at all"
+msgstr "Not at all"
+
+msgid "How Iridia uses it"
+msgstr "How Iridia uses it"
+
+msgid "Let Iridia control it"
+msgstr "Let Iridia steer it"
+
+msgid ""
+"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
+"switch at the top of the card turns it off instead."
+msgstr ""
+"Off: Iridia sends it nothin', so it keeps whatever it shows (a lantern's own app can set it). The"
+" switch atop the card snuffs it instead."
+
+msgid "On its own: ignore the monitor, night mode, lock and sleep"
+msgstr "On its own: ignore the monitor, night watch, lock an' sleep"
+
+msgid "Keep its own colour (Iridia sets only brightness and on/off)"
+msgstr "Keep its own colour (Iridia sets only brightness an' on/off)"
+
 msgid "Strip type and wiring"
 msgstr "Strip type an' riggin'"
 
@@ -3142,6 +3280,21 @@ msgstr "Colors in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this color"
+
+msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
+msgstr "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes an' the rest."
+
+msgid ""
+"Iridia sends its colour and brightness only when you change them here, and never switches it on "
+"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
+" light may switch itself on when it gets a colour."
+msgstr ""
+"Iridia sends its colour an' brightness only when ye change 'em here, an' never switches it on or "
+"off: its own app an' automations (Google Home, say) stay at the helm. Yer choice be kept. A "
+"lantern may light itself when it gets a colour."
+
+msgid "Iridia sends it nothing: it keeps whatever its own app set."
+msgstr "Iridia sends it nothin': it keeps whatever its own app set."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

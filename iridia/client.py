@@ -127,7 +127,9 @@ class Client:
 
     def set_zone_strip(self, device: str, zone: str, **fields) -> dict:
         """strip_type (addressable, addressable12, single, rgbw or auto), color_order, leds_per_pixel,
-        power_limit (A, 0 = none), ma_per_led."""
+        power_limit (A, 0 = none), ma_per_led, session_ignore, hands_off (Iridia sends it nothing),
+        independent (ignores the monitor, night mode, lock and sleep), keep_color (a network light's own
+        colour stays)."""
         return self._ipc.send(dict(fields, cmd="set_zone_strip", device=device, zone=zone))
 
     def set_zone_sections(self, device: str, zone: str, **fields) -> dict:
@@ -162,6 +164,11 @@ class Client:
         """Notification flashes: enabled, targets, effect, color, hex, urgent_red, duration, apps,
         app_list, dnd, night_quiet, forget, test, or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="notify"))
+
+    def netlights(self, **kw) -> dict:
+        """Network lights (WiZ, Govee): enabled, scan, or nothing to ask."""
+        # a test waits for the light's answer (up to about 3 seconds)
+        return self._ipc.send(dict(kw, cmd="netlights"), timeout=8.0 if kw.get("probe") else None)
 
     def scenes(self, **kw) -> dict:
         """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,

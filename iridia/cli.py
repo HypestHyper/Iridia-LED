@@ -463,10 +463,10 @@ def cmd_freeze(args):
                    "Colors frozen. Wallpaper changes are ignored until 'iridia unfreeze'.")
 
 
-def _report(req, text):
+def _report(req, text, timeout=None):
     """Send a request and print text(response) (or the error)."""
     try:
-        resp = _client().send(req)
+        resp = _client().send(req, timeout=timeout) if timeout else _client().send(req)
     except Exception as e:                  # noqa: BLE001
         print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
         return 1
@@ -874,6 +874,84 @@ def cmd_scenes(args):
     if verb == "test":
         return _report(req, lambda r: "Showing it for 5 seconds.")
     return _report(req, _scenes_text)
+
+
+def _netlights_text(r):
+    n = r.get("netlights") or r
+    lines = [f"Network lights (WiZ, Govee): {'looking' if n.get('enabled') else 'off'}"]
+    if n.get("hosts"):
+        lines.append("Also asked directly: " + ", ".join(n["hosts"]))
+    if n.get("error"):
+        lines.append(n["error"])
+    for f in n.get("found") or []:
+        lines.append(f"  {f['name']}  {f.get('net', {}).get('ip', '')}")
+    if n.get("enabled") and not n.get("found"):
+        lines.append("  none yet (Govee lights need LAN Control on in the Govee app)")
+    return "\n".join(lines)
+
+
+FIREWALL_FIX = {"ufw": "sudo ufw allow 4002/udp",
+                "firewalld": "sudo firewall-cmd --permanent --add-port=4002/udp && sudo firewall-cmd --reload"}
+
+
+def probe_text(p) -> str:
+    """What a test of one address found, and what to do about it."""
+    ip = p.get("ip", "?")
+    if p.get("govee") or p.get("wiz"):
+        what = " and ".join(b for b, k in (("a Govee light", "govee"), ("a WiZ light", "wiz")) if p.get(k))
+        return (f"{ip} answered: {what} ({', '.join(p.get('heard') or [])}). It shows up with the next search; "
+                f"if it's on another network, add its address under Other networks (iridia netlights add {ip}).")
+    lines = [f"No answer from {ip}."]
+    if p.get("send_errors"):
+        lines.append("Couldn't even send to it: " + "; ".join(p["send_errors"]) + " (no route to that network?)")
+    lines.append("Either there's no light with LAN Control on at that address, or its answers don't get back "
+                 "to this PC. A Govee light answers to this PC's UDP port 4002 (a WiZ light from port 38899):")
+    fw = p.get("firewall")
+    if fw:
+        fix = FIREWALL_FIX.get(fw)
+        lines.append(f"  - This PC's own firewall ({fw}) is on and can drop them"
+                     + (f": {fix}" if fix else ": allow incoming UDP 4002 (and 38899 for WiZ)"))
+    lines.append("  - The router has to let the IoT network reach this PC on UDP 4002 (devices there are often "
+                 "allowed to answer only on the port they were asked on).")
+    if not p.get("govee_listening"):
+        lines.append("  - Another program here holds port 4002, so Govee answers can't reach Iridia.")
+    lines.append(f"Or add it anyway, without answers: iridia netlights add-light govee {ip} "
+                 "(Iridia then just sends it colours; commands to the light usually get through).")
+    return "\n".join(lines)
+
+
+def cmd_netlights(args):
+    """iridia netlights [on | off | scan | add ADDRESS | remove ADDRESS]"""
+    req = {"cmd": "netlights"}
+    if args.action == "test":
+        if not args.address:
+            print("Use: iridia netlights test ADDRESS", file=sys.stderr)
+            return 2
+        req["probe"] = args.address
+        print(f"Asking {args.address} (a few seconds)...")
+        return _report(req, lambda r: probe_text(r.get("probe") or {}), timeout=8.0)
+    if args.action == "add-light":
+        kind, ip = args.address, args.extra
+        if kind not in ("govee", "wiz") or not ip:
+            print("Use: iridia netlights add-light govee|wiz ADDRESS", file=sys.stderr)
+            return 2
+        req["add_light"] = {"kind": kind, "ip": ip}
+    elif args.action == "remove-light":
+        if not args.address:
+            print("Use: iridia netlights remove-light ADDRESS", file=sys.stderr)
+            return 2
+        req["remove_light"] = args.address
+    elif args.action in ("add", "remove"):
+        if not args.address:
+            print(f"Use: iridia netlights {args.action} ADDRESS (like 192.168.20.31 or 192.168.20.0/24)",
+                  file=sys.stderr)
+            return 2
+        req["add_host" if args.action == "add" else "remove_host"] = args.address
+    elif args.action in ("on", "off"):
+        req["enabled"] = args.action == "on"
+    elif args.action == "scan":
+        req["scan"] = True
+    return _report(req, _netlights_text)
 
 
 def cmd_update(args):
@@ -1638,6 +1716,20 @@ def main(argv=None):
                            help="seconds before the lights go back (0 to 10)")
     sc_parser.add_argument("--interval", type=int,
                            help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
+    nl_parser = subparsers.add_parser("netlights", help="Philips WiZ and Govee lights on the network",
+                                      description="on: look for them (they become devices like any strip); "
+                                                  "scan: look again now; off: stop; add ADDRESS: also ask an "
+                                                  "address or network directly (lights on another VLAN or subnet, "
+                                                  "like 192.168.20.0/24); remove ADDRESS; test ADDRESS: ask one "
+                                                  "address and say what came back; add-light govee|wiz ADDRESS: "
+                                                  "drive a light by its address without needing its answers; "
+                                                  "remove-light ADDRESS.")
+    nl_parser.add_argument("action", nargs="?", default="show",
+                           choices=["show", "on", "off", "scan", "add", "remove", "test", "add-light", "remove-light"])
+    nl_parser.add_argument("address", nargs="?",
+                           help="add/remove: an address or network; test/remove-light: an address; add-light: "
+                                "govee or wiz, then the address")
+    nl_parser.add_argument("extra", nargs="?", help="add-light: the light's address")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
     p_mon = subparsers.add_parser("monitor", help="Which monitor's brightness strips follow: list, auto, a bus, rescan")
     p_mon.add_argument("what", nargs="?", default="list", help="list (default), auto, an I2C bus number, or rescan")
@@ -1687,7 +1779,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "netlights": cmd_netlights, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

@@ -214,6 +214,10 @@ class Daemon:
         self.sleepwatch = None
         self.sessionwatch = None
         self.notifywatch = None
+        from iridia.netlights import NetLights
+        self.netlights = NetLights()              # WiZ and Govee lights on the network (off until switched on)
+        self._left_alone: set = set()             # zone keys Iridia doesn't control right now ("hands_off")
+        self._on_demand_due: set = set()          # "only when I change it" devices just changed: send once
         self.focuswatch = None
         self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
         self._scene_look: Optional[dict] = None
@@ -293,7 +297,7 @@ class Daemon:
         self._last_wallpaper_event = 0.0
 
         # animations (see animations.py and animator.py)
-        self._animator = Animator(self.openrgb.send_frames)
+        self._animator = Animator(self._send_frames)
         self._anim_keys: set = set()      # zones the animator sends (unless paused for a moment)
         self._anim_jobs: Dict[str, tuple] = {}    # key -> (signature, Job)
         self._static_rgb: Dict[str, list] = {}    # key -> what the static path shows on that zone
@@ -615,6 +619,8 @@ class Daemon:
             dev_cfg = devices.get(t["device"])
             if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True):
                 continue
+            if dev_cfg.get("on_demand") or dev_cfg.get("hands_off"):
+                continue                    # left to its own app: no flashes either
             zones = dev_cfg.get("zones")
             if t["zone"]:
                 raw = zones.get(t["zone"]) if isinstance(zones, dict) else None
@@ -936,6 +942,7 @@ class Daemon:
             self.sessionwatch.stop()
         if self.notifywatch:
             self.notifywatch.stop()
+        self.netlights.stop()
         if self.focuswatch:
             self.focuswatch.stop()
         self.sensors.stop()
@@ -1105,6 +1112,14 @@ class Daemon:
             self._autoadd_devices()
             self._check_missing_devices()
 
+        nls = self._netlight_settings()
+        self.netlights.hosts = nls["hosts"]
+        self.netlights.set_manual([(m["kind"], m["ip"]) for m in nls["manual"]])
+        self.netlights.set_enabled(nls["enabled"])
+        if self.netlights.lights:
+            self._autoadd_devices(self.netlights.list_devices())
+        out = connected or bool(self.netlights.lights)     # something to send to
+
         self._detect_wallpaper()
         self._read_brightness()
 
@@ -1112,14 +1127,14 @@ class Daemon:
         self._update_notify()
         self._update_scenes()
         self._update_sensors()
-        self._refresh_animations(connected)
+        self._refresh_animations(out)
         if self._glide_active:
             self._needs_update = True       # a brightness glide is still running
-        if connected and (self._needs_update or self._force_refresh):
+        if out and (self._needs_update or self._force_refresh):
             self._glide_active = False
             self._sensor_zones = set()
             self._update_all_devices()
-        elif connected and self._sensor_zones:
+        elif out and self._sensor_zones:
             self._update_sensor_zones()
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
@@ -1180,13 +1195,14 @@ class Daemon:
             self._last_sent.clear()
             self._needs_update = True
 
-    def _autoadd_devices(self):
-        """Devices OpenRGB reports that aren't in the config yet get a
-        sensible default entry, so a fresh install works with no hand-editing."""
-        try:
-            found = self.openrgb.list_devices()
-        except Exception:
-            return
+    def _autoadd_devices(self, found=None):
+        """Devices OpenRGB reports (or the network lights in found) that aren't in the config yet get
+        a sensible default entry, so a fresh install works with no hand-editing."""
+        if found is None:
+            try:
+                found = self.openrgb.list_devices()
+            except Exception:
+                return
         known = self.config.devices
         if not isinstance(known, dict):
             known = {}
@@ -1236,6 +1252,11 @@ class Daemon:
                 empty = sum(1 for z in dev["zones"] if z["led_count"] == 0)
                 self.logger.info(f"Found new device '{dev['name']}' with {len(zones)} zone(s)"
                                  + (f", {empty} without a size yet (off)" if empty else "") + "; added to config")
+            elif dev.get("net"):
+                # a WiZ or Govee light: one colour, sent over the network
+                devices[dev["name"]] = dict(fresh(1), strip_type="single", net=dev["net"]["kind"])
+                self.logger.info(f"Found network light '{dev['name']}' ({dev['net']['ip']}); added to config")
+                continue
             else:
                 # Whole-device control (mice, some GPUs and RAM report no zones).
                 devices[dev["name"]] = dict(fresh(max(1, dev.get("led_count") or 1)))
@@ -1257,7 +1278,8 @@ class Daemon:
         """
         self._reconcile_zones()
         now = time.time()
-        configured = [name for name, cfg in self.config.devices_view.items() if cfg.get("enabled", True)]
+        configured = [name for name, cfg in self.config.devices_view.items()
+                      if cfg.get("enabled", True) and not cfg.get("net")]    # network lights aren't OpenRGB's
         for name in configured:
             if name in self.openrgb.devices:
                 self._device_missing_since.pop(name, None)
@@ -2028,6 +2050,14 @@ class Daemon:
             changes["color_order"] = co
         if "session_ignore" in req:            # stays lit when the screen locks or you're away
             changes["session_ignore"] = True if req["session_ignore"] else None
+        if "independent" in req:               # on its own: ignores the monitor, night mode, lock and sleep
+            changes["independent"] = True if req["independent"] else None
+        if "on_demand" in req:                 # only when changed on its card; never on or off
+            changes["on_demand"] = True if req["on_demand"] else None
+        if "hands_off" in req:                 # Iridia sends it nothing (it keeps what it shows)
+            changes["hands_off"] = True if req["hands_off"] else None
+        if "keep_color" in req:                # a network light: its own app's colour stays
+            changes["keep_color"] = True if req["keep_color"] else None
         for key, lo, hi in (("leds_per_pixel", 1, 20), ("power_limit", 0, 100), ("ma_per_led", 1, 500)):
             if key in req:
                 try:
@@ -2233,7 +2263,13 @@ class Daemon:
             self._needs_update = False
             return
         t = time.time() - self._start_time
+        self.netlights.set_keep_color(n for n, c in devices_cfg.items()
+                                      if isinstance(c, dict) and c.get("net") and c.get("keep_color"))
+        self.netlights.on_demand = {n for n, c in devices_cfg.items()
+                                    if isinstance(c, dict) and c.get("net") and c.get("on_demand")}
         for name, dev_cfg in devices_cfg.items():
+            if isinstance(dev_cfg, dict) and dev_cfg.get("net") and not self.netlights.has(name):
+                continue                    # a network light that hasn't answered (yet)
             self._update_device(name, dev_cfg, t)
         self._needs_update = False
         self._force_refresh = False
@@ -2245,7 +2281,28 @@ class Daemon:
         zones = dev_cfg.get("zones")
         targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
                    if isinstance(zones, dict) and zones else [("", dev_cfg)])
+        on_demand = bool(dev_cfg.get("on_demand"))
+        if on_demand and name not in self._on_demand_due:
+            return                          # only when you change it on its card: nothing to send now
+        self._on_demand_due.discard(name)
         for zname, zcfg in targets:
+            key = self._zone_key(name, zname)
+            if on_demand:
+                # what its card says, and nothing else: no wallpaper change, monitor, lock, sleep, scene
+                # or keybind on top, and never on or off (that's left to its own app and automations)
+                zc = dict(clean_zone_cfg(zcfg), independent=True, on_demand=True)
+                self._last_sent.pop(key, None)
+                self._update_zone(name, zname, zc, t)
+                continue
+            if zcfg.get("hands_off"):
+                # not controlled by Iridia right now: nothing is sent, it keeps what it shows
+                self._left_alone.add(key)
+                continue
+            if key in self._left_alone:
+                self._left_alone.discard(key)
+                self._last_sent.pop(key, None)      # back with Iridia: its colours again
+                if self.netlights.has(name):
+                    self.netlights.resend(name)
             # One broken zone (a hand-edited config, odd hardware) must not stop the others.
             try:
                 self._update_zone(name, zname, clean_zone_cfg(zcfg), t,
@@ -2282,8 +2339,10 @@ class Daemon:
         exact = False                                        # send the colours untouched
         levels = None                                        # sensor parts: each LED's level, applied last
 
-        override = self._override_colors(device_name, zone_name, led_count)
-        ov = self._ov(key) or {}
+        on_demand = bool(zcfg.get("on_demand"))
+        override = None if on_demand else self._override_colors(device_name, zone_name, led_count,
+                                                                bool(zcfg.get("independent")))
+        ov = {} if on_demand else (self._ov(key) or {})
         power = ov.get("power")
         if override is not None:
             final_colors = override
@@ -2365,7 +2424,7 @@ class Daemon:
         # off means sending black, and the sender skips disabled zones.
         send_cfg = dict(zcfg, enabled=True)
         zones_config = {zone_name: send_cfg} if zone_name else None
-        if self.openrgb.send(device_name, final_colors, zones_config):
+        if self._out(device_name).send(device_name, final_colors, zones_config):
             self._last_sent[key] = color_hash
             self.logger.debug(f"Sent to '{device_name}/{zone_name}' | pattern={pattern} | mode={mode} | "
                               f"brightness={brightness}% | LEDs={len(final_colors)}{' | off' if off else ''}")
@@ -2426,7 +2485,7 @@ class Daemon:
         """The zone's brightness, faded down while the screen is locked or you're away (unless the
         zone ignores that)."""
         b = self._brightness_glide(key, zcfg)
-        return b if zcfg.get("session_ignore") else b * self._session_factor()
+        return b if zcfg.get("session_ignore") or zcfg.get("independent") else b * self._session_factor()
 
     def _brightness_glide(self, key: str, zcfg: dict) -> float:
         """The zone's brightness (monitor or manual, range, invert, night cap), gliding to a new
@@ -2473,7 +2532,8 @@ class Daemon:
         flash_on = set(self._flash.ranges) if self._flash is not None else set()
         flash_keys = set()
         if connected:
-            real = {d["name"]: [z["name"] for z in d["zones"]] for d in self.openrgb.list_devices()}
+            real = {d["name"]: [z["name"] for z in d["zones"]]
+                    for d in self.openrgb.list_devices() + self.netlights.list_devices()}
             layout_groups: Dict[tuple, list] = {}
             plan = []
             for dev, dev_cfg in self.config.devices_view.items():
@@ -2485,6 +2545,8 @@ class Daemon:
                 for zn, raw in targets:
                     if zn and not raw.get("enabled", True):
                         continue
+                    if raw.get("hands_off") or raw.get("on_demand") or dev_cfg.get("on_demand"):
+                        continue                    # not Iridia's right now, or only when changed
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
@@ -2751,9 +2813,11 @@ class Daemon:
                 return len(z.leds)
         return None
 
-    def _override_colors(self, device: str, zone: str, led_count: int) -> Optional[List[str]]:
-        """Colours that replace everything else: lights off, identify, LED counting."""
-        if self._lights_off or self._asleep:
+    def _override_colors(self, device: str, zone: str, led_count: int,
+                         independent: bool = False) -> Optional[List[str]]:
+        """Colours that replace everything else: lights off, identify, LED counting. A zone on its own
+        stays as it is while the PC sleeps."""
+        if self._lights_off or (self._asleep and not independent):
             return ["000000"] * led_count
         ident, probe, test = self._identify, self._probe, self._rgbtest   # IPC threads may clear them
         if test and (test[0], test[1] or "") == (device, zone or ""):
@@ -2779,6 +2843,9 @@ class Daemon:
         return None
 
     def _get_zone_brightness(self, zcfg: Dict[str, Any]) -> int:
+        if zcfg.get("independent"):
+            # on its own: its own brightness, whatever the monitor and night mode say
+            return zcfg.get("manual_brightness", 100)
         b = self._zone_brightness_raw(zcfg)
         if self._night_active:
             b = min(b, self._night_cap)
@@ -2830,7 +2897,26 @@ class Daemon:
             return {"ok": False, "error": str(e)}
         finally:
             if req.get("cmd") not in ("status", "ping"):
+                self._mark_on_demand(req)
                 self._wake.set()            # show a change now, not at the next half-second tick
+
+    def _on_demand_devices(self) -> set:
+        return {n for n, c in self.config.devices_view.items() if isinstance(c, dict) and c.get("on_demand")}
+
+    def _mark_on_demand(self, req: dict):
+        """A change made on an "only when I change it" device's card (or on the Everything card): it gets
+        its colour and brightness once, now. Choosing the mode itself sends nothing."""
+        if "on_demand" in req or "hands_off" in req:
+            return
+        dev = req.get("device")
+        demand = self._on_demand_devices()
+        if dev in demand:
+            self._on_demand_due.add(dev)
+        elif req.get("cmd") == "set_all":
+            self._on_demand_due |= demand
+        else:
+            return
+        self._needs_update = True
 
     def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd", "")
@@ -2936,6 +3022,8 @@ class Daemon:
             return self._cmd_set_zone_animation(req)
         if cmd == "scenes":
             return self._cmd_scenes(req)
+        if cmd == "netlights":
+            return self._cmd_netlights(req)
         if cmd == "animations":
             return self._cmd_animations(req)
         if cmd == "test_colors":
@@ -3042,6 +3130,92 @@ class Daemon:
             items.append({"from": c, "to": to, "name": name})
         return {"mode": mode, "profile": zcfg.get("calibration_profile", "WS2812B"), "items": items}
 
+    # ------------------------------------------------------------- network lights
+    def _out(self, device: str):
+        """Who sends a device's colours: the network lights, or OpenRGB."""
+        return self.netlights if self.netlights.has(device) else self.openrgb
+
+    def _send_frames(self, device: str, frames):
+        return self._out(device).send_frames(device, frames)
+
+    def _netlight_settings(self) -> dict:
+        from iridia.netlights import clean_hosts
+        n = self.config.get("netlights", {})
+        n = n if isinstance(n, dict) else {}
+        manual = []
+        for x in n.get("manual") or []:
+            if isinstance(x, dict) and x.get("kind") in ("wiz", "govee") and clean_hosts([x.get("ip")]):
+                ip = clean_hosts([x["ip"]])[0]
+                if "/" not in ip and (x["kind"], ip) not in [(m["kind"], m["ip"]) for m in manual]:
+                    manual.append({"kind": x["kind"], "ip": ip})
+        return {"enabled": bool(n.get("enabled", False)), "hosts": clean_hosts(n.get("hosts")), "manual": manual}
+
+    def _netlights_status(self) -> dict:
+        return dict(self._netlight_settings(), found=self.netlights.list_devices(), error=self.netlights.error)
+
+    def _cmd_netlights(self, req: dict) -> dict:
+        """Network lights: enabled (look for WiZ and Govee lights), scan (look again now), add_host /
+        remove_host (an address or network to ask directly: lights on another VLAN or subnet)."""
+        from iridia.netlights import clean_hosts
+        cur = self.config.get("netlights", {})
+        cur = dict(cur if isinstance(cur, dict) else {})
+        if "enabled" in req:
+            cur["enabled"] = bool(req["enabled"])
+        if "add_host" in req:
+            h = clean_hosts([req["add_host"]])
+            if not h:
+                return dict(self._netlights_status(), ok=False,
+                            error="give an IPv4 address or network, like 192.168.20.31 or 192.168.20.0/24 "
+                                  "(at most 1024 addresses)")
+            cur["hosts"] = clean_hosts(list(cur.get("hosts") or []) + h)
+            req = dict(req, scan=True)
+        if "remove_host" in req:
+            gone = clean_hosts([req["remove_host"]]) or [str(req["remove_host"])]
+            cur["hosts"] = [x for x in clean_hosts(cur.get("hosts")) if x not in gone]
+        if isinstance(req.get("add_light"), dict):
+            kind, ip = req["add_light"].get("kind"), clean_hosts([req["add_light"].get("ip")])
+            if kind not in ("wiz", "govee") or not ip or "/" in ip[0]:
+                return dict(self._netlights_status(), ok=False, error="give wiz or govee and one IPv4 address")
+            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip[0]]
+            cur["manual"].append({"kind": kind, "ip": ip[0]})
+        if "remove_light" in req:
+            ip = str(req["remove_light"]).strip()
+            gone = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") == ip]
+            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip]
+            devices = self.config.get("devices", {})
+            if isinstance(devices, dict):
+                # its card goes too (a light added by address is named after it)
+                names = [n for n, c in devices.items() if isinstance(c, dict) and c.get("net")
+                         and any(n == f"{'WiZ' if m['kind'] == 'wiz' else 'Govee'} {ip}" for m in gone)]
+                for n in names:
+                    del devices[n]
+                if names:
+                    self.config.set("devices", devices)
+                    self._last_sent = {}
+        if any(k in req for k in ("enabled", "add_host", "remove_host", "add_light", "remove_light")):
+            self.config.set("netlights", cur)
+            nls = self._netlight_settings()
+            self.netlights.hosts = nls["hosts"]
+            self.netlights.set_manual([(m["kind"], m["ip"]) for m in nls["manual"]])
+            self.netlights.set_enabled(nls["enabled"])
+        if req.get("probe"):
+            from iridia.netlights import local_firewall
+            ip = clean_hosts([req["probe"]])
+            if not ip or "/" in ip[0]:
+                return dict(self._netlights_status(), ok=False, error="give one IPv4 address to test")
+            if not self.netlights.enabled:
+                return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")
+            r = self.netlights.probe(ip[0])
+            r["firewall"] = local_firewall()
+            return dict(self._netlights_status(), ok=True, probe=r)
+        if req.get("scan"):
+            if not self.netlights.enabled:
+                return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")
+            self.netlights.scan()
+            self.netlights.resend()
+        self._wake.set()
+        return dict(self._netlights_status(), ok=True)
+
     def _cmd_status(self) -> Dict[str, Any]:
         ident, probe = self._identify, self._probe
         missing = [
@@ -3102,7 +3276,8 @@ class Daemon:
             "openrgb_connected_since": self.openrgb.connected_since,
             "openrgb_last_error": self.openrgb.last_error,
             "openrgb_missing_devices": missing,
-            "devices": self.openrgb.list_devices(),
+            "devices": self.openrgb.list_devices() + self.netlights.list_devices(),
+            "netlights": self._netlights_status(),
             "device_configs": {n: (dict(c, zones={zn: clean_zone_cfg(zc) for zn, zc in c["zones"].items()})
                                    if c.get("zones") else clean_zone_cfg(c))
                                for n, c in self.config.devices_view.items()},

@@ -786,6 +786,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
     # ============================================================ devices tab
     def _build_devices(self):
         self._dev_box = self._devices_page
+        from iridia.ui.netlights_card import NetLightsCard
+        self._net_card = NetLightsCard(self)     # kept across rebuilds: appended last each time
 
     def _clear(self, box):
         c = box.get_first_child()
@@ -835,6 +837,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                            "tab, Start Server) and make sure it lists your devices."), ("small", "dim"), xalign=0.5,
                            wrap=True))
             self._dev_box.append(b)
+            self._dev_box.append(self._net_card.widget)
             return
         cfgs = self._all_zone_cfgs(devices)
         merged, mixed = merge_zone_cfgs(cfgs)
@@ -846,7 +849,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._global_card.set_monitors(*self._ddc_menu)
         self._dev_box.append(self._global_card)
         for d, dc in devices.items():
-            self._dev_box.append(section(d, None if dc.get("enabled", True) else _("Disabled")))
+            sub = None if dc.get("enabled", True) else _("Disabled")
+            if dc.get("net"):
+                brand = {"wiz": "WiZ", "govee": "Govee"}.get(dc["net"], dc["net"])
+                sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else f" · {sub}")
+            self._dev_box.append(section(d, sub))
             zones = dc.get("zones", {})
             for z, zc in (zones.items() if zones else [("", dc)]):
                 key = f"{d}|{z}"
@@ -855,10 +862,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 cardw.zone_name = z
                 self._dev_box.append(cardw)
                 self._zone_cards[key] = cardw
+        self._dev_box.append(self._net_card.widget)
 
     def _apply_hw(self, hw):
         """Hints from what OpenRGB reports (unsized zones, single-colour devices) on the zone cards."""
         for d in hw:
+            if d.get("net"):
+                continue                    # a network light: one colour by nature, nothing to explain
             single = bool(d.get("single_color"))
             zones = d.get("zones") or []
             sizes = {z.get("name", ""): z.get("led_count") for z in zones} if zones else {"": d.get("led_count")}
@@ -1517,6 +1527,26 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     if r:
                         leds.update(range(*r))
             c.set_notify(leds, bool(n.get("enabled")))
+
+    def show_device_card(self, device: str) -> bool:
+        """Scroll the Devices tab to a device's (first) card, open it, and say whether there was one."""
+        card_w = next((c for k, c in self._zone_cards.items() if k.split("|", 1)[0] == device), None)
+        if card_w is None:
+            return False
+        self._tabs["devices"].set_active(True)
+        if not card_w.expanded:
+            card_w._toggle_expand()
+        sc = self._devices_page
+        while sc is not None and not hasattr(sc, "get_vadjustment"):
+            sc = sc.get_parent()
+
+        def go():
+            ok, b = card_w.compute_bounds(self._devices_page)
+            if ok and sc is not None:
+                sc.get_vadjustment().set_value(max(0.0, b.get_y() - 80))
+            return False
+        GLib.timeout_add(120, go)                # once the card has opened
+        return True
 
     def open_notify_settings(self):
         self._tabs["notify"].set_active(True)
@@ -2612,6 +2642,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         else:
             self._sync_devices(devices, colors, custom)
         self._apply_hw(st.get("devices") or [])
+        self._net_card.update(st.get("netlights"))
         self._apply_ddc(st)
         self._sync_animation_settings(st)
         for k, info in (st.get("strip_info") or {}).items():

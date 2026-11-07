@@ -14,6 +14,7 @@
 - [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md)
 - [Notifications](Notifications.md)
 - [Scenes](Scenes.md)
+- [Network lights (WiZ, Govee)](Network-Lights.md)
 - [Setups and backups](Setups-and-Backups.md)
 - [Updates](Updates.md)
 - [Start at login](Start-at-Login.md)

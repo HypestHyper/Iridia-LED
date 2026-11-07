@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.3.8 — 2026-11-07
+
+- **Philips WiZ and Govee lights on your Wi-Fi:** Devices tab, *Network lights* (or `iridia netlights
+  on`). Iridia finds them over the network with their own local protocols, with nothing to pair, and
+  each becomes a device like a strip: wallpaper colours, brightness, scenes, night mode, lock and sleep.
+  They keep working in their own apps and in Google Home. Govee lights need *LAN Control* on in the
+  Govee app. Lights on another VLAN or subnet (an IoT network) are asked directly: give their address
+  or network under *Other networks* (`iridia netlights add 192.168.20.0/24`). *Test* asks one address
+  and says what came back and what may block it (this PC's firewall, the router); a light whose
+  answers don't get back can be added by address and driven anyway (`iridia netlights add-light`).
+- **Network lights next to their own app and automations:** *How Iridia uses it* at the top of a light's
+  card: *With the rest*, *Only when I change it* (colour and brightness only when changed on its card,
+  never on or off, so a Google Home routine that switches it with the TV stays in charge) or *Not at
+  all*. A light added by address opens its card right away.
+- **Use a device only when you want, per device** (its card, Brightness): *Let Iridia control it* (off:
+  Iridia sends it nothing, so its own app can set it), *On its own* (ignores the monitor's brightness,
+  night mode, lock and sleep) and, for network lights, *Keep its own colour* (only brightness and
+  on/off).
+
 ## 1.3.7 — 2026-11-02
 
 - **Iridia needs Python 3.10 or newer now** (3.8 and 3.9 are no longer supported by Python itself).

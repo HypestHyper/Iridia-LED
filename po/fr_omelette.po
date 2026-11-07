@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-01 21:50+0000\n"
+"POT-Creation-Date: 2026-11-07 14:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -278,6 +278,10 @@ msgstr "Bof"
 
 msgid "Disabled"
 msgstr "Bonsoir"
+
+#, python-brace-format
+msgid "Network light ({brand})"
+msgstr "Lampe réseau ({brand})"
 
 msgid "Whole device"
 msgstr "Oh là là"
@@ -2472,6 +2476,101 @@ msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
+msgid "Network lights"
+msgstr "Lampes réseau"
+
+msgid ""
+"Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
+"and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
+"lights need LAN Control switched on (Govee app, the light's settings)."
+msgstr ""
+"Les lampes WiZ et Govee sur ton Wi-Fi, trouvées toutes seules. Rien à appairer. Une couleur "
+"chacune. Govee : active LAN Control dans l'app. Voilà."
+
+msgid "Look for WiZ and Govee lights"
+msgstr "Chercher les lampes WiZ et Govee"
+
+msgid "Other networks"
+msgstr "Autres réseaux"
+
+msgid ""
+"Lights on another VLAN or subnet (an IoT network, say) don't hear the search. Give their address,"
+" or the whole network, and they're asked directly. The router has to let this PC reach them (UDP "
+"38899 for WiZ, 4001 and 4003 for Govee) and Govee's answers back to it (UDP 4002)."
+msgstr ""
+"Les lampes sur un autre VLAN n'entendent pas la recherche. Donne leur adresse ou leur réseau. Le "
+"routeur doit laisser passer UDP 38899, 4001, 4003 et 4002. Voilà."
+
+msgid "Address or network, like 192.168.20.0/24"
+msgstr "Adresse ou réseau, comme 192.168.20.0/24"
+
+msgid "Test"
+msgstr "Tester"
+
+msgid "Add as a Govee light"
+msgstr "Ajouter comme lampe Govee"
+
+msgid "Add as a WiZ light"
+msgstr "Ajouter comme lampe WiZ"
+
+msgid "Type the light's address first."
+msgstr "Tape l'adresse d'abord."
+
+#, python-brace-format
+msgid "Asking {ip}…"
+msgstr "Je demande à {ip}…"
+
+msgid "Couldn't test it"
+msgstr "Impossible de tester"
+
+#, python-brace-format
+msgid ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+msgstr "{ip} a répondu ({what}). Voilà."
+
+#, python-brace-format
+msgid ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+msgstr "Pas de réponse de {ip}. Le routeur doit laisser passer UDP 4002 vers ce PC. Oh là là."
+
+#, python-brace-format
+msgid "This PC's own firewall ({fw}) is on and can drop them too."
+msgstr "Le pare-feu de ce PC ({fw}) est actif aussi."
+
+msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+msgstr "Ou ajoute-la quand même : Iridia lui envoie juste des couleurs."
+
+msgid "Its card shows up in a moment, once Iridia has added it."
+msgstr "Sa carte arrive dans un instant."
+
+msgid "Added: this is its card. Settings next to it in Network lights comes back here."
+msgstr "Ajoutée : voici sa carte."
+
+msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
+msgstr "Ajoutée. Sa carte est au-dessus : Réglages y mène. Voilà."
+
+msgid "added by address"
+msgstr "ajoutée par adresse"
+
+msgid "Its card: colours, brightness, on and off"
+msgstr "Sa carte : couleurs, luminosité, marche/arrêt"
+
+msgid "Off: nothing is sent to the network."
+msgstr "Éteint : rien ne part sur le réseau."
+
+msgid ""
+"Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
+" switched on in the Govee app."
+msgstr "Je cherche… Une lampe Govee absente ? LAN Control dans l'app Govee. Oh là là."
+
+msgid ""
+"Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
+"the same."
+msgstr "Chaque lampe a sa carte au-dessus, comme une bande."
+
 msgid "Nothing"
 msgstr "Rien"
 
@@ -2903,6 +3002,32 @@ msgstr "Bonsoir"
 msgid "Stay lit when the screen locks or you're away"
 msgstr "Toujours allumé, même en vacances"
 
+msgid "With the rest"
+msgstr "Avec le reste"
+
+msgid "Only when I change it"
+msgstr "Seulement quand je change"
+
+msgid "Not at all"
+msgstr "Pas du tout"
+
+msgid "How Iridia uses it"
+msgstr "Comment Iridia l'utilise"
+
+msgid "Let Iridia control it"
+msgstr "Laisser Iridia la piloter"
+
+msgid ""
+"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
+"switch at the top of the card turns it off instead."
+msgstr "Non : Iridia ne lui envoie rien. Son app peut la régler. Voilà."
+
+msgid "On its own: ignore the monitor, night mode, lock and sleep"
+msgstr "Indépendante : ignore l'écran, la nuit, le verrouillage et la veille"
+
+msgid "Keep its own colour (Iridia sets only brightness and on/off)"
+msgstr "Garder sa propre couleur (luminosité et marche/arrêt seulement)"
+
 msgid "Strip type and wiring"
 msgstr "Ceci n'est pas une pipe"
 
@@ -2984,6 +3109,20 @@ msgstr "Je ne sais quoi"
 
 msgid "Change this color"
 msgstr "Ceci n'est pas une pipe"
+
+msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
+msgstr "Comme une bande. Voilà."
+
+msgid ""
+"Iridia sends its colour and brightness only when you change them here, and never switches it on "
+"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
+" light may switch itself on when it gets a colour."
+msgstr ""
+"Couleur et luminosité seulement quand tu les changes ici. Jamais allumée ou éteinte par Iridia. "
+"Google Home reste le chef."
+
+msgid "Iridia sends it nothing: it keeps whatever its own app set."
+msgstr "Iridia ne lui envoie rien."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

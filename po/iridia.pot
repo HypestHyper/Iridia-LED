@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:40+0000\n"
+"POT-Creation-Date: 2026-11-07 22:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -129,7 +129,7 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: iridia/ui/app.py:430 iridia/ui/scenes_tab.py:138
+#: iridia/ui/app.py:430 iridia/ui/favorites_tab.py:28 iridia/ui/scenes_tab.py:155
 msgid "Scenes"
 msgstr ""
 
@@ -149,7 +149,8 @@ msgstr ""
 msgid "Updates"
 msgstr ""
 
-#: iridia/ui/app.py:458 iridia/ui/app.py:1489 iridia/ui/keybinds_tab.py:174 iridia/ui/scenes_tab.py:56
+#: iridia/ui/app.py:458 iridia/ui/app.py:1489 iridia/ui/keybinds_tab.py:174 iridia/ui/scenes_tab.py:72
+#: iridia/ui/scenes_tab.py:267
 msgid "Try it"
 msgstr ""
 
@@ -181,7 +182,7 @@ msgstr ""
 msgid "Maximize"
 msgstr ""
 
-#: iridia/ui/app.py:523 iridia/ui/dialogs.py:313 iridia/ui/favorites_tab.py:608
+#: iridia/ui/app.py:523 iridia/ui/dialogs.py:313 iridia/ui/favorites_tab.py:600
 msgid "Close"
 msgstr ""
 
@@ -356,8 +357,8 @@ msgid_plural "Changes here apply to all {n} zones at once."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:851 iridia/ui/favorites_tab.py:255 iridia/ui/favorites_tab.py:647
-#: iridia/ui/favorites_tab.py:738
+#: iridia/ui/app.py:851 iridia/ui/favorites_tab.py:247 iridia/ui/favorites_tab.py:639
+#: iridia/ui/favorites_tab.py:730 iridia/ui/scenes_tab.py:236 iridia/ui/scenes_tab.py:314
 msgid "Everything"
 msgstr ""
 
@@ -439,7 +440,7 @@ msgstr ""
 msgid "System font"
 msgstr ""
 
-#: iridia/ui/app.py:974 iridia/ui/favorites_tab.py:688
+#: iridia/ui/app.py:974 iridia/ui/favorites_tab.py:680
 msgid "Size"
 msgstr ""
 
@@ -511,7 +512,7 @@ msgid ""
 "and your saved colors) under a name, and load it again later."
 msgstr ""
 
-#: iridia/ui/app.py:1050 iridia/ui/app.py:1939 iridia/ui/app.py:1948 iridia/ui/favorites_tab.py:493
+#: iridia/ui/app.py:1050 iridia/ui/app.py:1939 iridia/ui/app.py:1948 iridia/ui/favorites_tab.py:485
 #: iridia/ui/keybinds_tab.py:157
 msgid "Setup"
 msgstr ""
@@ -524,7 +525,7 @@ msgstr ""
 msgid "Save current as…"
 msgstr ""
 
-#: iridia/ui/app.py:1056 iridia/ui/app.py:1962 iridia/ui/favorites_tab.py:494
+#: iridia/ui/app.py:1056 iridia/ui/app.py:1962 iridia/ui/favorites_tab.py:486
 msgid "Load"
 msgstr ""
 
@@ -537,7 +538,7 @@ msgid "Import"
 msgstr ""
 
 #: iridia/ui/app.py:1060 iridia/ui/app.py:1088 iridia/ui/app.py:1994 iridia/ui/app.py:2084
-#: iridia/ui/favorites_tab.py:700 iridia/ui/favorites_tab.py:757
+#: iridia/ui/favorites_tab.py:692 iridia/ui/favorites_tab.py:749 iridia/ui/scenes_tab.py:335
 msgid "Delete"
 msgstr ""
 
@@ -572,7 +573,7 @@ msgid "Edit"
 msgstr ""
 
 #: iridia/ui/app.py:1085 iridia/ui/app.py:1620 iridia/ui/app.py:1682 iridia/ui/favorites_tab.py:139
-#: iridia/ui/netlights_card.py:36 iridia/ui/scenes_tab.py:163
+#: iridia/ui/netlights_card.py:36 iridia/ui/scenes_tab.py:183 iridia/ui/scenes_tab.py:300
 msgid "Add"
 msgstr ""
 
@@ -939,7 +940,7 @@ msgid "Dim"
 msgstr ""
 
 #: iridia/ui/app.py:1472 iridia/ui/app.py:2637 iridia/ui/effects.py:74 iridia/ui/scenes_tab.py:17
-#: iridia/ui/scenes_tab.py:34 iridia/ui/sections_panel.py:19 iridia/ui/sections_panel.py:66
+#: iridia/ui/scenes_tab.py:50 iridia/ui/sections_panel.py:19 iridia/ui/sections_panel.py:66
 #: iridia/ui/sections_panel.py:400
 msgid "Off"
 msgstr ""
@@ -1066,12 +1067,12 @@ msgid "No strips yet"
 msgstr ""
 
 #: iridia/ui/app.py:1621 iridia/ui/app.py:1854 iridia/ui/app.py:1873 iridia/ui/app.py:2305
-#: iridia/ui/netlights_card.py:127 iridia/ui/netlights_card.py:147 iridia/ui/scenes_tab.py:258
-#: iridia/ui/scenes_tab.py:268
+#: iridia/ui/netlights_card.py:127 iridia/ui/netlights_card.py:147 iridia/ui/scenes_tab.py:343
+#: iridia/ui/scenes_tab.py:432
 msgid "Remove"
 msgstr ""
 
-#: iridia/ui/app.py:1627 iridia/ui/favorites_tab.py:38 iridia/ui/favorites_tab.py:338
+#: iridia/ui/app.py:1627 iridia/ui/favorites_tab.py:38 iridia/ui/favorites_tab.py:330
 #: iridia/ui/keybinds_tab.py:146 iridia/ui/layout_notify.py:359 iridia/ui/scenes_tab.py:18
 #: iridia/ui/sections_panel.py:327
 msgid "Effect"
@@ -1099,7 +1100,7 @@ msgid "times"
 msgstr ""
 
 #: iridia/ui/app.py:1644 iridia/ui/favorites_tab.py:34 iridia/ui/keybinds_tab.py:137
-#: iridia/ui/scenes_tab.py:59 iridia/ui/zonecard.py:347
+#: iridia/ui/scenes_tab.py:75 iridia/ui/zonecard.py:347
 msgid "Brightness"
 msgstr ""
 
@@ -1117,7 +1118,7 @@ msgid "Custom"
 msgstr ""
 
 #: iridia/ui/app.py:1656 iridia/ui/app.py:1678 iridia/ui/layout_notify.py:354
-#: iridia/ui/scenes_tab.py:64
+#: iridia/ui/scenes_tab.py:80
 msgid "Pick a colour"
 msgstr ""
 
@@ -1133,7 +1134,7 @@ msgstr ""
 msgid "Urgent ones use"
 msgstr ""
 
-#: iridia/ui/app.py:1669 iridia/ui/scenes_tab.py:152
+#: iridia/ui/app.py:1669
 msgid "Apps with their own look"
 msgstr ""
 
@@ -1174,7 +1175,7 @@ msgid "Not during night mode"
 msgstr ""
 
 #: iridia/ui/app.py:1712 iridia/ui/app.py:1920 iridia/ui/app.py:1939 iridia/ui/favorites_tab.py:195
-#: iridia/ui/favorites_tab.py:203 iridia/ui/netlights_card.py:113 iridia/ui/scenes_tab.py:194
+#: iridia/ui/favorites_tab.py:203 iridia/ui/netlights_card.py:113 iridia/ui/scenes_tab.py:213
 msgid "Couldn't save"
 msgstr ""
 
@@ -1259,7 +1260,7 @@ msgstr ""
 msgid "Pick some LEDs to start listening."
 msgstr ""
 
-#: iridia/ui/app.py:1898 iridia/ui/scenes_tab.py:237
+#: iridia/ui/app.py:1898 iridia/ui/scenes_tab.py:399
 msgid "Off."
 msgstr ""
 
@@ -1756,8 +1757,8 @@ msgid "Couldn't start the uninstaller: {e}"
 msgstr ""
 
 #: iridia/ui/app.py:2431 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
-#: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227 iridia/ui/favorites_tab.py:697
-#: iridia/ui/favorites_tab.py:754
+#: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227 iridia/ui/favorites_tab.py:689
+#: iridia/ui/favorites_tab.py:746 iridia/ui/scenes_tab.py:332
 msgid "Cancel"
 msgstr ""
 
@@ -1910,7 +1911,7 @@ msgstr ""
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:2645 iridia/ui/favorites_tab.py:481
+#: iridia/ui/app.py:2645 iridia/ui/favorites_tab.py:473
 msgid "On"
 msgstr ""
 
@@ -1965,7 +1966,7 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
-#: iridia/ui/calibration_editor.py:37 iridia/ui/favorites_tab.py:520 iridia/ui/keybinds_tab.py:402
+#: iridia/ui/calibration_editor.py:37 iridia/ui/favorites_tab.py:512 iridia/ui/keybinds_tab.py:402
 #: iridia/ui/sections_panel.py:429 iridia/ui/zonecard.py:1032
 msgid "Done"
 msgstr ""
@@ -2175,7 +2176,8 @@ msgstr ""
 msgid "Type a name."
 msgstr ""
 
-#: iridia/ui/dialogs.py:167 iridia/ui/favorites_tab.py:696 iridia/ui/favorites_tab.py:753
+#: iridia/ui/dialogs.py:167 iridia/ui/favorites_tab.py:688 iridia/ui/favorites_tab.py:745
+#: iridia/ui/scenes_tab.py:331
 msgid "Save"
 msgstr ""
 
@@ -2456,10 +2458,6 @@ msgstr ""
 msgid "Freeze colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:28
-msgid "Scenes (fullscreen)"
-msgstr ""
-
 #: iridia/ui/favorites_tab.py:29
 msgid "Notification flashes"
 msgstr ""
@@ -2530,15 +2528,15 @@ msgid ""
 "and switches. Drag them where you like in Arrange."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:137 iridia/ui/favorites_tab.py:155 iridia/ui/favorites_tab.py:638
+#: iridia/ui/favorites_tab.py:137 iridia/ui/favorites_tab.py:155 iridia/ui/favorites_tab.py:630
 msgid "New card"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:138 iridia/ui/favorites_tab.py:156 iridia/ui/favorites_tab.py:730
+#: iridia/ui/favorites_tab.py:138 iridia/ui/favorites_tab.py:156 iridia/ui/favorites_tab.py:722
 msgid "New look"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:140 iridia/ui/favorites_tab.py:520 iridia/ui/layout_tab.py:33
+#: iridia/ui/favorites_tab.py:140 iridia/ui/favorites_tab.py:512 iridia/ui/layout_tab.py:33
 msgid "Arrange"
 msgstr ""
 
@@ -2557,174 +2555,175 @@ msgstr ""
 msgid "Couldn't do that"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:260
+#: iridia/ui/favorites_tab.py:252 iridia/ui/scenes_tab.py:239
 #, python-brace-format
 msgid "{n} strips"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:311
+#: iridia/ui/favorites_tab.py:303
 msgid "Its strips aren't there any more."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:329
+#: iridia/ui/favorites_tab.py:321
 msgid "Follow the monitor"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:330
+#: iridia/ui/favorites_tab.py:322
 msgid "Stay lit when locked"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:362
+#: iridia/ui/favorites_tab.py:354
 msgid "All colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:375 iridia/ui/layout_notify.py:355
+#: iridia/ui/favorites_tab.py:367 iridia/ui/layout_notify.py:355
 msgid "Colour"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:379
+#: iridia/ui/favorites_tab.py:371
 #, python-brace-format
 msgid "Wallpaper colour {n}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:399
+#: iridia/ui/favorites_tab.py:391
 msgid "Wallpaper colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:406
+#: iridia/ui/favorites_tab.py:398
 msgid "Saved colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:418
+#: iridia/ui/favorites_tab.py:410
 #, python-brace-format
 msgid "Colour for {name}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:419
+#: iridia/ui/favorites_tab.py:411
 msgid "Colour wheel…"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:437
+#: iridia/ui/favorites_tab.py:429
 msgid "No looks picked: Arrange, ✏ on this card."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:474 iridia/ui/favorites_tab.py:481 iridia/ui/keybinds_tab.py:126
+#: iridia/ui/favorites_tab.py:466 iridia/ui/favorites_tab.py:473 iridia/ui/keybinds_tab.py:126
 msgid "Turn on"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:481
+#: iridia/ui/favorites_tab.py:473
 msgid "On: tap to go back"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:496
+#: iridia/ui/favorites_tab.py:488
 #, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:528
+#: iridia/ui/favorites_tab.py:520
 #, python-brace-format
 msgid "Size: {size}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:534 iridia/ui/favorites_tab.py:638
+#: iridia/ui/favorites_tab.py:526 iridia/ui/favorites_tab.py:630
 msgid "Change this card"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:538 iridia/ui/favorites_tab.py:730
+#: iridia/ui/favorites_tab.py:530 iridia/ui/favorites_tab.py:722
 msgid "Change this look"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:539 iridia/ui/zonecard.py:216
+#: iridia/ui/favorites_tab.py:531 iridia/ui/zonecard.py:216
 msgid "Take off Favourites"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:607 iridia/ui/zonecard.py:180 iridia/ui/zonecard.py:216
+#: iridia/ui/favorites_tab.py:599 iridia/ui/zonecard.py:180 iridia/ui/zonecard.py:216
 msgid "Add to Favourites"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:621 iridia/ui/scenes_tab.py:261
+#: iridia/ui/favorites_tab.py:613 iridia/ui/scenes_tab.py:345
 msgid "None yet."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:623
+#: iridia/ui/favorites_tab.py:615
 msgid "A card for one strip"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:626
+#: iridia/ui/favorites_tab.py:618
 msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:627
+#: iridia/ui/favorites_tab.py:619
 msgid "A look on its own"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:629
+#: iridia/ui/favorites_tab.py:621
 msgid "Setups"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:630
+#: iridia/ui/favorites_tab.py:622
 msgid "A switch on its own"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:640
+#: iridia/ui/favorites_tab.py:632
 msgid "Start from"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:642
+#: iridia/ui/favorites_tab.py:634
 msgid "Title (optional), like Desk or Room"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:645 iridia/ui/favorites_tab.py:736
+#: iridia/ui/favorites_tab.py:637 iridia/ui/favorites_tab.py:728 iridia/ui/scenes_tab.py:312
 msgid "Which strips"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:658
+#: iridia/ui/favorites_tab.py:650
 msgid "What's on it"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:667
+#: iridia/ui/favorites_tab.py:659
 msgid "Its looks (if Looks is on)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:676
+#: iridia/ui/favorites_tab.py:668
 msgid "None yet: New look makes one."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:678
+#: iridia/ui/favorites_tab.py:670
 msgid "Its switches (if Switches is on)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:709 iridia/ui/favorites_tab.py:769 iridia/ui/favorites_tab.py:782
+#: iridia/ui/favorites_tab.py:701 iridia/ui/favorites_tab.py:761 iridia/ui/favorites_tab.py:774
+#: iridia/ui/scenes_tab.py:369
 msgid "Pick the strips it's for, or Everything."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:712
+#: iridia/ui/favorites_tab.py:704
 msgid "Pick what goes on the card."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:731
+#: iridia/ui/favorites_tab.py:723
 msgid ""
 "One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
 "key: iridia look \"NAME\"."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:733
+#: iridia/ui/favorites_tab.py:725
 msgid "Name, like Movie or Gaming"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:749
+#: iridia/ui/favorites_tab.py:741 iridia/ui/scenes_tab.py:326
 msgid "What they do"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:772 iridia/ui/scenes_tab.py:203
+#: iridia/ui/favorites_tab.py:764 iridia/ui/scenes_tab.py:222
 msgid "Showing it for 5 seconds."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:773 iridia/ui/scenes_tab.py:204
+#: iridia/ui/favorites_tab.py:765 iridia/ui/scenes_tab.py:223
 msgid "Couldn't show it"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:778
+#: iridia/ui/favorites_tab.py:770
 msgid "Give the look a name."
 msgstr ""
 
@@ -3632,7 +3631,7 @@ msgid ""
 "the same."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:17 iridia/ui/scenes_tab.py:31
+#: iridia/ui/scenes_tab.py:17 iridia/ui/scenes_tab.py:47 iridia/ui/scenes_tab.py:411
 msgid "Nothing"
 msgstr ""
 
@@ -3669,115 +3668,184 @@ msgid ""
 "be told."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:36
+#: iridia/ui/scenes_tab.py:29
+msgid "Anything fullscreen"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:29
+msgid "These apps"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:52
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:38
+#: iridia/ui/scenes_tab.py:54
 #, python-brace-format
 msgid "#{hex}, {n}%"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:39
+#: iridia/ui/scenes_tab.py:55
 #, python-brace-format
 msgid "{effect}, {n}%"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:127
+#: iridia/ui/scenes_tab.py:143
 msgid "Scene colour"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:138
+#: iridia/ui/scenes_tab.py:155
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:141
-msgid "Change the lights for fullscreen apps"
+#: iridia/ui/scenes_tab.py:159
+msgid "Use scenes"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:146
-msgid "When anything is fullscreen"
+#: iridia/ui/scenes_tab.py:167 iridia/ui/scenes_tab.py:282
+msgid "New scene"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:153
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr ""
-
-#: iridia/ui/scenes_tab.py:157
-msgid "App name, like mpv or steam_app_1091500"
-msgstr ""
-
-#: iridia/ui/scenes_tab.py:164
-msgid "Never for this app"
-msgstr ""
-
-#: iridia/ui/scenes_tab.py:165
+#: iridia/ui/scenes_tab.py:176
 msgid "Never for these"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:171
+#: iridia/ui/scenes_tab.py:177
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:181
+msgid "App name, like firefox"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:189
 msgid "Timing"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:173
+#: iridia/ui/scenes_tab.py:192
 msgid "Comes on after"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:175
+#: iridia/ui/scenes_tab.py:194
 msgid "Goes back after"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:177
+#: iridia/ui/scenes_tab.py:196
 msgid "Check every"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:183
+#: iridia/ui/scenes_tab.py:202
 msgid "A short wait keeps the lights steady when you switch away from a game for a moment."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:200
+#: iridia/ui/scenes_tab.py:219
 msgid "Nothing to show: pick a look first."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:209 iridia/ui/scenes_tab.py:217
+#: iridia/ui/scenes_tab.py:228 iridia/ui/scenes_tab.py:350
 msgid "Type the app's name, or pick one it has seen."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:239
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
+#: iridia/ui/scenes_tab.py:243
+msgid "When anything is fullscreen"
 msgstr ""
 
 #: iridia/ui/scenes_tab.py:244
 #, python-brace-format
+msgid "When {apps} is in front"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:255
+msgid "On now"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:261
+msgid "Up: wins over the ones below"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:263
+msgid "Down"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:268 iridia/ui/scenes_tab.py:282
+msgid "Change this scene"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:283
+msgid "Name, like Games or Films"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:287
+msgid "When"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:294
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:298
+msgid "App name, like mpv or steam_app_1091500"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:303
+msgid "Seen fullscreen lately"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:306
+msgid "Add it"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:372
+msgid "Add the apps it's for."
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:401
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:406
+#, python-brace-format
 msgid "In front now: {app}{fs}."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:245
+#: iridia/ui/scenes_tab.py:407
 msgid "nothing"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:245
+#: iridia/ui/scenes_tab.py:407
 msgid " (fullscreen)"
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:247
+#: iridia/ui/scenes_tab.py:409
 #, python-brace-format
 msgid "Running now: {apps}."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:248
+#: iridia/ui/scenes_tab.py:411
 #, python-brace-format
 msgid "Showing: {look}."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:270
+#: iridia/ui/scenes_tab.py:421
+msgid "No scenes yet"
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:422
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+
+#: iridia/ui/scenes_tab.py:434
 msgid "None."
 msgstr ""
 
-#: iridia/ui/scenes_tab.py:277
+#: iridia/ui/scenes_tab.py:441
 msgid "Use this name"
 msgstr ""
 

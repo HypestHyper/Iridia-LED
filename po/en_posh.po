@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:39+0000\n"
+"POT-Creation-Date: 2026-11-07 22:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2004,9 +2004,6 @@ msgstr "All lamps"
 msgid "Freeze colours"
 msgstr "Freeze colours"
 
-msgid "Scenes (fullscreen)"
-msgstr "Tableaux (fullscreen)"
-
 msgid "Notification flashes"
 msgstr "Correspondence flashes"
 
@@ -3012,6 +3009,12 @@ msgstr ""
 "instead: the applications below receive their look whilst they run, and \"anything fullscreen\" "
 "cannot be discerned."
 
+msgid "Anything fullscreen"
+msgstr "Anything fullscreen"
+
+msgid "These apps"
+msgstr "These particular apps"
+
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr "Softer, {n}%"
@@ -3028,29 +3031,26 @@ msgid "Scene colour"
 msgstr "Tableau colour"
 
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 msgstr ""
-"A different look for the lamps whilst a game or a picture is fullscreen. They return once it has "
-"gone, and your settings remain quite untouched."
+"A different look for the lights while a game or a film is fullscreen, or while an app of one's "
+"choosing is in front. They return once it has gone, and one's settings remain untouched."
 
-msgid "Change the lights for fullscreen apps"
-msgstr "Alter the lamps for fullscreen applications"
+msgid "Use scenes"
+msgstr "Employ scenes"
 
-msgid "When anything is fullscreen"
-msgstr "Whenever anything is fullscreen"
-
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr "Whilst one of these is foremost, fullscreen or not, it receives its own look instead."
-
-msgid "App name, like mpv or steam_app_1091500"
-msgstr "Application name, such as mpv or steam_app_1091500"
-
-msgid "Never for this app"
-msgstr "Never for this application"
+msgid "New scene"
+msgstr "New scene"
 
 msgid "Never for these"
 msgstr "Never for these"
+
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr "Apps that never count as fullscreen: a browser playing a video, for instance."
+
+msgid "App name, like firefox"
+msgstr "App name, such as firefox"
 
 msgid "Timing"
 msgstr "Timing"
@@ -3073,8 +3073,52 @@ msgstr "Nothing to present: do choose a look first."
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Do type the application's name, or choose one it has seen."
 
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
-msgstr "Nothing to watch for as yet: choose a look for fullscreen applications, or add one."
+msgid "When anything is fullscreen"
+msgstr "Whenever anything is fullscreen"
+
+#, python-brace-format
+msgid "When {apps} is in front"
+msgstr "When {apps} is at the fore"
+
+msgid "On now"
+msgstr "Presently on"
+
+msgid "Up: wins over the ones below"
+msgstr "Up: takes precedence over those below"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "Change this scene"
+msgstr "Alter this scene"
+
+msgid "Name, like Games or Films"
+msgstr "Name, such as Games or Films"
+
+msgid "When"
+msgstr "When"
+
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+"While one of these is at the fore, fullscreen or not. Names are the app's own (its window class),"
+" such as mpv or steam_app_1091500."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "Application name, such as mpv or steam_app_1091500"
+
+msgid "Seen fullscreen lately"
+msgstr "Recently seen fullscreen"
+
+msgid "Add it"
+msgstr "Add it"
+
+msgid "Add the apps it's for."
+msgstr "Kindly add the apps it is for."
+
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr "Nothing to watch for as yet: make a scene, or switch one on."
 
 #, python-brace-format
 msgid "In front now: {app}{fs}."
@@ -3093,6 +3137,16 @@ msgstr "Running at present: {apps}."
 #, python-brace-format
 msgid "Showing: {look}."
 msgstr "Presenting: {look}."
+
+msgid "No scenes yet"
+msgstr "No scenes as yet"
+
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game brings embers to the desk, a film turns everything off."
 
 msgid "None."
 msgstr "None."

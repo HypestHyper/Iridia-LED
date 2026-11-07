@@ -16,7 +16,7 @@ from iridia.looks import CONTROLS, SPAN, SWITCHES
 from iridia.ui import widgets
 from iridia.ui.effects import EFFECT_KEYS, EFFECT_NAMES
 from iridia.ui.layout_notify import MiniSlider
-from iridia.ui.scenes_tab import LookEditor, look_text
+from iridia.ui.scenes_tab import LookEditor, look_text, strip_list
 from iridia.ui.widgets import (Dropdown, Group, Swatch, Toggle, button, card, hbox, icon, label, section, vbox,
                                wrap_row)
 
@@ -25,7 +25,7 @@ SWITCH_NAMES = {
     "freeze": (_("Freeze colours"), "ac_unit"),
     "night": (_("Night mode"), "bedtime"),
     "animations": (_("Animations"), "motion_photos_on"),
-    "scenes": (_("Scenes (fullscreen)"), "sports_esports"),
+    "scenes": (_("Scenes"), "sports_esports"),
     "notify": (_("Notification flashes"), "bolt"),
     "netlights": (_("Network lights"), "wifi"),
 }
@@ -222,15 +222,7 @@ class FavoritesPage:
     # ---------------------------------------------------------------- strips
     def _strips(self, with_hidden: bool = False) -> list:
         """[(zone key, name)] for every strip, without the hidden ones unless asked."""
-        out = []
-        for dev, dc in sorted((self._st.get("device_configs") or {}).items()):
-            zones = dc.get("zones") if isinstance(dc, dict) else None
-            for zn, zc in (zones.items() if isinstance(zones, dict) and zones else [("", dc)]):
-                if not isinstance(zc, dict) or (zc.get("hidden") and not with_hidden):
-                    continue
-                nm = zc.get("display_name") or zn or dev
-                out.append((f"{dev}|{zn}", nm if not zn or nm == dev else f"{dev} · {nm}"))
-        return out
+        return strip_list(self._st, with_hidden)
 
     def _zone_cfg(self, key, st=None) -> Optional[dict]:
         dev, _s, zone = key.partition("|")

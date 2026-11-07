@@ -812,9 +812,15 @@ def _scenes_text(r):
            "processes": "running programs (this desktop doesn't say which window is in front)"}
     lines = [f"Scenes: {'on' if n.get('enabled') else 'off'}"
              + (f", watching through {how.get(n.get('method'), n.get('method'))}" if n.get("watching") else ""),
-             f"Anything fullscreen: {_look_text(n.get('look'))}"]
-    for a in n.get("apps") or []:
-        lines.append(f"  {a['app']}: {_look_text(a['look'])}")
+             ]
+    active = set(n.get("active") or [])
+    for sc in n.get("scenes") or []:
+        when = "anything fullscreen" if sc["when"] == "fullscreen" else ", ".join(sc["apps"])
+        where = "everything" if sc["targets"] == ["*"] else f"{len(sc['targets'])} strip(s)"
+        lines.append(f"{'*' if sc['id'] in active else ' '} {sc['name']}: {when} -> {_look_text(sc['look'])}, "
+                     f"{where}{'' if sc['on'] else ' (off)'}")
+    if not n.get("scenes"):
+        lines.append("  No scenes: make one on the Scenes tab, or iridia scenes look dim 20")
     if n.get("ignore"):
         lines.append("Never for: " + ", ".join(n["ignore"]))
     lines.append(f"Comes on after {n.get('on_delay')} s, goes after {n.get('off_delay')} s"
@@ -823,7 +829,6 @@ def _scenes_text(r):
         front = n.get("front") or "nothing"
         lines.append(f"In front now: {front}{' (fullscreen)' if n.get('fullscreen') else ''}"
                      + (f"; running: {', '.join(n['running'])}" if n.get("running") else ""))
-    lines.append("Showing now: " + _look_text(n.get("active")))
     if n.get("seen"):
         lines.append("Seen fullscreen: " + ", ".join(n["seen"]))
     return "\n".join(lines)

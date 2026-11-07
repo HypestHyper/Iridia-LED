@@ -8,6 +8,10 @@
   stay lit, effect, look chips, switch chips); presets for a colour, brightness, looks or switches
   card. Looks, setups and switches can go there on their own too. Tiles are small, wide, tall or large;
   *Arrange* drags them into place. The ★ on a strip's card makes a card for it.
+- **Scenes, as many as you like:** each one "when this happens, these strips look like this", made in
+  an editor on the Scenes tab: a name, when (anything fullscreen, or some apps in front), which strips
+  (or everything) and the look. Switch each on or off, try it, and move it up or down: the higher one
+  wins on a strip two scenes share. Your scenes from before carry over.
 - **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
   it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
 - **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:

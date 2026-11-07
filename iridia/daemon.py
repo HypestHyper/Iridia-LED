@@ -219,10 +219,10 @@ class Daemon:
         self._left_alone: set = set()             # zone keys Iridia doesn't control right now ("hands_off")
         self._on_demand_due: set = set()          # "only when I change it" devices just changed: send once
         self.focuswatch = None
-        self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
-        self._scene_look: Optional[dict] = None
+        self._scene_ovs: list = []                # [(zone keys or None for all, overlay)], first wins
+        self._scene_shown: tuple = ()             # ids of the scenes showing (a keybind's overlay wins)
         self._scene_delay = scenes.Delay()
-        self._scene_try = None                    # (look, until): Try it
+        self._scene_try = None                    # (scene, until): Try it
         self._scene_soon = False                  # a look is about to come on or go: tick sooner
         self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
         self._notify_lock = threading.Lock()
@@ -463,12 +463,11 @@ class Daemon:
         return scenes.clean(self.config.get("scenes", {}))
 
     def _update_scenes(self):
-        """The look for what's in front (after its delay), on every strip."""
+        """The scenes for what's in front (after their delay), on their strips."""
         st = self._scene_settings()
         w = self.focuswatch
         if w is not None:
-            w.set_needed(st["enabled"] and (st["look"] is not None or bool(st["apps"])), st["interval"],
-                         [r["app"] for r in st["apps"]])
+            w.set_needed(scenes.needs_watching(st), st["interval"], scenes.watched_apps(st))
         front, fs, running = w.state() if w is not None and w.running_flag else ("", False, set())
         if fs and front and scenes.app_key(front) not in {scenes.app_key(a) for a in st["seen"]}:
             st["seen"] = [front] + st["seen"][:scenes.SEEN_MAX - 1]
@@ -477,22 +476,28 @@ class Daemon:
         now = time.monotonic()
         want = scenes.pick(st, front, fs, running)
         if not st["enabled"]:
-            self._scene_delay.force(None)       # switched off: back at once, not after the wait
+            self._scene_delay.force()           # switched off: back at once, not after the wait
         shown = self._scene_delay.update(want, now, st["on_delay"], st["off_delay"])
         self._scene_soon = shown != want
+        by_id = {sc["id"]: sc for sc in st["scenes"]}
+        showing = [by_id[i] for i in shown if i in by_id]
         if self._scene_try is not None:
             if now < self._scene_try[1]:
-                shown = self._scene_try[0]
+                showing = [self._scene_try[0]]
                 self._scene_soon = True
             else:
                 self._scene_try = None
-        if shown != self._scene_look:
-            if shown is None:
+        ovs = [(None if sc["targets"] == ["*"] else frozenset(sc["targets"]), scenes.overlay(sc["look"]))
+               for sc in showing]
+        if shown != self._scene_shown:
+            if not shown:
                 self.logger.info("Scene off: back to normal")
             else:
-                self.logger.info(f"Scene: {shown['kind']} ({front or ', '.join(sorted(running)) or 'try'})")
-            self._scene_look = shown
-            self._scene_ov = scenes.overlay(shown)
+                self.logger.info(f"Scene: {', '.join(by_id[i]['name'] for i in shown if i in by_id)} "
+                                 f"({front or ', '.join(sorted(running))})")
+            self._scene_shown = shown
+        if ovs != self._scene_ovs:
+            self._scene_ovs = ovs
             self._last_sent = {}
             self._needs_update = True
 
@@ -503,37 +508,88 @@ class Daemon:
                                method=(w.method if on else None),
                                front=(w.front if on else ""), fullscreen=bool(on and w.fullscreen),
                                running=sorted(w.running) if on else [],
-                               active=self._scene_look)}
+                               active=list(self._scene_shown))}
 
     def _cmd_scenes(self, req: dict) -> dict:
-        """Scene settings: any of the settings' keys; set_app {app, look} / remove_app; ignore /
-        unignore an app; forget a seen app; test: show a look (or the fullscreen one) for a moment."""
+        """Scene settings: enabled, on_delay, off_delay, interval; set_scene {scene} (new, or by its
+        id) / remove_scene ID / move_scene {id, to} / scene_on {id, on}; look (anything fullscreen,
+        for the command line) and set_app {app, look} / remove_app (a scene for one app); ignore /
+        unignore an app; forget a seen app; test: show a look, a scene (or its id) for a moment."""
         cur = self.config.get("scenes", {})
-        new = dict(cur if isinstance(cur, dict) else {})
+        old = scenes.clean(cur)
+        new = dict(old)
+        lst = [dict(sc) for sc in old["scenes"]]
         changed = False
+
+        def put(sc):
+            """In its place if it's there; a new one for apps goes above those for anything
+            fullscreen, so an app's own look wins."""
+            i = next((n for n, x in enumerate(lst) if x["id"] == sc["id"]), None)
+            if i is not None:
+                lst[i] = sc
+            elif sc["when"] == "apps":
+                j = next((n for n, x in enumerate(lst) if x["when"] == "fullscreen"), len(lst))
+                lst.insert(j, sc)
+            else:
+                lst.append(sc)
         for k in ("enabled", "on_delay", "off_delay", "interval"):
             if k in req:
                 new[k] = req[k]
                 changed = True
+        if "set_scene" in req:
+            sc = scenes.clean_scene(req["set_scene"])
+            if sc is None:
+                return {"ok": False, "error": "a scene needs a look (off, dim, color or effect) and its strips"}
+            if sc["when"] == "apps" and not sc["apps"]:
+                return {"ok": False, "error": "give the apps it's for"}
+            if len(lst) >= scenes.SCENES_MAX and not any(x["id"] == sc["id"] for x in lst):
+                return {"ok": False, "error": f"at most {scenes.SCENES_MAX} scenes"}
+            put(sc)
+            changed = True
+        if "remove_scene" in req:
+            lst = [x for x in lst if x["id"] != req["remove_scene"]]
+            changed = True
+        if isinstance(req.get("move_scene"), dict):
+            i = next((n for n, x in enumerate(lst) if x["id"] == req["move_scene"].get("id")), None)
+            if i is not None:
+                to = max(0, min(len(lst) - 1, int(req["move_scene"].get("to") or 0)))
+                lst.insert(to, lst.pop(i))
+                changed = True
+        if isinstance(req.get("scene_on"), dict):
+            for x in lst:
+                if x["id"] == req["scene_on"].get("id"):
+                    x["on"] = bool(req["scene_on"].get("on"))
+                    changed = True
         if "look" in req:
             look = scenes.clean_look(req["look"])
             if req["look"] is not None and look is None:
                 return {"ok": False, "error": "a look is off, dim, color or effect"}
-            new["look"] = look
+            fs = next((x for x in lst if x["when"] == "fullscreen" and x["targets"] == ["*"]), None)
+            if look is None:
+                lst = [x for x in lst if x["when"] != "fullscreen"]
+            elif fs:
+                fs["look"], fs["on"] = look, True
+            else:
+                put(scenes.clean_scene({"name": "Anything fullscreen", "when": "fullscreen", "look": look}))
             changed = True
         if isinstance(req.get("set_app"), dict):
             app = str(req["set_app"].get("app") or "").strip()
             look = scenes.clean_look(req["set_app"].get("look"))
             if not app or look is None:
                 return {"ok": False, "error": "give an app and a look"}
-            rules = [r for r in new.get("apps") or []
-                     if isinstance(r, dict) and scenes.app_key(r.get("app")) != scenes.app_key(app)]
-            new["apps"] = rules + [{"app": app, "look": look}]
+            key = scenes.app_key(app)
+            mine = next((x for x in lst if x["when"] == "apps" and [scenes.app_key(a) for a in x["apps"]] == [key]),
+                        None)
+            if mine:
+                mine["look"], mine["on"] = look, True
+            else:
+                put(scenes.clean_scene({"name": app, "when": "apps", "apps": [app], "look": look}))
             changed = True
         if "remove_app" in req:
             key = scenes.app_key(req["remove_app"])
-            new["apps"] = [r for r in new.get("apps") or []
-                           if isinstance(r, dict) and scenes.app_key(r.get("app")) != key]
+            for x in lst:
+                x["apps"] = [a for a in x["apps"] if scenes.app_key(a) != key]
+            lst = [x for x in lst if x["when"] != "apps" or x["apps"]]
             changed = True
         for op, add in (("ignore", True), ("unignore", False)):
             if op in req:
@@ -546,12 +602,24 @@ class Daemon:
             new["seen"] = [a for a in new.get("seen") or [] if scenes.app_key(a) != key]
             changed = True
         if changed:
+            new["scenes"] = lst
             self.config.set("scenes", scenes.clean(new))
-        if req.get("test"):
-            look = scenes.clean_look(req["test"]) if isinstance(req["test"], dict) else self._scene_settings()["look"]
-            if look is None:
+        t = req.get("test")
+        if t:
+            st = self._scene_settings()
+            if isinstance(t, dict) and "look" in t:
+                sc = scenes.clean_scene(dict(t, name=t.get("name") or "try"))
+            elif isinstance(t, dict):
+                look = scenes.clean_look(t)
+                sc = scenes.clean_scene({"name": "try", "look": look}) if look else None
+            elif isinstance(t, str):
+                sc = next((x for x in st["scenes"] if x["id"] == t or x["name"].lower() == t.lower()), None)
+            else:
+                sc = next((x for x in st["scenes"] if x["when"] == "fullscreen"), None) or \
+                    (st["scenes"][0] if st["scenes"] else None)
+            if sc is None:
                 return {"ok": False, "error": "no look to show"}
-            self._scene_try = (look, time.monotonic() + self.TRY_SEC)
+            self._scene_try = (sc, time.monotonic() + self.TRY_SEC)
         self._wake.set()
         return dict(self._scenes_status(), ok=True)
 
@@ -2474,9 +2542,11 @@ class Daemon:
         """What's on top of a zone's own settings: a keybind's change, else the scene's look (whose
         brightness still fades on lock and keeps under night mode's cap)."""
         ov = self._overlays.get(key)
-        sc = self._scene_ov
-        if ov is not None or sc is None:
+        if ov is not None or not self._scene_ovs:
             return ov
+        sc = next((o for keys, o in self._scene_ovs if keys is None or key in keys), None)
+        if sc is None:
+            return None
         if "bright" in sc:
             b = sc["bright"] * self._session_factor()
             if self._night_active:

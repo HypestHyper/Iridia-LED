@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:39+0000\n"
+"POT-Creation-Date: 2026-11-07 22:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -1983,9 +1983,6 @@ msgstr "All lanterns"
 msgid "Freeze colours"
 msgstr "Freeze colours"
 
-msgid "Scenes (fullscreen)"
-msgstr "Scenes (fullscreen)"
-
 msgid "Notification flashes"
 msgstr "Message flashes"
 
@@ -2985,6 +2982,12 @@ msgstr ""
 "sailin' instead: the apps below get their look while they run, an' \"anythin' fullscreen\" can't "
 "be told."
 
+msgid "Anything fullscreen"
+msgstr "Anythin' full-sail"
+
+msgid "These apps"
+msgstr "These vessels"
+
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr "Dimmer, {n}%"
@@ -3001,29 +3004,26 @@ msgid "Scene colour"
 msgstr "Scene colour"
 
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 msgstr ""
-"A different look fer the lanterns while a game or a picture be fullscreen. They go back when it's"
-" gone, an' yer settin's don't change."
+"A different look fer the lights while a game or a picture show be full-sail, or while a vessel ye"
+" pick be in front. They go back when it's gone, an' yer settings stay put."
 
-msgid "Change the lights for fullscreen apps"
-msgstr "Change the lanterns fer fullscreen apps"
+msgid "Use scenes"
+msgstr "Hoist the scenes"
 
-msgid "When anything is fullscreen"
-msgstr "When anythin' be fullscreen"
-
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr "While one o' these be up front, fullscreen or not, it gets its own look instead."
-
-msgid "App name, like mpv or steam_app_1091500"
-msgstr "App name, like mpv or steam_app_1091500"
-
-msgid "Never for this app"
-msgstr "Never fer this app"
+msgid "New scene"
+msgstr "New scene"
 
 msgid "Never for these"
 msgstr "Never fer these"
+
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr "Vessels that never count as full-sail: a browser playin' a video, say."
+
+msgid "App name, like firefox"
+msgstr "Vessel name, like firefox"
 
 msgid "Timing"
 msgstr "Timin'"
@@ -3046,8 +3046,52 @@ msgstr "Nothin' to show: pick a look first."
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Type the app's name, or pick one it's spotted."
 
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
-msgstr "Nothin' to watch fer yet: pick a look fer fullscreen apps, or add an app."
+msgid "When anything is fullscreen"
+msgstr "When anythin' be fullscreen"
+
+#, python-brace-format
+msgid "When {apps} is in front"
+msgstr "When {apps} be at the bow"
+
+msgid "On now"
+msgstr "Aboard now"
+
+msgid "Up: wins over the ones below"
+msgstr "Up: outranks the ones below"
+
+msgid "Down"
+msgstr "Below decks"
+
+msgid "Change this scene"
+msgstr "Change this scene"
+
+msgid "Name, like Games or Films"
+msgstr "Name, like Games or Picture Shows"
+
+msgid "When"
+msgstr "When"
+
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+"While one o' these be in front, full-sail or not. Names be the vessel's own (its window class), "
+"like mpv or steam_app_1091500."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "App name, like mpv or steam_app_1091500"
+
+msgid "Seen fullscreen lately"
+msgstr "Spotted full-sail lately"
+
+msgid "Add it"
+msgstr "Bring it aboard"
+
+msgid "Add the apps it's for."
+msgstr "Add the vessels it be for."
+
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr "Nothin' to keep watch fer yet: make a scene, or hoist one."
 
 #, python-brace-format
 msgid "In front now: {app}{fs}."
@@ -3066,6 +3110,16 @@ msgstr "Sailin' now: {apps}."
 #, python-brace-format
 msgid "Showing: {look}."
 msgstr "Showin': {look}."
+
+msgid "No scenes yet"
+msgstr "No scenes yet"
+
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+"A scene be \"when this happens, these strips look like this\": anythin' full-sail dims the cabin,"
+" a game gets embers on the desk, a picture show douses the lot."
 
 msgid "None."
 msgstr "None."

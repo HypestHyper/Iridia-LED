@@ -952,7 +952,8 @@ def test_a_fullscreen_app_gets_the_scene_and_the_lights_come_back(d, monkeypatch
     monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
     r = _cmd(d, "scenes", enabled=True, look={"kind": "color", "hex": "0000ff", "bright": 50}, on_delay=1,
              off_delay=2, set_app={"app": "mpv", "look": {"kind": "off"}})
-    assert r["ok"] and r["scenes"]["apps"] == [{"app": "mpv", "look": {"kind": "off"}}]
+    assert r["ok"] and [(x["when"], x["apps"], x["look"]) for x in r["scenes"]["scenes"]] == [
+        ("apps", ["mpv"], {"kind": "off"}), ("fullscreen", [], {"kind": "color", "hex": "0000ff", "bright": 50})]
     d._update_scenes()
     assert d.focuswatch.running_flag
     d.focuswatch.front, d.focuswatch.fullscreen = "steam_app_10", True
@@ -999,13 +1000,51 @@ def test_scene_try_it_and_cli(d, monkeypatch, capsys):
     assert cli.main(["scenes", "app", "mpv", "effect", "rainbow", "60"]) == 0
     assert cli.main(["scenes", "ignore", "firefox"]) == 0
     out = capsys.readouterr().out
-    assert "Anything fullscreen: dim to 15%" in out and "mpv: rainbow at 60%" in out and "Never for: firefox" in out
+    assert "Anything fullscreen: anything fullscreen -> dim to 15%" in out and "mpv: mpv -> rainbow at 60%" in out
+    assert "Never for: firefox" in out
     assert cli.main(["scenes", "look", "sparkly"]) == 2
     assert cli.main(["scenes", "test"]) == 0
     d._update_scenes()
-    assert d._scene_ov == {"bright": 15}
+    assert d._ov("Strip|") == {"bright": 15}
     assert cli.main(["scenes", "remove", "mpv"]) == 0
-    assert d._scene_settings()["apps"] == []
+    assert [x["when"] for x in d._scene_settings()["scenes"]] == ["fullscreen"]
+
+
+def test_scenes_made_in_the_editor(d, monkeypatch):
+    d.focuswatch = FakeFocus()
+    clock = [100.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    _cmd(d, "scenes", enabled=True, on_delay=0, off_delay=0, look=None)
+    r = _cmd(d, "scenes", set_scene={"name": "Films", "when": "apps", "apps": ["mpv"], "look": {"kind": "off"},
+                                     "targets": ["Strip|"]})
+    films = r["scenes"]["scenes"][0]
+    assert films["name"] == "Films" and r["ok"]
+    assert not _cmd(d, "scenes", set_scene={"name": "x", "when": "apps", "look": {"kind": "off"}})["ok"]
+    r = _cmd(d, "scenes", set_scene={"name": "Games", "look": {"kind": "dim", "bright": 50}})
+    games = r["scenes"]["scenes"][1]
+    d.focuswatch.front, d.focuswatch.fullscreen = "mpv", True        # both: Films is higher, so it wins
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    assert _cmd(d, "status")["scenes"]["active"] == [films["id"], games["id"]]
+    _cmd(d, "scenes", move_scene={"id": games["id"], "to": 0})       # Games first now
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["7f0000"] * 4
+    _cmd(d, "scenes", scene_on={"id": games["id"], "on": False})      # switched off: Films again
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    films = dict(films, look={"kind": "color", "hex": "00ff00", "bright": 100})   # changed while it shows
+    _cmd(d, "scenes", set_scene=films)
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4
+    _cmd(d, "scenes", remove_scene=films["id"])
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    assert [x["name"] for x in _cmd(d, "scenes")["scenes"]["scenes"]] == ["Games"]
 
 
 def test_a_device_iridia_leaves_alone_or_that_is_on_its_own(d):

@@ -179,8 +179,8 @@ class Client:
         return self._ipc.send(dict(kw, cmd="favorites"))
 
     def scenes(self, **kw) -> dict:
-        """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,
-        forget, test, or nothing to ask."""
+        """Scenes: enabled, set_scene, remove_scene, move_scene, scene_on, look, set_app, remove_app,
+        ignore, unignore, on_delay, off_delay, interval, forget, test, or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="scenes"))
 
     def set_sleep(self, lights_off: bool) -> dict:

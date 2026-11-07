@@ -78,11 +78,17 @@ class NetLightsCard:
             self._anyway.set_visible(True)
         self.app.bg(lambda: self.app.client.netlights(probe=ip), done)
 
+    def _open(self, name):
+        if not self.app.show_device_card(name):
+            self.app.toast(_("Its card shows up in a moment, once Iridia has added it."))
+
     def _add_light(self, kind):
         if self._anyway_ip:
             self._anyway.set_visible(False)
             self._probe.set_visible(False)
+            self._host.set_text("")
             self._send(add_light={"kind": kind, "ip": self._anyway_ip})
+            self.app.toast(_("Added. Its card is above the Network lights card: Settings next to it goes there."))
 
     def _add_host(self):
         h = self._host.get_text().strip()
@@ -121,13 +127,16 @@ class NetLightsCard:
                 row = label(f"{f['name']}  ·  {net.get('ip', '')}"
                             + ("  ·  " + _("added by address") if net.get("manual") else ""), ("body",))
                 row.set_hexpand(True)
+                name = f["name"]
+                go = button(_("Settings"), "tune", "text small", lambda n=name: self._open(n),
+                            tooltip=_("Its card: colours, brightness, on and off"))
                 if net.get("manual"):
                     addr = net.get("ip")
                     rm = button(None, "close", "flat small",
                                 lambda ip=addr: self._send(remove_light=ip), tooltip=_("Remove"))
-                    self._list.append(hbox(8, row, rm))
+                    self._list.append(hbox(8, row, go, rm))
                 else:
-                    self._list.append(row)
+                    self._list.append(hbox(8, row, go))
         if not on:
             self._note.set_label(_("Off: nothing is sent to the network."))
         elif n.get("error"):

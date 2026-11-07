@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 13:47+0000\n"
+"POT-Creation-Date: 2026-11-07 14:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -2683,8 +2683,17 @@ msgstr "This PC's own firewall ({fw}) be on an' can sink 'em too."
 msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
 msgstr "Or add it anyway: Iridia then just sends it colours, which usually gets through."
 
+msgid "Its card shows up in a moment, once Iridia has added it."
+msgstr "Its card shows up in a moment, once Iridia's added it."
+
+msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
+msgstr "Added. Its card be above the Network lanterns card: Settings next to it sails there."
+
 msgid "added by address"
 msgstr "added by address"
+
+msgid "Its card: colours, brightness, on and off"
+msgstr "Its card: colours, brightness, on an' off"
 
 msgid "Off: nothing is sent to the network."
 msgstr "Off: nothin' be sent to the network."

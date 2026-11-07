@@ -163,6 +163,7 @@ def test_the_daemon_adds_them_and_shows_its_colours(fakes, tmp_path, monkeypatch
         assert d.config.get(("devices", "Govee 10.0.0.9", "net")) == "govee"
         assert d._cmd_netlights({"probe": "127.0.0.1"})["probe"]["wiz"]
         assert d._cmd_netlights({"remove_light": "10.0.0.9"})["manual"] == []
+        assert d.config.get(("devices", "Govee 10.0.0.9")) is None          # its card went with it
         assert not d.netlights.has("Govee 10.0.0.9")
         _ = d.handle_command({"cmd": "zone_action", "target": "WiZ D1E2F3", "actions": ["off"]})
         d._update_all_devices()

@@ -3140,8 +3140,19 @@ class Daemon:
             cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip[0]]
             cur["manual"].append({"kind": kind, "ip": ip[0]})
         if "remove_light" in req:
-            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict)
-                             and m.get("ip") != str(req["remove_light"]).strip()]
+            ip = str(req["remove_light"]).strip()
+            gone = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") == ip]
+            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip]
+            devices = self.config.get("devices", {})
+            if isinstance(devices, dict):
+                # its card goes too (a light added by address is named after it)
+                names = [n for n, c in devices.items() if isinstance(c, dict) and c.get("net")
+                         and any(n == f"{'WiZ' if m['kind'] == 'wiz' else 'Govee'} {ip}" for m in gone)]
+                for n in names:
+                    del devices[n]
+                if names:
+                    self.config.set("devices", devices)
+                    self._last_sent = {}
         if any(k in req for k in ("enabled", "add_host", "remove_host", "add_light", "remove_light")):
             self.config.set("netlights", cur)
             nls = self._netlight_settings()

@@ -1528,6 +1528,26 @@ class IridiaWindow(Gtk.ApplicationWindow):
                         leds.update(range(*r))
             c.set_notify(leds, bool(n.get("enabled")))
 
+    def show_device_card(self, device: str) -> bool:
+        """Scroll the Devices tab to a device's (first) card, open it, and say whether there was one."""
+        card_w = next((c for k, c in self._zone_cards.items() if k.split("|", 1)[0] == device), None)
+        if card_w is None:
+            return False
+        self._tabs["devices"].set_active(True)
+        if not card_w.expanded:
+            card_w._toggle_expand()
+        sc = self._devices_page
+        while sc is not None and not hasattr(sc, "get_vadjustment"):
+            sc = sc.get_parent()
+
+        def go():
+            ok, b = card_w.compute_bounds(self._devices_page)
+            if ok and sc is not None:
+                sc.get_vadjustment().set_value(max(0.0, b.get_y() - 80))
+            return False
+        GLib.timeout_add(120, go)                # once the card has opened
+        return True
+
     def open_notify_settings(self):
         self._tabs["notify"].set_active(True)
 

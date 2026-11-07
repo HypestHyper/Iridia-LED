@@ -60,7 +60,16 @@ The router's firewall has to allow, between the two networks:
 | this PC | the lights | 4003 | Govee: colours |
 
 Many routers let devices on the main network reach the IoT network and only block the other way: then
-only the Govee row from the lights to this PC needs a rule. A light that keeps the same address (a
+only the Govee row from the lights to this PC needs a rule. This PC's own firewall (ufw, firewalld)
+has to let UDP 4002 in too: `sudo ufw allow 4002/udp`, or
+`sudo firewall-cmd --permanent --add-port=4002/udp && sudo firewall-cmd --reload`.
+
+**Still not found?** Type its address under *Other networks* and press *Test* (or `iridia netlights
+test 192.168.20.31`): Iridia asks it as a WiZ and as a Govee light and says what came back, and whether
+this PC's firewall is on. If nothing comes back but the address is right, *Add as a Govee light* (or
+`iridia netlights add-light govee 192.168.20.31`) drives it without ever needing its answers: commands
+from this PC to the light usually get through even when the answers don't. Such a light is listed as
+*added by address*, with a ✕ to take it out again. A light that keeps the same address (a
 DHCP reservation for it on the router) is the easiest to give: add that one address.
 
 ## Command line
@@ -72,4 +81,7 @@ iridia netlights scan     # look again now
 iridia netlights off
 iridia netlights add 192.168.20.0/24     # also ask these directly (another VLAN or subnet)
 iridia netlights remove 192.168.20.0/24
+iridia netlights test 192.168.20.31      # ask one address, say what came back and what may block it
+iridia netlights add-light govee 192.168.20.31   # drive it without needing its answers
+iridia netlights remove-light 192.168.20.31
 ```

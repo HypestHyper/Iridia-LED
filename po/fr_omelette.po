@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 13:32+0000\n"
+"POT-Creation-Date: 2026-11-07 13:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -2503,6 +2503,48 @@ msgstr ""
 
 msgid "Address or network, like 192.168.20.0/24"
 msgstr "Adresse ou réseau, comme 192.168.20.0/24"
+
+msgid "Test"
+msgstr "Tester"
+
+msgid "Add as a Govee light"
+msgstr "Ajouter comme lampe Govee"
+
+msgid "Add as a WiZ light"
+msgstr "Ajouter comme lampe WiZ"
+
+msgid "Type the light's address first."
+msgstr "Tape l'adresse d'abord."
+
+#, python-brace-format
+msgid "Asking {ip}…"
+msgstr "Je demande à {ip}…"
+
+msgid "Couldn't test it"
+msgstr "Impossible de tester"
+
+#, python-brace-format
+msgid ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+msgstr "{ip} a répondu ({what}). Voilà."
+
+#, python-brace-format
+msgid ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+msgstr "Pas de réponse de {ip}. Le routeur doit laisser passer UDP 4002 vers ce PC. Oh là là."
+
+#, python-brace-format
+msgid "This PC's own firewall ({fw}) is on and can drop them too."
+msgstr "Le pare-feu de ce PC ({fw}) est actif aussi."
+
+msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+msgstr "Ou ajoute-la quand même : Iridia lui envoie juste des couleurs."
+
+msgid "added by address"
+msgstr "ajoutée par adresse"
 
 msgid "Off: nothing is sent to the network."
 msgstr "Éteint : rien ne part sur le réseau."

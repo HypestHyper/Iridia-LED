@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 13:32+0000\n"
+"POT-Creation-Date: 2026-11-07 13:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1046,7 +1046,8 @@ msgid "No strips yet"
 msgstr ""
 
 #: iridia/ui/app.py:1574 iridia/ui/app.py:1807 iridia/ui/app.py:1826 iridia/ui/app.py:2258
-#: iridia/ui/netlights_card.py:64 iridia/ui/scenes_tab.py:258 iridia/ui/scenes_tab.py:268
+#: iridia/ui/netlights_card.py:110 iridia/ui/netlights_card.py:126 iridia/ui/scenes_tab.py:258
+#: iridia/ui/scenes_tab.py:268
 msgid "Remove"
 msgstr ""
 
@@ -1151,7 +1152,7 @@ msgstr ""
 msgid "Not during night mode"
 msgstr ""
 
-#: iridia/ui/app.py:1665 iridia/ui/app.py:1873 iridia/ui/app.py:1892 iridia/ui/netlights_card.py:50
+#: iridia/ui/app.py:1665 iridia/ui/app.py:1873 iridia/ui/app.py:1892 iridia/ui/netlights_card.py:96
 #: iridia/ui/scenes_tab.py:194
 msgid "Couldn't save"
 msgstr ""
@@ -3244,17 +3245,70 @@ msgstr ""
 msgid "Address or network, like 192.168.20.0/24"
 msgstr ""
 
-#: iridia/ui/netlights_card.py:77
+#: iridia/ui/netlights_card.py:37
+msgid "Test"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:45
+msgid "Add as a Govee light"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:46
+msgid "Add as a WiZ light"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:53
+msgid "Type the light's address first."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:55
+#, python-brace-format
+msgid "Asking {ip}…"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:61
+msgid "Couldn't test it"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:65
+#, python-brace-format
+msgid ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:70
+#, python-brace-format
+msgid ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:74
+#, python-brace-format
+msgid "This PC's own firewall ({fw}) is on and can drop them too."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:75
+msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:122
+msgid "added by address"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:131
 msgid "Off: nothing is sent to the network."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:81
+#: iridia/ui/netlights_card.py:135
 msgid ""
 "Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
 " switched on in the Govee app."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:84
+#: iridia/ui/netlights_card.py:138
 msgid ""
 "Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
 "the same."

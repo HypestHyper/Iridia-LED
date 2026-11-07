@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 13:32+0000\n"
+"POT-Creation-Date: 2026-11-07 13:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -2636,6 +2636,53 @@ msgstr ""
 
 msgid "Address or network, like 192.168.20.0/24"
 msgstr "Address or network, like 192.168.20.0/24"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Add as a Govee light"
+msgstr "Add as a Govee light"
+
+msgid "Add as a WiZ light"
+msgstr "Add as a WiZ light"
+
+msgid "Type the light's address first."
+msgstr "Type the light's address first."
+
+#, python-brace-format
+msgid "Asking {ip}…"
+msgstr "Asking {ip}…"
+
+msgid "Couldn't test it"
+msgstr "Couldn't test it"
+
+#, python-brace-format
+msgid ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+msgstr ""
+"{ip} answered ({what}). It shows up with the next search; add its address above if it's on "
+"another network."
+
+#, python-brace-format
+msgid ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+msgstr ""
+"No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get back "
+"to this PC: the router has to let the lights reach this PC on UDP port 4002 (a WiZ light answers "
+"from 38899)."
+
+#, python-brace-format
+msgid "This PC's own firewall ({fw}) is on and can drop them too."
+msgstr "This PC's own firewall ({fw}) is on and can drop them too."
+
+msgid "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+msgstr "Or add it anyway: Iridia then just sends it colours, which usually gets through."
+
+msgid "added by address"
+msgstr "added by address"
 
 msgid "Off: nothing is sent to the network."
 msgstr "Off: nothing is sent to the network."

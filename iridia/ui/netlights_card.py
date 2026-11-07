@@ -33,10 +33,56 @@ class NetLightsCard:
                          "it (UDP 4002)."), ("small", "dim"), wrap=True))
         self._host = Gtk.Entry(placeholder_text=_("Address or network, like 192.168.20.0/24"), hexpand=True)
         self._host.connect("activate", lambda *_a: self._add_host())
-        c.append(hbox(8, self._host, button(_("Add"), "add", "tonal small", self._add_host)))
+        c.append(hbox(8, self._host, button(_("Add"), "add", "tonal small", self._add_host),
+                      button(_("Test"), "troubleshoot", "text small", self._test)))
         self._hosts = wrap_row(6)
         self._hosts_now = None
         c.append(self._hosts)
+        self._probe = label("", ("small",), wrap=True)
+        self._probe.set_visible(False)
+        c.append(self._probe)
+        self._anyway_ip = ""
+        self._anyway = hbox(8, button(_("Add as a Govee light"), "add", "tonal small", lambda: self._add_light("govee")),
+                            button(_("Add as a WiZ light"), "add", "text small", lambda: self._add_light("wiz")))
+        self._anyway.set_visible(False)
+        c.append(self._anyway)
+
+    def _test(self):
+        ip = self._host.get_text().strip()
+        if not ip:
+            self.app.toast(_("Type the light's address first."))
+            return
+        self._probe.set_label(_("Asking {ip}…").format(ip=ip))
+        self._probe.set_visible(True)
+        self._anyway.set_visible(False)
+
+        def done(r):
+            if not r.get("ok"):
+                self._probe.set_label(r.get("error") or _("Couldn't test it"))
+                return
+            p = r.get("probe") or {}
+            if p.get("govee") or p.get("wiz"):
+                self._probe.set_label(_("{ip} answered ({what}). It shows up with the next search; add its address "
+                                        "above if it's on another network.").format(
+                    ip=p.get("ip"), what=", ".join(p.get("heard") or [])))
+                return
+            fw = p.get("firewall")
+            text = _("No answer from {ip}. Either no light with LAN Control on is there, or its answers don't get "
+                     "back to this PC: the router has to let the lights reach this PC on UDP port 4002 "
+                     "(a WiZ light answers from 38899).").format(ip=p.get("ip"))
+            if fw:
+                text += " " + _("This PC's own firewall ({fw}) is on and can drop them too.").format(fw=fw)
+            text += " " + _("Or add it anyway: Iridia then just sends it colours, which usually gets through.")
+            self._probe.set_label(text)
+            self._anyway_ip = p.get("ip", "")
+            self._anyway.set_visible(True)
+        self.app.bg(lambda: self.app.client.netlights(probe=ip), done)
+
+    def _add_light(self, kind):
+        if self._anyway_ip:
+            self._anyway.set_visible(False)
+            self._probe.set_visible(False)
+            self._send(add_light={"kind": kind, "ip": self._anyway_ip})
 
     def _add_host(self):
         h = self._host.get_text().strip()
@@ -66,13 +112,22 @@ class NetLightsCard:
         self._on.set_value(on)
         self._again.set_visible(on)
         found = n.get("found") or []
-        key = [(f["name"], f.get("net", {}).get("ip")) for f in found]
+        key = [(f["name"], f.get("net", {}).get("ip"), f.get("net", {}).get("manual")) for f in found]
         if key != self._found_now:
             self._found_now = key
             widgets.clear(self._list)
             for f in found:
-                ip = f.get("net", {}).get("ip", "")
-                self._list.append(label(f"{f['name']}  ·  {ip}", ("body",)))
+                net = f.get("net", {})
+                row = label(f"{f['name']}  ·  {net.get('ip', '')}"
+                            + ("  ·  " + _("added by address") if net.get("manual") else ""), ("body",))
+                row.set_hexpand(True)
+                if net.get("manual"):
+                    addr = net.get("ip")
+                    rm = button(None, "close", "flat small",
+                                lambda ip=addr: self._send(remove_light=ip), tooltip=_("Remove"))
+                    self._list.append(hbox(8, row, rm))
+                else:
+                    self._list.append(row)
         if not on:
             self._note.set_label(_("Off: nothing is sent to the network."))
         elif n.get("error"):

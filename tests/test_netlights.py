@@ -156,6 +156,14 @@ def test_the_daemon_adds_them_and_shows_its_colours(fakes, tmp_path, monkeypatch
         assert d._cmd_netlights({"add_host": "192.168.20.0/24"})["hosts"] == ["192.168.20.0/24"]
         assert d.netlights.hosts == ["192.168.20.0/24"]
         assert d._cmd_netlights({"remove_host": "192.168.20.0/24"})["hosts"] == []
+        assert not d._cmd_netlights({"add_light": {"kind": "hue", "ip": "10.0.0.9"}})["ok"]
+        r = d._cmd_netlights({"add_light": {"kind": "govee", "ip": "10.0.0.9"}})
+        assert r["manual"] == [{"kind": "govee", "ip": "10.0.0.9"}] and d.netlights.has("Govee 10.0.0.9")
+        d._autoadd_devices(d.netlights.list_devices())
+        assert d.config.get(("devices", "Govee 10.0.0.9", "net")) == "govee"
+        assert d._cmd_netlights({"probe": "127.0.0.1"})["probe"]["wiz"]
+        assert d._cmd_netlights({"remove_light": "10.0.0.9"})["manual"] == []
+        assert not d.netlights.has("Govee 10.0.0.9")
         _ = d.handle_command({"cmd": "zone_action", "target": "WiZ D1E2F3", "actions": ["off"]})
         d._update_all_devices()
         assert wait(lambda: fakes.wiz_got[-1]["method"] == "setState")
@@ -212,5 +220,32 @@ def test_keep_colour_on_a_light(fakes):
         nl.set_keep_color({"WiZ D1E2F3"})
         nl.send("WiZ D1E2F3", ["808080"])
         assert wait(lambda: fakes.wiz_got and fakes.wiz_got[-1]["params"] == {"state": True, "dimming": 50})
+    finally:
+        nl.stop()
+
+
+def test_a_test_says_what_came_back_and_a_light_can_be_added_by_address(fakes):
+    from iridia.cli import probe_text
+    nl = N.NetLights()
+    fakes.point(nl)
+    nl.targets["wiz"] = ("127.0.0.2", nl.targets["wiz"][1])        # no search reaches them
+    nl.targets["govee"] = ("127.0.0.2", nl.targets["govee"][1])
+    nl.set_enabled(True)
+    try:
+        p = nl.probe("127.0.0.1", wait=2.0)
+        assert p["wiz"] and p["govee"]                            # both stand-ins answer when asked directly
+        assert "answered" in probe_text(p)
+        p = nl.probe("127.0.0.3", wait=0.3)                       # nobody there
+        assert not p["wiz"] and not p["govee"]
+        assert "No answer from 127.0.0.3" in probe_text(dict(p, firewall="ufw")) and "ufw allow 4002" in \
+            probe_text(dict(p, firewall="ufw"))
+        # driven without ever hearing from it
+        nl.set_manual([("govee", "127.0.0.1")])
+        assert nl.has("Govee 127.0.0.1") and nl.list_devices()[0]["net"]["manual"]
+        n = len(fakes.govee_got)
+        nl.send("Govee 127.0.0.1", ["ff0000"])
+        assert wait(lambda: len(fakes.govee_got) >= n + 3)
+        nl.set_manual([])
+        assert not nl.has("Govee 127.0.0.1")
     finally:
         nl.stop()

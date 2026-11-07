@@ -116,9 +116,31 @@ def govee_commands(rgb, was_on: Optional[bool], keep_color: bool = False) -> Lis
     return out
 
 
+def local_firewall() -> Optional[str]:
+    """This PC's own firewall, when one is on: it can drop Govee's answers (to UDP 4002) before
+    Iridia sees them. None when there's none (or it can't be told without root)."""
+    import shutil
+    import subprocess
+
+    def out(cmd):
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=3).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            return ""
+    if shutil.which("firewall-cmd") and out(["firewall-cmd", "--state"]) == "running":
+        return "firewalld"
+    if shutil.which("systemctl"):
+        for unit, name in (("ufw", "ufw"), ("firewalld", "firewalld"), ("nftables", "nftables"),
+                           ("iptables", "iptables")):
+            if out(["systemctl", "is-active", unit]) == "active":
+                return name
+    return None
+
+
 class Light:
-    def __init__(self, kind: str, ident: str, ip: str, model: str = ""):
+    def __init__(self, kind: str, ident: str, ip: str, model: str = "", manual: bool = False):
         self.kind, self.ident, self.ip, self.model = kind, ident, ip, model
+        self.manual = manual            # added by address: driven without ever hearing from it
         self.seen = time.monotonic()
         self.sent: Optional[Tuple[int, int, int]] = None
         self.sent_at = 0.0
@@ -128,6 +150,8 @@ class Light:
     @property
     def name(self) -> str:
         """The name it gets in Iridia (renamed on its card like any strip): brand, model, end of its id."""
+        if self.manual:
+            return f"{'WiZ' if self.kind == 'wiz' else 'Govee'} {self.ip}"
         tail = self.ident.replace(":", "")[-6:].upper()
         if self.kind == "wiz":
             return f"WiZ {tail}"
@@ -149,6 +173,8 @@ class NetLights:
         self._last_scan = 0.0
         self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
         self.keep_color: set = set()                # lights whose own colour stays: brightness and on/off only
+        self.heard: Dict[str, List[str]] = {}       # address -> what came back from it lately (for a test)
+        self._manual: List[Tuple[str, str]] = []    # (kind, ip) added by address
         self.targets = {"wiz": (BROADCAST, WIZ_PORT), "govee": GOVEE_SCAN, "govee_cmd": GOVEE_CMD,
                         "govee_listen": GOVEE_LISTEN}       # tests point these at localhost
 
@@ -253,6 +279,10 @@ class NetLights:
             return True
         if not isinstance(msg, dict):
             return True
+        what = (msg.get("msg") or {}).get("cmd") if isinstance(msg.get("msg"), dict) else msg.get("method")
+        heard = self.heard.setdefault(ip, [])
+        heard.append(f"{'Govee' if kind_hint == 'govee' else 'WiZ'} {what or '?'}")
+        del heard[:-10]
         if kind_hint == "govee" or "msg" in msg:
             d = (msg.get("msg") or {}).get("data") or {}
             if (msg.get("msg") or {}).get("cmd") == "scan" and isinstance(d, dict):
@@ -271,7 +301,8 @@ class NetLights:
                 self._send_scan()
                 self.resend()                   # a light switched off at the wall shows its colour again
                 with self._lock:
-                    for name in [n for n, light in self.lights.items() if now - light.seen > FORGET_AFTER]:
+                    for name in [n for n, light in self.lights.items()
+                                 if not light.manual and now - light.seen > FORGET_AFTER]:
                         logger.info(f"{name} hasn't answered for a while; dropped from the list")
                         del self.lights[name]
             busy = False
@@ -283,6 +314,45 @@ class NetLights:
                 self._wake.wait(0.05)
                 self._wake.clear()
 
+    # ---------------------------------------------------------------- by address
+    def set_manual(self, lights):
+        """Lights added by address [(kind, ip)]: driven without ever hearing from them, for a network
+        whose firewall doesn't let their answers back."""
+        lights = [(k, ip) for k, ip in lights if k in ("wiz", "govee")]
+        if lights == self._manual:
+            return
+        self._manual = lights
+        with self._lock:
+            for n in [n for n, light in self.lights.items() if light.manual and (light.kind, light.ip) not in lights]:
+                del self.lights[n]
+            for kind, ip in lights:
+                light = Light(kind, "ip:" + ip, ip, manual=True)
+                self.lights.setdefault(light.name, light)
+
+    def probe(self, ip: str, wait: float = 2.5) -> dict:
+        """Ask one address directly, as WiZ and as Govee, and say what came back: tells "nothing there"
+        from "the answers don't get back" (WiZ answers from the port it was asked on, Govee to 4002)."""
+        if self._sock is None:
+            return {"ok": False, "error": "Looking for network lights is off"}
+        self.heard.pop(ip, None)
+        msgs = ((json.dumps({"method": "getSystemConfig", "params": {}}), self.targets["wiz"][1]),
+                (json.dumps({"msg": {"cmd": "scan", "data": {"account_topic": "reserve"}}}), self.targets["govee"][1]),
+                (json.dumps({"msg": {"cmd": "devStatus", "data": {}}}), self.targets["govee_cmd"]))
+        errors = []
+        for text, port in msgs:
+            try:
+                self._sock.sendto(text.encode(), (ip, port))
+            except OSError as e:
+                errors.append(f"port {port}: {e.strerror or e}")
+        end = time.monotonic() + wait
+        while time.monotonic() < end and not self.heard.get(ip):
+            time.sleep(0.05)
+        time.sleep(0.2)                         # the other answers, if any
+        heard = list(self.heard.get(ip, []))
+        return {"ok": True, "ip": ip, "heard": heard, "send_errors": errors,
+                "wiz": any(h.startswith("WiZ") for h in heard), "govee": any(h.startswith("Govee") for h in heard),
+                "govee_listening": self._govee is not None}
+
     # ---------------------------------------------------------------- what the daemon uses
     def has(self, name: str) -> bool:
         return name in self.lights
@@ -292,7 +362,7 @@ class NetLights:
         with self._lock:
             return [{"name": n, "type": f"{light.kind} light", "mode": "network", "zones": [], "led_count": 1,
                      "single_color": True, "net": {"kind": light.kind, "ip": light.ip, "id": light.ident,
-                                                   "model": light.model}}
+                                                   "model": light.model, "manual": light.manual}}
                     for n, light in sorted(self.lights.items())]
 
     def send(self, name: str, colors, zones_config=None) -> bool:

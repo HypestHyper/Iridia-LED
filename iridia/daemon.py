@@ -1111,6 +1111,7 @@ class Daemon:
 
         nls = self._netlight_settings()
         self.netlights.hosts = nls["hosts"]
+        self.netlights.set_manual([(m["kind"], m["ip"]) for m in nls["manual"]])
         self.netlights.set_enabled(nls["enabled"])
         if self.netlights.lights:
             self._autoadd_devices(self.netlights.list_devices())
@@ -3102,7 +3103,13 @@ class Daemon:
         from iridia.netlights import clean_hosts
         n = self.config.get("netlights", {})
         n = n if isinstance(n, dict) else {}
-        return {"enabled": bool(n.get("enabled", False)), "hosts": clean_hosts(n.get("hosts"))}
+        manual = []
+        for x in n.get("manual") or []:
+            if isinstance(x, dict) and x.get("kind") in ("wiz", "govee") and clean_hosts([x.get("ip")]):
+                ip = clean_hosts([x["ip"]])[0]
+                if "/" not in ip and (x["kind"], ip) not in [(m["kind"], m["ip"]) for m in manual]:
+                    manual.append({"kind": x["kind"], "ip": ip})
+        return {"enabled": bool(n.get("enabled", False)), "hosts": clean_hosts(n.get("hosts")), "manual": manual}
 
     def _netlights_status(self) -> dict:
         return dict(self._netlight_settings(), found=self.netlights.list_devices(), error=self.netlights.error)
@@ -3126,11 +3133,31 @@ class Daemon:
         if "remove_host" in req:
             gone = clean_hosts([req["remove_host"]]) or [str(req["remove_host"])]
             cur["hosts"] = [x for x in clean_hosts(cur.get("hosts")) if x not in gone]
-        if any(k in req for k in ("enabled", "add_host", "remove_host")):
+        if isinstance(req.get("add_light"), dict):
+            kind, ip = req["add_light"].get("kind"), clean_hosts([req["add_light"].get("ip")])
+            if kind not in ("wiz", "govee") or not ip or "/" in ip[0]:
+                return dict(self._netlights_status(), ok=False, error="give wiz or govee and one IPv4 address")
+            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip[0]]
+            cur["manual"].append({"kind": kind, "ip": ip[0]})
+        if "remove_light" in req:
+            cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict)
+                             and m.get("ip") != str(req["remove_light"]).strip()]
+        if any(k in req for k in ("enabled", "add_host", "remove_host", "add_light", "remove_light")):
             self.config.set("netlights", cur)
             nls = self._netlight_settings()
             self.netlights.hosts = nls["hosts"]
+            self.netlights.set_manual([(m["kind"], m["ip"]) for m in nls["manual"]])
             self.netlights.set_enabled(nls["enabled"])
+        if req.get("probe"):
+            from iridia.netlights import local_firewall
+            ip = clean_hosts([req["probe"]])
+            if not ip or "/" in ip[0]:
+                return dict(self._netlights_status(), ok=False, error="give one IPv4 address to test")
+            if not self.netlights.enabled:
+                return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")
+            r = self.netlights.probe(ip[0])
+            r["firewall"] = local_firewall()
+            return dict(self._netlights_status(), ok=True, probe=r)
         if req.get("scan"):
             if not self.netlights.enabled:
                 return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")

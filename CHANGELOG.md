@@ -7,7 +7,9 @@
   each becomes a device like a strip: wallpaper colours, brightness, scenes, night mode, lock and sleep.
   They keep working in their own apps and in Google Home. Govee lights need *LAN Control* on in the
   Govee app. Lights on another VLAN or subnet (an IoT network) are asked directly: give their address
-  or network under *Other networks* (`iridia netlights add 192.168.20.0/24`).
+  or network under *Other networks* (`iridia netlights add 192.168.20.0/24`). *Test* asks one address
+  and says what came back and what may block it (this PC's firewall, the router); a light whose
+  answers don't get back can be added by address and driven anyway (`iridia netlights add-light`).
 - **Use a device only when you want, per device** (its card, Brightness): *Let Iridia control it* (off:
   Iridia sends it nothing, so its own app can set it), *On its own* (ignores the monitor's brightness,
   night mode, lock and sleep) and, for network lights, *Keep its own colour* (only brightness and

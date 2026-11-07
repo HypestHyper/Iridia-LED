@@ -12,6 +12,7 @@ Each light is one colour (a Govee strip too: its segments are another protocol).
 most every MIN_GAP seconds per light, the latest one winning, and only when they change, so a fade
 or an animation doesn't flood the light.
 """
+import ipaddress
 import json
 import logging
 import socket
@@ -29,6 +30,36 @@ BROADCAST = "255.255.255.255"
 SCAN_EVERY = 60.0               # seconds between searches (and right away when asked)
 FORGET_AFTER = 600.0            # a light not seen for this long drops off the list
 MIN_GAP = {"wiz": 0.1, "govee": 0.2}     # seconds between two colours to one light
+MAX_HOSTS = 1024                # addresses asked directly per search (a /22 at most)
+
+
+def clean_hosts(raw) -> List[str]:
+    """Addresses or networks to ask directly ("192.168.20.31", "192.168.20.0/24"): for lights the
+    broadcast and multicast don't reach, on another VLAN or subnet. Bad entries are dropped."""
+    out = []
+    for h in raw if isinstance(raw, (list, tuple)) else []:
+        try:
+            net = ipaddress.ip_network(str(h).strip(), strict=False)
+        except ValueError:
+            continue
+        if net.version != 4 or net.num_addresses > MAX_HOSTS:
+            continue
+        text = str(net.network_address) if net.num_addresses == 1 else str(net)
+        if text not in out:
+            out.append(text)
+    return out
+
+
+def expand(hosts) -> List[str]:
+    """Every address to ask: a network's hosts (not its network and broadcast address)."""
+    out = []
+    for h in clean_hosts(hosts):
+        net = ipaddress.ip_network(h, strict=False)
+        addrs = [net.network_address] if net.num_addresses == 1 else list(net.hosts())
+        out += [str(a) for a in addrs]
+        if len(out) >= MAX_HOSTS:
+            return out[:MAX_HOSTS]
+    return out
 
 
 def _hex_rgb(h: str) -> Tuple[int, int, int]:
@@ -107,6 +138,7 @@ class NetLights:
         self._sock: Optional[socket.socket] = None          # WiZ, and commands to Govee
         self._govee: Optional[socket.socket] = None         # Govee's answers to a scan (port 4002)
         self._last_scan = 0.0
+        self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
         self.targets = {"wiz": (BROADCAST, WIZ_PORT), "govee": GOVEE_SCAN, "govee_cmd": GOVEE_CMD,
                         "govee_listen": GOVEE_LISTEN}       # tests point these at localhost
 
@@ -168,12 +200,21 @@ class NetLights:
             s.sendto(json.dumps({"method": "getSystemConfig", "params": {}}).encode(), self.targets["wiz"])
         except OSError as e:
             logger.debug(f"WiZ search failed: {e}")
+        govee_scan = json.dumps({"msg": {"cmd": "scan", "data": {"account_topic": "reserve"}}}).encode()
         if self._govee is not None:
             try:
-                s.sendto(json.dumps({"msg": {"cmd": "scan", "data": {"account_topic": "reserve"}}}).encode(),
-                         self.targets["govee"])
+                s.sendto(govee_scan, self.targets["govee"])
             except OSError as e:
                 logger.debug(f"Govee search failed: {e}")
+        # Broadcast and multicast stay on this network: lights on another VLAN or subnet are asked
+        # one by one (routers pass that on like any other traffic)
+        wiz_ask = json.dumps({"method": "getSystemConfig", "params": {}}).encode()
+        for ip in expand(self.hosts):
+            for msg, port in ((wiz_ask, self.targets["wiz"][1]), (govee_scan, self.targets["govee"][1])):
+                try:
+                    s.sendto(msg, (ip, port))
+                except OSError:
+                    pass                        # no route to it: nothing there
 
     def _found(self, kind: str, ident: str, ip: str, model: str = ""):
         if not ident:

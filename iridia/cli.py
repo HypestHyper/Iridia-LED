@@ -879,6 +879,8 @@ def cmd_scenes(args):
 def _netlights_text(r):
     n = r.get("netlights") or r
     lines = [f"Network lights (WiZ, Govee): {'looking' if n.get('enabled') else 'off'}"]
+    if n.get("hosts"):
+        lines.append("Also asked directly: " + ", ".join(n["hosts"]))
     if n.get("error"):
         lines.append(n["error"])
     for f in n.get("found") or []:
@@ -889,9 +891,15 @@ def _netlights_text(r):
 
 
 def cmd_netlights(args):
-    """iridia netlights [on | off | scan]"""
+    """iridia netlights [on | off | scan | add ADDRESS | remove ADDRESS]"""
     req = {"cmd": "netlights"}
-    if args.action in ("on", "off"):
+    if args.action in ("add", "remove"):
+        if not args.address:
+            print(f"Use: iridia netlights {args.action} ADDRESS (like 192.168.20.31 or 192.168.20.0/24)",
+                  file=sys.stderr)
+            return 2
+        req["add_host" if args.action == "add" else "remove_host"] = args.address
+    elif args.action in ("on", "off"):
         req["enabled"] = args.action == "on"
     elif args.action == "scan":
         req["scan"] = True
@@ -1662,8 +1670,12 @@ def main(argv=None):
                            help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
     nl_parser = subparsers.add_parser("netlights", help="Philips WiZ and Govee lights on the network",
                                       description="on: look for them (they become devices like any strip); "
-                                                  "scan: look again now; off: stop.")
-    nl_parser.add_argument("action", nargs="?", choices=["show", "on", "off", "scan"], default="show")
+                                                  "scan: look again now; off: stop; add ADDRESS: also ask an "
+                                                  "address or network directly (lights on another VLAN or subnet, "
+                                                  "like 192.168.20.0/24); remove ADDRESS.")
+    nl_parser.add_argument("action", nargs="?", choices=["show", "on", "off", "scan", "add", "remove"],
+                           default="show")
+    nl_parser.add_argument("address", nargs="?", help="with add or remove: an IPv4 address or network")
     subparsers.add_parser("sensors", help="List the temperature, load and memory sensors a strip can show")
     p_mon = subparsers.add_parser("monitor", help="Which monitor's brightness strips follow: list, auto, a bus, rescan")
     p_mon.add_argument("what", nargs="?", default="list", help="list (default), auto, an I2C bus number, or rescan")

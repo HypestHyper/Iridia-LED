@@ -69,6 +69,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `notify.effect`, `notify.duration` | `pulse`, `1.5` | `pulse`, `flash`, `sweep`, `comet`, `fill` or `ripple`; seconds (0.5 to 5) |
 | `notify.direction`, `notify.band`, `notify.repeat`, `notify.brightness` | `ab`, `3`, `1`, `100` | `ab`, `ba`, `abba` or `out`; how many LEDs light at once (1 to 30); plays (1 to 5); percent |
 | `notify.path`, `notify.spatial` | `null`, `false` | `{"a": [x, y], "b": [x, y]}` in layout units, and whether a moving flash runs between them |
+| `netlights.hosts` | `[]` | Addresses or networks (`"192.168.20.0/24"`) also asked directly, for lights on another VLAN or subnet |
 | `netlights.enabled` | `false` | Look for Philips WiZ and Govee lights on the network; each one found becomes a device with `"net": "wiz"` or `"govee"` (see [Network lights](Network-Lights.md)) |
 | `scenes.enabled`, `scenes.look` | `false`, `{"kind": "dim", "bright": 20}` | A look while anything is fullscreen: `kind` `off`, `dim`, `color` (with `hex`) or `effect` (with `effect`), and `bright` (percent); `null` for none (see [Scenes](Scenes.md)) |
 | `scenes.apps`, `scenes.ignore` | `[]`, `[]` | `[{"app", "look"}]`: an app's own look while it's in front; apps that never get the fullscreen look |

@@ -1108,7 +1108,9 @@ class Daemon:
             self._autoadd_devices()
             self._check_missing_devices()
 
-        self.netlights.set_enabled(bool(self._netlight_settings()["enabled"]))
+        nls = self._netlight_settings()
+        self.netlights.hosts = nls["hosts"]
+        self.netlights.set_enabled(nls["enabled"])
         if self.netlights.lights:
             self._autoadd_devices(self.netlights.list_devices())
         out = connected or bool(self.netlights.lights)     # something to send to
@@ -3071,18 +3073,38 @@ class Daemon:
         return self._out(device).send_frames(device, frames)
 
     def _netlight_settings(self) -> dict:
+        from iridia.netlights import clean_hosts
         n = self.config.get("netlights", {})
-        return {"enabled": bool(n.get("enabled", False)) if isinstance(n, dict) else False}
+        n = n if isinstance(n, dict) else {}
+        return {"enabled": bool(n.get("enabled", False)), "hosts": clean_hosts(n.get("hosts"))}
 
     def _netlights_status(self) -> dict:
         return dict(self._netlight_settings(), found=self.netlights.list_devices(), error=self.netlights.error)
 
     def _cmd_netlights(self, req: dict) -> dict:
-        """Network lights: enabled (look for WiZ and Govee lights), scan (look again now)."""
+        """Network lights: enabled (look for WiZ and Govee lights), scan (look again now), add_host /
+        remove_host (an address or network to ask directly: lights on another VLAN or subnet)."""
+        from iridia.netlights import clean_hosts
+        cur = self.config.get("netlights", {})
+        cur = dict(cur if isinstance(cur, dict) else {})
         if "enabled" in req:
-            cur = self.config.get("netlights", {})
-            self.config.set("netlights", dict(cur if isinstance(cur, dict) else {}, enabled=bool(req["enabled"])))
-            self.netlights.set_enabled(bool(req["enabled"]))
+            cur["enabled"] = bool(req["enabled"])
+        if "add_host" in req:
+            h = clean_hosts([req["add_host"]])
+            if not h:
+                return dict(self._netlights_status(), ok=False,
+                            error="give an IPv4 address or network, like 192.168.20.31 or 192.168.20.0/24 "
+                                  "(at most 1024 addresses)")
+            cur["hosts"] = clean_hosts(list(cur.get("hosts") or []) + h)
+            req = dict(req, scan=True)
+        if "remove_host" in req:
+            gone = clean_hosts([req["remove_host"]]) or [str(req["remove_host"])]
+            cur["hosts"] = [x for x in clean_hosts(cur.get("hosts")) if x not in gone]
+        if any(k in req for k in ("enabled", "add_host", "remove_host")):
+            self.config.set("netlights", cur)
+            nls = self._netlight_settings()
+            self.netlights.hosts = nls["hosts"]
+            self.netlights.set_enabled(nls["enabled"])
         if req.get("scan"):
             if not self.netlights.enabled:
                 return dict(self._netlights_status(), ok=False, error="Looking for network lights is off")

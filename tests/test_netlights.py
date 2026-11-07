@@ -147,6 +147,10 @@ def test_the_daemon_adds_them_and_shows_its_colours(fakes, tmp_path, monkeypatch
         assert "WiZ D1E2F3" not in d._device_missing_since                # not an OpenRGB device
         st = d._cmd_status()
         assert {x["name"] for x in st["netlights"]["found"]} == {"WiZ D1E2F3", "Govee H6159 36724E"}
+        assert not d._cmd_netlights({"add_host": "my lamp"})["ok"]
+        assert d._cmd_netlights({"add_host": "192.168.20.0/24"})["hosts"] == ["192.168.20.0/24"]
+        assert d.netlights.hosts == ["192.168.20.0/24"]
+        assert d._cmd_netlights({"remove_host": "192.168.20.0/24"})["hosts"] == []
         _ = d.handle_command({"cmd": "zone_action", "target": "WiZ D1E2F3", "actions": ["off"]})
         d._update_all_devices()
         assert wait(lambda: fakes.wiz_got[-1]["method"] == "setState")
@@ -161,3 +165,27 @@ def test_cli_text():
     assert "looking" in t and "WiZ D1E2F3  10.0.0.5" in t
     assert "LAN Control" in _netlights_text({"enabled": True, "found": []})
     assert "off" in _netlights_text({"enabled": False})
+
+
+def test_hosts_and_networks():
+    assert N.clean_hosts(["192.168.20.31", "192.168.20.0/24", "192.168.20.7/24", "nope", "10.0.0.0/8", "::1"]) == \
+        ["192.168.20.31", "192.168.20.0/24"]                      # /8 is too many to ask one by one
+    ips = N.expand(["192.168.20.0/30", "10.1.1.9"])
+    assert ips == ["192.168.20.1", "192.168.20.2", "10.1.1.9"]
+
+
+def test_lights_on_another_network_are_asked_directly(fakes):
+    """Broadcast and multicast don't reach them (another VLAN): the search misses, asking directly finds."""
+    nl = N.NetLights()
+    fakes.point(nl)
+    nl.targets["wiz"] = ("127.0.0.2", nl.targets["wiz"][1])        # the broadcast goes nowhere
+    nl.targets["govee"] = ("127.0.0.2", nl.targets["govee"][1])    # and so does the multicast
+    nl.set_enabled(True)
+    try:
+        time.sleep(0.6)
+        assert nl.lights == {}
+        nl.hosts = ["127.0.0.1"]
+        nl.scan()
+        assert wait(lambda: len(nl.lights) == 2)
+    finally:
+        nl.stop()

@@ -1,8 +1,10 @@
 """The Devices tab's Network lights card: look for WiZ and Govee lights on the network."""
 
+from gi.repository import Gtk
+
 from iridia.i18n import _
 from iridia.ui import widgets
-from iridia.ui.widgets import button, card, hbox, label, switch_row, vbox
+from iridia.ui.widgets import button, card, hbox, label, switch_row, vbox, wrap_row
 
 
 class NetLightsCard:
@@ -24,6 +26,23 @@ class NetLightsCard:
         c.append(self._note)
         self._again = button(_("Look again"), "refresh", "tonal small", lambda: self._send(scan=True))
         c.append(hbox(8, self._again))
+        c.append(label(_("Other networks"), ("body",)))
+        c.append(label(_("Lights on another VLAN or subnet (an IoT network, say) don't hear the search. Give their "
+                         "address, or the whole network, and they're asked directly. The router has to let this "
+                         "PC reach them (UDP 38899 for WiZ, 4001 and 4003 for Govee) and Govee's answers back to "
+                         "it (UDP 4002)."), ("small", "dim"), wrap=True))
+        self._host = Gtk.Entry(placeholder_text=_("Address or network, like 192.168.20.0/24"), hexpand=True)
+        self._host.connect("activate", lambda *_a: self._add_host())
+        c.append(hbox(8, self._host, button(_("Add"), "add", "tonal small", self._add_host)))
+        self._hosts = wrap_row(6)
+        self._hosts_now = None
+        c.append(self._hosts)
+
+    def _add_host(self):
+        h = self._host.get_text().strip()
+        if h:
+            self._host.set_text("")
+            self._send(add_host=h)
 
     def _send(self, **kw):
         def done(r):
@@ -36,6 +55,14 @@ class NetLightsCard:
         if not n:
             return
         on = bool(n.get("enabled"))
+        hosts = n.get("hosts") or []
+        if hosts != self._hosts_now:
+            self._hosts_now = hosts
+            widgets.clear(self._hosts)
+            for h in hosts:
+                self._hosts.append(button(h, "close", "tonal small", lambda h=h: self._send(remove_host=h),
+                                          tooltip=_("Remove")))
+            self._hosts.set_visible(bool(hosts))
         self._on.set_value(on)
         self._again.set_visible(on)
         found = n.get("found") or []

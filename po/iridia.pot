@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 01:45+0000\n"
+"POT-Creation-Date: 2026-11-07 13:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -551,7 +551,8 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: iridia/ui/app.py:1058 iridia/ui/app.py:1573 iridia/ui/app.py:1635 iridia/ui/scenes_tab.py:163
+#: iridia/ui/app.py:1058 iridia/ui/app.py:1573 iridia/ui/app.py:1635 iridia/ui/netlights_card.py:36
+#: iridia/ui/scenes_tab.py:163
 msgid "Add"
 msgstr ""
 
@@ -806,7 +807,7 @@ msgstr ""
 msgid "Monitor"
 msgstr ""
 
-#: iridia/ui/app.py:1347 iridia/ui/netlights_card.py:25
+#: iridia/ui/app.py:1347 iridia/ui/netlights_card.py:27
 msgid "Look again"
 msgstr ""
 
@@ -1045,7 +1046,7 @@ msgid "No strips yet"
 msgstr ""
 
 #: iridia/ui/app.py:1574 iridia/ui/app.py:1807 iridia/ui/app.py:1826 iridia/ui/app.py:2258
-#: iridia/ui/scenes_tab.py:258 iridia/ui/scenes_tab.py:268
+#: iridia/ui/netlights_card.py:64 iridia/ui/scenes_tab.py:258 iridia/ui/scenes_tab.py:268
 msgid "Remove"
 msgstr ""
 
@@ -1150,7 +1151,7 @@ msgstr ""
 msgid "Not during night mode"
 msgstr ""
 
-#: iridia/ui/app.py:1665 iridia/ui/app.py:1873 iridia/ui/app.py:1892 iridia/ui/netlights_card.py:31
+#: iridia/ui/app.py:1665 iridia/ui/app.py:1873 iridia/ui/app.py:1892 iridia/ui/netlights_card.py:50
 #: iridia/ui/scenes_tab.py:194
 msgid "Couldn't save"
 msgstr ""
@@ -3213,32 +3214,47 @@ msgid ""
 "strip's name."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:14
+#: iridia/ui/netlights_card.py:16
 msgid "Network lights"
 msgstr ""
 
-#: iridia/ui/netlights_card.py:15
+#: iridia/ui/netlights_card.py:17
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
 "lights need LAN Control switched on (Govee app, the light's settings)."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:19
+#: iridia/ui/netlights_card.py:21
 msgid "Look for WiZ and Govee lights"
 msgstr ""
 
-#: iridia/ui/netlights_card.py:50
+#: iridia/ui/netlights_card.py:29
+msgid "Other networks"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:30
+msgid ""
+"Lights on another VLAN or subnet (an IoT network, say) don't hear the search. Give their address,"
+" or the whole network, and they're asked directly. The router has to let this PC reach them (UDP "
+"38899 for WiZ, 4001 and 4003 for Govee) and Govee's answers back to it (UDP 4002)."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:34
+msgid "Address or network, like 192.168.20.0/24"
+msgstr ""
+
+#: iridia/ui/netlights_card.py:77
 msgid "Off: nothing is sent to the network."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:54
+#: iridia/ui/netlights_card.py:81
 msgid ""
 "Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
 " switched on in the Govee app."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:57
+#: iridia/ui/netlights_card.py:84
 msgid ""
 "Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
 "the same."

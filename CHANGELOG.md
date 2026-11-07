@@ -6,7 +6,8 @@
   on`). Iridia finds them over the network with their own local protocols, with nothing to pair, and
   each becomes a device like a strip: wallpaper colours, brightness, scenes, night mode, lock and sleep.
   They keep working in their own apps and in Google Home. Govee lights need *LAN Control* on in the
-  Govee app.
+  Govee app. Lights on another VLAN or subnet (an IoT network) are asked directly: give their address
+  or network under *Other networks* (`iridia netlights add 192.168.20.0/24`).
 
 ## 1.3.7 — 2026-11-02
 

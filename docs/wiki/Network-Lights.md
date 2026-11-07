@@ -29,8 +29,28 @@ at the wall shows it again within a minute).
   locks: its card, *Advanced*, the lock and idle setting.
 - **Same network.** Iridia finds lights with a broadcast (WiZ, port 38899) and a multicast (Govee,
   239.255.255.250, answers on port 4002), so they have to be on the network your PC is on, and a
-  firewall has to let those through. If another program already uses port 4002, Govee lights can't
-  answer, and the card says so.
+  firewall has to let those through; for lights on another VLAN, see below. If another program
+  already uses port 4002, Govee lights can't answer, and the card says so.
+
+## Lights on another VLAN or subnet
+
+The search (a broadcast for WiZ, a multicast for Govee) stays on your PC's own network: routers don't
+pass it on. Lights on an IoT network or another VLAN don't hear it. Under *Other networks*, give their
+address (`192.168.20.31`) or their whole network (`192.168.20.0/24`, up to 1024 addresses), and Iridia
+asks each address directly at every search, which the router passes on like any other traffic.
+
+The router's firewall has to allow, between the two networks:
+
+| From | To | UDP port | What |
+| --- | --- | --- | --- |
+| this PC | the lights | 38899 | WiZ: the search, and colours (the light answers from the same port) |
+| this PC | the lights | 4001 | Govee: the search |
+| the lights | this PC | 4002 | Govee: its answer (to another port, so a firewall that only lets replies back doesn't let it through) |
+| this PC | the lights | 4003 | Govee: colours |
+
+Many routers let devices on the main network reach the IoT network and only block the other way: then
+only the Govee row from the lights to this PC needs a rule. A light that keeps the same address (a
+DHCP reservation for it on the router) is the easiest to give: add that one address.
 
 ## Command line
 
@@ -39,4 +59,6 @@ iridia netlights          # on or off, and the lights found
 iridia netlights on       # look for them (and keep them as devices)
 iridia netlights scan     # look again now
 iridia netlights off
+iridia netlights add 192.168.20.0/24     # also ask these directly (another VLAN or subnet)
+iridia netlights remove 192.168.20.0/24
 ```

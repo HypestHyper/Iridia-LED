@@ -463,10 +463,10 @@ def cmd_freeze(args):
                    "Colors frozen. Wallpaper changes are ignored until 'iridia unfreeze'.")
 
 
-def _report(req, text):
+def _report(req, text, timeout=None):
     """Send a request and print text(response) (or the error)."""
     try:
-        resp = _client().send(req)
+        resp = _client().send(req, timeout=timeout) if timeout else _client().send(req)
     except Exception as e:                  # noqa: BLE001
         print(f"Couldn't reach the daemon: {e}", file=sys.stderr)
         return 1
@@ -928,7 +928,8 @@ def cmd_netlights(args):
             print("Use: iridia netlights test ADDRESS", file=sys.stderr)
             return 2
         req["probe"] = args.address
-        return _report(req, lambda r: probe_text(r.get("probe") or {}))
+        print(f"Asking {args.address} (a few seconds)...")
+        return _report(req, lambda r: probe_text(r.get("probe") or {}), timeout=8.0)
     if args.action == "add-light":
         kind, ip = args.address, args.extra
         if kind not in ("govee", "wiz") or not ip:

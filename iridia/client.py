@@ -167,7 +167,8 @@ class Client:
 
     def netlights(self, **kw) -> dict:
         """Network lights (WiZ, Govee): enabled, scan, or nothing to ask."""
-        return self._ipc.send(dict(kw, cmd="netlights"))
+        # a test waits for the light's answer (up to about 3 seconds)
+        return self._ipc.send(dict(kw, cmd="netlights"), timeout=8.0 if kw.get("probe") else None)
 
     def scenes(self, **kw) -> dict:
         """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,

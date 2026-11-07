@@ -217,6 +217,7 @@ class Daemon:
         from iridia.netlights import NetLights
         self.netlights = NetLights()              # WiZ and Govee lights on the network (off until switched on)
         self._left_alone: set = set()             # zone keys Iridia doesn't control right now ("hands_off")
+        self._on_demand_due: set = set()          # "only when I change it" devices just changed: send once
         self.focuswatch = None
         self._scene_ov: Optional[dict] = None     # the look on every strip now (a keybind's overlay wins)
         self._scene_look: Optional[dict] = None
@@ -618,6 +619,8 @@ class Daemon:
             dev_cfg = devices.get(t["device"])
             if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True):
                 continue
+            if dev_cfg.get("on_demand") or dev_cfg.get("hands_off"):
+                continue                    # left to its own app: no flashes either
             zones = dev_cfg.get("zones")
             if t["zone"]:
                 raw = zones.get(t["zone"]) if isinstance(zones, dict) else None
@@ -2049,6 +2052,8 @@ class Daemon:
             changes["session_ignore"] = True if req["session_ignore"] else None
         if "independent" in req:               # on its own: ignores the monitor, night mode, lock and sleep
             changes["independent"] = True if req["independent"] else None
+        if "on_demand" in req:                 # only when changed on its card; never on or off
+            changes["on_demand"] = True if req["on_demand"] else None
         if "hands_off" in req:                 # Iridia sends it nothing (it keeps what it shows)
             changes["hands_off"] = True if req["hands_off"] else None
         if "keep_color" in req:                # a network light: its own app's colour stays
@@ -2260,6 +2265,8 @@ class Daemon:
         t = time.time() - self._start_time
         self.netlights.set_keep_color(n for n, c in devices_cfg.items()
                                       if isinstance(c, dict) and c.get("net") and c.get("keep_color"))
+        self.netlights.on_demand = {n for n, c in devices_cfg.items()
+                                    if isinstance(c, dict) and c.get("net") and c.get("on_demand")}
         for name, dev_cfg in devices_cfg.items():
             if isinstance(dev_cfg, dict) and dev_cfg.get("net") and not self.netlights.has(name):
                 continue                    # a network light that hasn't answered (yet)
@@ -2274,8 +2281,19 @@ class Daemon:
         zones = dev_cfg.get("zones")
         targets = ([(zn, zc) for zn, zc in zones.items() if isinstance(zc, dict)]
                    if isinstance(zones, dict) and zones else [("", dev_cfg)])
+        on_demand = bool(dev_cfg.get("on_demand"))
+        if on_demand and name not in self._on_demand_due:
+            return                          # only when you change it on its card: nothing to send now
+        self._on_demand_due.discard(name)
         for zname, zcfg in targets:
             key = self._zone_key(name, zname)
+            if on_demand:
+                # what its card says, and nothing else: no wallpaper change, monitor, lock, sleep, scene
+                # or keybind on top, and never on or off (that's left to its own app and automations)
+                zc = dict(clean_zone_cfg(zcfg), independent=True, on_demand=True)
+                self._last_sent.pop(key, None)
+                self._update_zone(name, zname, zc, t)
+                continue
             if zcfg.get("hands_off"):
                 # not controlled by Iridia right now: nothing is sent, it keeps what it shows
                 self._left_alone.add(key)
@@ -2321,8 +2339,10 @@ class Daemon:
         exact = False                                        # send the colours untouched
         levels = None                                        # sensor parts: each LED's level, applied last
 
-        override = self._override_colors(device_name, zone_name, led_count, bool(zcfg.get("independent")))
-        ov = self._ov(key) or {}
+        on_demand = bool(zcfg.get("on_demand"))
+        override = None if on_demand else self._override_colors(device_name, zone_name, led_count,
+                                                                bool(zcfg.get("independent")))
+        ov = {} if on_demand else (self._ov(key) or {})
         power = ov.get("power")
         if override is not None:
             final_colors = override
@@ -2525,8 +2545,8 @@ class Daemon:
                 for zn, raw in targets:
                     if zn and not raw.get("enabled", True):
                         continue
-                    if raw.get("hands_off"):
-                        continue                    # not Iridia's right now
+                    if raw.get("hands_off") or raw.get("on_demand") or dev_cfg.get("on_demand"):
+                        continue                    # not Iridia's right now, or only when changed
                     key = self._zone_key(dev, zn)
                     zc = clean_zone_cfg(raw)
                     anim = self._zone_animation(key, zc)
@@ -2877,7 +2897,26 @@ class Daemon:
             return {"ok": False, "error": str(e)}
         finally:
             if req.get("cmd") not in ("status", "ping"):
+                self._mark_on_demand(req)
                 self._wake.set()            # show a change now, not at the next half-second tick
+
+    def _on_demand_devices(self) -> set:
+        return {n for n, c in self.config.devices_view.items() if isinstance(c, dict) and c.get("on_demand")}
+
+    def _mark_on_demand(self, req: dict):
+        """A change made on an "only when I change it" device's card (or on the Everything card): it gets
+        its colour and brightness once, now. Choosing the mode itself sends nothing."""
+        if "on_demand" in req or "hands_off" in req:
+            return
+        dev = req.get("device")
+        demand = self._on_demand_devices()
+        if dev in demand:
+            self._on_demand_due.add(dev)
+        elif req.get("cmd") == "set_all":
+            self._on_demand_due |= demand
+        else:
+            return
+        self._needs_update = True
 
     def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd", "")

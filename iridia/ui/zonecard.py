@@ -362,21 +362,37 @@ class ZoneCard(Gtk.Box):
                                                  bool(self.cfg.get("session_ignore")), self._on_session_ignore)
             br.append(row5)
             # for using a device only now and then: Iridia leaves it alone, or keeps out of its way
-            row6, self._control = switch_row(_("Let Iridia control it"), not self.cfg.get("hands_off"),
-                                             lambda v: self._strip_set(hands_off=not v))
-            br.append(row6)
-            br.append(label(_("Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app "
-                              "can set it). The switch at the top of the card turns it off instead."), ("small", "faint"), wrap=True))
-            row7, self._indep = switch_row(_("On its own: ignore the monitor, night mode, lock and sleep"),
-                                           bool(self.cfg.get("independent")),
-                                           lambda v: self._strip_set(independent=bool(v)))
-            br.append(row7)
-            self._keep = None
+            self._usage = None
+            self._usage_note = None
+            self._control_row = self._sess_row = row5
             if self.cfg.get("net"):
-                row8, self._keep = switch_row(_("Keep its own colour (Iridia sets only brightness and on/off)"),
-                                              bool(self.cfg.get("keep_color")),
-                                              lambda v: self._strip_set(keep_color=bool(v)))
-                br.append(row8)
+                # a network light: how much Iridia does with it, next to its own app and automations
+                self._usage = Group([("rest", _("With the rest")), ("demand", _("Only when I change it")),
+                                     ("none", _("Not at all"))], self._usage_of(self.cfg), self._on_usage)
+                # at the top of the card: it decides what the rest of the card does
+                box = hbox(10, label(_("How Iridia uses it"), ("body",)), self._usage)
+                self._usage_note = label("", ("small", "faint"), wrap=True)
+                self._details.insert_child_after(box, self._hw_note)
+                self._details.insert_child_after(self._usage_note, box)
+                self._control = None
+            else:
+                row6, self._control = switch_row(_("Let Iridia control it"), not self.cfg.get("hands_off"),
+                                                 lambda v: self._strip_set(hands_off=not v))
+                br.append(row6)
+                br.append(label(_("Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app "
+                                  "can set it). The switch at the top of the card turns it off instead."),
+                                ("small", "faint"), wrap=True))
+            self._indep_row, self._indep = switch_row(_("On its own: ignore the monitor, night mode, lock and sleep"),
+                                                      bool(self.cfg.get("independent")),
+                                                      lambda v: self._strip_set(independent=bool(v)))
+            br.append(self._indep_row)
+            self._keep = self._keep_row = None
+            if self.cfg.get("net"):
+                self._keep_row, self._keep = switch_row(
+                    _("Keep its own colour (Iridia sets only brightness and on/off)"), bool(self.cfg.get("keep_color")),
+                    lambda v: self._strip_set(keep_color=bool(v)))
+                br.append(self._keep_row)
+                self._show_usage(self._usage_of(self.cfg))
         r4 = hbox(10)
         r4.set_margin_top(6)
         r4.append(label(_("Color correction"), ("small", "dim")))
@@ -955,6 +971,31 @@ class ZoneCard(Gtk.Box):
         self._call(self.client.set_zone_brightness_range, self.device_name, self.zone_name, self._range.lo,
                    self._range.hi)
 
+    USAGE_NOTES = {
+        "rest": _("Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."),
+        "demand": _("Iridia sends its colour and brightness only when you change them here, and never switches "
+                    "it on or off: its own app and automations (Google Home, say) stay in charge. Your choice "
+                    "stays saved. A light may switch itself on when it gets a colour."),
+        "none": _("Iridia sends it nothing: it keeps whatever its own app set."),
+    }
+
+    @staticmethod
+    def _usage_of(cfg) -> str:
+        return "none" if cfg.get("hands_off") else "demand" if cfg.get("on_demand") else "rest"
+
+    def _on_usage(self, v):
+        self._strip_set(hands_off=v == "none", on_demand=v == "demand")
+        self._show_usage(v)
+
+    def _show_usage(self, v):
+        if self._usage_note is None:
+            return
+        self._usage_note.set_label(self.USAGE_NOTES.get(v, ""))
+        rest = v == "rest"
+        for row in (self._sess_row, self._indep_row, self._keep_row):
+            if row is not None:
+                row.set_visible(rest)
+
     def _on_session_ignore(self, v):
         self._strip_set(session_ignore=bool(v))
 
@@ -1052,7 +1093,11 @@ class ZoneCard(Gtk.Box):
         self._gamma.set_value(zcfg.get("gamma_correction", False))
         if hasattr(self, "_sess_ignore"):
             self._sess_ignore.set_value(bool(zcfg.get("session_ignore")))
-            self._control.set_value(not zcfg.get("hands_off"))
+            if self._control is not None:
+                self._control.set_value(not zcfg.get("hands_off"))
+            if self._usage is not None:
+                self._usage.set_active(self._usage_of(zcfg))
+                self._show_usage(self._usage_of(zcfg))
             self._indep.set_value(bool(zcfg.get("independent")))
             if self._keep is not None:
                 self._keep.set_value(bool(zcfg.get("keep_color")))

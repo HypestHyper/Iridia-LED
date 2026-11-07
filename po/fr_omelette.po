@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:06+0000\n"
+"POT-Creation-Date: 2026-11-07 14:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -2546,6 +2546,9 @@ msgstr "Ou ajoute-la quand même : Iridia lui envoie juste des couleurs."
 msgid "Its card shows up in a moment, once Iridia has added it."
 msgstr "Sa carte arrive dans un instant."
 
+msgid "Added: this is its card. Settings next to it in Network lights comes back here."
+msgstr "Ajoutée : voici sa carte."
+
 msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
 msgstr "Ajoutée. Sa carte est au-dessus : Réglages y mène. Voilà."
 
@@ -2999,6 +3002,18 @@ msgstr "Bonsoir"
 msgid "Stay lit when the screen locks or you're away"
 msgstr "Toujours allumé, même en vacances"
 
+msgid "With the rest"
+msgstr "Avec le reste"
+
+msgid "Only when I change it"
+msgstr "Seulement quand je change"
+
+msgid "Not at all"
+msgstr "Pas du tout"
+
+msgid "How Iridia uses it"
+msgstr "Comment Iridia l'utilise"
+
 msgid "Let Iridia control it"
 msgstr "Laisser Iridia la piloter"
 
@@ -3094,6 +3109,20 @@ msgstr "Je ne sais quoi"
 
 msgid "Change this color"
 msgstr "Ceci n'est pas une pipe"
+
+msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
+msgstr "Comme une bande. Voilà."
+
+msgid ""
+"Iridia sends its colour and brightness only when you change them here, and never switches it on "
+"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
+" light may switch itself on when it gets a colour."
+msgstr ""
+"Couleur et luminosité seulement quand tu les changes ici. Jamais allumée ou éteinte par Iridia. "
+"Google Home reste le chef."
+
+msgid "Iridia sends it nothing: it keeps whatever its own app set."
+msgstr "Iridia ne lui envoie rien."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

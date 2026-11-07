@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:06+0000\n"
+"POT-Creation-Date: 2026-11-07 14:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "Iridia {version}"
 msgstr ""
 
 #: iridia/ui/app.py:221 iridia/ui/app.py:1344 iridia/ui/app.py:1345 iridia/ui/app.py:1402
-#: iridia/ui/app.py:1410 iridia/ui/zonecard.py:108 iridia/ui/zonecard.py:342 iridia/ui/zonecard.py:404
+#: iridia/ui/app.py:1410 iridia/ui/zonecard.py:108 iridia/ui/zonecard.py:342 iridia/ui/zonecard.py:420
 msgid "Automatic"
 msgstr ""
 
@@ -133,7 +133,7 @@ msgstr ""
 msgid "Keybinds"
 msgstr ""
 
-#: iridia/ui/app.py:430 iridia/ui/netlights_card.py:131 iridia/ui/sections_panel.py:237
+#: iridia/ui/app.py:430 iridia/ui/netlights_card.py:142 iridia/ui/sections_panel.py:237
 msgid "Settings"
 msgstr ""
 
@@ -211,7 +211,7 @@ msgstr ""
 msgid "Monitor sync (DDC)"
 msgstr ""
 
-#: iridia/ui/app.py:644 iridia/ui/zonecard.py:382
+#: iridia/ui/app.py:644 iridia/ui/zonecard.py:398
 msgid "Color correction"
 msgstr ""
 
@@ -1046,7 +1046,7 @@ msgid "No strips yet"
 msgstr ""
 
 #: iridia/ui/app.py:1594 iridia/ui/app.py:1827 iridia/ui/app.py:1846 iridia/ui/app.py:2278
-#: iridia/ui/netlights_card.py:116 iridia/ui/netlights_card.py:136 iridia/ui/scenes_tab.py:258
+#: iridia/ui/netlights_card.py:127 iridia/ui/netlights_card.py:147 iridia/ui/scenes_tab.py:258
 #: iridia/ui/scenes_tab.py:268
 msgid "Remove"
 msgstr ""
@@ -1152,7 +1152,7 @@ msgstr ""
 msgid "Not during night mode"
 msgstr ""
 
-#: iridia/ui/app.py:1685 iridia/ui/app.py:1893 iridia/ui/app.py:1912 iridia/ui/netlights_card.py:102
+#: iridia/ui/app.py:1685 iridia/ui/app.py:1893 iridia/ui/app.py:1912 iridia/ui/netlights_card.py:113
 #: iridia/ui/scenes_tab.py:194
 msgid "Couldn't save"
 msgstr ""
@@ -1944,7 +1944,7 @@ msgid "Reset to defaults"
 msgstr ""
 
 #: iridia/ui/calibration_editor.py:37 iridia/ui/keybinds_tab.py:390 iridia/ui/sections_panel.py:429
-#: iridia/ui/zonecard.py:969
+#: iridia/ui/zonecard.py:1010
 msgid "Done"
 msgstr ""
 
@@ -2219,7 +2219,7 @@ msgid "Comet"
 msgstr ""
 
 #: iridia/ui/effects.py:18 iridia/ui/layout_notify.py:20 iridia/ui/layout_tab.py:35
-#: iridia/ui/zonecard.py:570
+#: iridia/ui/zonecard.py:586
 msgid "Fill"
 msgstr ""
 
@@ -2782,7 +2782,7 @@ msgstr ""
 msgid "All settings"
 msgstr ""
 
-#: iridia/ui/layout_notify.py:346 iridia/ui/zonecard.py:571
+#: iridia/ui/layout_notify.py:346 iridia/ui/zonecard.py:587
 msgid "Clear"
 msgstr ""
 
@@ -2847,7 +2847,7 @@ msgstr ""
 msgid "Find LEDs: light one LED on the real strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:34 iridia/ui/zonecard.py:561 iridia/ui/zonecard.py:567
+#: iridia/ui/layout_tab.py:34 iridia/ui/zonecard.py:577 iridia/ui/zonecard.py:583
 msgid "Paint"
 msgstr ""
 
@@ -2855,7 +2855,7 @@ msgstr ""
 msgid "Erase (back to the zone's own color)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:35 iridia/ui/zonecard.py:32 iridia/ui/zonecard.py:568
+#: iridia/ui/layout_tab.py:35 iridia/ui/zonecard.py:32 iridia/ui/zonecard.py:584
 msgid "Gradient"
 msgstr ""
 
@@ -2863,8 +2863,8 @@ msgstr ""
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:112 iridia/ui/layout_tab.py:880 iridia/ui/zonecard.py:564
-#: iridia/ui/zonecard.py:768
+#: iridia/ui/layout_tab.py:112 iridia/ui/layout_tab.py:880 iridia/ui/zonecard.py:580
+#: iridia/ui/zonecard.py:784
 msgid "Paint color"
 msgstr ""
 
@@ -3080,7 +3080,7 @@ msgstr ""
 msgid "clone of {strip} (shows the same colors)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1153 iridia/ui/zonecard.py:273 iridia/ui/zonecard.py:969
+#: iridia/ui/layout_tab.py:1153 iridia/ui/zonecard.py:273 iridia/ui/zonecard.py:1010
 msgid "Identify"
 msgstr ""
 
@@ -3298,29 +3298,33 @@ msgstr ""
 msgid "Its card shows up in a moment, once Iridia has added it."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:91
+#: iridia/ui/netlights_card.py:97
+msgid "Added: this is its card. Settings next to it in Network lights comes back here."
+msgstr ""
+
+#: iridia/ui/netlights_card.py:102
 msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:128
+#: iridia/ui/netlights_card.py:139
 msgid "added by address"
 msgstr ""
 
-#: iridia/ui/netlights_card.py:132
+#: iridia/ui/netlights_card.py:143
 msgid "Its card: colours, brightness, on and off"
 msgstr ""
 
-#: iridia/ui/netlights_card.py:141
+#: iridia/ui/netlights_card.py:152
 msgid "Off: nothing is sent to the network."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:145
+#: iridia/ui/netlights_card.py:156
 msgid ""
 "Looking… Lights answer within a few seconds. A Govee light that doesn't show up needs LAN Control"
 " switched on in the Govee app."
 msgstr ""
 
-#: iridia/ui/netlights_card.py:148
+#: iridia/ui/netlights_card.py:159
 msgid ""
 "Each light has its own card above, like a strip: pattern, brightness, scenes and the rest work "
 "the same."
@@ -3587,7 +3591,7 @@ msgstr ""
 msgid "LED {first}"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:269 iridia/ui/zonecard.py:708
+#: iridia/ui/sections_panel.py:269 iridia/ui/zonecard.py:724
 #, python-brace-format
 msgid "{leds} LEDs: {sizes}"
 msgstr ""
@@ -3596,14 +3600,14 @@ msgstr ""
 msgid "Add a divider to split this strip into parts."
 msgstr ""
 
-#: iridia/ui/sections_panel.py:274 iridia/ui/zonecard.py:714
+#: iridia/ui/sections_panel.py:274 iridia/ui/zonecard.py:730
 #, python-brace-format
 msgid "The parts are {n} LED apart. Space evenly makes them match."
 msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/sections_panel.py:277 iridia/ui/zonecard.py:717
+#: iridia/ui/sections_panel.py:277 iridia/ui/zonecard.py:733
 #, python-brace-format
 msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
 msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
@@ -3698,7 +3702,7 @@ msgstr ""
 msgid "#{k}  (right-click to delete)"
 msgstr ""
 
-#: iridia/ui/widgets.py:709 iridia/ui/zonecard.py:927
+#: iridia/ui/widgets.py:709 iridia/ui/zonecard.py:943
 msgid "Save a new color"
 msgstr ""
 
@@ -3837,7 +3841,7 @@ msgstr ""
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr ""
 
-#: iridia/ui/zonecard.py:289 iridia/ui/zonecard.py:638
+#: iridia/ui/zonecard.py:289 iridia/ui/zonecard.py:654
 msgid "Edit layout"
 msgstr ""
 
@@ -3883,136 +3887,167 @@ msgstr ""
 msgid "Stay lit when the screen locks or you're away"
 msgstr ""
 
-#: iridia/ui/zonecard.py:365
+#: iridia/ui/zonecard.py:370
+msgid "With the rest"
+msgstr ""
+
+#: iridia/ui/zonecard.py:370
+msgid "Only when I change it"
+msgstr ""
+
+#: iridia/ui/zonecard.py:371
+msgid "Not at all"
+msgstr ""
+
+#: iridia/ui/zonecard.py:373
+msgid "How Iridia uses it"
+msgstr ""
+
+#: iridia/ui/zonecard.py:379
 msgid "Let Iridia control it"
 msgstr ""
 
-#: iridia/ui/zonecard.py:368
+#: iridia/ui/zonecard.py:382
 msgid ""
 "Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
 "switch at the top of the card turns it off instead."
 msgstr ""
 
-#: iridia/ui/zonecard.py:370
+#: iridia/ui/zonecard.py:385
 msgid "On its own: ignore the monitor, night mode, lock and sleep"
 msgstr ""
 
-#: iridia/ui/zonecard.py:376
+#: iridia/ui/zonecard.py:392
 msgid "Keep its own colour (Iridia sets only brightness and on/off)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:398
+#: iridia/ui/zonecard.py:414
 msgid "Strip type and wiring"
 msgstr ""
 
-#: iridia/ui/zonecard.py:402
+#: iridia/ui/zonecard.py:418
 msgid "Strip type"
 msgstr ""
 
-#: iridia/ui/zonecard.py:412
+#: iridia/ui/zonecard.py:428
 msgid "Color order"
 msgstr ""
 
-#: iridia/ui/zonecard.py:416 iridia/ui/zonecard.py:473 iridia/ui/zonecard.py:482
+#: iridia/ui/zonecard.py:432 iridia/ui/zonecard.py:489 iridia/ui/zonecard.py:498
 msgid "Test colors"
 msgstr ""
 
-#: iridia/ui/zonecard.py:419
+#: iridia/ui/zonecard.py:435
 msgid ""
 "Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far end "
 "(a one-color strip cycles red, green, blue). If the colors are wrong, change the order until they"
 " match."
 msgstr ""
 
-#: iridia/ui/zonecard.py:424
+#: iridia/ui/zonecard.py:440
 msgid "LEDs per pixel"
 msgstr ""
 
-#: iridia/ui/zonecard.py:431
+#: iridia/ui/zonecard.py:447
 msgid "Power limit"
 msgstr ""
 
-#: iridia/ui/zonecard.py:435
+#: iridia/ui/zonecard.py:451
 msgid "A  (0 = no limit)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:439
+#: iridia/ui/zonecard.py:455
 msgid ""
 "Long 5V strips at full white pull a lot of current: the far end turns orange or pink, or the "
 "controller resets. Set your power supply's amps (minus a bit) and Iridia dims only when a color "
 "would go over it. The estimate assumes 60 mA per LED at full white."
 msgstr ""
 
-#: iridia/ui/zonecard.py:448
+#: iridia/ui/zonecard.py:464
 msgid "Resize the OpenRGB zone"
 msgstr ""
 
-#: iridia/ui/zonecard.py:473
+#: iridia/ui/zonecard.py:489
 msgid "Stop test"
 msgstr ""
 
-#: iridia/ui/zonecard.py:490
+#: iridia/ui/zonecard.py:506
 #, python-brace-format
 msgid "Asked OpenRGB for {need} LEDs on this zone"
 msgstr ""
 
-#: iridia/ui/zonecard.py:508
+#: iridia/ui/zonecard.py:524
 #, python-brace-format
 msgid "Notifications: LEDs {leds}"
 msgstr ""
 
-#: iridia/ui/zonecard.py:510
+#: iridia/ui/zonecard.py:526
 msgid "(off)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:532
+#: iridia/ui/zonecard.py:548
 #, python-brace-format
 msgid "(looks like: {type})"
 msgstr ""
 
-#: iridia/ui/zonecard.py:534
+#: iridia/ui/zonecard.py:550
 #, python-brace-format
 msgid "Strip: {type}"
 msgstr ""
 
-#: iridia/ui/zonecard.py:541
+#: iridia/ui/zonecard.py:557
 #, python-brace-format
 msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
 msgstr ""
 
-#: iridia/ui/zonecard.py:544
+#: iridia/ui/zonecard.py:560
 #, python-brace-format
 msgid "Dimmed to stay under the limit (would be {amps:.1f} A)."
 msgstr ""
 
-#: iridia/ui/zonecard.py:551
+#: iridia/ui/zonecard.py:567
 #, python-brace-format
 msgid "For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark."
 msgstr ""
 
-#: iridia/ui/zonecard.py:567
+#: iridia/ui/zonecard.py:583
 msgid "Erase"
 msgstr ""
 
-#: iridia/ui/zonecard.py:638
+#: iridia/ui/zonecard.py:654
 msgid "Done editing"
 msgstr ""
 
-#: iridia/ui/zonecard.py:662
+#: iridia/ui/zonecard.py:678
 msgid "Colors in order (click to change):"
 msgstr ""
 
-#: iridia/ui/zonecard.py:682
+#: iridia/ui/zonecard.py:698
 msgid "Change this color"
 msgstr ""
 
-#: iridia/ui/zonecard.py:989
+#: iridia/ui/zonecard.py:975
+msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
+msgstr ""
+
+#: iridia/ui/zonecard.py:976
+msgid ""
+"Iridia sends its colour and brightness only when you change them here, and never switches it on "
+"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
+" light may switch itself on when it gets a colour."
+msgstr ""
+
+#: iridia/ui/zonecard.py:979
+msgid "Iridia sends it nothing: it keeps whatever its own app set."
+msgstr ""
+
+#: iridia/ui/zonecard.py:1030
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
 "set the size there."
 msgstr ""
 
-#: iridia/ui/zonecard.py:992
+#: iridia/ui/zonecard.py:1033
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."

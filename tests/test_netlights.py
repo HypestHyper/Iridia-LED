@@ -250,3 +250,56 @@ def test_a_test_says_what_came_back_and_a_light_can_be_added_by_address(fakes):
         assert not nl.has("Govee 127.0.0.1")
     finally:
         nl.stop()
+
+
+def test_only_when_i_change_it(fakes, tmp_path, monkeypatch):
+    """A Govee strip a Google Home automation switches on and off: Iridia never switches it, and sends
+    its colour and brightness only when they're changed on its card."""
+    from tests.test_daemon import DEVICES, FakeDDC, FakeOpenRGB
+    from iridia import daemon as daemon_mod
+    assert N.on_demand_commands("govee", (0, 0, 0)) == []
+    assert [c["msg"]["cmd"] for c in N.on_demand_commands("govee", (255, 0, 0))] == ["colorwc", "brightness"]
+    assert "state" not in N.on_demand_commands("wiz", (255, 0, 0))[0]["params"]
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    monkeypatch.setattr("iridia.setups.CONFIG_DIR", str(tmp_path / ".config" / "iridia"))
+    monkeypatch.setattr(daemon_mod, "OpenRGBController", FakeOpenRGB)
+    monkeypatch.setattr(daemon_mod, "DDCController", FakeDDC)
+    cfg = tmp_path / ".config" / "iridia"
+    cfg.mkdir(parents=True)
+    (cfg / "config.json").write_text(json.dumps({"devices": DEVICES}))
+    d = daemon_mod.Daemon()
+    try:
+        fakes.point(d.netlights)
+        d._cmd_netlights({"enabled": True})
+        assert wait(lambda: d.netlights.has("Govee H6159 36724E"))
+        d._autoadd_devices(d.netlights.list_devices())
+        name = "Govee H6159 36724E"
+        assert d.handle_command({"cmd": "set_zone_strip", "device": name, "zone": "", "on_demand": True})["ok"]
+        d._extracted_colors = ["00ff00"]
+        d._update_all_devices()
+        time.sleep(0.4)
+        assert fakes.govee_got == []                             # choosing the mode sends nothing
+        d._lights_off = True                                     # nor lights off, sleep, a new wallpaper
+        d._asleep = True
+        d._extracted_colors = ["0000ff"]
+        d._needs_update = True
+        d._update_all_devices()
+        d.netlights.resend()                                     # nor the minute's re-send
+        time.sleep(0.4)
+        assert fakes.govee_got == []
+        # changed on its card: its colour and brightness, now, and never "turn"
+        assert d.handle_command({"cmd": "set_zone_manual_brightness", "device": name, "zone": "", "value": 50})["ok"]
+        d._update_all_devices()
+        assert wait(lambda: len(fakes.govee_got) >= 2)
+        cmds = [m["cmd"] for m in fakes.govee_got]
+        assert "turn" not in cmds and cmds[:2] == ["colorwc", "brightness"]
+        assert fakes.govee_got[0]["data"]["color"] == {"r": 0, "g": 0, "b": 255}
+        assert fakes.govee_got[1]["data"]["value"] == 50
+        n = len(fakes.govee_got)
+        d._update_all_devices()                                  # and only that once
+        time.sleep(0.4)
+        assert len(fakes.govee_got) == n
+    finally:
+        d.netlights.stop()
+        d.ipc.stop()

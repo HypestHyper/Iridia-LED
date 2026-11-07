@@ -104,6 +104,20 @@ def wiz_brightness(rgb) -> dict:
     return {"method": "setPilot", "params": {"state": True, "dimming": max(10, bright)}}
 
 
+def on_demand_commands(kind: str, rgb) -> List[dict]:
+    """A colour asked for on the card of an "only when I change it" light: colour and brightness, never
+    on or off (that stays with its own app and automations); nothing for black."""
+    full, bright = split_brightness(rgb)
+    if bright == 0:
+        return []
+    if kind == "wiz":
+        return [{"method": "setPilot", "params": {"r": full[0], "g": full[1], "b": full[2],
+                                                  "dimming": max(10, bright)}}]
+    return [{"msg": {"cmd": "colorwc", "data": {"color": {"r": full[0], "g": full[1], "b": full[2]},
+                                                "colorTemInKelvin": 0}}},
+            {"msg": {"cmd": "brightness", "data": {"value": bright}}}]
+
+
 def govee_commands(rgb, was_on: Optional[bool], keep_color: bool = False) -> List[dict]:
     full, bright = split_brightness(rgb)
     if bright == 0:
@@ -173,6 +187,7 @@ class NetLights:
         self._last_scan = 0.0
         self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
         self.keep_color: set = set()                # lights whose own colour stays: brightness and on/off only
+        self.on_demand: set = set()                 # "only when I change it": never on/off, never re-sent
         self.heard: Dict[str, List[str]] = {}       # address -> what came back from it lately (for a test)
         self._manual: List[Tuple[str, str]] = []    # (kind, ip) added by address
         self.targets = {"wiz": (BROADCAST, WIZ_PORT), "govee": GOVEE_SCAN, "govee_cmd": GOVEE_CMD,
@@ -404,7 +419,13 @@ class NetLights:
         if s is None:
             return
         try:
-            keep = self._name_of(light) in self.keep_color
+            name = self._name_of(light)
+            if name in self.on_demand:
+                port = self.targets["wiz"][1] if light.kind == "wiz" else self.targets["govee_cmd"]
+                for cmd in on_demand_commands(light.kind, rgb):
+                    s.sendto(json.dumps(cmd).encode(), (light.ip, port))
+                return
+            keep = name in self.keep_color
             if light.kind == "wiz":
                 cmd = wiz_brightness(rgb) if keep else wiz_command(rgb)
                 s.sendto(json.dumps(cmd).encode(), (light.ip, self.targets["wiz"][1]))
@@ -434,6 +455,8 @@ class NetLights:
             for n, light in self.lights.items():
                 if name is not None and n != name:
                     continue
+                if name is None and n in self.on_demand:
+                    continue                    # only when changed on its card: not again by itself
                 if light.sent is not None:
                     light.pending, light.sent = light.sent, None
                 light.on = None

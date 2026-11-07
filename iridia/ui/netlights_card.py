@@ -1,6 +1,6 @@
 """The Devices tab's Network lights card: look for WiZ and Govee lights on the network."""
 
-from gi.repository import Gtk
+from gi.repository import GLib, Gtk
 
 from iridia.i18n import _
 from iridia.ui import widgets
@@ -87,7 +87,18 @@ class NetLightsCard:
             self._anyway.set_visible(False)
             self._probe.set_visible(False)
             self._host.set_text("")
+            name = f"{'WiZ' if kind == 'wiz' else 'Govee'} {self._anyway_ip}"
             self._send(add_light={"kind": kind, "ip": self._anyway_ip})
+            self._jump_to(name, 12)
+
+    def _jump_to(self, name, tries):
+        """Open the new light's card once the daemon has added it (a second or two)."""
+        if self.app.show_device_card(name):
+            self.app.toast(_("Added: this is its card. Settings next to it in Network lights comes back here."))
+            return
+        if tries > 0:
+            GLib.timeout_add(500, lambda: (self._jump_to(name, tries - 1), False)[1])
+        else:
             self.app.toast(_("Added. Its card is above the Network lights card: Settings next to it goes there."))
 
     def _add_host(self):

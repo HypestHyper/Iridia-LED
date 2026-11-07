@@ -32,6 +32,16 @@ at the wall shows it again within a minute).
   firewall has to let those through; for lights on another VLAN, see below. If another program
   already uses port 4002, Govee lights can't answer, and the card says so.
 
+## Next to its own app and automations
+
+At the top of a network light's card, *How Iridia uses it*:
+
+| | |
+| --- | --- |
+| *With the rest* (the default) | Like a strip: wallpaper colours, monitor brightness, lock, sleep, night mode, scenes, keybinds, notifications |
+| *Only when I change it* | Iridia sends its colour and brightness only at the moment you change them on its card, and **never switches it on or off**: its own app and automations (a Google Home routine that switches it on with the TV, say) stay in charge. Wallpaper changes, the monitor, lock, sleep, night mode, scenes and notifications leave it alone. Your choice stays saved, but isn't sent again by itself (not after a restart either). A light may switch itself on when it gets a colour: that's the light's doing |
+| *Not at all* | Iridia sends it nothing |
+
 ## Using a light only now and then
 
 Three switches on each device's card (under Brightness) decide how much Iridia does with it. They work

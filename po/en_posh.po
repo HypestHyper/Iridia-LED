@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:06+0000\n"
+"POT-Creation-Date: 2026-11-07 14:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2713,6 +2713,9 @@ msgstr "Or add it regardless: Iridia shall simply send it colours, which usually
 msgid "Its card shows up in a moment, once Iridia has added it."
 msgstr "Its card shall appear presently, once Iridia has added it."
 
+msgid "Added: this is its card. Settings next to it in Network lights comes back here."
+msgstr "Added: this is its card. Settings beside it under Network lights returns here."
+
 msgid "Added. Its card is above the Network lights card: Settings next to it goes there."
 msgstr "Added. Its card sits above the Network lights card: Settings beside it leads there."
 
@@ -3197,6 +3200,18 @@ msgstr "Gamma correction"
 msgid "Stay lit when the screen locks or you're away"
 msgstr "Remain lit when the screen locks or one steps away"
 
+msgid "With the rest"
+msgstr "With the others"
+
+msgid "Only when I change it"
+msgstr "Only when I alter it"
+
+msgid "Not at all"
+msgstr "Not in the least"
+
+msgid "How Iridia uses it"
+msgstr "How Iridia employs it"
+
 msgid "Let Iridia control it"
 msgstr "Permit Iridia to direct it"
 
@@ -3300,6 +3315,21 @@ msgstr "Colours in order (click to change):"
 
 msgid "Change this color"
 msgstr "Change this colour"
+
+msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
+msgstr "Like a strip: wallpaper colours, the monitor, the lock, sleep, tableaux and the rest."
+
+msgid ""
+"Iridia sends its colour and brightness only when you change them here, and never switches it on "
+"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
+" light may switch itself on when it gets a colour."
+msgstr ""
+"Iridia sends its colour and brightness only when you alter them here, and never switches it on or"
+" off: its own application and automations (Google Home, for instance) remain in charge. Your "
+"choice is kept. A lamp may switch itself on upon receiving a colour."
+
+msgid "Iridia sends it nothing: it keeps whatever its own app set."
+msgstr "Iridia sends it nothing whatsoever: it keeps whatever its own application set."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

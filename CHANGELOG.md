@@ -12,6 +12,9 @@
   an editor on the Scenes tab: a name, when (anything fullscreen, or some apps in front), which strips
   (or everything) and the look. Switch each on or off, try it, and move it up or down: the higher one
   wins on a strip two scenes share. Your scenes from before carry over.
+- **Safer without XDG_RUNTIME_DIR:** where it isn't set (cron, `sudo -u`, some SSH sessions), the
+  daemon's socket, lock and pid files now go in `/run/user/UID` or `~/.cache/iridia/run` instead of the
+  shared `/tmp`, where another user could have put a file of their own under the same name first.
 - **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
   it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
 - **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:

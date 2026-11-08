@@ -30,6 +30,7 @@ from iridia.openrgb_ctl import OpenRGBController, zones_of
 from iridia import openrgb_server
 from iridia.ddc import DDCController
 from iridia.ipc import IPCServer
+from iridia.rundir import runtime_path
 
 
 def _num(v, default, lo, hi):
@@ -179,10 +180,7 @@ class Daemon:
             self.config.set("logging.enabled", True)
         self.logger = setup_logging(self.config)
 
-        self._socket_path = os.path.join(
-            os.environ.get("XDG_RUNTIME_DIR", "/tmp"),
-            f"iridia-{os.getuid()}.sock"
-        )
+        self._socket_path = runtime_path(f"iridia-{os.getuid()}.sock")
         self._config_dir = os.path.expanduser("~/.config/iridia")
 
         self.detector = WallpaperDetector(
@@ -4059,8 +4057,7 @@ def _acquire_single_instance_lock():
     Returns the open lock file (keep a reference!) or None if another
     instance already holds it."""
     import fcntl
-    base = os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
-    path = os.path.join(base, f"iridia-daemon-{os.getuid()}.lock")
+    path = runtime_path(f"iridia-daemon-{os.getuid()}.lock")
     fh = open(path, "a+")
     try:
         fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)

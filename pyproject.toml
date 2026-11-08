@@ -53,7 +53,7 @@ target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint]
-# Real errors only: undefined names, unused imports/variables, syntax errors, likely bugs.
-select = ["F", "E9", "B", "PLE"]
+# Real errors only: undefined names, unused imports/variables, syntax errors, likely bugs, files in the shared /tmp.
+select = ["F", "E9", "B", "PLE", "S108"]
 # zip() without strict=: pairing a list with itself shifted by one (zip(a, a[1:])) is meant to stop short
 ignore = ["B905"]

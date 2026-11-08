@@ -393,9 +393,14 @@ def hypr_sockets() -> Optional[Tuple[str, str]]:
     if not sig:
         return None
     run = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
-    for base in (os.path.join(run, "hypr", sig), os.path.join("/tmp", "hypr", sig)):
+    old = os.path.join("/tmp", "hypr", sig)  # noqa: S108 (where older Hyprland puts it)
+    for base in (os.path.join(run, "hypr", sig), old):
         ev = os.path.join(base, ".socket2.sock")
-        if os.path.exists(ev):
+        try:
+            ours = os.stat(ev).st_uid == os.getuid()    # in the shared /tmp, only Hyprland's own (ours)
+        except OSError:
+            continue
+        if ours:
             return os.path.join(base, ".socket.sock"), ev
     return None
 

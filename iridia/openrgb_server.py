@@ -13,7 +13,7 @@ starts that server:
 Two OpenRGB instances fight over the same hardware, so nothing is started while another OpenRGB
 process runs or while something else is set up to start it (another unit, an autostart entry, a
 compositor line). Iridia only ever restarts an OpenRGB it started itself: the one in its PID file
-($XDG_RUNTIME_DIR/iridia-openrgb.pid), or its own systemd unit.
+($XDG_RUNTIME_DIR/iridia-openrgb.pid, see rundir.py), or its own systemd unit.
 """
 
 import glob
@@ -26,6 +26,8 @@ import subprocess
 import threading
 import time
 from typing import List, Optional, Tuple
+
+from iridia.rundir import runtime_path
 
 logger = logging.getLogger("iridia.openrgb_server")
 
@@ -326,8 +328,7 @@ def _start_time(pid: int) -> Optional[str]:
 
 
 def pid_path() -> str:
-    base = os.environ.get("XDG_RUNTIME_DIR")
-    return os.path.join(base, "iridia-openrgb.pid") if base else f"/tmp/iridia-openrgb-{os.getuid()}.pid"
+    return runtime_path("iridia-openrgb.pid")
 
 
 def read_pid() -> Optional[int]:

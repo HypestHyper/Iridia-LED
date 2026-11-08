@@ -9,11 +9,9 @@ from typing import Optional
 
 from iridia import assets
 from iridia.ipc import IPCClient
+from iridia.rundir import runtime_path
 
-SOCKET_PATH = os.path.join(
-    os.environ.get("XDG_RUNTIME_DIR", "/tmp"),
-    f"iridia-{os.getuid()}.sock"
-)
+SOCKET_PATH = runtime_path(f"iridia-{os.getuid()}.sock")
 
 SERVICE_NAME = "iridia-daemon.service"
 SERVICE_PATH = os.path.expanduser(f"~/.config/systemd/user/{SERVICE_NAME}")
@@ -1513,9 +1511,8 @@ def _service_remove():
     return 0
 
 def _lock_pid():
-    base = os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
     try:
-        with open(os.path.join(base, f"iridia-daemon-{os.getuid()}.lock")) as fh:
+        with open(runtime_path(f"iridia-daemon-{os.getuid()}.lock")) as fh:
             return int(fh.read().strip())
     except (OSError, ValueError):
         return None

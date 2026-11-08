@@ -2,11 +2,9 @@
 
 import os
 from iridia.ipc import IPCClient
+from iridia.rundir import runtime_path
 
-SOCKET_PATH = os.path.join(
-    os.environ.get("XDG_RUNTIME_DIR", "/tmp"),
-    f"iridia-{os.getuid()}.sock"
-)
+SOCKET_PATH = runtime_path(f"iridia-{os.getuid()}.sock")
 
 class Client:
     def __init__(self):

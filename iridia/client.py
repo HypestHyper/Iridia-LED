@@ -90,7 +90,7 @@ class Client:
     def set_zone_gamma(self, device: str, zone: str, enabled: bool) -> dict:
         return self._ipc.send({"cmd": "set_zone_gamma", "device": device, "zone": zone, "enabled": enabled})
 
-    def set_wallpaper_color(self, index: int = None, hex_color: str = None) -> dict:
+    def set_wallpaper_color(self, index: int | None = None, hex_color: str | None = None) -> dict:
         req = {"cmd": "set_wallpaper_color"}
         if index is not None:
             req["index"] = index

@@ -22,7 +22,7 @@ import tarfile
 import time
 import urllib.error
 import urllib.request
-from typing import Callable, Optional
+from collections.abc import Callable
 
 REPO = "HypestHyper/Iridia-LED"
 API = os.environ.get("IRIDIA_UPDATE_API") or f"https://api.github.com/repos/{REPO}"
@@ -73,7 +73,7 @@ def _get(url: str, timeout: float = 15.0) -> bytes:
         raise UpdateError(f"Couldn't reach GitHub ({reason}). Are you online?") from None
 
 
-def _release_info(rel: dict) -> Optional[dict]:
+def _release_info(rel: dict) -> dict | None:
     version = str(rel.get("tag_name") or "").lstrip("v")
     if not version or rel.get("draft"):
         return None
@@ -152,7 +152,7 @@ def install_kind(venv: str = VENV) -> str:
     return "venv" if here == os.path.realpath(venv) and os.path.isdir(venv) else "source"
 
 
-def prev_version(venv: str = VENV) -> Optional[str]:
+def prev_version(venv: str = VENV) -> str | None:
     """The version kept from before the last update, if any."""
     prev = venv + ".prev"
     for d in _glob_dist_info(prev):

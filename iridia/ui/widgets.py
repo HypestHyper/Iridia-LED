@@ -4,7 +4,7 @@ import colorsys
 import math
 import time
 import weakref
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 from gi.repository import Gdk, GLib, Gtk, Pango
 
@@ -113,8 +113,8 @@ def vbox(spacing=8, *children, **kw) -> Gtk.Box:
     return b
 
 
-def button(text: Optional[str] = None, icon_name: Optional[str] = None, style: str = "tonal",
-           cb: Optional[Callable] = None, small: bool = False, tooltip: Optional[str] = None) -> Gtk.Button:
+def button(text: str | None = None, icon_name: str | None = None, style: str = "tonal",
+           cb: Callable | None = None, small: bool = False, tooltip: str | None = None) -> Gtk.Button:
     b = Gtk.Button()
     if style:
         for s in style.split():
@@ -135,7 +135,7 @@ def button(text: Optional[str] = None, icon_name: Optional[str] = None, style: s
     return b
 
 
-def set_button_text(b: Gtk.Button, text: str, icon_name: Optional[str] = None):
+def set_button_text(b: Gtk.Button, text: str, icon_name: str | None = None):
     if icon_name:
         b.set_child(hbox(8, icon(icon_name), Gtk.Label(label=text)))
     else:
@@ -148,7 +148,7 @@ def card(inner: bool = False, spacing: int = 10) -> Gtk.Box:
     return b
 
 
-def section(title: str, sub: Optional[str] = None, top: int = 18) -> Gtk.Box:
+def section(title: str, sub: str | None = None, top: int = 18) -> Gtk.Box:
     b = vbox(2)
     b.set_margin_top(top)
     b.set_margin_bottom(6)
@@ -180,7 +180,7 @@ def divider() -> Gtk.Widget:
 class Toggle(Gtk.Switch):
     """Gtk.Switch whose callback only fires for user changes."""
 
-    def __init__(self, active: bool, cb: Optional[Callable[[bool], None]] = None):
+    def __init__(self, active: bool, cb: Callable[[bool], None] | None = None):
         super().__init__(active=active, valign=Gtk.Align.CENTER)
         self._cb = cb
         self._quiet = False
@@ -197,7 +197,7 @@ class Toggle(Gtk.Switch):
             self._quiet = False
 
 
-def switch_row(text: str, active: bool, cb: Optional[Callable[[bool], None]] = None, classes=("body",)):
+def switch_row(text: str, active: bool, cb: Callable[[bool], None] | None = None, classes=("body",)):
     sw = Toggle(active, cb)
     lbl = label(text, classes)
     row = hbox(12, sw, lbl)
@@ -205,8 +205,8 @@ def switch_row(text: str, active: bool, cb: Optional[Callable[[bool], None]] = N
 
 
 class Dropdown(Gtk.DropDown):
-    def __init__(self, items: List[str], selected: Optional[str] = None,
-                 cb: Optional[Callable[[str], None]] = None, width_chars: int = 0, placeholder: Optional[str] = None):
+    def __init__(self, items: list[str], selected: str | None = None,
+                 cb: Callable[[str], None] | None = None, width_chars: int = 0, placeholder: str | None = None):
         self._items = list(items)
         self._placeholder = _("Mixed") if placeholder is None else placeholder
         self._ph_shown = False
@@ -247,11 +247,11 @@ class Dropdown(Gtk.DropDown):
         self.set_model(Gtk.StringList.new(list(items) + ([self._placeholder] if placeholder else [])))
         self._quiet = False
 
-    def value(self) -> Optional[str]:
+    def value(self) -> str | None:
         i = self.get_selected()
         return self._items[i] if 0 <= i < len(self._items) else None
 
-    def set_items(self, items: List[str], selected: Optional[str] = None):
+    def set_items(self, items: list[str], selected: str | None = None):
         items = list(items)
         cur = selected if selected is not None else self.value()
         if items != self._items:
@@ -259,7 +259,7 @@ class Dropdown(Gtk.DropDown):
             self._set_model(items)
         self.set_value(cur)
 
-    def set_value(self, v: Optional[str]):
+    def set_value(self, v: str | None):
         if v in self._items:
             if self._ph_shown:
                 self._set_model(self._items)
@@ -300,7 +300,7 @@ def no_scroll(widget: Gtk.Widget) -> Gtk.Widget:
 
 
 class Spin(Gtk.SpinButton):
-    def __init__(self, lo: float, hi: float, value: float, cb: Optional[Callable[[float], None]] = None,
+    def __init__(self, lo: float, hi: float, value: float, cb: Callable[[float], None] | None = None,
                  step: float = 1, digits: int = 0, delay: int = 450):
         adj = Gtk.Adjustment(value=value, lower=lo, upper=hi, step_increment=step, page_increment=step * 10)
         super().__init__(adjustment=adj, digits=digits, numeric=True, valign=Gtk.Align.CENTER)
@@ -336,7 +336,7 @@ class Spin(Gtk.SpinButton):
 class Group(Gtk.Box):
     """Connected button group (Material 3 Expressive). Exactly one item checked, or none for 'mixed'."""
 
-    def __init__(self, items, active: Optional[str] = None, cb: Optional[Callable[[str], None]] = None,
+    def __init__(self, items, active: str | None = None, cb: Callable[[str], None] | None = None,
                  small: bool = True):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         self.add_css_class("group")
@@ -367,7 +367,7 @@ class Group(Gtk.Box):
         if b.get_active() and not self._quiet and self._cb:
             self._cb(key)
 
-    def set_active(self, key: Optional[str]):
+    def set_active(self, key: str | None):
         self._quiet = True
         if key in self.buttons:
             self.buttons[key].set_active(True)
@@ -376,7 +376,7 @@ class Group(Gtk.Box):
                 b.set_active(False)
         self._quiet = False
 
-    def active(self) -> Optional[str]:
+    def active(self) -> str | None:
         for k, b in self.buttons.items():
             if b.get_active():
                 return k
@@ -440,7 +440,7 @@ SHAPES = {
 }
 
 
-def shape_path(cr, cx: float, cy: float, r: float, shape: str = "circle", to: Optional[str] = None,
+def shape_path(cr, cx: float, cy: float, r: float, shape: str = "circle", to: str | None = None,
                t: float = 0.0, rotate: float = 0.0, steps: int = 96):
     """Polar outline of an Expressive shape, optionally morphing toward another."""
     fa = SHAPES.get(shape, _r_circle)
@@ -499,7 +499,7 @@ class Swatch(Gtk.DrawingArea):
     """A colour swatch: rounded square, morphing into a scalloped 'cookie' when selected."""
 
     def __init__(self, hex6: str, size: int = 44, selected: bool = False, badge: str = "",
-                 on_click: Optional[Callable] = None, on_right: Optional[Callable] = None, tooltip: str = "",
+                 on_click: Callable | None = None, on_right: Callable | None = None, tooltip: str = "",
                  add: bool = False):
         super().__init__()
         themed(self)
@@ -534,7 +534,7 @@ class Swatch(Gtk.DrawingArea):
         self._t = self._from + (self._target - self._from) * spring(p)
         self.queue_draw()
 
-    def set_state(self, hex6: Optional[str] = None, selected: Optional[bool] = None, badge: Optional[str] = None):
+    def set_state(self, hex6: str | None = None, selected: bool | None = None, badge: str | None = None):
         changed = False
         if hex6 is not None and hex6 != self.hex:
             self.hex = hex6
@@ -601,9 +601,9 @@ class QuickColors(Gtk.Box):
 
     _live: "weakref.WeakSet" = None
 
-    def __init__(self, get_saved: Callable[[], List[str]], get_recent: Callable[[], List[str]],
-                 on_a: Callable[[str], None], on_b: Optional[Callable[[str], None]] = None,
-                 on_save: Optional[Callable[[], None]] = None, size: int = 26, per_line: int = 8):
+    def __init__(self, get_saved: Callable[[], list[str]], get_recent: Callable[[], list[str]],
+                 on_a: Callable[[str], None], on_b: Callable[[str], None] | None = None,
+                 on_save: Callable[[], None] | None = None, size: int = 26, per_line: int = 8):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         self._get_saved, self._get_recent = get_saved, get_recent
         self._on_a, self._on_b, self._on_save = on_a, on_b, on_save
@@ -651,9 +651,9 @@ class QuickColors(Gtk.Box):
 class SwatchPicker(Gtk.Box):
     """Pattern colour picker: wallpaper colours (by index) + saved custom colours (by hex), ordered."""
 
-    def __init__(self, extracted: List[str], selected: list, on_change: Callable[[list], None],
-                 custom: Optional[List[str]] = None, on_add: Optional[Callable] = None,
-                 on_remove_custom: Optional[Callable[[str], None]] = None, max_select: int = 8, size: int = 40,
+    def __init__(self, extracted: list[str], selected: list, on_change: Callable[[list], None],
+                 custom: list[str] | None = None, on_add: Callable | None = None,
+                 on_remove_custom: Callable[[str], None] | None = None, max_select: int = 8, size: int = 40,
                  hint: bool = True):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.extracted = list(extracted)
@@ -744,7 +744,7 @@ class SwatchPicker(Gtk.Box):
             self.custom = list(custom)
         self._build()
 
-    def current_hex(self) -> List[str]:
+    def current_hex(self) -> list[str]:
         return resolve_colors(self.selected, self.extracted)
 
 
@@ -795,12 +795,12 @@ class StripEditor(Gtk.DrawingArea):
         self.led_count = 20
         self.colors = ["000000"] * 20
         self.pattern = "solid"
-        self.stops: List[float] = []
+        self.stops: list[float] = []
         self.layout_mode = False
         self.reverse = self.mirror = False
         self.paint_mode = False
-        self.paint: List[Optional[str]] = []
-        self.base_color: Optional[str] = None      # what erased LEDs show (the zone's own colour)
+        self.paint: list[str | None] = []
+        self.base_color: str | None = None      # what erased LEDs show (the zone's own colour)
         self.tool = "paint"
         self.color_a, self.color_b = "ff8800", "3355ff"
         self._grad_anchor = None
@@ -1034,7 +1034,7 @@ class SectionStrip(Gtk.DrawingArea):
         self.set_hexpand(True)
         self.n = 20
         self.colors = ["000000"] * 20
-        self.starts: List[int] = []           # first LED of every part but the first
+        self.starts: list[int] = []           # first LED of every part but the first
         self.marked = set()                   # LEDs set by hand
         self.pick_mode = False
         self._on_drag, self._on_moved, self._on_led = on_drag, on_moved, on_led
@@ -1183,7 +1183,7 @@ rounded_rect = _rounded
 class DualRange(Gtk.DrawingArea):
     """Two-handle 0..100 range slider with Expressive bar handles."""
 
-    def __init__(self, lo: int, hi: int, on_change: Optional[Callable[[int, int], None]] = None, width: int = 260):
+    def __init__(self, lo: int, hi: int, on_change: Callable[[int, int], None] | None = None, width: int = 260):
         super().__init__()
         themed(self)
         self.lo, self.hi = lo, hi
@@ -1359,7 +1359,7 @@ class Snackbar(Gtk.Revealer):
         self._job = None
         self.set_can_target(True)
 
-    def show(self, text: str, action_label: Optional[str] = None, action: Optional[Callable] = None,
+    def show(self, text: str, action_label: str | None = None, action: Callable | None = None,
              seconds: float = 3.5):
         self._lbl.set_label(text)
         self._action = action

@@ -63,7 +63,7 @@ def icon_png_path() -> str:
 
 
 def read_icon_svg() -> str:
-    with open(icon_svg_path(), "r", encoding="utf-8") as f:
+    with open(icon_svg_path(), encoding="utf-8") as f:
         return f.read()
 
 

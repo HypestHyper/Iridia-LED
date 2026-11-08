@@ -15,6 +15,10 @@
 - **Safer without XDG_RUNTIME_DIR:** where it isn't set (cron, `sudo -u`, some SSH sessions), the
   daemon's socket, lock and pid files now go in `/run/user/UID` or `~/.cache/iridia/run` instead of the
   shared `/tmp`, where another user could have put a file of their own under the same name first.
+- **Ready for newer Python and GTK:** the code uses today's Python forms throughout (checked by ruff
+  in CI, now on a fixed ruff version), the tests fail on anything Python deprecates in Iridia's code,
+  the window asks for GTK 4's own Gdk and Pango up front, and the tab bar's scroll arrows no longer
+  make GTK lay the window out with no room for them (a warning on every start).
 - **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
   it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
 - **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:

@@ -29,7 +29,7 @@ def home(tmp_path, monkeypatch):
 
 
 def test_kde_plasma_5_and_6(home):
-    tmp, tool, image = home
+    tmp, _tool, image = home
     pic = image("Pictures/My pic.jpg")
     (tmp / ".config").mkdir()
     (tmp / ".config/plasma-org.kde.plasma.desktop-appletsrc").write_text(
@@ -47,7 +47,7 @@ def test_kde_plasma_5_and_6(home):
 
 
 def test_kde_default_wallpaper_before_one_is_picked(home, monkeypatch):
-    tmp, tool, image = home
+    tmp, _tool, image = home
     data = tmp / "share"
     monkeypatch.setenv("XDG_DATA_DIRS", str(data))
     monkeypatch.setenv("XDG_CONFIG_DIRS", str(tmp / "xdg"))
@@ -93,7 +93,7 @@ esac""")                                       # GNOME 41 and older: no color-sc
 
 
 def test_xfce_uses_the_real_monitor_names(home):
-    tmp, tool, image = home
+    _tmp, tool, image = home
     pic = image("x.jpg")
     tool("xfconf-query", f"""if [ "$3" = -l ]; then
   printf '/backdrop/screen0/monitoreDP-1/workspace1/last-image\\n/backdrop/screen0/monitoreDP-1/workspace0/last-image\\n'
@@ -118,7 +118,7 @@ def test_mate_cosmic_lxqt(home):
 
 
 def test_settings_files_are_watched_instead_of_polled(home):
-    tmp, tool, image = home
+    tmp, _tool, _image = home
     d = WallpaperDetector()
     assert d.watch_files() == []                        # nothing remembered yet: nothing to watch
     d._sticky = "gnome"

@@ -14,7 +14,7 @@ import colorsys
 import math
 import time
 import zlib
-from typing import Dict, List, Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 EFFECTS = ("pulse", "flash", "sweep", "comet", "fill", "ripple")
 MOVING = ("sweep", "comet", "fill", "ripple")       # these use the direction, the band and A/B
@@ -38,7 +38,7 @@ def _hex(v, default="ffffff") -> str:
     return s if len(s) == 6 and all(ch in "0123456789abcdef" for ch in s) else default
 
 
-def _int(v) -> Optional[int]:
+def _int(v) -> int | None:
     if isinstance(v, bool) or v is None:
         return None
     try:
@@ -58,7 +58,7 @@ def _num(v, default: float, lo: float, hi: float) -> float:
     return default if v != v else max(lo, min(hi, v))
 
 
-def clean_target(raw) -> Optional[dict]:
+def clean_target(raw) -> dict | None:
     """{"device", "zone", and which LEDs: "part" (0-based part number), or "start"/"end" (1-based,
     inclusive), or none of them for the whole strip}."""
     if not isinstance(raw, dict) or not isinstance(raw.get("device"), str) or not raw["device"]:
@@ -73,7 +73,7 @@ def clean_target(raw) -> Optional[dict]:
     return out
 
 
-def _clean_point(p) -> Optional[List[float]]:
+def _clean_point(p) -> list[float] | None:
     if isinstance(p, (list, tuple)) and len(p) == 2:
         try:
             x, y = float(p[0]), float(p[1])
@@ -84,7 +84,7 @@ def _clean_point(p) -> Optional[List[float]]:
     return None
 
 
-def clean_rule(raw) -> Optional[dict]:
+def clean_rule(raw) -> dict | None:
     """One app's own look: {"app", "effect" ("default" or an effect), "color" ("default", "accent",
     "app" or "custom"), "hex"}."""
     if not isinstance(raw, dict) or not isinstance(raw.get("app"), str) or not raw["app"].strip():
@@ -145,18 +145,18 @@ def wanted(settings: dict, app: str) -> bool:
     return True
 
 
-def app_color(app: str) -> Tuple[int, int, int]:
+def app_color(app: str) -> tuple[int, int, int]:
     """A colour of its own for each app (the same every time)."""
     hue = (zlib.crc32(app.lower().encode()) % 360) / 360.0
     r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
     return int(r * 255), int(g * 255), int(b * 255)
 
 
-def _rgb(hex6: str) -> Tuple[int, int, int]:
+def _rgb(hex6: str) -> tuple[int, int, int]:
     return int(hex6[0:2], 16), int(hex6[2:4], 16), int(hex6[4:6], 16)
 
 
-def style_for(settings: dict, app: str, urgent: bool, accent: str) -> Tuple[str, Tuple[int, int, int]]:
+def style_for(settings: dict, app: str, urgent: bool, accent: str) -> tuple[str, tuple[int, int, int]]:
     """(effect, colour) for a notification from app: an urgent one's own effect and red come first,
     then the app's rule, then the defaults. accent is the wallpaper colour (hex)."""
     rule = next((r for r in settings["rules"] if r["app"].lower() == app.lower()), None)
@@ -177,7 +177,7 @@ def style_for(settings: dict, app: str, urgent: bool, accent: str) -> Tuple[str,
     return effect, _rgb(_hex(accent, "ffffff"))
 
 
-def target_range(t: dict, n: int, sections: Sequence[dict], spans) -> Optional[Tuple[int, int]]:
+def target_range(t: dict, n: int, sections: Sequence[dict], spans) -> tuple[int, int] | None:
     """The LEDs a target means on a strip of n: (first, one past the last), 0-based, or None when
     there are none (a part that isn't there any more, a range past the end)."""
     if n <= 0:
@@ -193,7 +193,7 @@ def target_range(t: dict, n: int, sections: Sequence[dict], spans) -> Optional[T
     return 0, n
 
 
-def targets_for(device: str, zone: str, leds) -> List[dict]:
+def targets_for(device: str, zone: str, leds) -> list[dict]:
     """Targets covering exactly these LEDs (0-based) of one strip, as few ranges as possible."""
     out, run = [], None
     for i in sorted(set(leds)):
@@ -208,9 +208,9 @@ def targets_for(device: str, zone: str, leds) -> List[dict]:
     return [{"device": device, "zone": zone, "start": a + 1, "end": b + 1} for a, b in out]
 
 
-def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Optional[list]],
-               effect: str, path: Optional[dict], spacing: Optional[Dict[str, float]] = None
-               ) -> Dict[str, List[Tuple[int, float, float]]]:
+def led_places(ranges: dict[str, list[tuple[int, int]]], positions: dict[str, list | None],
+               effect: str, path: dict | None, spacing: dict[str, float] | None = None
+               ) -> dict[str, list[tuple[int, float, float]]]:
     """key -> [(LED, t, span)]: where each LED of the flash lies along it, 0 to 1, and how many LEDs
     long its stretch is (so a band can be a number of LEDs).
 
@@ -220,7 +220,7 @@ def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Op
     left out (spacing: key -> the distance between two of its LEDs there, for the span). Otherwise,
     and for strips not on the Layout tab, t goes along each range's LEDs (the ripple: out from its
     middle)."""
-    out: Dict[str, List[Tuple[int, float]]] = {}
+    out: dict[str, list[tuple[int, float]]] = {}
     a = b = None
     if path and effect in MOVING:
         a, b = path.get("a"), path.get("b")
@@ -260,8 +260,8 @@ def led_places(ranges: Dict[str, List[Tuple[int, int]]], positions: Dict[str, Op
 class Flash:
     """One flash, started now: leds is key -> [(LED, t, span)] from led_places(); band is in LEDs."""
 
-    def __init__(self, leds: Dict[str, List[Tuple[int, float, float]]], rgb: Tuple[int, int, int], effect: str,
-                 duration: float, now: Optional[float] = None, direction: str = "ab", band: int = 3,
+    def __init__(self, leds: dict[str, list[tuple[int, float, float]]], rgb: tuple[int, int, int], effect: str,
+                 duration: float, now: float | None = None, direction: str = "ab", band: int = 3,
                  repeat: int = 1, brightness: int = 100):
         self.leds, self.rgb, self.effect, self.duration = leds, rgb, effect, duration
         self.direction, self.band, self.repeat = direction, band, max(1, repeat)
@@ -269,17 +269,17 @@ class Flash:
         self.t0 = time.monotonic() if now is None else now
 
     @property
-    def ranges(self) -> Dict[str, list]:
+    def ranges(self) -> dict[str, list]:
         return self.leds
 
     @property
     def length(self) -> float:
         return self.duration * self.repeat
 
-    def done(self, now: Optional[float] = None) -> bool:
+    def done(self, now: float | None = None) -> bool:
         return (time.monotonic() if now is None else now) - self.t0 >= self.length
 
-    def mix(self, key: str, frame: list, scale: float = 1.0, now: Optional[float] = None) -> list:
+    def mix(self, key: str, frame: list, scale: float = 1.0, now: float | None = None) -> list:
         """frame with the flash over its LEDs at this moment; scale (0-1) dims the flash colour the
         way the strip is dimmed."""
         leds = self.leds.get(key)

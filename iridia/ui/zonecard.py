@@ -4,7 +4,7 @@ import time
 
 from gi.repository import GLib, Gtk
 
-from iridia.i18n import _, ngettext, pgettext  # noqa: F401
+from iridia.i18n import _, ngettext, pgettext
 from iridia import animations
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes

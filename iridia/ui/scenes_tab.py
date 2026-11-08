@@ -2,7 +2,7 @@
 fullscreen, or some apps in front. The daemon does the watching (iridia/focuswatch.py); this page
 only sets what it does."""
 
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 from gi.repository import Gtk
 
@@ -29,7 +29,7 @@ HOW = {"hyprland": _("Hyprland says which window is in front."),
 WHEN_NAMES = {"fullscreen": _("Anything fullscreen"), "apps": _("These apps")}
 
 
-def strip_list(st: dict, with_hidden: bool = False) -> List[tuple]:
+def strip_list(st: dict, with_hidden: bool = False) -> list[tuple]:
     """[(zone key, name)] for every strip in a status, without the hidden ones unless asked."""
     out = []
     for dev, dc in sorted((st.get("device_configs") or {}).items()):
@@ -59,8 +59,8 @@ class LookEditor(Gtk.Box):
     """What the lights do: nothing (only where that's a choice), off, dimmer, one colour or an effect,
     with a brightness; on_change(look or None) when it's changed."""
 
-    def __init__(self, app, look: Optional[dict], on_change: Callable, allow_none: bool = True,
-                 on_try: Optional[Callable] = None):
+    def __init__(self, app, look: dict | None, on_change: Callable, allow_none: bool = True,
+                 on_try: Callable | None = None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self._app, self._cb, self._quiet = app, on_change, False
         self._look = scenes.clean_look(look) or ({"kind": "dim", "bright": 20} if not allow_none else None)
@@ -86,7 +86,7 @@ class LookEditor(Gtk.Box):
         self.append(r)
         self._shown()
 
-    def get(self) -> Optional[dict]:
+    def get(self) -> dict | None:
         return dict(self._look) if self._look else None
 
     def set(self, look):
@@ -151,7 +151,7 @@ class ScenesPage:
         self._list_now = None
         self._ignore_now = None
         self._seen_now = None
-        self._editing: Optional[dict] = None
+        self._editing: dict | None = None
         page.append(section(_("Scenes"), _("A different look for the lights while a game or a film is fullscreen, or "
                                            "while an app you pick is in front. They go back when it's gone, and "
                                            "your settings don't change."), top=4))
@@ -273,7 +273,7 @@ class ScenesPage:
         return c
 
     # -- the editor
-    def _open(self, sc: Optional[dict]):
+    def _open(self, sc: dict | None):
         c = self._editor
         widgets.clear(c)
         self._editing = dict(sc) if sc else None
@@ -344,7 +344,7 @@ class ScenesPage:
         if not self._apps_sel:
             self._apps_row.append(label(_("None yet."), ("small", "faint")))
 
-    def _add_app(self, name: Optional[str] = None):
+    def _add_app(self, name: str | None = None):
         name = (name or self._app_entry.get_text()).strip()
         if not name:
             self.app.toast(_("Type the app's name, or pick one it has seen."))
@@ -358,7 +358,7 @@ class ScenesPage:
         self._apps_sel = [a for a in self._apps_sel if a != name]
         self._show_apps()
 
-    def _gather(self) -> Optional[dict]:
+    def _gather(self) -> dict | None:
         targets = ["*"] if self._all.get_active() else [k for k, cb in self._strips.items() if cb.get_active()]
         return {"name": self._name.get_text().strip(), "when": self._when_grp.active() or "fullscreen",
                 "apps": list(self._apps_sel), "targets": targets, "look": self._look.get()}

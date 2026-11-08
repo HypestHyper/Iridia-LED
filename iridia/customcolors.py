@@ -15,9 +15,9 @@ import json
 import logging
 import os
 import threading
-from typing import List
 
 from iridia.colors import normalize_hex
+import builtins
 
 logger = logging.getLogger("iridia")
 
@@ -26,13 +26,13 @@ class CustomColors:
     def __init__(self, path: str = "~/.config/iridia/custom_colors.json"):
         self.path = os.path.expanduser(path)
         self._lock = threading.RLock()
-        self._colors: List[str] = []
-        self._exact: List[str] = []
+        self._colors: list[str] = []
+        self._exact: list[str] = []
         self._load()
 
     def _load(self):
         try:
-            with open(self.path, "r", encoding="utf-8") as f:
+            with open(self.path, encoding="utf-8") as f:
                 data = json.load(f)
             raw = data.get("colors", []) if isinstance(data, dict) else data
             self._colors = self._clean(raw)
@@ -44,8 +44,8 @@ class CustomColors:
                            "and leaving the file untouched")
 
     @staticmethod
-    def _clean(raw) -> List[str]:
-        out: List[str] = []
+    def _clean(raw) -> list[str]:
+        out: list[str] = []
         for c in raw or []:
             h = normalize_hex(c)
             if h and h not in out:
@@ -74,11 +74,11 @@ class CustomColors:
             self._save()
         return True
 
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         with self._lock:
             return list(self._colors)
 
-    def add(self, hex_color: str) -> List[str]:
+    def add(self, hex_color: str) -> builtins.list[str]:
         h = normalize_hex(hex_color)
         with self._lock:
             if h and h not in self._colors:
@@ -86,7 +86,7 @@ class CustomColors:
                 self._save()
             return list(self._colors)
 
-    def remove(self, hex_color: str) -> List[str]:
+    def remove(self, hex_color: str) -> builtins.list[str]:
         h = normalize_hex(hex_color)
         with self._lock:
             if h in self._colors or h in self._exact:
@@ -100,7 +100,7 @@ class CustomColors:
     # ------------------------------------------------------------ exact colours
     MAX_EXACT = 64
 
-    def exact(self) -> List[str]:
+    def exact(self) -> builtins.list[str]:
         with self._lock:
             return list(self._exact)
 

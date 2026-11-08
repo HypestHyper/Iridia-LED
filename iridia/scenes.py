@@ -21,7 +21,6 @@ A look: {"kind": "off" | "dim" | "color" | "effect", "bright": 0-100, "hex": "rr
 import hashlib
 import re
 import secrets
-from typing import List, Optional
 
 from iridia import animations
 
@@ -60,7 +59,7 @@ def app_key(app) -> str:
     return str(app or "").strip().lower()
 
 
-def clean_look(raw) -> Optional[dict]:
+def clean_look(raw) -> dict | None:
     if not isinstance(raw, dict) or raw.get("kind") not in KINDS:
         return None
     kind = raw["kind"]
@@ -74,13 +73,13 @@ def clean_look(raw) -> Optional[dict]:
     return out
 
 
-def default_scenes() -> List[dict]:
+def default_scenes() -> list[dict]:
     """What there is before you make any: anything fullscreen dims everything to 20%."""
     return [{"id": "f5f5f5", "name": "Anything fullscreen", "on": True, "when": "fullscreen", "apps": [],
              "targets": ["*"], "look": {"kind": "dim", "bright": 20}}]
 
 
-def _apps(raw) -> List[str]:
+def _apps(raw) -> list[str]:
     out, keys = [], set()
     for a in raw if isinstance(raw, list) else []:
         a = str(a or "").strip()[:80]
@@ -90,7 +89,7 @@ def _apps(raw) -> List[str]:
     return out
 
 
-def clean_scene(raw) -> Optional[dict]:
+def clean_scene(raw) -> dict | None:
     """A scene: a name, when (anything fullscreen, or one of its apps in front), its strips and its
     look; None if it can't be one."""
     if not isinstance(raw, dict):
@@ -113,7 +112,7 @@ def clean_scene(raw) -> Optional[dict]:
             "targets": targets, "look": look}
 
 
-def _migrate(raw: dict) -> List[dict]:
+def _migrate(raw: dict) -> list[dict]:
     """Settings from before scenes were a list: each app's own look, then anything fullscreen."""
     out, keys = [], set()
     for r in raw.get("apps") or []:
@@ -156,7 +155,7 @@ def clean(raw) -> dict:
     return out
 
 
-def watched_apps(st: dict) -> List[str]:
+def watched_apps(st: dict) -> list[str]:
     return [a for sc in st.get("scenes") or [] if sc["on"] and sc["when"] == "apps" for a in sc["apps"]]
 
 
@@ -185,7 +184,7 @@ def pick(st: dict, front: str, fullscreen: bool, running=()) -> tuple:
     return tuple(out)
 
 
-def overlay(look: Optional[dict]) -> Optional[dict]:
+def overlay(look: dict | None) -> dict | None:
     """A look as the overlay every strip gets (the same kind a keybind sets)."""
     if not look:
         return None

@@ -5,7 +5,6 @@ import os
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 from iridia import assets
 from iridia.ipc import IPCClient
@@ -147,7 +146,7 @@ METHOD_TEXT = {"daemon": "the Iridia daemon starts it, and starts it again if it
                "off": "Iridia never starts or restarts it; you do"}
 
 
-def set_start_method(method: str, stop: Optional[bool] = None) -> int:
+def set_start_method(method: str, stop: bool | None = None) -> int:
     """Switch openrgb.start_method, cleaning up after the old one. stop: also stop the OpenRGB the
     daemon started when leaving "daemon" (None: ask when there's a terminal)."""
     from iridia import openrgb_server as osrv

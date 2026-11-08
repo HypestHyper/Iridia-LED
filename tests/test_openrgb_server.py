@@ -496,7 +496,7 @@ def test_doctor_warns_when_the_unit_can_never_start(env):
 def test_doctor_does_not_call_a_running_daemon_inactive(env):
     env.with_systemd(enabled="iridia-daemon.service")
     checks = diagnostics.daemon_login_checks({"started_by": "Hyprland"})
-    started = [c for c in checks if c.label == "Daemon started"][0]
+    started = next(c for c in checks if c.label == "Daemon started")
     assert started.ok is True and "started outside systemd" in started.detail
     assert not any("inactive" in c.detail for c in checks)
 

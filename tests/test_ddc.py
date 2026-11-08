@@ -38,7 +38,7 @@ def _wait(c, done=1):
 
 @pytest.mark.parametrize("version", [1, 2])
 def test_both_ddcutil_generations(tools, version):
-    tmp, ddcutil = tools
+    _tmp, ddcutil = tools
     ddcutil(version)
     c = D.DDCController(poll_interval=1)
     _wait(c)
@@ -48,7 +48,7 @@ def test_both_ddcutil_generations(tools, version):
 
 
 def test_a_laptop_follows_its_backlight(tools):
-    tmp, ddcutil = tools
+    tmp, _ddcutil = tools
     bl = tmp / "backlight" / "intel_backlight"
     bl.mkdir(parents=True)
     (bl / "max_brightness").write_text("19393\n")

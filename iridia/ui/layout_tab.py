@@ -9,11 +9,10 @@ layout" stops strips from moving so painting and colour stops are safe to drag.
 
 import math
 import time
-from typing import Dict, List, Optional
 
 from gi.repository import Gdk, GLib, Gtk
 
-from iridia.i18n import _, ngettext  # noqa: F401
+from iridia.i18n import _, ngettext
 from iridia import theme
 from iridia.colors import resolve_colors
 from iridia.layout import (Layout, cut_before, fraction_to_stop, gap_starts, hidden_path, led_at_path, path_at_led, path_points,
@@ -52,10 +51,10 @@ class LayoutTab(NotifyLayer, Gtk.Box):
         self.layout = Layout()
         self.patterns = PatternGenerator()
         self.status: dict = {}
-        self._cfg: Dict[str, dict] = {}
-        self._hold: Dict[str, float] = {}
+        self._cfg: dict[str, dict] = {}
+        self._hold: dict[str, float] = {}
         self._enabled = set()
-        self._sel: Optional[str] = None
+        self._sel: str | None = None
         self._sel_seg = 0
         self.tool = "arrange"
         self.color_a, self.color_b = "ff8800", "3355ff"
@@ -206,7 +205,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
                 self._dirty = True
 
     # ------------------------------------------------------------ animation
-    def _animated(self) -> Dict[str, dict]:
+    def _animated(self) -> dict[str, dict]:
         """Zones animating right now (per the daemon), with their effect."""
         out = {}
         for k in self._enabled:
@@ -232,7 +231,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
                 self.cv.queue_draw()
         return True
 
-    def _layout_frame(self, key: str, anim: dict, colors: List[str], base: List[str], n: int) -> List[str]:
+    def _layout_frame(self, key: str, anim: dict, colors: list[str], base: list[str], n: int) -> list[str]:
         """The same frame the daemon renders: positions along the strip, or through the room."""
         params = (self._cfg.get(key) or {}).get("pattern_params") or {}
         positions, extent = None, None
@@ -255,7 +254,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
         strip = next((s for s in self.layout.strips if s["zone"] == key and not s["clone"]), None)
         return (led_points(strip, n), strip["segments"][0]["spacing"]) if strip and n > 0 else None
 
-    def zone_colors(self, key: str, overrides: bool = True) -> List[str]:
+    def zone_colors(self, key: str, overrides: bool = True) -> list[str]:
         cfg = self._cfg.get(key) or {}
         n = int(cfg.get("led_count", 20))
         st = self.status if overrides else {"extracted_colors": self.status.get("extracted_colors")}
@@ -574,7 +573,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
         a = math.radians(segs[i]["angle"] + off)
         return px + math.cos(a) * dist, py + math.sin(a) * dist
 
-    def _stops(self, cfg) -> List[float]:
+    def _stops(self, cfg) -> list[float]:
         pat = PatternGenerator.normalize(cfg.get("pattern", "solid"))
         if pat not in PatternGenerator.EDITABLE:
             return []

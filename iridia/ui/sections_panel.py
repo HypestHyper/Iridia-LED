@@ -3,7 +3,6 @@
 Kept out of zonecard.py, which only calls set_config(), refresh(), frame() and rescale().
 """
 import zlib
-from typing import Dict, List
 
 from gi.repository import GLib, Gtk
 
@@ -29,9 +28,9 @@ class SectionsPanel(Gtk.Box):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.card = zcard
         self.n = int(zcard.cfg.get("led_count", 20) or 20)
-        self.secs: List[dict] = S.clean(zcard.cfg.get("sections"), self.n)
-        self.ov: Dict[int, str] = S.clean_overrides(zcard.cfg.get("led_overrides"), self.n)
-        self._base: List[str] = []
+        self.secs: list[dict] = S.clean(zcard.cfg.get("sections"), self.n)
+        self.ov: dict[int, str] = S.clean_overrides(zcard.cfg.get("led_overrides"), self.n)
+        self._base: list[str] = []
         self._comp = None
         self._comp_sig = None
         self._save_job = None
@@ -96,7 +95,7 @@ class SectionsPanel(Gtk.Box):
         st = self.card.app._status if isinstance(self.card.app._status, dict) else {}
         return (st.get("sensors") or {}).get(sid)
 
-    def _parts(self) -> List[dict]:
+    def _parts(self) -> list[dict]:
         """The parts to list: the whole strip is one part until it's split."""
         return self.secs or [{"start": 0, "type": "same"}]
 
@@ -121,14 +120,14 @@ class SectionsPanel(Gtk.Box):
     def _resolve(self, entries):
         return resolve_colors(entries, self.card.extracted)
 
-    def compose(self, base: List[str]) -> List[str]:
+    def compose(self, base: list[str]) -> list[str]:
         if not self.active():
             return list(base)
         return S.compose_static(base, self.secs, self.ov, self._resolve, self.card.patterns, self.sensor_value,
                                 fx.anim_clock(self.card.app._status if isinstance(self.card.app._status, dict)
                                               else {}))
 
-    def frame(self, base: List[str], status: dict) -> List[str]:
+    def frame(self, base: list[str], status: dict) -> list[str]:
         """An animated frame: base with the parts drawn on top, as the daemon draws them."""
         if not self.active():
             return list(base)
@@ -142,7 +141,7 @@ class SectionsPanel(Gtk.Box):
         out = self._comp.frame([animations.hex_to_rgb(c) for c in base], fx.anim_clock(status))
         return [animations.rgb_to_hex(c) for c in out]
 
-    def refresh(self, base: List[str], shown=None):
+    def refresh(self, base: list[str], shown=None):
         """Show base (the strip's own colors) with the parts on top; shown: an already composed frame."""
         self._base = list(base)
         cols = shown if shown is not None else self.compose(base)
@@ -151,7 +150,7 @@ class SectionsPanel(Gtk.Box):
         self._update_row_labels()
 
     # ------------------------------------------------------------ dividers
-    def _starts(self) -> List[int]:
+    def _starts(self) -> list[int]:
         return [s["start"] for s in self.secs] if self.secs else [0]
 
     def _add_divider(self):
@@ -161,7 +160,7 @@ class SectionsPanel(Gtk.Box):
             self.secs = [{"start": 0, "type": "same"}]
         # split the biggest part in half
         spans = S.spans(self.secs, self.n)
-        a, b, sec = max(spans, key=lambda p: p[1] - p[0])
+        a, b, _sec = max(spans, key=lambda p: p[1] - p[0])
         if b - a < 2:
             return
         new = {"start": (a + b) // 2, "type": "same"}

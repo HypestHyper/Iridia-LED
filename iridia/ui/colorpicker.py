@@ -7,7 +7,7 @@ pick_color(parent, initial, saved, title, on_done, on_change=None, extra=None)
 
 import colorsys
 import math
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 import cairo
 from gi.repository import Gdk, Gtk
@@ -95,10 +95,10 @@ class GradSlider(Gtk.DrawingArea):
 
 
 class ColorPicker(Dialog):
-    def __init__(self, parent, initial: str, saved: Optional[List[str]], title: str,
-                 on_done: Callable[[Optional[str]], None], on_change: Optional[Callable[[str], None]] = None,
-                 extra=None, recent: Optional[List[str]] = None, on_save: Optional[Callable[[str], None]] = None,
-                 exact: Optional[bool] = None, exact_colors=None, on_exact: Optional[Callable[[bool], None]] = None):
+    def __init__(self, parent, initial: str, saved: list[str] | None, title: str,
+                 on_done: Callable[[str | None], None], on_change: Callable[[str], None] | None = None,
+                 extra=None, recent: list[str] | None = None, on_save: Callable[[str], None] | None = None,
+                 exact: bool | None = None, exact_colors=None, on_exact: Callable[[bool], None] | None = None):
         super().__init__(parent, title, width=560, on_close=self._closing)
         self._done_cb = on_done
         self._result = None

@@ -115,7 +115,7 @@ class Config:
             self._file_keys = set()
             if os.path.exists(self.path):
                 try:
-                    with open(self.path, "r") as f:
+                    with open(self.path) as f:
                         loaded = json.load(f)
                     self._data = copy.deepcopy(DEFAULT_CONFIG)
                     if not isinstance(loaded, dict):

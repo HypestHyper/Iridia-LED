@@ -25,7 +25,6 @@ import signal
 import subprocess
 import threading
 import time
-from typing import List, Optional, Tuple
 
 from iridia.rundir import runtime_path
 
@@ -160,7 +159,7 @@ def unit_state(name: str, system=False) -> tuple:
     return enabled, active
 
 
-def graphical_session_active() -> Optional[bool]:
+def graphical_session_active() -> bool | None:
     """Whether the session reached graphical-session.target (None: no systemd user session).
     Hyprland started without UWSM, and many other compositors, never activate it."""
     r = _systemctl("is-active", "graphical-session.target", timeout=3)
@@ -211,7 +210,7 @@ WantedBy=graphical-session.target
 """
 
 
-def enable_unit(custom: str = "", port=None) -> Tuple[bool, str]:
+def enable_unit(custom: str = "", port=None) -> tuple[bool, str]:
     """Write, enable and start iridia-openrgb.service."""
     cmd = command(custom, port)
     if not cmd:
@@ -239,7 +238,7 @@ def enable_unit(custom: str = "", port=None) -> Tuple[bool, str]:
     return True, msg
 
 
-def disable_unit() -> Tuple[bool, str]:
+def disable_unit() -> tuple[bool, str]:
     """Stop, disable and delete iridia-openrgb.service (only if Iridia wrote it)."""
     if not managed():
         return True, f"{UNIT_NAME} isn't installed."
@@ -283,7 +282,7 @@ def _cmd_settings() -> dict:
 
 # ---------------------------------------------------------------- processes
 
-def processes() -> List[Tuple[int, List[str]]]:
+def processes() -> list[tuple[int, list[str]]]:
     """Running OpenRGB processes (window or server, native, Flatpak or AppImage): (pid, argv)."""
     out = []
     for pid in os.listdir("/proc"):
@@ -314,7 +313,7 @@ def window_without_server() -> bool:
     return any("--server" not in argv for _, argv in processes())
 
 
-def _start_time(pid: int) -> Optional[str]:
+def _start_time(pid: int) -> str | None:
     """Process start time (field 22 of /proc/PID/stat), to tell a PID apart from a reused one."""
     try:
         with open(f"/proc/{pid}/stat", encoding="utf-8", errors="replace") as f:
@@ -331,7 +330,7 @@ def pid_path() -> str:
     return runtime_path("iridia-openrgb.pid")
 
 
-def read_pid() -> Optional[int]:
+def read_pid() -> int | None:
     """The OpenRGB Iridia started, if it still runs."""
     try:
         with open(pid_path(), encoding="utf-8") as f:
@@ -392,7 +391,7 @@ def _terminate(pid: int, wait: float = 5.0, group: bool = True) -> bool:
     return _start_time(pid) != started
 
 
-def stop_ours() -> Tuple[bool, str]:
+def stop_ours() -> tuple[bool, str]:
     """Stop the OpenRGB Iridia started (never anything else)."""
     pid = read_pid()
     if pid is None:
@@ -443,7 +442,7 @@ def _hidden(lines) -> bool:
     return any(ln.replace(" ", "").lower() == "hidden=true" for ln in lines)
 
 
-def xdg_entries() -> List[str]:
+def xdg_entries() -> list[str]:
     """Autostart entries (~/.config/autostart/*.desktop) that start OpenRGB and aren't hidden."""
     found = []
     for path in sorted(glob.glob(os.path.join(_autostart_dir(), "*.desktop"))):
@@ -453,7 +452,7 @@ def xdg_entries() -> List[str]:
     return found
 
 
-def hide_xdg_entry(path: str) -> Tuple[bool, str]:
+def hide_xdg_entry(path: str) -> tuple[bool, str]:
     """Turn off an autostart entry by adding Hidden=true (the file stays, nothing is deleted)."""
     path = os.path.abspath(os.path.expanduser(path))
     if os.path.dirname(path) != os.path.abspath(_autostart_dir()) or not path.endswith(".desktop"):
@@ -579,7 +578,7 @@ def status() -> dict:
             "host": cfg.get("host") or "127.0.0.1"}
 
 
-def set_method(new: str, old: str, stop_running: bool = False) -> Tuple[bool, List[str]]:
+def set_method(new: str, old: str, stop_running: bool = False) -> tuple[bool, list[str]]:
     """Clean up after the old method and set up the new one (config.json is saved by the caller).
     stop_running: also stop the OpenRGB the daemon started when leaving "daemon"."""
     if new not in METHODS:
@@ -670,7 +669,7 @@ class Supervisor:
         if not is_local(host):
             if method != "off":
                 self._say(f"OpenRGB is on another machine ({host}); not starting anything here", logging.DEBUG)
-            return
+            return None
         now = self._clock()
         with self._lock:
             if self.pid and not self.alive():
@@ -683,31 +682,31 @@ class Supervisor:
         if method == "systemd":
             return self._tick_unit(now, reachable)
         if method != "daemon":
-            return
+            return None
         if self.pid or reachable:
-            return
+            return None
         if now - self._born < self.QUICK_SEC:
-            return
+            return None
         if now - self._born < self.GRACE_SEC and (self._others_now(now) or running()):
-            return
+            return None
         if self.gave_up:
-            return
+            return None
         if now < self._next_try:
-            return
+            return None
         if running(exclude=(self.pid,) if self.pid else ()):
             self._say("OpenRGB isn't reachable, but an OpenRGB process runs: not starting another. If it's the "
                       "window, turn on its SDK server (SDK Server tab, Start Server).")
-            return
+            return None
         found = self._others_now(now)
         if found:
             self._say(f"OpenRGB isn't reachable; it's set to be started by {', '.join(found)}: not starting "
                       "another (two OpenRGB instances fight over the hardware)", logging.WARNING)
-            return
+            return None
         cmd = command(custom, port)
         if not cmd:
             self._say("OpenRGB isn't reachable and isn't installed (no openrgb command, no Flatpak); "
                       "nothing to start", logging.WARNING)
-            return
+            return None
         self.spawn(cmd, "OpenRGB isn't reachable")
 
     def _tick_unit(self, now, reachable):

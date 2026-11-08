@@ -18,7 +18,7 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 logger = logging.getLogger("iridia")
 
@@ -95,7 +95,7 @@ def busctl_event(line: str):
     return None
 
 
-def monitor_command() -> Optional[List[str]]:
+def monitor_command() -> list[str] | None:
     if shutil.which("dbus-monitor"):
         return ["dbus-monitor", "--session",
                 f"type='method_call',interface='{FD}',member='Notify'",
@@ -113,9 +113,9 @@ class NotifyWatcher:
         self._on_notify = on_notify
         self._lock = threading.Lock()
         self._gen = 0
-        self._proc: Optional[subprocess.Popen] = None
+        self._proc: subprocess.Popen | None = None
         self.running = False
-        self.method: Optional[str] = None           # "dbus-monitor" or "busctl"; None: can't listen here
+        self.method: str | None = None           # "dbus-monitor" or "busctl"; None: can't listen here
 
     def set_needed(self, on: bool):
         with self._lock:
@@ -176,7 +176,7 @@ class NotifyWatcher:
 _dnd_cache = [0.0, False]
 
 
-def _out(cmd: List[str]) -> str:
+def _out(cmd: list[str]) -> str:
     try:
         return subprocess.run(cmd, capture_output=True, text=True, timeout=2).stdout.strip()
     except (OSError, subprocess.SubprocessError):

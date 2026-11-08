@@ -24,7 +24,7 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Callable, List, Optional, Tuple
+from collections.abc import Callable
 
 logger = logging.getLogger("iridia")
 
@@ -43,25 +43,25 @@ SCREENSAVERS = {
 
 # ------------------------------------------------------------- parsing (pure, tested)
 
-def parse_bool(out: str) -> Optional[bool]:
+def parse_bool(out: str) -> bool | None:
     """gdbus's answer to a boolean property or method: "(<true>,)" or "(true,)"."""
     m = re.search(r"\b(true|false)\b", out or "")
     return None if m is None else m.group(1) == "true"
 
 
-def parse_number(out: str) -> Optional[int]:
+def parse_number(out: str) -> int | None:
     """gdbus's answer holding one number: "(uint64 12345,)", "(<uint64 1700000000000000>,)", "(12,)"."""
     m = re.search(r"(?:u?int(?:16|32|64)\s+)?(-?\d+)", out or "")
     return int(m.group(1)) if m else None
 
 
-def parse_object_path(out: str) -> Optional[str]:
+def parse_object_path(out: str) -> str | None:
     m = re.search(r"objectpath\s+'([^']+)'", out or "") or re.search(r"'(/org/freedesktop/login1/session/[^']+)'",
                                                                      out or "")
     return m.group(1) if m else None
 
 
-def screensaver_of(line: str) -> Optional[str]:
+def screensaver_of(line: str) -> str | None:
     """The screen saver interface an ActiveChanged line comes from, if it's one of SCREENSAVERS
     (other services have signals with that name too)."""
     m = re.search(r"interface=([\w.]+);\s*member=ActiveChanged", line) or \
@@ -69,7 +69,7 @@ def screensaver_of(line: str) -> Optional[str]:
     return m.group(1) if m and m.group(1) in SCREENSAVERS else None
 
 
-def lock_event(line: str, pending: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
+def lock_event(line: str, pending: str | None = None) -> tuple[str | None, str | None]:
     """(event or None, what to look for on the next line) for one line of monitor output. Events:
     "locked"/"unlocked" (the desktop says so: LockedHint, ScreenSaver), "lock"/"unlock" (logind's
     requests, from loginctl lock-session: hyprlock and swaylock never answer them, so the screen
@@ -118,7 +118,7 @@ LOCKERS = ("hyprlock", "swaylock", "gtklock", "waylock", "i3lock", "xsecurelock"
 _LOCKER_COMMS = {n[:15] for n in LOCKERS}
 
 
-def find_locker(proc: str, uid: int) -> Optional[str]:
+def find_locker(proc: str, uid: int) -> str | None:
     """The name of a running screen locker of this user, from /proc (no process started for it)."""
     import os
     try:
@@ -138,7 +138,7 @@ def find_locker(proc: str, uid: int) -> Optional[str]:
 
 # ------------------------------------------------------------- the watcher
 
-def _run(cmd: List[str], timeout: float = 2.0) -> Optional[str]:
+def _run(cmd: list[str], timeout: float = 2.0) -> str | None:
     try:
         r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL,
                            text=True, timeout=timeout)
@@ -147,13 +147,13 @@ def _run(cmd: List[str], timeout: float = 2.0) -> Optional[str]:
     return r.stdout if r.returncode == 0 else None
 
 
-def _gdbus_call(bus: str, dest: str, path: str, method: str, *args) -> Optional[str]:
+def _gdbus_call(bus: str, dest: str, path: str, method: str, *args) -> str | None:
     if not shutil.which("gdbus"):
         return None
     return _run(["gdbus", "call", f"--{bus}", "--dest", dest, "--object-path", path, "--method", method, *args])
 
 
-def _prop(path: str, iface: str, name: str) -> Optional[str]:
+def _prop(path: str, iface: str, name: str) -> str | None:
     return _gdbus_call("system", LOGIND, path, "org.freedesktop.DBus.Properties.Get", iface, name)
 
 
@@ -169,21 +169,21 @@ class SessionWatcher:
         self._on_change = on_change
         self._stop = False
         self._mutex = threading.Lock()
-        self._procs: List[subprocess.Popen] = []
+        self._procs: list[subprocess.Popen] = []
         self._lock_gen = 0                           # bumped to stop the lock watchers
         self.watching_lock = False
         self._idle_wanted = threading.Event()
         self._idle_started = False
         self.idle_checked = False                    # looked for a way to read the idle time
-        self.session_path: Optional[str] = None
+        self.session_path: str | None = None
         self._said_locked = False                    # the desktop says the screen is locked
-        self._said_by: Optional[str] = None          # "logind" or a SCREENSAVERS interface
+        self._said_by: str | None = None          # "logind" or a SCREENSAVERS interface
         self._verify_at = 0.0                        # when to ask it again
         self._locker_running = False                 # a screen locker (hyprlock, swaylock, ...) runs
         self._poke = threading.Event()
-        self.lock_method: Optional[str] = None       # what reported the lock state, for the window
-        self.idle_method: Optional[str] = None
-        self.idle: Optional[float] = None            # seconds without input, POLL_SEC old at most
+        self.lock_method: str | None = None       # what reported the lock state, for the window
+        self.idle_method: str | None = None
+        self.idle: float | None = None            # seconds without input, POLL_SEC old at most
 
     @property
     def locked(self) -> bool:
@@ -264,7 +264,7 @@ class SessionWatcher:
             self._poll_idle()
 
     @staticmethod
-    def _find_session() -> Optional[str]:
+    def _find_session() -> str | None:
         out = _prop("/org/freedesktop/login1/user/self", "org.freedesktop.login1.User", "Display")
         path = parse_object_path(out or "")
         if path and not path.endswith("/"):
@@ -317,7 +317,7 @@ class SessionWatcher:
         self._verify_at = 0.0
         self._poke.set()
 
-    def _still_said_locked(self) -> Optional[bool]:
+    def _still_said_locked(self) -> bool | None:
         """Ask whatever said the screen is locked whether it still is; None when it doesn't answer."""
         by = self._said_by
         if by == "logind" and self.session_path:
@@ -365,7 +365,7 @@ class SessionWatcher:
             self.idle = self._idle_now(self.idle_method)
             time.sleep(self.POLL_SEC)
 
-    def _idle_now(self, method: str) -> Optional[float]:
+    def _idle_now(self, method: str) -> float | None:
         if method == "gnome":
             ms = parse_number(_gdbus_call("session", "org.gnome.Mutter.IdleMonitor", "/org/gnome/Mutter/IdleMonitor/Core",
                                           "org.gnome.Mutter.IdleMonitor.GetIdletime") or "")
@@ -385,7 +385,7 @@ class SessionWatcher:
             return max(0.0, time.time() - since / 1e6) if since else 0.0
         return None
 
-    def _find_idle_method(self) -> Optional[str]:
+    def _find_idle_method(self) -> str | None:
         for m in ("gnome", "screensaver", "xprintidle", "logind"):
             if m == "xprintidle" and not shutil.which("xprintidle"):
                 continue
@@ -398,6 +398,6 @@ class SessionWatcher:
             return m
         return None
 
-    def idle_seconds(self) -> Optional[float]:
+    def idle_seconds(self) -> float | None:
         """Seconds without input, POLL_SEC old at most; None when nothing here can tell."""
         return self.idle if self.idle_method and self._idle_wanted.is_set() else None

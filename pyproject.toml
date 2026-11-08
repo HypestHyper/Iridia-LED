@@ -31,7 +31,7 @@ Documentation = "https://github.com/HypestHyper/Iridia-LED/blob/main/docs/wiki/H
 
 [project.optional-dependencies]
 material = ["material-color-utilities>=0.1.0"]
-dev = ["pytest", "ruff"]
+dev = ["pytest", "ruff==0.17.3"]
 
 [project.scripts]
 iridia-daemon = "iridia.daemon:main"
@@ -47,13 +47,19 @@ iridia = ["data/*.svg", "data/*.png", "data/fonts/*", "data/locale/*/LC_MESSAGES
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Anything Python deprecates in Iridia's own code fails the tests while it still works, long before
+# a later Python takes it away.
+filterwarnings = ["error::DeprecationWarning:iridia", "error::PendingDeprecationWarning:iridia"]
 
 [tool.ruff]
 target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint]
-# Real errors only: undefined names, unused imports/variables, syntax errors, likely bugs, files in the shared /tmp.
-select = ["F", "E9", "B", "PLE", "S108"]
-# zip() without strict=: pairing a list with itself shifted by one (zip(a, a[1:])) is meant to stop short
-ignore = ["B905"]
+# Real errors (undefined names, unused imports/variables, syntax errors, likely bugs), files in the
+# shared /tmp, and code a newer Python has a better (or the only future) way for: deprecated typing
+# names and aliases, implicit Optional, bare returns in functions that return a value.
+select = ["F", "E9", "B", "PLE", "S108", "UP", "RUF013", "RET502"]
+# zip() without strict=: pairing a list with itself shifted by one (zip(a, a[1:])) is meant to stop short.
+# "%" formatting isn't going away, and it reads better in the few places it's used.
+ignore = ["B905", "UP031"]

@@ -9,7 +9,6 @@ daemon takes a single-instance lock, so a second copy exits quietly.
 import os
 import shutil
 import sys
-from typing import Dict, List
 
 XDG_AUTOSTART_NAME = "iridia-daemon.desktop"
 
@@ -70,7 +69,7 @@ def xdg_remove() -> bool:
     return False
 
 
-def snippets(cmd: str = "") -> List[Dict[str, str]]:
+def snippets(cmd: str = "") -> list[dict[str, str]]:
     """Copy-paste autostart lines, one entry per environment."""
     cmd = cmd or daemon_command()
     return [
@@ -195,5 +194,5 @@ def _compositor_from_processes(proc: str = "/proc") -> str:
     return ""
 
 
-def snippet(snip_id: str) -> Dict[str, str]:
+def snippet(snip_id: str) -> dict[str, str]:
     return next((x for x in snippets() if x["id"] == snip_id), {})

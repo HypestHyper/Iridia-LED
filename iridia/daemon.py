@@ -7,7 +7,7 @@ import signal
 import sys
 import threading
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -91,7 +91,7 @@ def clean_zone_cfg(z: dict) -> dict:
     return out
 
 
-def pack_rgbw(colors: List[str]) -> List[str]:
+def pack_rgbw(colors: list[str]) -> list[str]:
     """RGBW strips (SK6812 RGBW, 4 bytes per LED) on a header that sends 3 bytes per LED.
 
     Take the white out of every colour, lay the bytes out as the strip reads them (G R B W),
@@ -202,9 +202,9 @@ class Daemon:
         # Keybind changes ("iridia zone NAME off"): temporary, never saved, cleared by running
         # the same command again or "normal". zone key -> {"power": "on"|"off", "hex": .., "bright": N}
         # (any combination: "on" + a color + a brightness in one keybind)
-        self._overlays: Dict[str, dict] = {}
+        self._overlays: dict[str, dict] = {}
         self._rgbtest = None              # (device, zone, until): red / green / blue test for color order
-        self._strip_info: Dict[str, dict] = {}   # zone key -> strip type, power estimate, size needs
+        self._strip_info: dict[str, dict] = {}   # zone key -> strip type, power estimate, size needs
         self._asleep = False              # PC is suspending: LEDs dark
         self._sleep_sent = threading.Event()
         self._wake = threading.Event()    # wakes the main loop early
@@ -222,12 +222,12 @@ class Daemon:
         self._scene_delay = scenes.Delay()
         self._scene_try = None                    # (scene, until): Try it
         self._scene_soon = False                  # a look is about to come on or go: tick sooner
-        self._notify_events: List[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
+        self._notify_events: list[tuple] = []     # (app, urgent) from the watcher thread, not handled yet
         self._notify_lock = threading.Lock()
-        self._flash: Optional[notifyflash.Flash] = None   # a notification flash running now
-        self._flash_sizes: Dict[str, int] = {}   # zone key -> its LED count, for the last flash's targets
+        self._flash: notifyflash.Flash | None = None   # a notification flash running now
+        self._flash_sizes: dict[str, int] = {}   # zone key -> its LED count, for the last flash's targets
         self._flash_keys: set = set()       # zones showing it through a flash job (static or paused)
-        self._static_pre: Dict[str, list] = {}    # key -> the static colours before _finish, for flashes
+        self._static_pre: dict[str, list] = {}    # key -> the static colours before _finish, for flashes
         self._stopping = threading.Event()  # set when the daemon shuts down
         self._sessions_dir = "/run/systemd/sessions"
         self._sensor_zones = set()          # zones to redraw for a new sensor reading
@@ -268,46 +268,46 @@ class Daemon:
         # than a simple is_available() check could tell apart here).
         self.ipc = IPCServer(self._socket_path, self)
 
-        self._current_wallpaper: Optional[str] = None
-        self._extracted_colors: List[str] = ["642107"]
+        self._current_wallpaper: str | None = None
+        self._extracted_colors: list[str] = ["642107"]
         self._current_brightness: int = 100
         self._last_brightness_poll = 0.0
         self._last_health_check = 0.0
         self._needs_update = True
         self._force_refresh = False
-        self._last_sent: Dict[str, str] = {}
+        self._last_sent: dict[str, str] = {}
         self._openrgb_epoch = 0
-        self._settle_resend_at: Optional[float] = None
+        self._settle_resend_at: float | None = None
         self._start_time = time.time()
         self._orgb = openrgb_server.Supervisor()
         self._orgb_busy = False
         self._orgb_restarting = False
         self._nodev_restarts = 0          # restarts because OpenRGB saw no devices (max NODEV_MAX per run)
         self._nodev_last = 0.0
-        self._said: Dict[str, str] = {}   # topic -> last message, for warnings logged once
+        self._said: dict[str, str] = {}   # topic -> last message, for warnings logged once
         self._last_logged_connected = None
-        self._device_missing_since: Dict[str, float] = {}
-        self._zone_errors: Dict[tuple, str] = {}
+        self._device_missing_since: dict[str, float] = {}
+        self._zone_errors: dict[tuple, str] = {}
         self._last_auto_restart = 0.0
-        self._restart_attempts: Dict[str, int] = {}   # device -> automatic OpenRGB restarts tried for it
+        self._restart_attempts: dict[str, int] = {}   # device -> automatic OpenRGB restarts tried for it
 
-        self._observer: Optional[Observer] = None
+        self._observer: Observer | None = None
         self._last_wallpaper_event = 0.0
 
         # animations (see animations.py and animator.py)
         self._animator = Animator(self._send_frames)
         self._anim_keys: set = set()      # zones the animator sends (unless paused for a moment)
-        self._anim_jobs: Dict[str, tuple] = {}    # key -> (signature, Job)
-        self._static_rgb: Dict[str, list] = {}    # key -> what the static path shows on that zone
+        self._anim_jobs: dict[str, tuple] = {}    # key -> (signature, Job)
+        self._static_rgb: dict[str, list] = {}    # key -> what the static path shows on that zone
         self._anim_hold = False           # `iridia animations pause`: until resumed (not saved)
         self._run_seed = int.from_bytes(os.urandom(2), "little")
-        self._glide: Dict[str, tuple] = {}        # key -> (from %, to %, start) for brightness glides
+        self._glide: dict[str, tuple] = {}        # key -> (from %, to %, start) for brightness glides
         self._glide_active = False
         self._layout = None
         self._layout_mtime = None
         self._anim_cfg = self._anim_settings()        # read once per tick, not once per frame
         self._night_cap = self._night_settings()["cap"]
-        self._power_shown: Dict[str, float] = {}
+        self._power_shown: dict[str, float] = {}
 
         signal.signal(signal.SIGTERM, self._on_signal)
         signal.signal(signal.SIGINT, self._on_signal)
@@ -676,9 +676,9 @@ class Daemon:
                                         band=st["band"], repeat=st["repeat"], brightness=st["brightness"])
         return True
 
-    def _flash_ranges(self, targets: list) -> Dict[str, list]:
+    def _flash_ranges(self, targets: list) -> dict[str, list]:
         """zone key -> the LEDs to flash on it, for the enabled strips the targets name."""
-        out: Dict[str, list] = {}
+        out: dict[str, list] = {}
         self._flash_sizes = {}
         devices = self.config.devices_view
         for t in targets:
@@ -847,7 +847,7 @@ class Daemon:
         """A lock or idle fade is running, or its last step hasn't been sent yet."""
         return not self._sess_settled or time.monotonic() - self._sess_ramp[2] < self._sess_ramp[3]
 
-    def _session_factor(self, now: Optional[float] = None) -> float:
+    def _session_factor(self, now: float | None = None) -> float:
         frm, to, t0, dur = self._sess_ramp
         now = time.monotonic() if now is None else now
         if dur <= 0 or now - t0 >= dur:
@@ -956,7 +956,7 @@ class Daemon:
                 "end": str(n.get("end", "07:00")), "cap": int(_num(n.get("cap", 20), 20, 0, 100))}
 
     @staticmethod
-    def _minutes(hhmm: str) -> Optional[int]:
+    def _minutes(hhmm: str) -> int | None:
         try:
             h, m = hhmm.split(":")
             h, m = int(h), int(m)
@@ -1208,7 +1208,7 @@ class Daemon:
 
     SETTLE_RESEND_SEC = 3.0      # after (re)connecting, send everything once more after this long
 
-    def _check_openrgb_epoch(self, now: Optional[float] = None):
+    def _check_openrgb_epoch(self, now: float | None = None):
         """OpenRGB (re)connected or its device list changed: its devices may be fresh ones showing their
         own colours, so send every zone again, and once more a little later (some controllers miss the
         first update right after being switched to Direct mode). Static colours are otherwise only sent
@@ -1700,7 +1700,7 @@ class Daemon:
             self.logger.info(f"Colors for this wallpaper: {restored} zone(s) restored from your saved picks, "
                              f"{followed} zone(s) following the wallpaper")
 
-    def _led_base_color(self) -> Optional[str]:
+    def _led_base_color(self) -> str | None:
         """The colour the LEDs are (nominally) showing, before brightness
         scaling and animation — the GUI uses it as its accent colour."""
         try:
@@ -1826,7 +1826,7 @@ class Daemon:
         return (zone in zones) if zones else not zone
 
     # ------------------------------------------------------------- keybinds
-    def _zone_targets(self) -> List[dict]:
+    def _zone_targets(self) -> list[dict]:
         """Every zone with the names you can call it by (for `iridia zone list`)."""
         out = []
         for dev, zname, zcfg in self._iter_zone_targets(self.config.devices_view):
@@ -1869,7 +1869,7 @@ class Daemon:
         return [], f"no strip called '{t}'. Known names: {', '.join(names) or 'none yet'} (or 'all')"
 
     @staticmethod
-    def _overlay_text(ov: Optional[dict]) -> str:
+    def _overlay_text(ov: dict | None) -> str:
         if not ov:
             return "back to normal"
         parts = []
@@ -2018,7 +2018,7 @@ class Daemon:
                 "message": f"{', '.join(parts)}: {what}"}
 
     # ---------------------------------------------------------- strip types
-    def _real_zone_type(self, device: str, zone: str) -> Optional[int]:
+    def _real_zone_type(self, device: str, zone: str) -> int | None:
         """OpenRGB zone type: 0 single (one colour), 1 linear, 2 matrix; None if unknown."""
         dev = self.openrgb.devices.get(device) if self.openrgb.devices else None
         if dev is None or not zone:
@@ -2041,7 +2041,7 @@ class Daemon:
         return "addressable"
 
     @staticmethod
-    def _merge_animation(current, anim: Optional[dict], given) -> Optional[dict]:
+    def _merge_animation(current, anim: dict | None, given) -> dict | None:
         """Keep the zone's other settings for the same effect; a new effect starts from its defaults."""
         if anim is None:
             return None
@@ -2164,7 +2164,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _finish(self, key: str, device: str, zone: str, zcfg: dict, colors: List[str]) -> List[str]:
+    def _finish(self, key: str, device: str, zone: str, zcfg: dict, colors: list[str]) -> list[str]:
         """Last steps before sending, whatever made the colours: power limit, channel order,
         RGBW packing. Also records what the window shows about the strip."""
         stype = self._strip_type(device, zone, zcfg)
@@ -2343,7 +2343,7 @@ class Daemon:
         self._needs_update = False
         self._force_refresh = False
 
-    def _update_device(self, name: str, dev_cfg: Dict[str, Any], t: float = 0.0):
+    def _update_device(self, name: str, dev_cfg: dict[str, Any], t: float = 0.0):
         if not isinstance(dev_cfg, dict):
             return
         dev_off = not dev_cfg.get("enabled", True)
@@ -2393,7 +2393,7 @@ class Daemon:
             self._snap_cache[hex_color] = hit
         return hit
 
-    def _update_zone(self, device_name: str, zone_name: str, zcfg: Dict[str, Any], t: float = 0.0,
+    def _update_zone(self, device_name: str, zone_name: str, zcfg: dict[str, Any], t: float = 0.0,
                      off: bool = False):
         pattern = PatternGenerator.normalize(zcfg.get("pattern", "solid"))
         params = zcfg.get("pattern_params") or {}
@@ -2507,7 +2507,7 @@ class Daemon:
         return {"enabled": bool(a.get("enabled", True)), "fps": a.get("fps", 30) if a.get("fps") in (15, 30, 60) else 30,
                 "night_pause": bool(a.get("night_pause", False)), "night_slow": bool(a.get("night_slow", False))}
 
-    def _zone_animation(self, key: str, zcfg: dict) -> Optional[dict]:
+    def _zone_animation(self, key: str, zcfg: dict) -> dict | None:
         """The zone's effect (a keybind's or a scene's effect wins), or None for a static pattern."""
         ov = self._ov(key) or {}
         if "effect" in ov:
@@ -2536,7 +2536,7 @@ class Daemon:
             return not self._flash_blocked(device, zone, key)
         return key in self._anim_keys and not self._anim_blocked(device, zone, key)
 
-    def _ov(self, key: str) -> Optional[dict]:
+    def _ov(self, key: str) -> dict | None:
         """What's on top of a zone's own settings: a keybind's change, else the scene's look (whose
         brightness still fades on lock and keeps under night mode's cap)."""
         ov = self._overlays.get(key)
@@ -2598,14 +2598,14 @@ class Daemon:
         when something they depend on changed, so per-frame caches survive."""
         s = self._anim_cfg = self._anim_settings()
         self._night_cap = self._night_settings()["cap"]
-        jobs_by_dev: Dict[str, tuple] = {}
+        jobs_by_dev: dict[str, tuple] = {}
         keys, seen = set(), set()
         flash_on = set(self._flash.ranges) if self._flash is not None else set()
         flash_keys = set()
         if connected:
             real = {d["name"]: [z["name"] for z in d["zones"]]
                     for d in self.openrgb.list_devices() + self.netlights.list_devices()}
-            layout_groups: Dict[tuple, list] = {}
+            layout_groups: dict[tuple, list] = {}
             plan = []
             for dev, dev_cfg in self.config.devices_view.items():
                 if not isinstance(dev_cfg, dict) or not dev_cfg.get("enabled", True) or dev not in real:
@@ -2783,10 +2783,10 @@ class Daemon:
         gamma = zc.get("gamma_value", 2.2) if zc.get("gamma_correction", False) else None
         exact = {animations.hex_to_rgb(h) for h in self.custom_colors.exact_set()}
         prof = self.calibration.get(zc.get("calibration_profile")) if mode == "calibrated" else None
-        luts: Dict[tuple, list] = {}
-        cache: Dict[tuple, tuple] = {}
+        luts: dict[tuple, list] = {}
+        cache: dict[tuple, tuple] = {}
         cache_b = [None]
-        snaps: Dict[tuple, tuple] = {}      # palette snaps don't depend on brightness: kept
+        snaps: dict[tuple, tuple] = {}      # palette snaps don't depend on brightness: kept
 
         def lut(b: int, g):
             key = (b, g)
@@ -2872,7 +2872,7 @@ class Daemon:
             colors = [animations.hex_to_rgb(h) for h in pack_rgbw([animations.rgb_to_hex(c) for c in colors])]
         return colors
 
-    def _real_zone_size(self, device: str, zone: str) -> Optional[int]:
+    def _real_zone_size(self, device: str, zone: str) -> int | None:
         """LED count OpenRGB reports for a zone (what can actually be addressed)."""
         dev = self.openrgb.devices.get(device) if self.openrgb.devices else None
         if dev is None:
@@ -2885,7 +2885,7 @@ class Daemon:
         return None
 
     def _override_colors(self, device: str, zone: str, led_count: int,
-                         independent: bool = False) -> Optional[List[str]]:
+                         independent: bool = False) -> list[str] | None:
         """Colours that replace everything else: lights off, identify, LED counting. A zone on its own
         stays as it is while the PC sleeps."""
         if self._lights_off or (self._asleep and not independent):
@@ -2913,7 +2913,7 @@ class Daemon:
             return out
         return None
 
-    def _get_zone_brightness(self, zcfg: Dict[str, Any]) -> int:
+    def _get_zone_brightness(self, zcfg: dict[str, Any]) -> int:
         if zcfg.get("independent"):
             # on its own: its own brightness, whatever the monitor and night mode say
             return zcfg.get("manual_brightness", 100)
@@ -2922,7 +2922,7 @@ class Daemon:
             b = min(b, self._night_cap)
         return b
 
-    def _zone_brightness_raw(self, zcfg: Dict[str, Any]) -> int:
+    def _zone_brightness_raw(self, zcfg: dict[str, Any]) -> int:
         if not zcfg.get("brightness_sync", False) or not self.ddc.is_available():
             # nothing to follow (no ddcutil, no monitor answers, the chosen one is off): the Manual value
             return zcfg.get("manual_brightness", 100)
@@ -2960,7 +2960,7 @@ class Daemon:
         b = int(pow(int(hex_color[4:6], 16) / 255.0, 1.0 / gamma) * 255)
         return f"{r:02x}{g:02x}{b:02x}"
 
-    def handle_command(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def handle_command(self, req: dict[str, Any]) -> dict[str, Any]:
         try:
             return self._dispatch(req)
         except ZoneNotFound as e:
@@ -2989,7 +2989,7 @@ class Daemon:
             return
         self._needs_update = True
 
-    def _dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _dispatch(self, req: dict[str, Any]) -> dict[str, Any]:
         cmd = req.get("cmd", "")
         if cmd == "ping":
             from iridia import get_version
@@ -3279,7 +3279,7 @@ class Daemon:
             self._apply_look(lk, on)
         return dict(self._looks_status(), ok=True)
 
-    def _end_look_try(self, now: Optional[float] = None):
+    def _end_look_try(self, now: float | None = None):
         t = getattr(self, "_look_try", None)
         if t is None or (now is not None and now < t[2]):
             return
@@ -3450,7 +3450,7 @@ class Daemon:
         self._wake.set()
         return dict(self._netlights_status(), ok=True)
 
-    def _cmd_status(self) -> Dict[str, Any]:
+    def _cmd_status(self) -> dict[str, Any]:
         ident, probe = self._identify, self._probe
         missing = [
             name for name, cfg in self.config.devices_view.items()
@@ -3531,7 +3531,7 @@ class Daemon:
             "code": getattr(self, "_code", ""),
         }
 
-    def _cmd_set_device(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_device(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         enabled = req.get("enabled")
         if name not in self.config.devices:
@@ -3541,7 +3541,7 @@ class Daemon:
             self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_pattern(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_pattern(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         pattern = req.get("pattern")
         if name not in self.config.devices:
@@ -3552,7 +3552,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_mode(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_mode(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         mode = req.get("mode")
         if name not in self.config.devices:
@@ -3561,7 +3561,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_led_count(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_led_count(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         zone = req.get("zone")
         count = req.get("count")
@@ -3578,7 +3578,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_brightness_sync(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_brightness_sync(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         enabled = req.get("enabled")
         if name not in self.config.devices:
@@ -3587,7 +3587,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_manual_brightness(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_manual_brightness(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         value = req.get("value")
         if name not in self.config.devices:
@@ -3596,7 +3596,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_brightness_range(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_brightness_range(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         range_min = req.get("min")
         range_max = req.get("max")
@@ -3606,7 +3606,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_invert(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_invert(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         enabled = req.get("enabled")
         if name not in self.config.devices:
@@ -3615,7 +3615,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
-    def _cmd_set_gamma(self, req: Dict[str, Any]) -> Dict[str, Any]:
+    def _cmd_set_gamma(self, req: dict[str, Any]) -> dict[str, Any]:
         name = req.get("device")
         enabled = req.get("enabled")
         if name not in self.config.devices:

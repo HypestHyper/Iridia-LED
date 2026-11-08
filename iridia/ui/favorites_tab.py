@@ -7,7 +7,6 @@ chips, switch chips), single looks, setups and switches, in a grid of square cel
 drag and drop. Everything lives in the daemon's config (iridia/looks.py), so setups and backups keep it.
 """
 
-from typing import List, Optional
 
 from gi.repository import Gdk, GLib, GObject, Gtk
 
@@ -129,7 +128,7 @@ class FavoritesPage:
         self._shown = None              # what the board shows (rebuilt when it changes)
         self._editing = False
         self._live = {}                 # item id -> function(status) refreshing it in place
-        self._setups: Optional[List[str]] = None
+        self._setups: list[str] | None = None
         page.append(section(_("Favourites"), _("Your quick panel: cards for the strips you choose with just the "
                                                "controls you want, looks, setups and switches. Drag them where you "
                                                "like in Arrange."), top=4))
@@ -224,7 +223,7 @@ class FavoritesPage:
         """[(zone key, name)] for every strip, without the hidden ones unless asked."""
         return strip_list(self._st, with_hidden)
 
-    def _zone_cfg(self, key, st=None) -> Optional[dict]:
+    def _zone_cfg(self, key, st=None) -> dict | None:
         dev, _s, zone = key.partition("|")
         dc = ((st or self._st).get("device_configs") or {}).get(dev)
         if not isinstance(dc, dict):
@@ -462,7 +461,7 @@ class FavoritesPage:
     # -- single items
     def _look_tile(self, t, lk):
         small = t.get("size") == "s"
-        c, head = self._frame("palette", lk["name"], "" if small else self._look_where(lk) + " · " + look_text(lk["look"]))
+        c, _head = self._frame("palette", lk["name"], "" if small else self._look_where(lk) + " · " + look_text(lk["look"]))
         btn = button(_("Turn on"), None, "tonal small",
                      lambda: self._looks_send(apply={"look": lk["id"], "on": "toggle"}))
         btn.set_vexpand(True)
@@ -623,7 +622,7 @@ class FavoritesPage:
                                          for w in SWITCH_NAMES])
 
     # ---------------------------------------------------------------- the card editor
-    def _open_card(self, t: Optional[dict]):
+    def _open_card(self, t: dict | None):
         c = self._editor
         widgets.clear(c)
         self._editing_card = dict(t) if t else None
@@ -715,7 +714,7 @@ class FavoritesPage:
         self._send(set=[t if (x.get("type") == "card" and x.get("id") == t["id"]) else x for x in self.favorites()])
 
     # ---------------------------------------------------------------- the look editor
-    def _open_look(self, lk: Optional[dict]):
+    def _open_look(self, lk: dict | None):
         self._look_edit = dict(lk) if lk else None
         c = self._editor
         widgets.clear(c)

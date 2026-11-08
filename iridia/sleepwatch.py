@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
 
 logger = logging.getLogger("iridia")
 
@@ -23,10 +23,10 @@ class SleepWatcher:
     def __init__(self, on_sleep: Callable[[], None], on_wake: Callable[[], None]):
         self._on_sleep = on_sleep
         self._on_wake = on_wake
-        self._proc: Optional[subprocess.Popen] = None
-        self._inhibit: Optional[subprocess.Popen] = None
+        self._proc: subprocess.Popen | None = None
+        self._inhibit: subprocess.Popen | None = None
         self._stop = False
-        self._thread: Optional[threading.Thread] = None
+        self._thread: threading.Thread | None = None
         self.available = False
         self.method = None
 

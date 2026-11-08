@@ -121,7 +121,7 @@ def _venv(tmp_path):
 
 
 def test_installing_keeps_the_old_version_and_going_back(github, tmp_path, monkeypatch):
-    base, routes, release = github
+    base, _routes, release = github
     venv, log = _venv(tmp_path)
     monkeypatch.setenv("VENV_MARK", str(venv / "marker"))
     release("9.9.9")
@@ -135,7 +135,7 @@ def test_installing_keeps_the_old_version_and_going_back(github, tmp_path, monke
 
 
 def test_a_failed_install_puts_the_old_version_back(github, tmp_path, monkeypatch):
-    base, routes, release = github
+    base, _routes, release = github
     venv, log = _venv(tmp_path)
     monkeypatch.setenv("VENV_MARK", str(venv / "marker"))
     release("9.9.9", data=_tarball("9.9.9", install_rc=1))

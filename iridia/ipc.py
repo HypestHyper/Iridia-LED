@@ -36,7 +36,7 @@ class IPCServer(threading.Thread):
                 conn, _ = self.server.accept()
                 handler = threading.Thread(target=self._handle_client, args=(conn,), daemon=True)
                 handler.start()
-            except socket.timeout:
+            except TimeoutError:
                 continue
             except OSError:
                 break
@@ -67,7 +67,7 @@ class IPCServer(threading.Thread):
             resp = self.daemon.handle_command(req)
             try:
                 conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
-            except (BrokenPipeError, ConnectionResetError, socket.timeout):
+            except (TimeoutError, BrokenPipeError, ConnectionResetError):
                 logger.debug(f"IPC client hung up before the answer to {req.get('cmd') if isinstance(req, dict) else '?'}")
         except Exception as e:
             # Without this, an exception here is only ever visible to
@@ -103,7 +103,7 @@ class IPCClient:
                     break
                 data += chunk
             return json.loads(data.decode("utf-8"))
-        except socket.timeout:
+        except TimeoutError:
             # connected (or still connecting) but no answer in time: running, just slow or busy
             return {"ok": False, "error": "the daemon didn't answer in time"}
         except (ConnectionRefusedError, FileNotFoundError):

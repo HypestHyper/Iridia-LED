@@ -20,7 +20,6 @@ Config:
 """
 import re
 import secrets
-from typing import List, Optional
 
 from iridia import scenes
 
@@ -38,7 +37,7 @@ def new_id() -> str:
     return secrets.token_hex(3)
 
 
-def clean_look(raw) -> Optional[dict]:
+def clean_look(raw) -> dict | None:
     """A look with a name, targets and what it does; None if it can't be one."""
     if not isinstance(raw, dict):
         return None
@@ -56,7 +55,7 @@ def clean_look(raw) -> Optional[dict]:
             "targets": list(dict.fromkeys(targets)), "look": look}
 
 
-def clean_looks(raw) -> List[dict]:
+def clean_looks(raw) -> list[dict]:
     out, ids, names = [], set(), set()
     for x in raw if isinstance(raw, list) else []:
         lk = clean_look(x)
@@ -70,7 +69,7 @@ def clean_looks(raw) -> List[dict]:
     return out
 
 
-def clean_card(raw) -> Optional[dict]:
+def clean_card(raw) -> dict | None:
     """A card: a title, its strips (zone keys, or ["*"]), the controls it shows (in that order), the
     looks and switches its chips are for, and its size."""
     t = raw.get("targets")
@@ -88,7 +87,7 @@ def clean_card(raw) -> Optional[dict]:
             "size": raw.get("size") if raw.get("size") in SIZES else "w"}
 
 
-def clean_tile(raw) -> Optional[dict]:
+def clean_tile(raw) -> dict | None:
     if isinstance(raw, dict) and raw.get("type") == "device" and isinstance(raw.get("key"), str) and "|" in raw["key"]:
         # a one-strip tile from before cards: a card for that strip
         raw = {"type": "card", "targets": [raw["key"]], "controls": ["power", "brightness", "colors"],
@@ -113,7 +112,7 @@ def tile_id(tile: dict) -> str:
     return f"{tile['type']}:{tile.get('id') or tile.get('name') or tile.get('what')}"
 
 
-def clean_favorites(raw) -> List[dict]:
+def clean_favorites(raw) -> list[dict]:
     out, seen = [], set()
     for x in raw if isinstance(raw, list) else []:
         t = clean_tile(x)
@@ -124,7 +123,7 @@ def clean_favorites(raw) -> List[dict]:
     return out
 
 
-def find(looks: List[dict], what: str) -> Optional[dict]:
+def find(looks: list[dict], what: str) -> dict | None:
     """A look by its id or its name (any case)."""
     w = str(what or "").strip().lower()
     return next((lk for lk in looks if lk["id"] == w or lk["name"].lower() == w), None)

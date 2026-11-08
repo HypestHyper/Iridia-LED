@@ -13,7 +13,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_foreign("cairo")
 from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from iridia.i18n import _, ngettext  # noqa: F401
+from iridia.i18n import _, ngettext
 from iridia import assets, diagnostics, i18n, theme  # noqa: E402
 from iridia.calibration import DEFAULT_NAME, valid_name  # noqa: E402
 from iridia.client import Client  # noqa: E402
@@ -417,8 +417,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         tabrow.append(self._tab_scroll)
         tabrow.append(self._tab_arrows[1])
         adj = self._tab_scroll.get_hadjustment()
+        self._arrows_due = False
         for sig in ("changed", "value-changed"):
-            adj.connect(sig, lambda *_a: self._update_tab_arrows())
+            adj.connect(sig, lambda *_a: self._arrows_soon())
         self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.CROSSFADE,
                                 transition_duration=180)
         self._stack.set_hhomogeneous(False)      # only the page on show sets how narrow the window can be
@@ -577,13 +578,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         elif x + w > v + page:
             adj.set_value(x + w - page)
 
+    def _arrows_soon(self):
+        """The adjustment changes while GTK lays the window out; showing a widget right then makes GTK
+        measure it with no room (a warning, and a layout pass that newer GTK may refuse), so it waits
+        for the layout to finish."""
+        if not self._arrows_due:
+            self._arrows_due = True
+            GLib.idle_add(self._update_tab_arrows)
+
     def _update_tab_arrows(self):
+        self._arrows_due = False
         adj = self._tab_scroll.get_hadjustment()
         over = adj.get_upper() - adj.get_page_size() > 1
         self._tab_arrows[0].set_visible(over)
         self._tab_arrows[1].set_visible(over)
         self._tab_arrows[0].set_sensitive(adj.get_value() > 0.5)
         self._tab_arrows[1].set_sensitive(adj.get_value() < adj.get_upper() - adj.get_page_size() - 0.5)
+        return False
 
     def _set_tight(self, tight):
         """Below TIGHT_BELOW pixels: icon-only tabs and buttons (the words become tooltips)."""

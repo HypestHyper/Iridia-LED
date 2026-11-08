@@ -31,19 +31,19 @@ import math
 import os
 import tempfile
 import uuid
-from typing import Dict, List, Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 PATH = os.path.expanduser("~/.config/iridia/layout.json")
 DEFAULT_SPACING = 16.6          # 60 LEDs per metre, in layout units (mm)
 MAX_GAP = 5000.0                # a wire gap of up to 5 m
 
 
-def _along(angle: float, length: float) -> List[float]:
+def _along(angle: float, length: float) -> list[float]:
     a = math.radians(angle)
     return [round(math.cos(a) * length, 2), round(math.sin(a) * length, 2)]
 
 
-def _jump(v) -> Optional[List[float]]:
+def _jump(v) -> list[float] | None:
     """A cut's step as [dx, dy], or None when it isn't a valid one."""
     try:
         dx, dy = float(v[0]), float(v[1])
@@ -66,7 +66,7 @@ def zone_key(device: str, zone: str) -> str:
     return f"{device}|{zone or ''}"
 
 
-def split_key(key: str) -> Tuple[str, str]:
+def split_key(key: str) -> tuple[str, str]:
     d, _, z = key.partition("|")
     return d, z
 
@@ -74,7 +74,7 @@ def split_key(key: str) -> Tuple[str, str]:
 class Layout:
     def __init__(self, path: str = PATH):
         self.path = path
-        self.strips: List[dict] = []
+        self.strips: list[dict] = []
         self.locked = False
         self.view = {"zoom": 1.0, "pan": [40.0, 40.0]}
         self.labels = True              # strip names and LED numbers on the canvas
@@ -83,7 +83,7 @@ class Layout:
     # ------------------------------------------------------------ files
     def load(self):
         try:
-            with open(self.path, "r", encoding="utf-8") as f:
+            with open(self.path, encoding="utf-8") as f:
                 data = json.load(f)
         except (OSError, ValueError):
             data = {}
@@ -119,7 +119,7 @@ class Layout:
             raise
 
     @staticmethod
-    def _clean(s) -> Optional[dict]:
+    def _clean(s) -> dict | None:
         if not isinstance(s, dict) or not isinstance(s.get("zone"), str):
             return None
         segs = []
@@ -169,7 +169,7 @@ class Layout:
         return out
 
     # ---------------------------------------------------------- editing
-    def ensure_zones(self, keys: List[str]) -> bool:
+    def ensure_zones(self, keys: list[str]) -> bool:
         """Add a strip for every zone that has none yet. True if something was added."""
         have = {s["zone"] for s in self.strips if not s["clone"]}
         added = False
@@ -181,10 +181,10 @@ class Layout:
                 added = True
         return added
 
-    def get(self, sid: str) -> Optional[dict]:
+    def get(self, sid: str) -> dict | None:
         return next((s for s in self.strips if s["id"] == sid), None)
 
-    def clone(self, sid: str) -> Optional[dict]:
+    def clone(self, sid: str) -> dict | None:
         src = self.get(sid)
         if src is None:
             return None
@@ -222,7 +222,7 @@ class Layout:
         return True
 
     @staticmethod
-    def add_cut(strip: dict, k: int, gap: Optional[float] = None) -> bool:
+    def add_cut(strip: dict, k: int, gap: float | None = None) -> bool:
         """A cut before LED k (path order): the strip was cut there and joined with a wire.
         Starts a section there if there's none yet; the default wire is three LEDs long."""
         if k <= 0:
@@ -315,7 +315,7 @@ class Layout:
 
 # ------------------------------------------------------------- geometry
 
-def path_points(strip: dict, n: int) -> List[Tuple[float, float]]:
+def path_points(strip: dict, n: int) -> list[tuple[float, float]]:
     """Centre of each LED along the strip, in path order (LED input first, unless flipped)."""
     pts = []
     x, y = strip["x"], strip["y"]
@@ -338,7 +338,7 @@ def path_points(strip: dict, n: int) -> List[Tuple[float, float]]:
     return pts
 
 
-def hidden_path(strip: dict, n: int) -> List[bool]:
+def hidden_path(strip: dict, n: int) -> list[bool]:
     """For each LED in path order: is it left out of the drawing?"""
     out = [False] * max(0, n)
     segs = strip["segments"]
@@ -350,7 +350,7 @@ def hidden_path(strip: dict, n: int) -> List[bool]:
     return out
 
 
-def gap_starts(strip: dict, n: int) -> List[int]:
+def gap_starts(strip: dict, n: int) -> list[int]:
     """Path positions of LEDs that come after a wire gap."""
     return [seg["start"] for seg in strip["segments"][1:] if seg.get("jump") and 0 < seg["start"] < n]
 
@@ -364,7 +364,7 @@ def cut_before(strip: dict, k: int) -> int:
     return idx
 
 
-def led_points(strip: dict, n: int) -> List[Tuple[float, float]]:
+def led_points(strip: dict, n: int) -> list[tuple[float, float]]:
     """Where each LED sits, in the order they're sent (LED 1 first, whatever the flip)."""
     pts = path_points(strip, n)
     return [pts[path_at_led(strip, n, i)] for i in range(n)]
@@ -379,7 +379,7 @@ def path_at_led(strip: dict, n: int, i: int) -> int:
     return n - 1 - i if strip.get("flip") else i
 
 
-def point_along(pts: List[Tuple[float, float]], f: float) -> Tuple[float, float]:
+def point_along(pts: list[tuple[float, float]], f: float) -> tuple[float, float]:
     """Point at fractional path index f (0..len-1), interpolated between LED centres."""
     if not pts:
         return 0.0, 0.0
@@ -392,7 +392,7 @@ def point_along(pts: List[Tuple[float, float]], f: float) -> Tuple[float, float]
     return x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
 
 
-def project(pts: List[Tuple[float, float]], px: float, py: float) -> Tuple[float, float]:
+def project(pts: list[tuple[float, float]], px: float, py: float) -> tuple[float, float]:
     """(fractional path index nearest to the point, distance)."""
     if not pts:
         return 0.0, float("inf")
@@ -415,7 +415,7 @@ def project(pts: List[Tuple[float, float]], px: float, py: float) -> Tuple[float
 # Same mapping as the Devices tab's strip editor, as a fraction 0..1 of the
 # strip's LEDs (as sent, before the layout's flip).
 
-def stop_to_fraction(v: float, pattern: str, reverse: bool, mirror: bool) -> List[float]:
+def stop_to_fraction(v: float, pattern: str, reverse: bool, mirror: bool) -> list[float]:
     """Where a stop value sits along the LEDs; two places for mirrored/radial patterns."""
     if pattern == "center_out":
         f = 0.5 + v / 2
@@ -446,7 +446,7 @@ def fraction_to_stop(f: float, pattern: str, reverse: bool, mirror: bool) -> flo
     return f
 
 
-def bounds(points: List[Tuple[float, float]]) -> Optional[Tuple[float, float, float, float]]:
+def bounds(points: list[tuple[float, float]]) -> tuple[float, float, float, float] | None:
     if not points:
         return None
     xs = [p[0] for p in points]
@@ -454,7 +454,7 @@ def bounds(points: List[Tuple[float, float]]) -> Optional[Tuple[float, float, fl
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def zone_count(device_configs: Dict, key: str) -> Optional[int]:
+def zone_count(device_configs: dict, key: str) -> int | None:
     d, z = split_key(key)
     dev = device_configs.get(d)
     if dev is None:

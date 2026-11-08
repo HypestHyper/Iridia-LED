@@ -15,7 +15,6 @@ params (all optional, stored per zone as ``pattern_params``):
     paint    list of hex strings (or null), used by the "paint" pattern; null LEDs show the zone's colour
 """
 
-from typing import List, Optional
 
 from iridia.colors import normalize_hex
 
@@ -32,15 +31,15 @@ def _lerp_hex(c1: str, c2: str, t: float) -> str:
     return f"{r:02x}{g:02x}{b:02x}"
 
 
-def even_boundaries(n_colors: int) -> List[float]:
+def even_boundaries(n_colors: int) -> list[float]:
     return [k / n_colors for k in range(1, n_colors)]
 
 
-def even_positions(n_colors: int) -> List[float]:
+def even_positions(n_colors: int) -> list[float]:
     return [k / (n_colors - 1) for k in range(n_colors)] if n_colors > 1 else [0.0]
 
 
-def led_even_boundaries(n_colors: int, led_count: int) -> List[float]:
+def led_even_boundaries(n_colors: int, led_count: int) -> list[float]:
     """Boundaries that split led_count LEDs into n_colors parts as evenly as whole LEDs allow (80 in 3 is
     27 + 27 + 26: the first parts take the leftover LEDs)."""
     if n_colors < 2 or led_count < 1:
@@ -53,7 +52,7 @@ def led_even_boundaries(n_colors: int, led_count: int) -> List[float]:
     return out
 
 
-def segment_sizes(stops, n_colors: int, led_count: int) -> List[int]:
+def segment_sizes(stops, n_colors: int, led_count: int) -> list[int]:
     """How many LEDs each colour of the segments pattern gets, as drawn by PatternGenerator."""
     if n_colors < 1 or led_count < 1:
         return []
@@ -65,7 +64,7 @@ def segment_sizes(stops, n_colors: int, led_count: int) -> List[int]:
     return sizes
 
 
-def _clean_stops(stops, want: int, default: List[float]) -> List[float]:
+def _clean_stops(stops, want: int, default: list[float]) -> list[float]:
     try:
         vals = [min(1.0, max(0.0, float(x))) for x in (stops or [])]
     except (TypeError, ValueError):
@@ -98,7 +97,7 @@ class PatternGenerator:
         return n_colors if kind == "positions" else n_colors - 1
 
     @classmethod
-    def default_stops(cls, pattern: str, n_colors: int) -> List[float]:
+    def default_stops(cls, pattern: str, n_colors: int) -> list[float]:
         kind = cls.EDITABLE.get(pattern)
         if kind == "positions":
             return even_positions(n_colors)
@@ -106,8 +105,8 @@ class PatternGenerator:
             return even_boundaries(n_colors)
         return []
 
-    def generate(self, pattern: str, colors: List[str], led_count: int, t: float = 0.0,
-                 params: Optional[dict] = None) -> List[str]:
+    def generate(self, pattern: str, colors: list[str], led_count: int, t: float = 0.0,
+                 params: dict | None = None) -> list[str]:
         if led_count <= 0:
             return []
         params = params if isinstance(params, dict) else {}

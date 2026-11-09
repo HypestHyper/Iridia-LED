@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.9 — 2026-11-09
 
 - **Favourites:** a tab (right after Status) with the controls you use most, on a grid you arrange
   yourself. *Cards* you make: a title, some strips or all of them, and just the controls you want (on/off,

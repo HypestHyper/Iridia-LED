@@ -34,8 +34,9 @@ what doesn't work.
 | [Color correction](Color-Correction.md) | Off, Palette and Calibrated modes, exact colors, calibration profiles |
 | [Keybinds](Keybinds.md) | Changing strips from a key: commands and config lines for every desktop |
 | [Night mode, sleep and freeze](Night-Sleep-and-Freeze.md) | Brightness caps at night, lock and idle, LEDs off while the PC sleeps, freezing colors |
+| [Favourites and looks](Favourites.md) | Cards with the controls you want, one-tap looks, sizes and arranging, hiding strips |
 | [Notifications](Notifications.md) | Flashing chosen LEDs when a desktop notification comes in |
-| [Scenes](Scenes.md) | A different look while a game or a film is fullscreen, or for an app |
+| [Scenes](Scenes.md) | As many as you like: a look for some strips while a game or a film is fullscreen, or an app is in front |
 | [Network lights](Network-Lights.md) | Philips WiZ and Govee lights on your Wi-Fi |
 | [Setups and backups](Setups-and-Backups.md) | Saving everything under a name, automatic backups, moving to another PC |
 | [Updates](Updates.md) | Checking for new versions, updating from the window, going back |

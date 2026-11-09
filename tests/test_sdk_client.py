@@ -106,7 +106,7 @@ def test_a_session_with_protocol_6(server):
     other = S.SDKClient("127.0.0.1", port, "someone else")
     try:
         assert c.ids == [500, 501]                                # controller IDs, not positions
-        argb, ram = c.devices
+        argb, _ram = c.devices
         assert (argb.name, argb.id, argb.cid) == ("Fake ARGB Controller", 0, 500)
         assert [z.name for z in argb.zones] == ["Channel 1", "Channel 2"] and len(argb.leds) == 40
         assert [m.name for m in argb.modes][:2] == ["Direct", "Static"] and argb.active_mode == 1

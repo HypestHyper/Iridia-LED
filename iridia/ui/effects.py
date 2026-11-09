@@ -3,7 +3,7 @@
 import math
 import time
 import zlib
-from typing import Callable, Dict, List, Optional, Sequence
+from collections.abc import Callable, Sequence
 
 from gi.repository import GLib, Gtk
 
@@ -81,7 +81,7 @@ _CHOICES = {
 class Slider(Gtk.Box):
     """A labelled slider that shows its value."""
 
-    def __init__(self, text: str, lo: float, hi: float, value: float, step: float, unit: Optional[str],
+    def __init__(self, text: str, lo: float, hi: float, value: float, step: float, unit: str | None,
                  cb: Callable[[float], None]):
         super().__init__(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self._unit = unit or ""
@@ -178,12 +178,12 @@ class EffectControls(Gtk.Box):
         self._on_change = on_change
         self._show_sync = show_sync
         self._show_layout = show_layout
-        self.params: Dict = {}
+        self.params: dict = {}
         self._job = None
         self._effect = None
-        self._widgets: Dict[str, object] = {}
+        self._widgets: dict[str, object] = {}
 
-    def set_effect(self, params: Optional[dict]):
+    def set_effect(self, params: dict | None):
         """Show the controls for params["effect"] with these values (None hides everything)."""
         params = animations.clean(params) if params else None
         if params is None:
@@ -315,7 +315,7 @@ class EffectControls(Gtk.Box):
 
 
 PREVIEW_MS = 50                # animated previews in the window: 20 frames a second
-_tickers: Dict[object, Callable[[], bool]] = {}
+_tickers: dict[object, Callable[[], bool]] = {}
 _tick_job = None
 
 
@@ -374,7 +374,7 @@ def anim_clock(status: dict) -> float:
     return float(a.get("clock") or 0.0) + (time.time() - t0) * float(a.get("rate") or 1.0)
 
 
-def live_animation(status: dict, key: str, cfg: dict) -> Optional[dict]:
+def live_animation(status: dict, key: str, cfg: dict) -> dict | None:
     """The effect this zone shows right now, according to the daemon, or None."""
     a = status.get("animations") or {}
     if key not in (a.get("zones") or []) or a.get("paused") or not a.get("enabled", True):
@@ -386,7 +386,7 @@ def live_animation(status: dict, key: str, cfg: dict) -> Optional[dict]:
 
 
 def preview(status: dict, key: str, anim: dict, colors: Sequence[str], base: Sequence[str], n: int,
-            positions=None, extent=None) -> List[str]:
+            positions=None, extent=None) -> list[str]:
     """One frame of the zone's effect as hex colors, the same frame the daemon sends (before brightness
     and color correction)."""
     a = status.get("animations") or {}

@@ -26,7 +26,6 @@ import os
 import re
 import tempfile
 import threading
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("iridia")
 
@@ -76,11 +75,11 @@ HUE_NAMES = {0: N_("Red"), 15: N_("Red-orange"), 30: N_("Orange"), 45: N_("Amber
              360: N_("Red (wraps around)")}
 
 
-def _rgb(h: str) -> List[int]:
+def _rgb(h: str) -> list[int]:
     return [int(h[i:i + 2], 16) for i in (0, 2, 4)]
 
 
-def clean_hex(value) -> Optional[str]:
+def clean_hex(value) -> str | None:
     h = str(value or "").strip().lstrip("#").lower()
     return h if _HEX.match(h) else None
 
@@ -89,7 +88,7 @@ def valid_name(name: str) -> bool:
     return bool(_NAME_OK.match(name or ""))
 
 
-def normalize(data) -> Tuple[Optional[dict], Optional[str]]:
+def normalize(data) -> tuple[dict | None, str | None]:
     """(clean profile dict, None) or (None, reason it is unusable)."""
     if not isinstance(data, dict):
         return None, "profile must be a JSON object"
@@ -133,7 +132,7 @@ def normalize(data) -> Tuple[Optional[dict], Optional[str]]:
     return out, None
 
 
-def _floor_sat(rgb: List[float], floor: float) -> List[float]:
+def _floor_sat(rgb: list[float], floor: float) -> list[float]:
     """Raise saturation to `floor` if the color is whiter than that; hue and brightness are kept."""
     r, g, b = (c / 255.0 for c in rgb)
     h, s, v = colorsys.rgb_to_hsv(r, g, b)
@@ -154,10 +153,10 @@ class Profile:
         self.name = clean["name"]
         self._grey = _rgb(clean["grey"])
         self._lut = self._build_lut(clean["anchors"])
-        self._cache: Dict[tuple, str] = {}
+        self._cache: dict[tuple, str] = {}
 
     @staticmethod
-    def _build_lut(anchors) -> List[List[float]]:
+    def _build_lut(anchors) -> list[list[float]]:
         lut = []
         for deg in range(360):
             for (h0, c0), (h1, c1) in zip(anchors, anchors[1:]):
@@ -213,7 +212,7 @@ class Profiles:
     def __init__(self, folder: str = "~/.config/iridia/calibration"):
         self.folder = os.path.expanduser(folder)
         self._lock = threading.RLock()
-        self._loaded: Dict[str, Tuple[float, Profile]] = {}     # name -> (mtime, profile)
+        self._loaded: dict[str, tuple[float, Profile]] = {}     # name -> (mtime, profile)
         self._default = Profile(DEFAULT_PROFILE)
 
     # ---- files
@@ -251,7 +250,7 @@ class Profiles:
                 pass
             raise
 
-    def list(self) -> List[str]:
+    def list(self) -> list[str]:
         with self._lock:
             try:
                 names = [f[:-5] for f in os.listdir(self.folder) if f.endswith(".json")]
@@ -263,7 +262,7 @@ class Profiles:
         return sorted(names, key=lambda n: (n != DEFAULT_NAME, n.lower()))
 
     # ---- reading
-    def get(self, name: Optional[str]) -> Profile:
+    def get(self, name: str | None) -> Profile:
         """The named profile; the built-in WS2812B values if it is missing or broken."""
         name = name or DEFAULT_NAME
         if not valid_name(name):
@@ -278,7 +277,7 @@ class Profiles:
             if hit and hit[0] == mtime:
                 return hit[1]
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     data = json.load(f)
                 data.setdefault("name", name)
                 data["name"] = name
@@ -293,7 +292,7 @@ class Profiles:
         return dict(self.get(name).data)
 
     # ---- editing
-    def save(self, name: str, data: dict) -> Optional[str]:
+    def save(self, name: str, data: dict) -> str | None:
         """Validate and write. Returns an error string or None."""
         if not valid_name(name):
             return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
@@ -306,14 +305,14 @@ class Profiles:
             self._loaded.pop(name, None)
         return None
 
-    def add(self, name: str, base: Optional[str] = None) -> Optional[str]:
+    def add(self, name: str, base: str | None = None) -> str | None:
         if not valid_name(name):
             return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
         if name in self.list():
             return f"A profile called '{name}' already exists."
         return self.save(name, self.read_data(base or DEFAULT_NAME))
 
-    def delete(self, name: str) -> Optional[str]:
+    def delete(self, name: str) -> str | None:
         if name == DEFAULT_NAME:
             return "The built-in WS2812B profile can't be deleted. Use Reset to restore its values."
         with self._lock:
@@ -329,7 +328,7 @@ class Profiles:
     def reset_default(self):
         self.save(DEFAULT_NAME, DEFAULT_PROFILE)
 
-    def export_to(self, name: str, dest: str) -> Optional[str]:
+    def export_to(self, name: str, dest: str) -> str | None:
         try:
             with open(dest, "w", encoding="utf-8") as f:
                 json.dump(self.read_data(name), f, indent=2)
@@ -337,10 +336,10 @@ class Profiles:
             return str(e)
         return None
 
-    def import_from(self, src: str) -> Tuple[Optional[str], Optional[str]]:
+    def import_from(self, src: str) -> tuple[str | None, str | None]:
         """(name it was saved under, None) or (None, error)."""
         try:
-            with open(src, "r", encoding="utf-8") as f:
+            with open(src, encoding="utf-8") as f:
                 data = json.load(f)
         except (OSError, ValueError) as e:
             return None, f"Couldn't read that file: {e}"

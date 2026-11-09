@@ -4,7 +4,7 @@ import time
 
 from gi.repository import GLib, Gtk
 
-from iridia.i18n import _, ngettext, pgettext  # noqa: F401
+from iridia.i18n import _, ngettext, pgettext
 from iridia import animations
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
@@ -175,7 +175,15 @@ class ZoneCard(Gtk.Box):
         self._summary = label("", ("small", "dim"))
         txt.append(self._summary)
         hdr.append(txt)
+        self._star = None
         if not self.global_mode:
+            self._star = button(icon_name="star", style="text small", cb=self._on_star, tooltip=_("Add to Favourites"))
+            self._star_on = False
+            hdr.append(self._star)
+            hid = bool(self.cfg.get("hidden"))
+            hdr.append(button(icon_name="visibility" if hid else "visibility_off", style="text small",
+                              cb=lambda: self._strip_set(hidden=not self.cfg.get("hidden")),
+                              tooltip=_("Show again") if hid else _("Hide this strip (it keeps working)")))
             hdr.append(button(icon_name="edit", style="text small", cb=self._rename, tooltip=_("Rename this strip")))
         self._chev = icon("expand_less" if expanded else "expand_more", classes=("dim",))
         hdr.append(self._chev)
@@ -192,6 +200,20 @@ class ZoneCard(Gtk.Box):
         self._details.set_margin_top(14)
         self._rev.set_child(self._details)
         self.append(self._rev)
+
+    def _on_star(self):
+        fav = getattr(self.app, "favorites", None)
+        if fav is not None:
+            fav.toggle_device(f"{self.device_name}|{self.zone_name or ''}")
+            self.set_favorite(not self._star_on)
+
+    def set_favorite(self, on: bool):
+        """The ★ is filled while this strip is on the Favourites tab."""
+        if self._star is None or on == self._star_on:
+            return
+        self._star_on = on
+        self._star.set_child(icon("star", fill=on))
+        self._star.set_tooltip_text(_("Take off Favourites") if on else _("Add to Favourites"))
 
     def _display_title(self):
         return self.cfg.get("display_name") or self._title

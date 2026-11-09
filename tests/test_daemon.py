@@ -952,7 +952,8 @@ def test_a_fullscreen_app_gets_the_scene_and_the_lights_come_back(d, monkeypatch
     monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
     r = _cmd(d, "scenes", enabled=True, look={"kind": "color", "hex": "0000ff", "bright": 50}, on_delay=1,
              off_delay=2, set_app={"app": "mpv", "look": {"kind": "off"}})
-    assert r["ok"] and r["scenes"]["apps"] == [{"app": "mpv", "look": {"kind": "off"}}]
+    assert r["ok"] and [(x["when"], x["apps"], x["look"]) for x in r["scenes"]["scenes"]] == [
+        ("apps", ["mpv"], {"kind": "off"}), ("fullscreen", [], {"kind": "color", "hex": "0000ff", "bright": 50})]
     d._update_scenes()
     assert d.focuswatch.running_flag
     d.focuswatch.front, d.focuswatch.fullscreen = "steam_app_10", True
@@ -999,13 +1000,51 @@ def test_scene_try_it_and_cli(d, monkeypatch, capsys):
     assert cli.main(["scenes", "app", "mpv", "effect", "rainbow", "60"]) == 0
     assert cli.main(["scenes", "ignore", "firefox"]) == 0
     out = capsys.readouterr().out
-    assert "Anything fullscreen: dim to 15%" in out and "mpv: rainbow at 60%" in out and "Never for: firefox" in out
+    assert "Anything fullscreen: anything fullscreen -> dim to 15%" in out and "mpv: mpv -> rainbow at 60%" in out
+    assert "Never for: firefox" in out
     assert cli.main(["scenes", "look", "sparkly"]) == 2
     assert cli.main(["scenes", "test"]) == 0
     d._update_scenes()
-    assert d._scene_ov == {"bright": 15}
+    assert d._ov("Strip|") == {"bright": 15}
     assert cli.main(["scenes", "remove", "mpv"]) == 0
-    assert d._scene_settings()["apps"] == []
+    assert [x["when"] for x in d._scene_settings()["scenes"]] == ["fullscreen"]
+
+
+def test_scenes_made_in_the_editor(d, monkeypatch):
+    d.focuswatch = FakeFocus()
+    clock = [100.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    _cmd(d, "scenes", enabled=True, on_delay=0, off_delay=0, look=None)
+    r = _cmd(d, "scenes", set_scene={"name": "Films", "when": "apps", "apps": ["mpv"], "look": {"kind": "off"},
+                                     "targets": ["Strip|"]})
+    films = r["scenes"]["scenes"][0]
+    assert films["name"] == "Films" and r["ok"]
+    assert not _cmd(d, "scenes", set_scene={"name": "x", "when": "apps", "look": {"kind": "off"}})["ok"]
+    r = _cmd(d, "scenes", set_scene={"name": "Games", "look": {"kind": "dim", "bright": 50}})
+    games = r["scenes"]["scenes"][1]
+    d.focuswatch.front, d.focuswatch.fullscreen = "mpv", True        # both: Films is higher, so it wins
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    assert _cmd(d, "status")["scenes"]["active"] == [films["id"], games["id"]]
+    _cmd(d, "scenes", move_scene={"id": games["id"], "to": 0})       # Games first now
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["7f0000"] * 4
+    _cmd(d, "scenes", scene_on={"id": games["id"], "on": False})      # switched off: Films again
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["000000"] * 4
+    films = dict(films, look={"kind": "color", "hex": "00ff00", "bright": 100})   # changed while it shows
+    _cmd(d, "scenes", set_scene=films)
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4
+    _cmd(d, "scenes", remove_scene=films["id"])
+    d._update_scenes()
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    assert [x["name"] for x in _cmd(d, "scenes")["scenes"]["scenes"]] == ["Games"]
 
 
 def test_a_device_iridia_leaves_alone_or_that_is_on_its_own(d):
@@ -1033,3 +1072,103 @@ def test_a_device_iridia_leaves_alone_or_that_is_on_its_own(d):
     d._update_all_devices()
     assert d.openrgb.last("Strip") == ["00ff00"] * 4
     assert d.openrgb.last("Hub v1.0") == ["000000"] * 2                  # the others go dark
+
+
+# ----------------------------------------------------------------- looks and favourites
+
+def test_looks_go_over_their_strips_and_come_off_again(d):
+    from iridia import looks as L
+    assert not _cmd(d, "looks", set={"name": "", "look": {"kind": "off"}})["ok"]
+    r = _cmd(d, "looks", set={"name": "Movie", "targets": ["*"], "look": {"kind": "dim", "bright": 10}})
+    movie = r["looks"][0]
+    assert movie["name"] == "Movie" and not movie["active"] and L.find(r["looks"], "movie")
+    r = _cmd(d, "looks", set={"name": "Desk red", "targets": ["Strip|"],
+                              "look": {"kind": "color", "hex": "ff0000", "bright": 100}})
+    assert not _cmd(d, "looks", set={"name": "movie", "look": {"kind": "off"}})["ok"]       # same name
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    r = _cmd(d, "looks", apply={"look": "Movie"})
+    assert [lk["active"] for lk in r["looks"]] == [True, False]
+    assert all(d._overlays.get(k) == {"bright": 10} for k in ("Strip|", "Hub v1.0|A", "Hub v1.0|B"))
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["190000"] * 4                    # everything at 10%
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 100      # settings untouched
+    _cmd(d, "looks", apply={"look": "desk red", "on": True})            # over Movie on its own strip
+    r = _cmd(d, "looks")
+    assert [lk["active"] for lk in r["looks"]] == [False, True]
+    _cmd(d, "looks", apply={"look": "Movie", "on": False})              # Movie's own strips go back
+    assert "Hub v1.0|A" not in d._overlays and d._overlays["Strip|"]["hex"] == "ff0000"   # Desk red stays
+    r = _cmd(d, "looks", remove=r["looks"][1]["id"])
+    assert [lk["name"] for lk in r["looks"]] == ["Movie"]
+
+
+def test_favorites_keep_their_order_and_drop_doubles(d):
+    r = _cmd(d, "favorites", add={"type": "device", "key": "Strip|"})   # an old one-strip tile: a card now
+    card = r["favorites"][0]
+    assert card["type"] == "card" and card["targets"] == ["Strip|"] and card["controls"] == ["power", "brightness",
+                                                                                              "colors"]
+    _cmd(d, "favorites", add={"type": "switch", "what": "lights"})
+    _cmd(d, "favorites", add={"type": "switch", "what": "lights"})       # already there
+    assert not _cmd(d, "favorites", add={"type": "switch", "what": "toaster"})["ok"]
+    assert not _cmd(d, "favorites", add={"type": "card", "targets": ["*"], "controls": []})["ok"]
+    r = _cmd(d, "favorites")
+    assert [t["type"] for t in r["favorites"]] == ["card", "switch"]
+    r = _cmd(d, "favorites", set=list(reversed(r["favorites"])) + [{"type": "setup", "name": "Evening", "size": "l"}])
+    assert [t["type"] for t in r["favorites"]] == ["switch", "card", "setup"] and r["favorites"][2]["size"] == "l"
+    assert r["favorites"][1]["id"] == card["id"]                          # a card keeps its id
+    r = _cmd(d, "favorites", remove=f"card:{card['id']}")
+    assert [t["type"] for t in r["favorites"]] == ["switch", "setup"]
+    lk = _cmd(d, "looks", set={"name": "Off", "look": {"kind": "off"}})["looks"][0]
+    _cmd(d, "favorites", add={"type": "look", "id": lk["id"]})
+    r = _cmd(d, "looks", remove=lk["id"])                               # its tile goes with it
+    assert [t["type"] for t in r["favorites"]] == ["switch", "setup"]
+
+
+def test_look_cli(d, monkeypatch, capsys):
+    from iridia import cli
+
+    class C:
+        def send(self, req):
+            return d.handle_command(dict(req))
+    monkeypatch.setattr(cli, "_client", lambda: C())
+    assert cli.main(["looks"]) == 0
+    assert "No looks yet" in capsys.readouterr().out
+    _cmd(d, "looks", set={"name": "Movie", "look": {"kind": "dim", "bright": 15}})
+    assert cli.main(["look", "Movie"]) == 0
+    assert "Movie: on" in capsys.readouterr().out
+    assert cli.main(["looks"]) == 0
+    assert "* Movie: dim to 15% (everything)" in capsys.readouterr().out
+    assert cli.main(["look", "Movie", "off"]) == 0
+    assert cli.main(["look", "Nope"]) == 1
+
+
+def test_trying_a_look_shows_it_on_its_strips_for_a_moment(d, monkeypatch):
+    clock = [100.0]
+    monkeypatch.setattr(daemon_mod.time, "monotonic", lambda: clock[0])
+    r = _cmd(d, "looks", **{"try": {"targets": ["Strip|"], "look": {"kind": "off"}}})
+    assert r["ok"] and d._overlays == {"Strip|": {"power": "off"}}       # only its strip
+    d._end_look_try(clock[0] + 1)
+    assert d._overlays                                                   # still showing
+    d._end_look_try(clock[0] + 10)
+    assert d._overlays == {}                                             # back
+
+
+def test_one_change_for_several_strips(d):
+    r = _cmd(d, "set_zones", targets=["Strip|", "Hub v1.0|A"], set={"brightness": 40, "color": "00ffff",
+                                                                    "brightness_sync": False, "session_ignore": True})
+    assert r["ok"] and r["zones"] == 2 and not r["errors"]
+    for path in (("devices", "Strip"), ("devices", "Hub v1.0", "zones", "A")):
+        z = d.config.get(path)
+        assert z["manual_brightness"] == 40 and z["pattern"] == "solid" and z["pattern_colors"] == ["00ffff"]
+        assert z["session_ignore"] is True
+    assert d.config.get(("devices", "Hub v1.0", "zones", "B", "manual_brightness")) == 100      # not on the card
+    r = _cmd(d, "set_zones", targets=["*"], set={"enabled": False})
+    assert r["zones"] == 3 and not d.config.get(("devices", "Hub v1.0", "zones", "B", "enabled"))
+    r = _cmd(d, "set_zones", targets=["Strip|"], set={"effect": "rainbow"})
+    assert d.config.get(("devices", "Strip", "animation"))["effect"] == "rainbow"
+    _cmd(d, "set_zones", targets=["Strip|"], set={"effect": None})
+    assert d.config.get(("devices", "Strip", "animation")) is None
+    assert not _cmd(d, "set_zones", targets=["Strip|"], set={"pattern": "x"})["ok"]
+    assert not _cmd(d, "set_zones", targets=[], set={"enabled": True})["ok"]
+    assert _cmd(d, "set_zone_strip", device="Strip", zone="", hidden=True)["ok"]
+    assert d.config.get(("devices", "Strip", "hidden")) is True

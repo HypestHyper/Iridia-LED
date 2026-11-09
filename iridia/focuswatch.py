@@ -21,7 +21,7 @@ import socket
 import subprocess
 import threading
 import time
-from typing import Callable, Optional, Set, Tuple
+from collections.abc import Callable
 
 logger = logging.getLogger("iridia")
 
@@ -79,7 +79,7 @@ BUS_XML = f"""<node><interface name="{BUS_NAME}">
 
 
 # ----------------------------------------------------------------- parsing (pure)
-def hypr_state(data) -> Tuple[str, bool]:
+def hypr_state(data) -> tuple[str, bool]:
     """`j/activewindow`: (class, fullscreen). Hyprland 0.42+ gives fullscreen as a number (2 and 3 are
     fullscreen, 1 is maximised); older versions a bool with fullscreenMode 0 for real fullscreen."""
     if not isinstance(data, dict) or not data:
@@ -100,7 +100,7 @@ def sway_app(con: dict) -> str:
     return str(con.get("app_id") or props.get("class") or props.get("instance") or "")
 
 
-def sway_event(ev, cur: Tuple[str, bool, int]) -> Optional[Tuple[str, bool, int]]:
+def sway_event(ev, cur: tuple[str, bool, int]) -> tuple[str, bool, int] | None:
     """A `swaymsg -t subscribe '["window"]'` event -> the new (app, fullscreen, window id), or None
     when what's in front didn't change."""
     if not isinstance(ev, dict):
@@ -114,23 +114,23 @@ def sway_event(ev, cur: Tuple[str, bool, int]) -> Optional[Tuple[str, bool, int]
     return None
 
 
-def xprop_active(line: str) -> Optional[str]:
+def xprop_active(line: str) -> str | None:
     """`_NET_ACTIVE_WINDOW(WINDOW): window id # 0x3a00007` -> "0x3a00007" (None for no window)."""
     m = re.search(r"#\s*(0x[0-9a-fA-F]+)", line or "")
     return m.group(1) if m and int(m.group(1), 16) else None
 
 
-def xprop_window(out: str) -> Tuple[str, bool]:
+def xprop_window(out: str) -> tuple[str, bool]:
     """`xprop -id W _NET_WM_STATE WM_CLASS` -> (class, fullscreen)."""
     m = re.search(r'WM_CLASS\(\w+\) = "([^"]*)"(?:, "([^"]*)")?', out or "")
     app = (m.group(2) or m.group(1)) if m else ""
     return app, "_NET_WM_STATE_FULLSCREEN" in (out or "")
 
 
-def running_apps(proc: str = "/proc") -> Set[str]:
+def running_apps(proc: str = "/proc") -> set[str]:
     """Names of this user's running programs: each one's file name (a Windows game's too, without
     .exe), and steam_app_N for a running Steam game (Steam starts each through `reaper ... AppId=N`)."""
-    out: Set[str] = set()
+    out: set[str] = set()
     uid = os.getuid()
     try:
         pids = [p for p in os.listdir(proc) if p.isdigit()]
@@ -173,20 +173,20 @@ class FocusWatch:
         self._on_change = on_change
         self._lock = threading.Lock()
         self._gen = 0
-        self._proc: Optional[subprocess.Popen] = None
+        self._proc: subprocess.Popen | None = None
         self._stop_hooks = []
         self.running_flag = False
-        self.method: Optional[str] = None       # hyprland | sway | kde | x11 | processes
+        self.method: str | None = None       # hyprland | sway | kde | x11 | processes
         self.front = ""
         self.fullscreen = False
-        self.running: Set[str] = set()
+        self.running: set[str] = set()
         self.interval = 3.0
-        self.wanted: Set[str] = set()           # apps worth looking for in the fallback
+        self.wanted: set[str] = set()           # apps worth looking for in the fallback
         self.script_log = []                    # what the KWin script says it saw (IRIDIA_KWIN_DEBUG)
         self.kde_window = ""                    # KDE: KWin's id for the window in front
 
     # -- state
-    def _set(self, front: str, fullscreen: bool, running: Optional[Set[str]] = None):
+    def _set(self, front: str, fullscreen: bool, running: set[str] | None = None):
         changed = (front, fullscreen) != (self.front, self.fullscreen)
         self.front, self.fullscreen = front, fullscreen
         if running is not None and running != self.running:
@@ -388,14 +388,19 @@ class FocusWatch:
 
 
 # ----------------------------------------------------------------- helpers
-def hypr_sockets() -> Optional[Tuple[str, str]]:
+def hypr_sockets() -> tuple[str, str] | None:
     sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
     if not sig:
         return None
     run = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
-    for base in (os.path.join(run, "hypr", sig), os.path.join("/tmp", "hypr", sig)):
+    old = os.path.join("/tmp", "hypr", sig)  # noqa: S108 (where older Hyprland puts it)
+    for base in (os.path.join(run, "hypr", sig), old):
         ev = os.path.join(base, ".socket2.sock")
-        if os.path.exists(ev):
+        try:
+            ours = os.stat(ev).st_uid == os.getuid()    # in the shared /tmp, only Hyprland's own (ours)
+        except OSError:
+            continue
+        if ours:
             return os.path.join(base, ".socket.sock"), ev
     return None
 

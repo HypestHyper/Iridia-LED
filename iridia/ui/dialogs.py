@@ -1,7 +1,7 @@
 """Dialogs. GTK 4 dialogs never block, so every one reports back through a callback."""
 
 import threading
-from typing import Callable, List, Optional
+from collections.abc import Callable
 
 from gi.repository import Gio, GLib, Gtk
 
@@ -13,7 +13,7 @@ PAUSE = None      # set by the app: callable(+1/-1) that pauses UI refreshes whi
 
 class Dialog(Gtk.Window):
     def __init__(self, parent: Gtk.Window, title: str, width: int = 460, height: int = -1,
-                 resizable: bool = False, on_close: Optional[Callable] = None):
+                 resizable: bool = False, on_close: Callable | None = None):
         super().__init__(title=title, modal=True, resizable=resizable)
         if parent is not None:
             self.set_transient_for(parent)
@@ -70,8 +70,8 @@ def message(parent, title: str, text: str, error: bool = False):
     return d
 
 
-def confirm(parent, title: str, text: str, on_yes: Callable, yes: Optional[str] = None, danger: bool = False,
-            no: Optional[str] = None, on_no: Optional[Callable] = None):
+def confirm(parent, title: str, text: str, on_yes: Callable, yes: str | None = None, danger: bool = False,
+            no: str | None = None, on_no: Callable | None = None):
     d = Dialog(parent, title)
     d.body.append(label(title, ("title",)))
     d.body.append(label(text, ("body", "dim"), wrap=True, chars=56))
@@ -92,7 +92,7 @@ def confirm(parent, title: str, text: str, on_yes: Callable, yes: Optional[str] 
 
 
 def ask_text(parent, title: str, prompt: str, initial: str, on_done: Callable[[str], None],
-             check: Optional[Callable[[str], Optional[str]]] = None, ok_label: Optional[str] = None):
+             check: Callable[[str], str | None] | None = None, ok_label: str | None = None):
     d = Dialog(parent, title)
     d.body.append(label(title, ("title",)))
     d.body.append(label(prompt, ("small", "dim"), wrap=True, chars=52))
@@ -178,7 +178,7 @@ def save_file(parent, title: str, initial_name: str, on_done: Callable[[str], No
     dlg.save(parent, None, done)
 
 
-def run_bg(fn, done: Optional[Callable] = None):
+def run_bg(fn, done: Callable | None = None):
     """Run fn() in a thread; done(result) back on the GTK thread."""
     def work():
         try:
@@ -290,7 +290,7 @@ class CountLedsDialog(Dialog):
             PAUSE(-1)
 
 
-def diagnostics_window(parent, checks: List):
+def diagnostics_window(parent, checks: list):
     d = Dialog(parent, _("Diagnostics"), width=640, height=560, resizable=True)
     d.body.append(label(_("Diagnostics"), ("title",)))
     sc = Gtk.ScrolledWindow(vexpand=True, hscrollbar_policy=Gtk.PolicyType.NEVER)

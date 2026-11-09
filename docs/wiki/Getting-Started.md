@@ -17,11 +17,15 @@ Open **Iridia** from your app launcher. The chip in the header says whether Open
 | Tab | What it's for |
 | --- | --- |
 | **Status** | The current wallpaper and its colors. Click a color to put it on every LED, or *Custom color…* for any color. *Now playing* sums up what Iridia is doing. |
-| **Devices** | The *Everything* card (changes all zones at once) and one card per zone: pattern, colors, strip preview, brightness, color correction, strip type. |
+| **Favourites** | Your quick panel: cards with just the controls you want for the strips you pick, one-tap looks, setups and switches, arranged on a grid (see [Favourites](Favourites.md)). |
+| **Devices** | The *Everything* card (changes all zones at once) and one card per zone: pattern, colors, strip preview, brightness, color correction, strip type. The ★ puts a strip on Favourites; the eye hides one you don't use. |
 | **Layout** | Your strips drawn where they are in the room, live, to arrange, bend and paint. |
+| **Notifications** | Chosen LEDs flash when a desktop notification comes in (see [Notifications](Notifications.md)). |
+| **Scenes** | A different look while a game or a film is fullscreen, or while an app you pick is in front (see [Scenes](Scenes.md)). |
 | **Keybinds** | Builds commands for keyboard shortcuts and the line for your desktop's config. |
 | **Settings** | Appearance (font, size, window buttons, language, reduce motion), night mode and sleep, setups and backups, color calibration, color extraction, logging. |
 | **Service** | The background daemon, starting at login, the OpenRGB connection, diagnostics, uninstalling. |
+| **Updates** | New versions, updating from the window, going back (see [Updates](Updates.md)). |
 
 Changes apply right away and are saved on their own; there's no Save button. The **Freeze colors**
 button in the header keeps the current colors no matter what the wallpaper does.

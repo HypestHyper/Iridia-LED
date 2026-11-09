@@ -6,7 +6,6 @@ Mixed into LayoutTab; it uses the tab's canvas, handles, drag state and side pan
 
 import math
 import time
-from typing import Dict, Optional, Set
 
 from gi.repository import GLib, Gtk
 
@@ -75,8 +74,8 @@ class NotifyLayer:
     def _nt_init(self):
         self._nt: dict = notifyflash.clean({})
         self._nt_hold = 0.0
-        self._nt_paint: Dict[str, Set[int]] = {}        # zone key -> LEDs while dragging over them
-        self._nt_preview: Optional[notifyflash.Flash] = None
+        self._nt_paint: dict[str, set[int]] = {}        # zone key -> LEDs while dragging over them
+        self._nt_preview: notifyflash.Flash | None = None
         self._nt_job = None
 
     # ------------------------------------------------------------ state
@@ -95,12 +94,12 @@ class NotifyLayer:
     def _nt_sections(self, key: str, n: int):
         return zone_sections.clean((self._cfg.get(key) or {}).get("sections"), n)
 
-    def _nt_leds(self, key: str, n: int) -> Set[int]:
+    def _nt_leds(self, key: str, n: int) -> set[int]:
         """The LEDs of this zone that flash (0-based, as sent)."""
         if key in self._nt_paint:
             return self._nt_paint[key]
         d, z = split_key(key)
-        out: Set[int] = set()
+        out: set[int] = set()
         for t in self._nt["targets"]:
             if (t["device"], t["zone"]) == (d, z):
                 r = notifyflash.target_range(t, n, self._nt_sections(key, n), zone_sections.spans)
@@ -108,7 +107,7 @@ class NotifyLayer:
                     out.update(range(*r))
         return out
 
-    def _nt_fill(self) -> Optional[str]:
+    def _nt_fill(self) -> str | None:
         """The colour a chosen LED flashes in, when it's one colour for all (not one per app)."""
         st = self._nt
         if st["color"] == "custom":

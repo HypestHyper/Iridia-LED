@@ -24,7 +24,7 @@ led_overrides set single LEDs to one color over everything else ("000000" is off
 Everything here is pure: the daemon and the window share it, so the preview is what the strip shows.
 """
 
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
+from collections.abc import Callable, Sequence
 
 from iridia import animations, sensors
 from iridia.colors import normalize_hex
@@ -107,11 +107,11 @@ def _num(v, default):
     return v if v == v and abs(v) < 1e6 else default
 
 
-def clean(raw, led_count: int) -> List[dict]:
+def clean(raw, led_count: int) -> list[dict]:
     """The zone's sections, valid and in order; [] when the strip isn't split."""
     if not isinstance(raw, list) or led_count < 1:
         return []
-    by_start: Dict[int, dict] = {}
+    by_start: dict[int, dict] = {}
     for item in raw[:MAX_SECTIONS]:
         if not isinstance(item, dict):
             continue
@@ -132,8 +132,8 @@ def clean(raw, led_count: int) -> List[dict]:
     return out
 
 
-def clean_overrides(raw, led_count: int) -> Dict[int, str]:
-    out: Dict[int, str] = {}
+def clean_overrides(raw, led_count: int) -> dict[int, str]:
+    out: dict[int, str] = {}
     if not isinstance(raw, dict):
         return out
     for k, v in list(raw.items())[:MAX_OVERRIDES]:
@@ -147,11 +147,11 @@ def clean_overrides(raw, led_count: int) -> Dict[int, str]:
     return out
 
 
-def overrides_for_config(ov: Dict[int, str]) -> Dict[str, str]:
+def overrides_for_config(ov: dict[int, str]) -> dict[str, str]:
     return {str(k): v for k, v in sorted(ov.items())}
 
 
-def spans(sections: Sequence[dict], n: int) -> List[Tuple[int, int, dict]]:
+def spans(sections: Sequence[dict], n: int) -> list[tuple[int, int, dict]]:
     """(first LED, one past the last, section) for each part."""
     out = []
     for k, sec in enumerate(sections):
@@ -166,11 +166,11 @@ def has_effects(sections: Sequence[dict]) -> bool:
     return any(s["type"] == "effect" for s in sections)
 
 
-def sensor_ids(sections: Sequence[dict]) -> List[str]:
+def sensor_ids(sections: Sequence[dict]) -> list[str]:
     return sorted({s["sensor"] for s in sections if s["type"] == "sensor"})
 
 
-def has_flash(sections: Sequence[dict], sensor: Callable[[str], Optional[float]]) -> bool:
+def has_flash(sections: Sequence[dict], sensor: Callable[[str], float | None]) -> bool:
     """A sensor part is over its flash level right now (it blinks, so it needs redrawing)."""
     for s in sections:
         if s["type"] == "sensor" and s.get("flash_above") is not None:
@@ -180,7 +180,7 @@ def has_flash(sections: Sequence[dict], sensor: Callable[[str], Optional[float]]
     return False
 
 
-def rescale(sections: Sequence[dict], overrides: Dict[int, str], old_n: int, new_n: int):
+def rescale(sections: Sequence[dict], overrides: dict[int, str], old_n: int, new_n: int):
     """Keep parts where they were, in proportion, when the strip's LED count changes. Single LEDs keep
     their number (they mark a real LED) and are dropped past the new end."""
     if old_n < 1 or new_n < 1:
@@ -192,7 +192,7 @@ def rescale(sections: Sequence[dict], overrides: Dict[int, str], old_n: int, new
     return clean(secs, new_n), {i: h for i, h in overrides.items() if i < new_n}
 
 
-def even_starts(parts: int, n: int) -> List[int]:
+def even_starts(parts: int, n: int) -> list[int]:
     """Where each part starts when n LEDs are split as evenly as whole LEDs allow (the first parts take
     the leftover LEDs: 80 in 3 is 27 + 27 + 26)."""
     parts = max(1, min(parts, n))
@@ -204,11 +204,11 @@ def even_starts(parts: int, n: int) -> List[int]:
     return out
 
 
-def sizes(sections: Sequence[dict], n: int) -> List[int]:
+def sizes(sections: Sequence[dict], n: int) -> list[int]:
     return [b - a for a, b, _s in spans(sections, n)]
 
 
-def split_note(sz: Sequence[int], n: int) -> Optional[Tuple[str, int]]:
+def split_note(sz: Sequence[int], n: int) -> tuple[str, int] | None:
     """("uneven", leftover) when an even split can't be exact, ("near", spread) when the parts are
     1 or 2 LEDs apart but could match; None otherwise."""
     if len(sz) < 2:
@@ -223,17 +223,17 @@ def split_note(sz: Sequence[int], n: int) -> Optional[Tuple[str, int]]:
 
 # ------------------------------------------------------------- drawing
 
-Resolve = Callable[[list], List[str]]
+Resolve = Callable[[list], list[str]]
 
 
-def _section_colors(sec: dict, resolve: Resolve) -> List[str]:
+def _section_colors(sec: dict, resolve: Resolve) -> list[str]:
     return resolve(sec.get("colors", [0])) or ["642107"]
 
 
-Sensor = Callable[[str], Optional[float]]
+Sensor = Callable[[str], float | None]
 
 
-def _ramp(cols: List[str], x: float) -> Tuple[int, int, int]:
+def _ramp(cols: list[str], x: float) -> tuple[int, int, int]:
     rgb = [animations.hex_to_rgb(c) for c in cols] or [(255, 255, 255)]
     if len(rgb) == 1:
         return rgb[0]
@@ -248,7 +248,7 @@ def _scale(c, k):
     return (int(c[0] * k), int(c[1] * k), int(c[2] * k))
 
 
-def sensor_level(sec: dict, value: Optional[float]) -> Optional[float]:
+def sensor_level(sec: dict, value: float | None) -> float | None:
     """How full the part is, 0 to 1, or None without a reading."""
     if value is None:
         return None
@@ -258,8 +258,8 @@ def sensor_level(sec: dict, value: Optional[float]) -> Optional[float]:
 DIM_REST = 0.12          # "the rest of the bar dim": this much of the color
 
 
-def sensor_part(sec: dict, length: int, value: Optional[float], resolve: Resolve, t: float = 0.0,
-                levels: Optional[list] = None) -> List[tuple]:
+def sensor_part(sec: dict, length: int, value: float | None, resolve: Resolve, t: float = 0.0,
+                levels: list | None = None) -> list[tuple]:
     """A sensor part as (r, g, b): the reading's color, a level bar, or a bar in the reading's color.
     Over flash_above the LEDs blink once a second. No reading: one dim LED, so the part isn't
     mistaken for "0".
@@ -332,8 +332,8 @@ def _fill_spans(n: int, sec: dict):
     return out, float(n)
 
 
-def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[PatternGenerator] = None,
-                sensor: Optional[Sensor] = None, t: float = 0.0) -> Optional[List[str]]:
+def static_part(sec: dict, length: int, resolve: Resolve, patterns: PatternGenerator | None = None,
+                sensor: Sensor | None = None, t: float = 0.0) -> list[str] | None:
     """A part's hex colors when it doesn't move (an effect shows its first color, as a paused zone
     does); None for "same"."""
     kind = sec["type"]
@@ -351,9 +351,9 @@ def static_part(sec: dict, length: int, resolve: Resolve, patterns: Optional[Pat
                                                     params=sec.get("params") or {}) or [cols[0]] * length
 
 
-def compose_static(base: List[str], sections: Sequence[dict], overrides: Dict[int, str], resolve: Resolve,
-                   patterns: Optional[PatternGenerator] = None, sensor: Optional[Sensor] = None,
-                   t: float = 0.0, levels: Optional[list] = None) -> List[str]:
+def compose_static(base: list[str], sections: Sequence[dict], overrides: dict[int, str], resolve: Resolve,
+                   patterns: PatternGenerator | None = None, sensor: Sensor | None = None,
+                   t: float = 0.0, levels: list | None = None) -> list[str]:
     """The whole strip's hex colors: base (what the strip shows) with each part and single LED on top.
     With levels (one 1.0 per LED), sensor parts come at full strength and their LEDs' levels go there
     (see sensor_part): the caller scales them after color correction."""
@@ -381,10 +381,10 @@ class Composer:
     """Per-frame drawing for an animated strip: static parts and single LEDs are worked out once,
     effect parts are drawn every frame over their own length. Works on (r, g, b) tuples."""
 
-    def __init__(self, sections: Sequence[dict], overrides: Dict[int, str], n: int, resolve: Resolve,
-                 seed: int = 0, patterns: Optional[PatternGenerator] = None, sensor: Optional[Sensor] = None):
+    def __init__(self, sections: Sequence[dict], overrides: dict[int, str], n: int, resolve: Resolve,
+                 seed: int = 0, patterns: PatternGenerator | None = None, sensor: Sensor | None = None):
         self.n = n
-        self.fixed: List[Tuple[int, int, list]] = []
+        self.fixed: list[tuple[int, int, list]] = []
         self.moving = []
         self.readings = []                  # sensor parts: drawn every frame from the latest value
         self._sensor = sensor
@@ -403,7 +403,7 @@ class Composer:
                     self.fixed.append((a, b, [animations.hex_to_rgb(c) for c in part]))
         self.single = [(i, animations.hex_to_rgb(h)) for i, h in sorted(overrides.items()) if 0 <= i < n]
 
-    def frame(self, base: List[tuple], t: float, levels: Optional[list] = None) -> List[tuple]:
+    def frame(self, base: list[tuple], t: float, levels: list | None = None) -> list[tuple]:
         """levels: as in compose_static (sensor parts at full strength, their LEDs' levels there)."""
         out = list(base)
         for a, b, part in self.fixed:

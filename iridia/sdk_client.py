@@ -21,7 +21,7 @@ import queue
 import socket
 import struct
 import threading
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
 
 logger = logging.getLogger("iridia")
 
@@ -81,7 +81,7 @@ class Mode:
         self.index, self.id, self.name = index, index, name
         for f in self.FIELDS:
             setattr(self, f, 0)
-        self.colors: List[RGB] = []
+        self.colors: list[RGB] = []
 
     def pack(self) -> bytes:
         """The mode description OpenRGB reads for a mode update (protocol 6)."""
@@ -100,10 +100,10 @@ class Zone:
         self.type = self.leds_min = self.leds_max = self.leds_count = self.flags = 0
         self.start_idx = 0
         self.active_mode = -1
-        self.modes: List[Mode] = []
-        self.segments: List[dict] = []
+        self.modes: list[Mode] = []
+        self.segments: list[dict] = []
         self.leds: list = []
-        self.colors: List[RGB] = []
+        self.colors: list[RGB] = []
 
     def set_colors(self, colors: Sequence, fast: bool = True):
         n = self.leds_count
@@ -127,10 +127,10 @@ class Device:
         self.display_name = self.configuration = ""
         self.type = self.flags = 0
         self.active_mode = 0
-        self.modes: List[Mode] = []
-        self.zones: List[Zone] = []
+        self.modes: list[Mode] = []
+        self.zones: list[Zone] = []
         self.leds: list = []
-        self.colors: List[RGB] = []
+        self.colors: list[RGB] = []
 
     def set_mode(self, mode, save: bool = False):
         if isinstance(mode, str):
@@ -273,14 +273,14 @@ def parse_device(data: bytes, dev: Device) -> Device:
 class SDKClient:
     def __init__(self, host: str, port: int, name: str = "Iridia"):
         self.host, self.port, self.name = host, port, name
-        self.sock: Optional[socket.socket] = None
-        self.devices: List[Device] = []
-        self.ids: List[int] = []
+        self.sock: socket.socket | None = None
+        self.devices: list[Device] = []
+        self.ids: list[int] = []
         self.list_changed = False
-        self._inbox: "queue.Queue" = queue.Queue()
+        self._inbox: queue.Queue = queue.Queue()
         self._send_lock = threading.Lock()
         self._request_lock = threading.RLock()
-        self._reader: Optional[threading.Thread] = None
+        self._reader: threading.Thread | None = None
         self._closed = threading.Event()
         self.server_protocol = 0
         self.connect()
@@ -305,7 +305,7 @@ class SDKClient:
                 if pid == ACK:
                     break
             s.settimeout(None)
-        except (socket.timeout, struct.error) as e:
+        except (TimeoutError, struct.error) as e:
             self.disconnect()
             raise ProtocolTooOld(f"no protocol 6 answer ({e})") from e
         except BaseException:
@@ -367,7 +367,7 @@ class SDKClient:
         return parse_device(data[4:], dev)
 
     # ------------------------------------------------------------ requests
-    def request(self, dev: int, pid: int, payload: bytes, reply: Optional[int] = None) -> Optional[bytes]:
+    def request(self, dev: int, pid: int, payload: bytes, reply: int | None = None) -> bytes | None:
         """Send a packet and wait for OpenRGB's acknowledgement (and its answer first, if reply is
         set). An error status raises SDKError; no answer raises ConnectionError."""
         with self._request_lock:
@@ -377,7 +377,7 @@ class SDKClient:
             answer = None
             while True:
                 try:
-                    rdev, rpid, data = self._inbox.get(timeout=TIMEOUT)
+                    _rdev, rpid, data = self._inbox.get(timeout=TIMEOUT)
                 except queue.Empty:
                     self.disconnect()
                     raise ConnectionError(f"OpenRGB didn't answer (packet {pid})") from None

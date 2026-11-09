@@ -1,10 +1,9 @@
 """Color extraction from wallpaper images."""
 
 import os
-from typing import List, Tuple
 
 
-def _hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
+def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     return int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
 
 
@@ -31,7 +30,7 @@ def normalize_hex(value) -> str:
     return h if len(h) == 6 and all(c in "0123456789abcdef" for c in h) else ""
 
 
-def resolve_colors(entries, extracted: List[str]) -> List[str]:
+def resolve_colors(entries, extracted: list[str]) -> list[str]:
     """Turn a zone's color selection into hex colors.
 
     Each entry is either an int (index into the wallpaper's extracted
@@ -52,7 +51,7 @@ def resolve_colors(entries, extracted: List[str]) -> List[str]:
     return out
 
 
-def _deduplicate(colors: List[str], threshold: float = 30.0) -> List[str]:
+def _deduplicate(colors: list[str], threshold: float = 30.0) -> list[str]:
     result = []
     for c in colors:
         if _is_valid_color(c) and all(_delta_e_rgb(c, r) > threshold for r in result):
@@ -88,7 +87,7 @@ class ColorExtractor:
         except ImportError:
             return False
 
-    def extract(self, image_path: str, wallpaper_source: str = "") -> List[str]:
+    def extract(self, image_path: str, wallpaper_source: str = "") -> list[str]:
         """wallpaper_source: name of the detector backend that found the
         image (e.g. "caelestia"); lets "auto" know whether Caelestia's
         scheme file can be trusted for this image."""
@@ -124,7 +123,7 @@ class ColorExtractor:
             colors = ["642107"]
         return colors
 
-    def _extract_caelestia(self, image_path: str = "") -> List[str]:
+    def _extract_caelestia(self, image_path: str = "") -> list[str]:
         """Read Caelestia's already-extracted primary color.
 
         Caelestia writes the correct dominant color to:
@@ -153,7 +152,7 @@ class ColorExtractor:
         except OSError:
             pass
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 for line in f:
                     if "$primaryPaletteKeyColor" in line:
                         parts = line.split("=")
@@ -165,7 +164,7 @@ class ColorExtractor:
             pass
         return None
 
-    def _extract_material(self, image_path: str) -> List[str]:
+    def _extract_material(self, image_path: str) -> list[str]:
         """Extract using PyPI material-color-utilities 0.2.x API."""
         try:
             from PIL import Image
@@ -189,7 +188,7 @@ class ColorExtractor:
             logging.getLogger("iridia").warning(f"Material backend failed: {e}")
             return None
 
-    def _extract_pillow(self, image_path: str) -> List[str]:
+    def _extract_pillow(self, image_path: str) -> list[str]:
         """Standard Pillow median-cut extraction, sorted by pixel frequency."""
         try:
             from PIL import Image

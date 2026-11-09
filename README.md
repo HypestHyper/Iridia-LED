@@ -3,7 +3,7 @@
 <p align="center">Sets the RGB lights in your room and PC to the colours of your wallpaper, through OpenRGB.
 It can also animate them, map them to your room, follow your monitor's brightness and show sensors.</p>
 <p align="center">
-  <img alt="Version 1.3.8" src="https://img.shields.io/badge/version-1.3.8-1f9e80">
+  <img alt="Version 1.3.9" src="https://img.shields.io/badge/version-1.3.9-1f9e80">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Platform Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB">
@@ -39,7 +39,9 @@ It can also animate them, map them to your room, follow your monitor's brightnes
 - Follows your monitor's brightness (DDC/CI) or the laptop screen, dims at night, and goes off when the
   screen locks or the PC sleeps.
 - Sensor bars for CPU temperature, load and memory; chosen LEDs flash for desktop notifications.
-- Scenes: a different look while a game or a film is fullscreen.
+- Favourites: a quick panel of cards you build yourself, with just the controls you want, and one-tap
+  looks.
+- Scenes: a different look while a game or a film is fullscreen, or while an app you pick is in front.
 - Philips WiZ and Govee lights on your Wi-Fi, next to what OpenRGB drives.
 - WS2812B, WS2811, plain 12V RGB and RGBW strips, with colour order, colour correction and power limits.
 
@@ -114,7 +116,7 @@ line for your desktop's config ([Keybinds](docs/wiki/Keybinds.md)).
 python3 -m venv --system-site-packages .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/iridia-daemon            # run the daemon from the checkout
 .venv/bin/iridia-gui               # and the window
-.venv/bin/pytest -q && sh tests/validate-desktop.sh
+.venv/bin/pytest -q && .venv/bin/ruff check iridia scripts tests && sh tests/validate-desktop.sh
 ```
 
 See [Development](docs/wiki/Development.md) for the project layout and the IPC protocol.

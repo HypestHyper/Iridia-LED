@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:18+0000\n"
+"POT-Creation-Date: 2026-11-07 22:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -90,6 +90,9 @@ msgstr "Camembert"
 
 msgid "Status"
 msgstr "Fromage"
+
+msgid "Favourites"
+msgstr "Favoris"
 
 msgid "Devices"
 msgstr "Baguette"
@@ -285,6 +288,19 @@ msgstr "Lampe réseau ({brand})"
 
 msgid "Whole device"
 msgstr "Oh là là"
+
+#, python-brace-format
+msgid "Hidden ({n})"
+msgid_plural "Hidden ({n})"
+msgstr[0] "Cache-cache ({n})"
+msgstr[1] "Cache-cache ({n})"
+
+msgid ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
+msgstr ""
+"Les bandes cachées : un canal sans rien de branché, par exemple. Elles gardent leurs réglages et "
+"sortent des listes ailleurs. L'œil sur une carte les fait revenir."
 
 msgid "Animations"
 msgstr "Le cinéma est fermé le lundi"
@@ -1865,6 +1881,223 @@ msgid ""
 "where the LEDs are on the Layout tab."
 msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
 
+msgid "All lights"
+msgstr "Tous les bisous"
+
+msgid "Freeze colours"
+msgstr "Geler les couleurs"
+
+msgid "Notification flashes"
+msgstr "Flashs du facteur"
+
+msgid "Network lights"
+msgstr "Lampes réseau"
+
+msgid "On and off"
+msgstr "Allumé, éteint"
+
+msgid "Colours"
+msgstr "Couleurs"
+
+msgid "Follow the monitor's brightness"
+msgstr "Suivre la luminosité de l'écran"
+
+msgid "Stay lit when the screen locks"
+msgstr "Rester allumé quand l'écran se verrouille"
+
+msgid "Looks"
+msgstr "Looks"
+
+msgid "Switches"
+msgstr "Interrupteurs"
+
+msgid "Small"
+msgstr "Petit four"
+
+msgid "Wide"
+msgstr "Baguette"
+
+msgid "Tall"
+msgstr "Tour Eiffel"
+
+msgid "Colour card"
+msgstr "Carte couleur"
+
+msgid "Brightness card"
+msgstr "Carte bisou"
+
+msgid "Looks card"
+msgstr "Carte looks"
+
+msgid "Switches card"
+msgstr "Carte interrupteurs"
+
+msgid "Static"
+msgstr "Immobile comme une statue"
+
+msgid ""
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
+msgstr ""
+"Votre tableau de bord : des cartes pour les bandes de votre choix avec juste les commandes "
+"voulues, des looks, des réglages et des interrupteurs. Glissez-les où vous voulez dans Déjà vu."
+
+msgid "New card"
+msgstr "Nouvelle carte"
+
+msgid "New look"
+msgstr "Nouveau look"
+
+msgid "Arrange"
+msgstr "Déjà vu"
+
+msgid "Nothing here yet"
+msgstr "Rien encore"
+
+msgid ""
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+msgstr ""
+"Faites une carte pour quelques bandes (ou toutes) avec les commandes voulues : allumé/éteint, "
+"luminosité, couleurs, suivre l'écran, un effet, vos looks, des interrupteurs. Ou ajoutez un look,"
+" un réglage ou un interrupteur seul. L'★ d'une bande dans l'onglet Appareils lui fait une carte."
+
+msgid "Couldn't do that"
+msgstr "Impossible"
+
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} bandes"
+
+msgid "Its strips aren't there any more."
+msgstr "Ses bandes ont disparu."
+
+msgid "Follow the monitor"
+msgstr "Suivre l'écran"
+
+msgid "Stay lit when locked"
+msgstr "Allumé si verrouillé"
+
+msgid "All colours"
+msgstr "Toutes les couleurs"
+
+msgid "Colour"
+msgstr "Couleur"
+
+#, python-brace-format
+msgid "Wallpaper colour {n}"
+msgstr "Couleur du fond {n}"
+
+msgid "Wallpaper colours"
+msgstr "Couleurs du papier peint"
+
+msgid "Saved colours"
+msgstr "Couleurs gardées"
+
+#, python-brace-format
+msgid "Colour for {name}"
+msgstr "Couleur pour {name}"
+
+msgid "Colour wheel…"
+msgstr "Roue des couleurs…"
+
+msgid "No looks picked: Arrange, ✏ on this card."
+msgstr "Aucun look choisi : Déjà vu, ✏ sur cette carte."
+
+msgid "Turn on"
+msgstr "C'est la vie"
+
+msgid "On: tap to go back"
+msgstr "Allumé : touche pour revenir"
+
+#, python-brace-format
+msgid "Loaded {name} (the settings before were backed up)"
+msgstr "{name} chargé. Voilà."
+
+#, python-brace-format
+msgid "Size: {size}"
+msgstr "Taille : {size}"
+
+msgid "Change this card"
+msgstr "Changer cette carte"
+
+msgid "Change this look"
+msgstr "Changer ce look"
+
+msgid "Take off Favourites"
+msgstr "Retirer des favoris"
+
+msgid "Add to Favourites"
+msgstr "Ajouter aux favoris"
+
+msgid "None yet."
+msgstr "Rien encore."
+
+msgid "A card for one strip"
+msgstr "Une carte pour une bande"
+
+msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
+msgstr ""
+"Allumé/éteint, luminosité et couleurs ; à changer plus tard. Nouvelle carte en fait une pour "
+"plusieurs bandes."
+
+msgid "A look on its own"
+msgstr "Un look tout seul"
+
+msgid "Setups"
+msgstr "Setups"
+
+msgid "A switch on its own"
+msgstr "Un interrupteur tout seul"
+
+msgid "Start from"
+msgstr "Partir de"
+
+msgid "Title (optional), like Desk or Room"
+msgstr "Titre (facultatif), comme Bureau ou Salon"
+
+msgid "Which strips"
+msgstr "Quelles bandes"
+
+msgid "What's on it"
+msgstr "Ce qu'il y a dessus"
+
+msgid "Its looks (if Looks is on)"
+msgstr "Ses looks (si Looks est coché)"
+
+msgid "None yet: New look makes one."
+msgstr "Aucun : Nouveau look en fait un."
+
+msgid "Its switches (if Switches is on)"
+msgstr "Ses interrupteurs (si Interrupteurs est coché)"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Choisis des bandes."
+
+msgid "Pick what goes on the card."
+msgstr "Choisissez ce qui va sur la carte."
+
+msgid ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+msgstr "Une touche pour, une touche contre. Voilà."
+
+msgid "Name, like Movie or Gaming"
+msgstr "Nom, comme Film"
+
+msgid "What they do"
+msgstr "Ce qu'elles font"
+
+msgid "Showing it for 5 seconds."
+msgstr "Pendant 5 secondes. Oh là là."
+
+msgid "Couldn't show it"
+msgstr "Impossible de le montrer"
+
+msgid "Give the look a name."
+msgstr "Donne-lui un nom."
+
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
 
@@ -1879,6 +2112,9 @@ msgstr "Pause café / reprise du travail"
 
 msgid "Load a setup"
 msgstr "Quiche"
+
+msgid "Turn a look on or off"
+msgstr "Allumer ou éteindre un look"
 
 msgid "No modifier"
 msgstr "Café"
@@ -1929,9 +2165,6 @@ msgstr "Quiche"
 msgid "Leave as is"
 msgstr "Brioche"
 
-msgid "Turn on"
-msgstr "C'est la vie"
-
 msgid "Back to normal"
 msgstr "Bisou"
 
@@ -1943,6 +2176,12 @@ msgstr "Le motif de la nappe"
 
 msgid "Do"
 msgstr "Bof"
+
+msgid "No looks yet"
+msgstr "Pas encore de looks"
+
+msgid "Look"
+msgstr "Look"
 
 msgid "Command"
 msgstr "Bonjour"
@@ -2088,6 +2327,9 @@ msgstr "La même touche arrête la musique, puis la relance."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Il pleut des cordes. Le béret de mon grand-père."
 
+msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+msgstr "Même touche : look, puis normal. Voilà."
+
 msgid "Keybind color"
 msgstr "Ratatouille"
 
@@ -2143,9 +2385,6 @@ msgstr "Bonjour"
 msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 msgstr "Clique ou glisse sur les bisous pour les choisir. Voilà."
 
-msgid "Colour"
-msgstr "Couleur"
-
 msgid "A and B"
 msgstr "A et B"
 
@@ -2180,9 +2419,6 @@ msgstr[1] "{n} baguettes"
 
 msgid "No LEDs chosen yet."
 msgstr "Aucun bisou choisi."
-
-msgid "Arrange"
-msgstr "Déjà vu"
 
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Omelette du fromage"
@@ -2476,9 +2712,6 @@ msgstr ""
 "Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
-msgid "Network lights"
-msgstr "Lampes réseau"
-
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
@@ -2602,6 +2835,12 @@ msgstr ""
 "Ce bureau ne dit rien, alors Iridia regarde les programmes qui tournent : les apps ci-dessous ont"
 " leur look pendant qu'elles tournent. Le « plein écran » ? Mystère."
 
+msgid "Anything fullscreen"
+msgstr "N'importe quoi en plein écran"
+
+msgid "These apps"
+msgstr "Ces applis"
+
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr "Plus doux, {n}%"
@@ -2618,27 +2857,26 @@ msgid "Scene colour"
 msgstr "Couleur de la scène"
 
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
-msgstr "Un autre look pour les bisous pendant un jeu ou un film en plein écran. Tout revient après. Voilà."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
+msgstr ""
+"Un autre look pour les lumières pendant qu'un jeu ou un film est en plein écran, ou qu'une appli "
+"choisie est devant. Tout revient quand elle part, et vos réglages ne bougent pas."
 
-msgid "Change the lights for fullscreen apps"
-msgstr "Changer les bisous en plein écran"
+msgid "Use scenes"
+msgstr "Scènes, oui"
 
-msgid "When anything is fullscreen"
-msgstr "Quand quelque chose est en plein écran"
-
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr "Quand une de ces apps est devant, elle a son propre look."
-
-msgid "App name, like mpv or steam_app_1091500"
-msgstr "Nom de l'app, comme mpv ou steam_app_1091500"
-
-msgid "Never for this app"
-msgstr "Jamais pour cette app"
+msgid "New scene"
+msgstr "Nouvelle scène"
 
 msgid "Never for these"
 msgstr "Jamais pour celles-ci"
+
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr "Les applis jamais comptées en plein écran : un navigateur qui passe une vidéo, par exemple."
+
+msgid "App name, like firefox"
+msgstr "Nom d'appli, comme firefox"
 
 msgid "Timing"
 msgstr "Timing"
@@ -2658,17 +2896,55 @@ msgstr "Une petite pause, et les bisous restent calmes quand tu quittes le jeu u
 msgid "Nothing to show: pick a look first."
 msgstr "Rien à montrer : choisis un look d'abord."
 
-msgid "Showing it for 5 seconds."
-msgstr "Pendant 5 secondes. Oh là là."
-
-msgid "Couldn't show it"
-msgstr "Impossible de le montrer"
-
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Tape le nom de l'app, ou choisis-en une déjà vue."
 
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
-msgstr "Rien à surveiller : choisis un look ou ajoute une app."
+msgid "When anything is fullscreen"
+msgstr "Quand quelque chose est en plein écran"
+
+#, python-brace-format
+msgid "When {apps} is in front"
+msgstr "Quand {apps} est devant"
+
+msgid "On now"
+msgstr "En cours"
+
+msgid "Up: wins over the ones below"
+msgstr "Monter : passe devant ceux d'en dessous"
+
+msgid "Down"
+msgstr "Descendre"
+
+msgid "Change this scene"
+msgstr "Changer cette scène"
+
+msgid "Name, like Games or Films"
+msgstr "Nom, comme Jeux ou Films"
+
+msgid "When"
+msgstr "Quand"
+
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+"Quand l'une d'elles est devant, en plein écran ou pas. Les noms sont ceux de l'appli (sa classe "
+"de fenêtre), comme mpv ou steam_app_1091500."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "Nom de l'app, comme mpv ou steam_app_1091500"
+
+msgid "Seen fullscreen lately"
+msgstr "Vu en plein écran récemment"
+
+msgid "Add it"
+msgstr "L'ajouter"
+
+msgid "Add the apps it's for."
+msgstr "Ajoutez ses applis."
+
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr "Rien à guetter : faites une scène, ou allumez-en une."
 
 #, python-brace-format
 msgid "In front now: {app}{fs}."
@@ -2688,8 +2964,15 @@ msgstr "En cours : {apps}."
 msgid "Showing: {look}."
 msgstr "Montré : {look}."
 
-msgid "None yet."
-msgstr "Rien encore."
+msgid "No scenes yet"
+msgstr "Pas encore de scène"
+
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+"Une scène, c'est « quand ceci arrive, ces bandes ressemblent à ça » : le plein écran tamise la "
+"pièce, un jeu met des braises sur le bureau, un film éteint tout."
 
 msgid "None."
 msgstr "Rien."
@@ -2946,6 +3229,12 @@ msgstr "Le béret de mon grand-père. J'ai une baguette. Mon oncle est un champi
 msgid "RGB (normal)"
 msgstr "Bonne nuit"
 
+msgid "Show again"
+msgstr "Revoir"
+
+msgid "Hide this strip (it keeps working)"
+msgstr "Cacher cette bande (elle marche toujours)"
+
 msgid "mixed"
 msgstr "Ooh la la"
 
@@ -2957,9 +3246,6 @@ msgstr "Santé !"
 
 msgid "calibrated"
 msgstr "Bof"
-
-msgid "Static"
-msgstr "Immobile comme une statue"
 
 msgid "Animated"
 msgstr "Animé comme un marché"

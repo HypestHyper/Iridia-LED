@@ -19,7 +19,6 @@ import json
 import logging
 import os
 import threading
-from typing import Dict, List, Optional
 
 logger = logging.getLogger("iridia")
 
@@ -32,7 +31,7 @@ class WallpaperColorCache:
     def __init__(self, path: str = "~/.config/iridia/wallpaper_colors.json"):
         self.path = os.path.expanduser(path)
         self._lock = threading.RLock()
-        self._data: Dict[str, dict] = {}
+        self._data: dict[str, dict] = {}
         self._load()
 
     @staticmethod
@@ -41,7 +40,7 @@ class WallpaperColorCache:
 
     def _load(self):
         try:
-            with open(self.path, "r") as f:
+            with open(self.path) as f:
                 data = json.load(f)
             if isinstance(data, dict):
                 # Drop entries for images that no longer exist so the file
@@ -64,7 +63,7 @@ class WallpaperColorCache:
         except Exception as e:
             logger.warning(f"Couldn't save {self.path}: {type(e).__name__}: {e}")
 
-    def get_colors(self, image_path: str, backend: Optional[str] = None) -> Optional[List[str]]:
+    def get_colors(self, image_path: str, backend: str | None = None) -> list[str] | None:
         """Cached colors if still valid for this image file (and, when
         given, produced by the same extraction backend setting), else None."""
         with self._lock:
@@ -80,7 +79,7 @@ class WallpaperColorCache:
                 return None
             return list(e["colors"])
 
-    def store_colors(self, image_path: str, colors: List[str], backend: Optional[str] = None):
+    def store_colors(self, image_path: str, colors: list[str], backend: str | None = None):
         with self._lock:
             e = self._data.setdefault(self._key(image_path), {})
             try:
@@ -92,12 +91,12 @@ class WallpaperColorCache:
                 e["backend"] = backend
             self._save()
 
-    def get_choice(self, image_path: str) -> Optional[dict]:
+    def get_choice(self, image_path: str) -> dict | None:
         with self._lock:
             c = self._data.get(self._key(image_path), {}).get("choice")
             return dict(c) if c else None
 
-    def set_choice(self, image_path: str, choice: Optional[dict]):
+    def set_choice(self, image_path: str, choice: dict | None):
         """choice: {"index": N} | {"hex": "rrggbb"} | None (back to automatic)."""
         with self._lock:
             key = self._key(image_path)

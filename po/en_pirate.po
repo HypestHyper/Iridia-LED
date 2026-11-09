@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:18+0000\n"
+"POT-Creation-Date: 2026-11-07 22:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -90,6 +90,9 @@ msgstr "Drop anchor on colors"
 
 msgid "Status"
 msgstr "Crow's Nest"
+
+msgid "Favourites"
+msgstr "Treasures"
 
 msgid "Devices"
 msgstr "Cargo"
@@ -292,6 +295,19 @@ msgstr "Lantern on the network ({brand})"
 
 msgid "Whole device"
 msgstr "The whole vessel"
+
+#, python-brace-format
+msgid "Hidden ({n})"
+msgid_plural "Hidden ({n})"
+msgstr[0] "Stowed in the Hold ({n})"
+msgstr[1] "Stowed in the Hold ({n})"
+
+msgid ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
+msgstr ""
+"Strips ye've stowed: a channel with nothin' plugged in, belike. They keep their settings and stay"
+" out o' lists elsewhere. The eye on a card brings 'em back on deck."
 
 msgid "Animations"
 msgstr "Dancin' lanterns"
@@ -1961,6 +1977,223 @@ msgstr ""
 "Follow the map sails the dance through the whole room, across every lantern string that follows "
 "it, using where they hang on the Treasure Map."
 
+msgid "All lights"
+msgstr "All lanterns"
+
+msgid "Freeze colours"
+msgstr "Freeze colours"
+
+msgid "Notification flashes"
+msgstr "Message flashes"
+
+msgid "Network lights"
+msgstr "Lanterns on the network"
+
+msgid "On and off"
+msgstr "Light 'n' douse"
+
+msgid "Colours"
+msgstr "Colours"
+
+msgid "Follow the monitor's brightness"
+msgstr "Follow the monitor's glow"
+
+msgid "Stay lit when the screen locks"
+msgstr "Stay lit when the hatch is battened"
+
+msgid "Looks"
+msgstr "Looks"
+
+msgid "Switches"
+msgstr "Switches"
+
+msgid "Small"
+msgstr "Dinghy"
+
+msgid "Wide"
+msgstr "Sloop"
+
+msgid "Tall"
+msgstr "Mast"
+
+msgid "Colour card"
+msgstr "Colour chart"
+
+msgid "Brightness card"
+msgstr "Glow chart"
+
+msgid "Looks card"
+msgstr "Looks chart"
+
+msgid "Switches card"
+msgstr "Levers chart"
+
+msgid "Static"
+msgstr "Becalmed"
+
+msgid ""
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
+msgstr ""
+"Yer quick panel: charts for the strips ye pick with just the controls ye want, looks, setups and "
+"levers. Haul 'em where ye like in Haul."
+
+msgid "New card"
+msgstr "New chart"
+
+msgid "New look"
+msgstr "New look"
+
+msgid "Arrange"
+msgstr "Haul"
+
+msgid "Nothing here yet"
+msgstr "Nothin' here yet"
+
+msgid ""
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+msgstr ""
+"Make a chart for some strips (or the whole fleet) with the controls ye want on it: light 'n' "
+"douse, glow, colours, follow the monitor, a trick, yer looks, levers. Or add a look, a setup or a"
+" lever on its own. A strip's ★ on the Devices tab makes a chart for it."
+
+msgid "Couldn't do that"
+msgstr "Couldn't do that"
+
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} strips"
+
+msgid "Its strips aren't there any more."
+msgstr "Its strips have gone overboard."
+
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
+
+msgid "Stay lit when locked"
+msgstr "Stay lit when battened"
+
+msgid "All colours"
+msgstr "All the colours o' the sea"
+
+msgid "Colour"
+msgstr "Colour"
+
+#, python-brace-format
+msgid "Wallpaper colour {n}"
+msgstr "Wallpaper colour {n}"
+
+msgid "Wallpaper colours"
+msgstr "Wallpaper colours"
+
+msgid "Saved colours"
+msgstr "Hoarded colours"
+
+#, python-brace-format
+msgid "Colour for {name}"
+msgstr "Colour fer {name}"
+
+msgid "Colour wheel…"
+msgstr "Ship's wheel o' colours…"
+
+msgid "No looks picked: Arrange, ✏ on this card."
+msgstr "No looks picked: Haul, ✏ on this chart."
+
+msgid "Turn on"
+msgstr "Light 'em"
+
+msgid "On: tap to go back"
+msgstr "On: tap to sail back"
+
+#, python-brace-format
+msgid "Loaded {name} (the settings before were backed up)"
+msgstr "Loaded {name} (the old settin's be stowed)"
+
+#, python-brace-format
+msgid "Size: {size}"
+msgstr "Size: {size}"
+
+msgid "Change this card"
+msgstr "Change this chart"
+
+msgid "Change this look"
+msgstr "Change this look"
+
+msgid "Take off Favourites"
+msgstr "Take off Treasures"
+
+msgid "Add to Favourites"
+msgstr "Add to Treasures"
+
+msgid "None yet."
+msgstr "None yet."
+
+msgid "A card for one strip"
+msgstr "A chart for one strip"
+
+msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
+msgstr "Light 'n' douse, glow and colours; change it later. New chart makes one for several strips."
+
+msgid "A look on its own"
+msgstr "A look on its lonesome"
+
+msgid "Setups"
+msgstr "Setups"
+
+msgid "A switch on its own"
+msgstr "A lever on its lonesome"
+
+msgid "Start from"
+msgstr "Set sail from"
+
+msgid "Title (optional), like Desk or Room"
+msgstr "Name (if ye like), like Desk or Cabin"
+
+msgid "Which strips"
+msgstr "Which strips"
+
+msgid "What's on it"
+msgstr "What's aboard"
+
+msgid "Its looks (if Looks is on)"
+msgstr "Its looks (if Looks be on)"
+
+msgid "None yet: New look makes one."
+msgstr "None yet: New look makes one."
+
+msgid "Its switches (if Switches is on)"
+msgstr "Its levers (if Switches be on)"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Pick the strips it be fer, or Everything."
+
+msgid "Pick what goes on the card."
+msgstr "Pick what goes on the chart."
+
+msgid ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+msgstr ""
+"One tap puts it on its strips, one more tap puts 'em back; yer settin's don't change. From a key:"
+" iridia look \"NAME\"."
+
+msgid "Name, like Movie or Gaming"
+msgstr "Name, like Movie or Gaming"
+
+msgid "What they do"
+msgstr "What they do"
+
+msgid "Showing it for 5 seconds."
+msgstr "Showin' it fer 5 seconds."
+
+msgid "Couldn't show it"
+msgstr "Couldn't show it"
+
+msgid "Give the look a name."
+msgstr "Give the look a name."
+
 msgid "All lights off / on"
 msgstr "All lanterns doused / lit"
 
@@ -1975,6 +2208,9 @@ msgstr "Still / wake the dancin' lanterns"
 
 msgid "Load a setup"
 msgstr "Dig up a chart"
+
+msgid "Turn a look on or off"
+msgstr "Turn a look on or off"
 
 msgid "No modifier"
 msgstr "No modifier"
@@ -2031,9 +2267,6 @@ msgstr "Lanterns"
 msgid "Leave as is"
 msgstr "Leave 'er be"
 
-msgid "Turn on"
-msgstr "Light 'em"
-
 msgid "Back to normal"
 msgstr "As ye were"
 
@@ -2045,6 +2278,12 @@ msgstr "Still pattern"
 
 msgid "Do"
 msgstr "Order"
+
+msgid "No looks yet"
+msgstr "No looks yet"
+
+msgid "Look"
+msgstr "Look"
 
 msgid "Command"
 msgstr "Command"
@@ -2200,6 +2439,9 @@ msgstr "Same key stills every dancin' lantern, then sets 'em dancin' again."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Digs up the chart an' keeps it (yer old one gets buried first)."
 
+msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+msgstr "Same key puts the look on, then back to normal. Make looks on the Treasures tab."
+
 msgid "Keybind color"
 msgstr "Signal color"
 
@@ -2255,9 +2497,6 @@ msgstr "Clear the deck"
 msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 msgstr "Click or drag over lanterns on the chart to pick 'em; start on a ringed one to take lanterns out."
 
-msgid "Colour"
-msgstr "Colour"
-
 msgid "A and B"
 msgstr "A an' B"
 
@@ -2294,9 +2533,6 @@ msgstr[1] "{n} strips"
 
 msgid "No LEDs chosen yet."
 msgstr "No lanterns chosen yet."
-
-msgid "Arrange"
-msgstr "Haul"
 
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find lanterns: light one lantern on the real strip"
@@ -2609,9 +2845,6 @@ msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
 "strip's name."
 
-msgid "Network lights"
-msgstr "Lanterns on the network"
-
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
@@ -2749,6 +2982,12 @@ msgstr ""
 "sailin' instead: the apps below get their look while they run, an' \"anythin' fullscreen\" can't "
 "be told."
 
+msgid "Anything fullscreen"
+msgstr "Anythin' full-sail"
+
+msgid "These apps"
+msgstr "These vessels"
+
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr "Dimmer, {n}%"
@@ -2765,29 +3004,26 @@ msgid "Scene colour"
 msgstr "Scene colour"
 
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 msgstr ""
-"A different look fer the lanterns while a game or a picture be fullscreen. They go back when it's"
-" gone, an' yer settin's don't change."
+"A different look fer the lights while a game or a picture show be full-sail, or while a vessel ye"
+" pick be in front. They go back when it's gone, an' yer settings stay put."
 
-msgid "Change the lights for fullscreen apps"
-msgstr "Change the lanterns fer fullscreen apps"
+msgid "Use scenes"
+msgstr "Hoist the scenes"
 
-msgid "When anything is fullscreen"
-msgstr "When anythin' be fullscreen"
-
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr "While one o' these be up front, fullscreen or not, it gets its own look instead."
-
-msgid "App name, like mpv or steam_app_1091500"
-msgstr "App name, like mpv or steam_app_1091500"
-
-msgid "Never for this app"
-msgstr "Never fer this app"
+msgid "New scene"
+msgstr "New scene"
 
 msgid "Never for these"
 msgstr "Never fer these"
+
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr "Vessels that never count as full-sail: a browser playin' a video, say."
+
+msgid "App name, like firefox"
+msgstr "Vessel name, like firefox"
 
 msgid "Timing"
 msgstr "Timin'"
@@ -2807,17 +3043,55 @@ msgstr "A short wait keeps the lanterns steady when ye sail away from a game fer
 msgid "Nothing to show: pick a look first."
 msgstr "Nothin' to show: pick a look first."
 
-msgid "Showing it for 5 seconds."
-msgstr "Showin' it fer 5 seconds."
-
-msgid "Couldn't show it"
-msgstr "Couldn't show it"
-
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Type the app's name, or pick one it's spotted."
 
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
-msgstr "Nothin' to watch fer yet: pick a look fer fullscreen apps, or add an app."
+msgid "When anything is fullscreen"
+msgstr "When anythin' be fullscreen"
+
+#, python-brace-format
+msgid "When {apps} is in front"
+msgstr "When {apps} be at the bow"
+
+msgid "On now"
+msgstr "Aboard now"
+
+msgid "Up: wins over the ones below"
+msgstr "Up: outranks the ones below"
+
+msgid "Down"
+msgstr "Below decks"
+
+msgid "Change this scene"
+msgstr "Change this scene"
+
+msgid "Name, like Games or Films"
+msgstr "Name, like Games or Picture Shows"
+
+msgid "When"
+msgstr "When"
+
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+"While one o' these be in front, full-sail or not. Names be the vessel's own (its window class), "
+"like mpv or steam_app_1091500."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "App name, like mpv or steam_app_1091500"
+
+msgid "Seen fullscreen lately"
+msgstr "Spotted full-sail lately"
+
+msgid "Add it"
+msgstr "Bring it aboard"
+
+msgid "Add the apps it's for."
+msgstr "Add the vessels it be for."
+
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr "Nothin' to keep watch fer yet: make a scene, or hoist one."
 
 #, python-brace-format
 msgid "In front now: {app}{fs}."
@@ -2837,8 +3111,15 @@ msgstr "Sailin' now: {apps}."
 msgid "Showing: {look}."
 msgstr "Showin': {look}."
 
-msgid "None yet."
-msgstr "None yet."
+msgid "No scenes yet"
+msgstr "No scenes yet"
+
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+"A scene be \"when this happens, these strips look like this\": anythin' full-sail dims the cabin,"
+" a game gets embers on the desk, a picture show douses the lot."
 
 msgid "None."
 msgstr "None."
@@ -3109,6 +3390,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (normal)"
 
+msgid "Show again"
+msgstr "Bring back on deck"
+
+msgid "Hide this strip (it keeps working)"
+msgstr "Stow this strip (it keeps workin')"
+
 msgid "mixed"
 msgstr "motley"
 
@@ -3120,9 +3407,6 @@ msgstr "palette"
 
 msgid "calibrated"
 msgstr "calibrated"
-
-msgid "Static"
-msgstr "Becalmed"
 
 msgid "Animated"
 msgstr "Dancin'"

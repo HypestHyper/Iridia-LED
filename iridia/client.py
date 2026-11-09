@@ -2,11 +2,9 @@
 
 import os
 from iridia.ipc import IPCClient
+from iridia.rundir import runtime_path
 
-SOCKET_PATH = os.path.join(
-    os.environ.get("XDG_RUNTIME_DIR", "/tmp"),
-    f"iridia-{os.getuid()}.sock"
-)
+SOCKET_PATH = runtime_path(f"iridia-{os.getuid()}.sock")
 
 class Client:
     def __init__(self):
@@ -92,7 +90,7 @@ class Client:
     def set_zone_gamma(self, device: str, zone: str, enabled: bool) -> dict:
         return self._ipc.send({"cmd": "set_zone_gamma", "device": device, "zone": zone, "enabled": enabled})
 
-    def set_wallpaper_color(self, index: int = None, hex_color: str = None) -> dict:
+    def set_wallpaper_color(self, index: int | None = None, hex_color: str | None = None) -> dict:
         req = {"cmd": "set_wallpaper_color"}
         if index is not None:
             req["index"] = index
@@ -170,9 +168,17 @@ class Client:
         # a test waits for the light's answer (up to about 3 seconds)
         return self._ipc.send(dict(kw, cmd="netlights"), timeout=8.0 if kw.get("probe") else None)
 
+    def looks(self, **kw) -> dict:
+        """Looks: set (a look), remove (an id), apply ({look, on}), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="looks"))
+
+    def favorites(self, **kw) -> dict:
+        """Favourites tiles: set (the whole list), add (a tile), remove (a tile id), or nothing to ask."""
+        return self._ipc.send(dict(kw, cmd="favorites"))
+
     def scenes(self, **kw) -> dict:
-        """Scenes: enabled, look, set_app, remove_app, ignore, unignore, on_delay, off_delay, interval,
-        forget, test, or nothing to ask."""
+        """Scenes: enabled, set_scene, remove_scene, move_scene, scene_on, look, set_app, remove_app,
+        ignore, unignore, on_delay, off_delay, interval, forget, test, or nothing to ask."""
         return self._ipc.send(dict(kw, cmd="scenes"))
 
     def set_sleep(self, lights_off: bool) -> dict:

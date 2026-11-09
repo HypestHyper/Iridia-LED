@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.3.9 — 2026-11-09
+
+- **Favourites:** a tab (right after Status) with the controls you use most, on a grid you arrange
+  yourself. *Cards* you make: a title, some strips or all of them, and just the controls you want (on/off,
+  one brightness, colours with a popup for saved colours and the colour wheel, follow the monitor,
+  stay lit, effect, look chips, switch chips); presets for a colour, brightness, looks or switches
+  card. Looks, setups and switches can go there on their own too. Tiles are small, wide, tall or large;
+  *Arrange* drags them into place. The ★ on a strip's card makes a card for it.
+- **Scenes, as many as you like:** each one "when this happens, these strips look like this", made in
+  an editor on the Scenes tab: a name, when (anything fullscreen, or some apps in front), which strips
+  (or everything) and the look. Switch each on or off, try it, and move it up or down: the higher one
+  wins on a strip two scenes share. Your scenes from before carry over.
+- **Safer without XDG_RUNTIME_DIR:** where it isn't set (cron, `sudo -u`, some SSH sessions), the
+  daemon's socket, lock and pid files now go in `/run/user/UID` or `~/.cache/iridia/run` instead of the
+  shared `/tmp`, where another user could have put a file of their own under the same name first.
+- **Ready for newer Python and GTK:** the code uses today's Python forms throughout (checked by ruff
+  in CI, now on a fixed ruff version), the tests fail on anything Python deprecates in Iridia's code,
+  the window asks for GTK 4's own Gdk and Pango up front, and the tab bar's scroll arrows no longer
+  make GTK lay the window out with no room for them (a warning on every start).
+- **OpenRGB on another PC is no longer an option:** Iridia always talks to the OpenRGB on this PC
+  (`openrgb.host` is gone from `config.json`; it's removed by itself).
+- **Docs:** the window rule to float Iridia on Hyprland for the Lua config and the newer
+  `hyprland.conf` syntax; the tab tour, configuration and command line brought up to date.
+- **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
+  it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
+- **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:
+  off, dimmer, one colour or an effect. On and back off like a keybind, so settings don't change. From
+  a key too: the Keybinds tab, or `iridia look NAME`.
+
 ## 1.3.8 — 2026-11-07
 
 - **Philips WiZ and Govee lights on your Wi-Fi:** Devices tab, *Network lights* (or `iridia netlights

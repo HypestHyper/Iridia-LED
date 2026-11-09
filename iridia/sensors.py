@@ -23,7 +23,7 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 READ_SEC = 1.0
 SMOOTH_SEC = 3.0            # exponential smoothing time constant
@@ -43,7 +43,7 @@ def valid_id(sid) -> bool:
     return isinstance(sid, str) and bool(_ID_RE.match(sid))
 
 
-def default_range(sid: str) -> Tuple[float, float]:
+def default_range(sid: str) -> tuple[float, float]:
     return TEMP_RANGE if sid.endswith("_temp") or sid.startswith("hwmon:") else PCT_RANGE
 
 
@@ -51,7 +51,7 @@ def unit_of(sid: str) -> str:
     return "°C" if sid.endswith("_temp") or sid.startswith("hwmon:") else "%"
 
 
-def format_value(v: Optional[float], unit: str = "") -> str:
+def format_value(v: float | None, unit: str = "") -> str:
     """A reading as shown: whole numbers for temperatures and percentages (the smoothed value has
     many digits, and text whose width changes every second moves what's next to it), one decimal
     otherwise."""
@@ -62,7 +62,7 @@ def format_value(v: Optional[float], unit: str = "") -> str:
     return f"{txt} {unit}".strip()
 
 
-def _read(path: str) -> Optional[str]:
+def _read(path: str) -> str | None:
     try:
         with open(path) as f:
             return f.read()
@@ -70,7 +70,7 @@ def _read(path: str) -> Optional[str]:
         return None
 
 
-def _read_milli(path: str) -> Optional[float]:
+def _read_milli(path: str) -> float | None:
     txt = _read(path)
     try:
         return int(txt.strip()) / 1000.0 if txt is not None else None
@@ -81,7 +81,7 @@ def _read_milli(path: str) -> Optional[float]:
 class Source:
     """One reading: name for people, how to read it, and its default range."""
 
-    def __init__(self, sid: str, name: str, read: Callable[[], Optional[float]], nvidia: bool = False):
+    def __init__(self, sid: str, name: str, read: Callable[[], float | None], nvidia: bool = False):
         self.id, self.name, self.read, self.nvidia = sid, name, read, nvidia
 
 
@@ -89,9 +89,9 @@ class _NvidiaStream:
     """nvidia-smi printing temperature and load once a second, read line by line."""
 
     def __init__(self):
-        self.temp: Optional[float] = None
-        self.load: Optional[float] = None
-        self._proc: Optional[subprocess.Popen] = None
+        self.temp: float | None = None
+        self.load: float | None = None
+        self._proc: subprocess.Popen | None = None
         self._lock = threading.Lock()
 
     def running(self) -> bool:
@@ -140,18 +140,18 @@ class SensorHub:
 
     def __init__(self, sys_root: str = "/sys", proc_root: str = "/proc"):
         self.sys, self.proc = sys_root, proc_root
-        self._sources: Optional[Dict[str, Source]] = None
+        self._sources: dict[str, Source] | None = None
         self._found_at = 0.0
         self._wanted: set = set()
-        self._raw: Dict[str, Optional[float]] = {}
-        self._smooth: Dict[str, float] = {}
+        self._raw: dict[str, float | None] = {}
+        self._smooth: dict[str, float] = {}
         self._last_read = 0.0
         self._last_smooth = 0.0
-        self._cpu_prev: Optional[Tuple[int, int]] = None
+        self._cpu_prev: tuple[int, int] | None = None
         self._nvidia = _NvidiaStream()
 
     # ------------------------------------------------------------- finding sensors
-    def _hwmon(self) -> List[Tuple[str, str, str]]:
+    def _hwmon(self) -> list[tuple[str, str, str]]:
         """(chip name, label, temp*_input path) for every hwmon temperature."""
         out = []
         for d in sorted(glob.glob(os.path.join(self.sys, "class", "hwmon", "hwmon*"))):
@@ -165,7 +165,7 @@ class SensorHub:
                 out.append((chip, label, inp))
         return out
 
-    def _pick(self, temps, chips, labels) -> Optional[str]:
+    def _pick(self, temps, chips, labels) -> str | None:
         for chip in chips:
             mine = [(lbl, p) for c, lbl, p in temps if c == chip]
             for want in labels:
@@ -176,8 +176,8 @@ class SensorHub:
                 return mine[0][1]
         return None
 
-    def discover(self) -> Dict[str, Source]:
-        src: Dict[str, Source] = {}
+    def discover(self) -> dict[str, Source]:
+        src: dict[str, Source] = {}
         stat = os.path.join(self.proc, "stat")
         if _read(stat) is not None:
             src["cpu_load"] = Source("cpu_load", "CPU load", self._cpu_load)
@@ -244,7 +244,7 @@ class SensorHub:
                     break
         return busy, temp or self._pick(temps, GPU_CHIPS, GPU_LABELS)
 
-    def sources(self) -> Dict[str, Source]:
+    def sources(self) -> dict[str, Source]:
         now = time.monotonic()
         if self._sources is None or (now - self._found_at > 60 and any(w not in self._sources
                                                                          for w in self._wanted)):
@@ -253,7 +253,7 @@ class SensorHub:
         return self._sources
 
     # ------------------------------------------------------------- readers
-    def _cpu_load(self) -> Optional[float]:
+    def _cpu_load(self) -> float | None:
         line = (_read(os.path.join(self.proc, "stat")) or "").split("\n", 1)[0].split()
         if not line or line[0] != "cpu":
             return None
@@ -268,7 +268,7 @@ class SensorHub:
             return None
         return max(0.0, min(100.0, 100.0 * (1 - (idle - prev[1]) / (total - prev[0]))))
 
-    def _ram(self) -> Optional[float]:
+    def _ram(self) -> float | None:
         info = {}
         for line in (_read(os.path.join(self.proc, "meminfo")) or "").splitlines():
             k, _sep, v = line.partition(":")
@@ -282,7 +282,7 @@ class SensorHub:
         return 100.0 * (1 - info["MemAvailable"] / info["MemTotal"])
 
     @staticmethod
-    def _pct(path) -> Optional[float]:
+    def _pct(path) -> float | None:
         txt = _read(path)
         try:
             return float(txt.strip()) if txt is not None else None
@@ -305,7 +305,7 @@ class SensorHub:
         else:
             self._nvidia.stop()
 
-    def update(self, now: Optional[float] = None) -> bool:
+    def update(self, now: float | None = None) -> bool:
         """Read (once a second) and smooth; True when a value moved enough to redraw."""
         if not self._wanted:
             return False
@@ -334,14 +334,14 @@ class SensorHub:
             self._smooth[sid] = new
         return moved
 
-    def value(self, sid: str) -> Optional[float]:
+    def value(self, sid: str) -> float | None:
         return self._smooth.get(sid)
 
-    def values(self) -> Dict[str, Optional[float]]:
+    def values(self) -> dict[str, float | None]:
         return {sid: (None if self._smooth.get(sid) is None else round(self._smooth[sid], 1))
                 for sid in sorted(self._wanted)}
 
-    def listing(self) -> List[dict]:
+    def listing(self) -> list[dict]:
         """Every sensor with a fresh reading (NVIDIA only when it's already running)."""
         out = []
         for sid, s in self.sources().items():

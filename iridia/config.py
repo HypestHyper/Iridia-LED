@@ -20,7 +20,6 @@ DEFAULT_CONFIG = {
         "palette_mode": "exact"
     },
     "openrgb": {
-        "host": "127.0.0.1",
         "port": None,
         # who starts OpenRGB's server: "daemon" (the Iridia daemon), "systemd"
         # (iridia-openrgb.service) or "off" (you do). See openrgb_server.py.
@@ -115,7 +114,7 @@ class Config:
             self._file_keys = set()
             if os.path.exists(self.path):
                 try:
-                    with open(self.path, "r") as f:
+                    with open(self.path) as f:
                         loaded = json.load(f)
                     self._data = copy.deepcopy(DEFAULT_CONFIG)
                     if not isinstance(loaded, dict):
@@ -151,6 +150,8 @@ class Config:
             # 1.1.0: "start_server": false meant "never start OpenRGB"
             if o.pop("start_server") is False and "start_method" not in o:
                 o["start_method"] = "off"
+        if isinstance(o, dict):
+            o.pop("host", None)     # 1.3.9: OpenRGB is always on this PC
 
     def is_set(self, key_path: str) -> bool:
         """The setting is in config.json itself (not only a default)."""

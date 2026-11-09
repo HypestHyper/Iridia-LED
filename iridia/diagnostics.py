@@ -6,17 +6,17 @@ own medium (plain text vs a colored dialog).
 
 import os
 import time
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple
 
 
 class Check(NamedTuple):
     label: str
-    ok: Optional[bool]   # True/False, or None for "informational, not a pass/fail"
+    ok: bool | None   # True/False, or None for "informational, not a pass/fail"
     detail: str
     hint: str = ""
 
 
-def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
+def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
     checks = []
 
     if not socket_reachable:
@@ -147,7 +147,7 @@ def run_checks(status: dict, socket_reachable: bool) -> List[Check]:
     return checks
 
 
-def daemon_login_checks(status: dict) -> List[Check]:
+def daemon_login_checks(status: dict) -> list[Check]:
     """How this daemon was started, and what starts it at login. A daemon started outside systemd
     is fine; "inactive" is never shown as a problem while the daemon answers."""
     from iridia import openrgb_server as osrv
@@ -176,13 +176,10 @@ def daemon_login_checks(status: dict) -> List[Check]:
     return out
 
 
-def openrgb_login_checks(status: dict) -> List[Check]:
+def openrgb_login_checks(status: dict) -> list[Check]:
     """Who starts OpenRGB's server, per openrgb.start_method, and whether something else does too."""
     from iridia import openrgb_server as osrv
     label = "OpenRGB at login"
-    host = status.get("openrgb_host") or "127.0.0.1"
-    if not osrv.is_local(host):
-        return [Check(label, None, f"OpenRGB runs on another machine ({host}); start it there")]
     st = osrv.status()
     method = st["method"]
     connected = bool(status.get("openrgb_connected"))
@@ -236,7 +233,7 @@ def openrgb_login_checks(status: dict) -> List[Check]:
     return out
 
 
-def format_text(checks: List[Check]) -> str:
+def format_text(checks: list[Check]) -> str:
     lines = []
     for c in checks:
         symbol = "?" if c.ok is None else ("\u2713" if c.ok else "\u2717")

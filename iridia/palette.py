@@ -101,7 +101,7 @@ class Palette:
     def _load(self):
         if os.path.exists(self.path):
             try:
-                with open(self.path, "r") as f:
+                with open(self.path) as f:
                     data = json.load(f)
                 self.colors = [
                     (c["hue"], c["hex"].lower(), c["name"])
@@ -125,7 +125,7 @@ class Palette:
         self.colors = list(DEFAULT_PALETTE)
         self._save()
 
-    def update(self, index: int, hex_color: str, name: str = None):
+    def update(self, index: int, hex_color: str, name: str | None = None):
         """Update a single palette entry."""
         if 0 <= index < len(self.colors):
             h = self.colors[index][0]

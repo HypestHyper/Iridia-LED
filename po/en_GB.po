@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 14:18+0000\n"
+"POT-Creation-Date: 2026-11-07 22:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -90,6 +90,9 @@ msgstr "Freeze colours"
 
 msgid "Status"
 msgstr "Status"
+
+msgid "Favourites"
+msgstr "Favourites"
 
 msgid "Devices"
 msgstr "Devices"
@@ -292,6 +295,19 @@ msgstr "Network light ({brand})"
 
 msgid "Whole device"
 msgstr "Whole device"
+
+#, python-brace-format
+msgid "Hidden ({n})"
+msgid_plural "Hidden ({n})"
+msgstr[0] "Hidden ({n})"
+msgstr[1] "Hidden ({n})"
+
+msgid ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
+msgstr ""
+"Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
+" of lists elsewhere. The eye on a card shows it again."
 
 msgid "Animations"
 msgstr "Animations"
@@ -1959,6 +1975,223 @@ msgstr ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
 "where the LEDs are on the Layout tab."
 
+msgid "All lights"
+msgstr "All lights"
+
+msgid "Freeze colours"
+msgstr "Freeze colours"
+
+msgid "Notification flashes"
+msgstr "Notification flashes"
+
+msgid "Network lights"
+msgstr "Network lights"
+
+msgid "On and off"
+msgstr "On and off"
+
+msgid "Colours"
+msgstr "Colours"
+
+msgid "Follow the monitor's brightness"
+msgstr "Follow the monitor's brightness"
+
+msgid "Stay lit when the screen locks"
+msgstr "Stay lit when the screen locks"
+
+msgid "Looks"
+msgstr "Looks"
+
+msgid "Switches"
+msgstr "Switches"
+
+msgid "Small"
+msgstr "Small"
+
+msgid "Wide"
+msgstr "Wide"
+
+msgid "Tall"
+msgstr "Tall"
+
+msgid "Colour card"
+msgstr "Colour card"
+
+msgid "Brightness card"
+msgstr "Brightness card"
+
+msgid "Looks card"
+msgstr "Looks card"
+
+msgid "Switches card"
+msgstr "Switches card"
+
+msgid "Static"
+msgstr "Static"
+
+msgid ""
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
+msgstr ""
+"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
+"and switches. Drag them where you like in Arrange."
+
+msgid "New card"
+msgstr "New card"
+
+msgid "New look"
+msgstr "New look"
+
+msgid "Arrange"
+msgstr "Arrange"
+
+msgid "Nothing here yet"
+msgstr "Nothing here yet"
+
+msgid ""
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+msgstr ""
+"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
+"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
+"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+
+msgid "Couldn't do that"
+msgstr "Couldn't do that"
+
+#, python-brace-format
+msgid "{n} strips"
+msgstr "{n} strips"
+
+msgid "Its strips aren't there any more."
+msgstr "Its strips aren't there any more."
+
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
+
+msgid "Stay lit when locked"
+msgstr "Stay lit when locked"
+
+msgid "All colours"
+msgstr "All colours"
+
+msgid "Colour"
+msgstr "Colour"
+
+#, python-brace-format
+msgid "Wallpaper colour {n}"
+msgstr "Wallpaper colour {n}"
+
+msgid "Wallpaper colours"
+msgstr "Wallpaper colours"
+
+msgid "Saved colours"
+msgstr "Saved colours"
+
+#, python-brace-format
+msgid "Colour for {name}"
+msgstr "Colour for {name}"
+
+msgid "Colour wheel…"
+msgstr "Colour wheel…"
+
+msgid "No looks picked: Arrange, ✏ on this card."
+msgstr "No looks picked: Arrange, ✏ on this card."
+
+msgid "Turn on"
+msgstr "Turn on"
+
+msgid "On: tap to go back"
+msgstr "On: tap to go back"
+
+#, python-brace-format
+msgid "Loaded {name} (the settings before were backed up)"
+msgstr "Loaded {name} (the settings before were backed up)"
+
+#, python-brace-format
+msgid "Size: {size}"
+msgstr "Size: {size}"
+
+msgid "Change this card"
+msgstr "Change this card"
+
+msgid "Change this look"
+msgstr "Change this look"
+
+msgid "Take off Favourites"
+msgstr "Take off Favourites"
+
+msgid "Add to Favourites"
+msgstr "Add to Favourites"
+
+msgid "None yet."
+msgstr "None yet."
+
+msgid "A card for one strip"
+msgstr "A card for one strip"
+
+msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
+msgstr "On and off, brightness and colours; change it later. New card makes one for several strips."
+
+msgid "A look on its own"
+msgstr "A look on its own"
+
+msgid "Setups"
+msgstr "Setups"
+
+msgid "A switch on its own"
+msgstr "A switch on its own"
+
+msgid "Start from"
+msgstr "Start from"
+
+msgid "Title (optional), like Desk or Room"
+msgstr "Title (optional), like Desk or Room"
+
+msgid "Which strips"
+msgstr "Which strips"
+
+msgid "What's on it"
+msgstr "What's on it"
+
+msgid "Its looks (if Looks is on)"
+msgstr "Its looks (if Looks is on)"
+
+msgid "None yet: New look makes one."
+msgstr "None yet: New look makes one."
+
+msgid "Its switches (if Switches is on)"
+msgstr "Its switches (if Switches is on)"
+
+msgid "Pick the strips it's for, or Everything."
+msgstr "Pick the strips it's for, or Everything."
+
+msgid "Pick what goes on the card."
+msgstr "Pick what goes on the card."
+
+msgid ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+msgstr ""
+"One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
+"key: iridia look \"NAME\"."
+
+msgid "Name, like Movie or Gaming"
+msgstr "Name, like Movie or Gaming"
+
+msgid "What they do"
+msgstr "What they do"
+
+msgid "Showing it for 5 seconds."
+msgstr "Showing it for 5 seconds."
+
+msgid "Couldn't show it"
+msgstr "Couldn't show it"
+
+msgid "Give the look a name."
+msgstr "Give the look a name."
+
 msgid "All lights off / on"
 msgstr "All lights off / on"
 
@@ -1973,6 +2206,9 @@ msgstr "Pause / resume animations"
 
 msgid "Load a setup"
 msgstr "Load a setup"
+
+msgid "Turn a look on or off"
+msgstr "Turn a look on or off"
 
 msgid "No modifier"
 msgstr "No modifier"
@@ -2029,9 +2265,6 @@ msgstr "Power"
 msgid "Leave as is"
 msgstr "Leave as is"
 
-msgid "Turn on"
-msgstr "Turn on"
-
 msgid "Back to normal"
 msgstr "Back to normal"
 
@@ -2043,6 +2276,12 @@ msgstr "Static pattern"
 
 msgid "Do"
 msgstr "Do"
+
+msgid "No looks yet"
+msgstr "No looks yet"
+
+msgid "Look"
+msgstr "Look"
 
 msgid "Command"
 msgstr "Command"
@@ -2198,6 +2437,9 @@ msgstr "Same key pauses every animated effect, then lets them run again."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Loads the setup and keeps it (an automatic backup is made first)."
 
+msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+msgstr "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
+
 msgid "Keybind color"
 msgstr "Keybind colour"
 
@@ -2253,9 +2495,6 @@ msgstr "Clear"
 msgid "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 msgstr "Click or drag over LEDs on the map to choose them; start on a ringed one to take LEDs out."
 
-msgid "Colour"
-msgstr "Colour"
-
 msgid "A and B"
 msgstr "A and B"
 
@@ -2292,9 +2531,6 @@ msgstr[1] "{n} strips"
 
 msgid "No LEDs chosen yet."
 msgstr "No LEDs chosen yet."
-
-msgid "Arrange"
-msgstr "Arrange"
 
 msgid "Find LEDs: light one LED on the real strip"
 msgstr "Find LEDs: light one LED on the real strip"
@@ -2607,9 +2843,6 @@ msgstr ""
 "A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
 "strip's name."
 
-msgid "Network lights"
-msgstr "Network lights"
-
 msgid ""
 "Philips WiZ and Govee lights on your Wi-Fi, found and driven over the network: nothing to pair, "
 "and they keep working in their own apps and in Google Home. Each one shows one colour. Govee "
@@ -2747,6 +2980,12 @@ msgstr ""
 "running instead: the apps below get their look while they run, and \"anything fullscreen\" can't "
 "be told."
 
+msgid "Anything fullscreen"
+msgstr "Anything fullscreen"
+
+msgid "These apps"
+msgstr "These apps"
+
 #, python-brace-format
 msgid "Dimmer, {n}%"
 msgstr "Dimmer, {n}%"
@@ -2763,29 +3002,26 @@ msgid "Scene colour"
 msgstr "Scene colour"
 
 msgid ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 msgstr ""
-"A different look for the lights while a game or a film is fullscreen. They go back when it's "
-"gone, and your settings don't change."
+"A different look for the lights while a game or a film is fullscreen, or while an app you pick is"
+" in front. They go back when it's gone, and your settings don't change."
 
-msgid "Change the lights for fullscreen apps"
-msgstr "Change the lights for fullscreen apps"
+msgid "Use scenes"
+msgstr "Use scenes"
 
-msgid "When anything is fullscreen"
-msgstr "When anything is fullscreen"
-
-msgid "While one of these is in front, fullscreen or not, it gets its own look instead."
-msgstr "While one of these is in front, fullscreen or not, it gets its own look instead."
-
-msgid "App name, like mpv or steam_app_1091500"
-msgstr "App name, like mpv or steam_app_1091500"
-
-msgid "Never for this app"
-msgstr "Never for this app"
+msgid "New scene"
+msgstr "New scene"
 
 msgid "Never for these"
 msgstr "Never for these"
+
+msgid "Apps that never count as fullscreen: a browser playing a video, say."
+msgstr "Apps that never count as fullscreen: a browser playing a video, say."
+
+msgid "App name, like firefox"
+msgstr "App name, like firefox"
 
 msgid "Timing"
 msgstr "Timing"
@@ -2805,17 +3041,55 @@ msgstr "A short wait keeps the lights steady when you switch away from a game fo
 msgid "Nothing to show: pick a look first."
 msgstr "Nothing to show: pick a look first."
 
-msgid "Showing it for 5 seconds."
-msgstr "Showing it for 5 seconds."
-
-msgid "Couldn't show it"
-msgstr "Couldn't show it"
-
 msgid "Type the app's name, or pick one it has seen."
 msgstr "Type the app's name, or pick one it has seen."
 
-msgid "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
-msgstr "Nothing to watch for yet: pick a look for fullscreen apps, or add an app."
+msgid "When anything is fullscreen"
+msgstr "When anything is fullscreen"
+
+#, python-brace-format
+msgid "When {apps} is in front"
+msgstr "When {apps} is in front"
+
+msgid "On now"
+msgstr "On now"
+
+msgid "Up: wins over the ones below"
+msgstr "Up: wins over the ones below"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "Change this scene"
+msgstr "Change this scene"
+
+msgid "Name, like Games or Films"
+msgstr "Name, like Games or Films"
+
+msgid "When"
+msgstr "When"
+
+msgid ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+msgstr ""
+"While one of these is in front, fullscreen or not. Names are the app's own (its window class), "
+"like mpv or steam_app_1091500."
+
+msgid "App name, like mpv or steam_app_1091500"
+msgstr "App name, like mpv or steam_app_1091500"
+
+msgid "Seen fullscreen lately"
+msgstr "Seen fullscreen lately"
+
+msgid "Add it"
+msgstr "Add it"
+
+msgid "Add the apps it's for."
+msgstr "Add the apps it's for."
+
+msgid "Nothing to watch for yet: make a scene, or switch one on."
+msgstr "Nothing to watch for yet: make a scene, or switch one on."
 
 #, python-brace-format
 msgid "In front now: {app}{fs}."
@@ -2835,8 +3109,15 @@ msgstr "Running now: {apps}."
 msgid "Showing: {look}."
 msgstr "Showing: {look}."
 
-msgid "None yet."
-msgstr "None yet."
+msgid "No scenes yet"
+msgstr "No scenes yet"
+
+msgid ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
+msgstr ""
+"A scene is \"when this happens, these strips look like this\": anything fullscreen dims the room,"
+" a game gets embers on the desk, a film turns everything off."
 
 msgid "None."
 msgstr "None."
@@ -3107,6 +3388,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (normal)"
 
+msgid "Show again"
+msgstr "Show again"
+
+msgid "Hide this strip (it keeps working)"
+msgstr "Hide this strip (it keeps working)"
+
 msgid "mixed"
 msgstr "mixed"
 
@@ -3118,9 +3405,6 @@ msgstr "palette"
 
 msgid "calibrated"
 msgstr "calibrated"
-
-msgid "Static"
-msgstr "Static"
 
 msgid "Animated"
 msgstr "Animated"

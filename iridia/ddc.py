@@ -74,7 +74,7 @@ class DDCController:
 
     def _run(self, cmd, timeout=5):
         try:
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
             if result.returncode != 0:
                 detail = result.stderr.strip() or result.stdout.strip()
                 logger.debug(f"{' '.join(cmd)} -> exit {result.returncode}: {detail}")

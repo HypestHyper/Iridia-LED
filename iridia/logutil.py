@@ -15,7 +15,7 @@ class RingBufferHandler(logging.Handler):
         with self._lock:
             current_size = os.path.getsize(self.filepath) if os.path.exists(self.filepath) else 0
             if current_size + len(encoded) > self.max_size and current_size > 0:
-                with open(self.filepath, "r", encoding="utf-8") as f:
+                with open(self.filepath, encoding="utf-8") as f:
                     lines = f.readlines()
                 trim_count = max(1, len(lines) // 4)
                 with open(self.filepath, "w", encoding="utf-8") as f:

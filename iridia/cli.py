@@ -5,15 +5,12 @@ import os
 import shutil
 import subprocess
 import sys
-from typing import Optional
 
 from iridia import assets
 from iridia.ipc import IPCClient
+from iridia.rundir import runtime_path
 
-SOCKET_PATH = os.path.join(
-    os.environ.get("XDG_RUNTIME_DIR", "/tmp"),
-    f"iridia-{os.getuid()}.sock"
-)
+SOCKET_PATH = runtime_path(f"iridia-{os.getuid()}.sock")
 
 SERVICE_NAME = "iridia-daemon.service"
 SERVICE_PATH = os.path.expanduser(f"~/.config/systemd/user/{SERVICE_NAME}")
@@ -149,7 +146,7 @@ METHOD_TEXT = {"daemon": "the Iridia daemon starts it, and starts it again if it
                "off": "Iridia never starts or restarts it; you do"}
 
 
-def set_start_method(method: str, stop: Optional[bool] = None) -> int:
+def set_start_method(method: str, stop: bool | None = None) -> int:
     """Switch openrgb.start_method, cleaning up after the old one. stop: also stop the OpenRGB the
     daemon started when leaving "daemon" (None: ask when there's a terminal)."""
     from iridia import openrgb_server as osrv
@@ -205,8 +202,6 @@ def cmd_openrgb(args):
         cmd = " ".join(st["command"]) or "not found (install OpenRGB, or set openrgb.server_command)"
         print(f"Start method:      {st['method']} ({METHOD_TEXT[st['method']]})")
         print(f"OpenRGB command:   {cmd}")
-        if not osrv.is_local(st["host"]):
-            print(f"Host:              {st['host']} (another machine: Iridia never starts anything)")
         print(f"OpenRGB running:   {'yes' if st['running'] else 'no'}"
               + (" (window without --server: is its SDK server on?)" if st["window_without_server"] else ""))
         print("Started by Iridia: " + (f"yes, pid {st['ours']} ({st['pid_file']})" if st["ours"] else "no"))
@@ -812,9 +807,15 @@ def _scenes_text(r):
            "processes": "running programs (this desktop doesn't say which window is in front)"}
     lines = [f"Scenes: {'on' if n.get('enabled') else 'off'}"
              + (f", watching through {how.get(n.get('method'), n.get('method'))}" if n.get("watching") else ""),
-             f"Anything fullscreen: {_look_text(n.get('look'))}"]
-    for a in n.get("apps") or []:
-        lines.append(f"  {a['app']}: {_look_text(a['look'])}")
+             ]
+    active = set(n.get("active") or [])
+    for sc in n.get("scenes") or []:
+        when = "anything fullscreen" if sc["when"] == "fullscreen" else ", ".join(sc["apps"])
+        where = "everything" if sc["targets"] == ["*"] else f"{len(sc['targets'])} strip(s)"
+        lines.append(f"{'*' if sc['id'] in active else ' '} {sc['name']}: {when} -> {_look_text(sc['look'])}, "
+                     f"{where}{'' if sc['on'] else ' (off)'}")
+    if not n.get("scenes"):
+        lines.append("  No scenes: make one on the Scenes tab, or iridia scenes look dim 20")
     if n.get("ignore"):
         lines.append("Never for: " + ", ".join(n["ignore"]))
     lines.append(f"Comes on after {n.get('on_delay')} s, goes after {n.get('off_delay')} s"
@@ -823,7 +824,6 @@ def _scenes_text(r):
         front = n.get("front") or "nothing"
         lines.append(f"In front now: {front}{' (fullscreen)' if n.get('fullscreen') else ''}"
                      + (f"; running: {', '.join(n['running'])}" if n.get("running") else ""))
-    lines.append("Showing now: " + _look_text(n.get("active")))
     if n.get("seen"):
         lines.append("Seen fullscreen: " + ", ".join(n["seen"]))
     return "\n".join(lines)
@@ -952,6 +952,28 @@ def cmd_netlights(args):
     elif args.action == "scan":
         req["scan"] = True
     return _report(req, _netlights_text)
+
+
+def _looks_text(r):
+    from iridia.looks import describe
+    looks = r.get("looks") or []
+    if not looks:
+        return "No looks yet: make them on the Favourites tab."
+    lines = []
+    for lk in looks:
+        where = "everything" if lk["targets"] == ["*"] else ", ".join(t.rstrip("|").replace("|", "/") for t in lk["targets"])
+        lines.append(f"{'*' if lk.get('active') else ' '} {lk['name']}: {describe(lk['look'])} ({where})")
+    return "\n".join(lines)
+
+
+def cmd_look(args):
+    """iridia look NAME [on | off | toggle]; iridia looks: the list (* = on now)."""
+    if args.command == "looks" or not args.name:
+        return _report({"cmd": "looks"}, _looks_text)
+    on = {"on": True, "off": False}.get(args.state, "toggle")
+    return _report({"cmd": "looks", "apply": {"look": args.name, "on": on}},
+                   lambda r: next((f"{lk['name']}: {'on' if lk.get('active') else 'off'}" for lk in r.get("looks", [])
+                                   if lk["name"].lower() == args.name.lower() or lk["id"] == args.name), "done"))
 
 
 def cmd_update(args):
@@ -1486,9 +1508,8 @@ def _service_remove():
     return 0
 
 def _lock_pid():
-    base = os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
     try:
-        with open(os.path.join(base, f"iridia-daemon-{os.getuid()}.lock")) as fh:
+        with open(runtime_path(f"iridia-daemon-{os.getuid()}.lock")) as fh:
             return int(fh.read().strip())
     except (OSError, ValueError):
         return None
@@ -1716,6 +1737,12 @@ def main(argv=None):
                            help="seconds before the lights go back (0 to 10)")
     sc_parser.add_argument("--interval", type=int,
                            help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
+    lk_parser = subparsers.add_parser("look", help="Turn one of your looks on or off (made on the Favourites tab)",
+                                      description="A look is a one-tap change you name yourself, like 'Movie': "
+                                                  "everything at 15%%. Run it again to go back. For a keybind.")
+    lk_parser.add_argument("name", nargs="?", help="the look's name")
+    lk_parser.add_argument("state", nargs="?", choices=["on", "off", "toggle"], default="toggle")
+    subparsers.add_parser("looks", help="Your looks, and which are on")
     nl_parser = subparsers.add_parser("netlights", help="Philips WiZ and Govee lights on the network",
                                       description="on: look for them (they become devices like any strip); "
                                                   "scan: look again now; off: stop; add ADDRESS: also ask an "
@@ -1779,7 +1806,7 @@ def main(argv=None):
                 "device": cmd_device, "refresh": cmd_refresh,
                 "wallpaper": cmd_wallpaper, "config": cmd_config, "palette": cmd_palette,
                 "restart": cmd_restart, "service": cmd_service, "daemon": cmd_daemon, "preview": cmd_preview, "uninstall": cmd_uninstall,
-                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "netlights": cmd_netlights, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
+                "freeze": cmd_freeze, "zone": cmd_zone, "split": cmd_split, "lock": cmd_hook, "idle": cmd_hook, "session": cmd_session, "notify": cmd_notify, "scenes": cmd_scenes, "look": cmd_look, "looks": cmd_look, "netlights": cmd_netlights, "sensors": cmd_sensors, "monitor": cmd_monitor, "update": cmd_update, "unfreeze": cmd_unfreeze, "lights": cmd_lights, "night": cmd_night, "setup": cmd_setup, "identify": cmd_identify, "autostart": cmd_autostart, "log": cmd_log,
                 "animations": cmd_animations}
     return commands[args.command](args)
 

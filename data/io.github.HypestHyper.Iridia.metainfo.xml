@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.9" date="2026-11-09">
+      <description>
+        <ul>
+          <li>Favourites: cards with the controls you choose, on a grid you arrange, and one-tap looks</li>
+          <li>Scenes: make as many as you like, each for some strips, when something is fullscreen or an app is in front</li>
+          <li>Hide strips you don't use</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.8" date="2026-11-07">
       <description>
         <ul>

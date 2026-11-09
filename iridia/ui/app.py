@@ -13,7 +13,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_foreign("cairo")
 from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from iridia.i18n import _, ngettext  # noqa: F401
+from iridia.i18n import _, ngettext
 from iridia import assets, diagnostics, i18n, theme  # noqa: E402
 from iridia.calibration import DEFAULT_NAME, valid_name  # noqa: E402
 from iridia.client import Client  # noqa: E402
@@ -417,14 +417,16 @@ class IridiaWindow(Gtk.ApplicationWindow):
         tabrow.append(self._tab_scroll)
         tabrow.append(self._tab_arrows[1])
         adj = self._tab_scroll.get_hadjustment()
+        self._arrows_due = False
         for sig in ("changed", "value-changed"):
-            adj.connect(sig, lambda *_a: self._update_tab_arrows())
+            adj.connect(sig, lambda *_a: self._arrows_soon())
         self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.CROSSFADE,
                                 transition_duration=180)
         self._stack.set_hhomogeneous(False)      # only the page on show sets how narrow the window can be
         self._tabs = {}
         first = None
-        for key, text, ico in (("status", _("Status"), "home"), ("devices", _("Devices"), "developer_board"),
+        for key, text, ico in (("status", _("Status"), "home"), ("favorites", _("Favourites"), "star"),
+                               ("devices", _("Devices"), "developer_board"),
                                ("layout", _("Layout"), "polyline"), ("notify", _("Notifications"), "bolt"),
                                ("scenes", _("Scenes"), "sports_esports"), ("keybinds", _("Keybinds"), "keyboard"),
                                ("settings", _("Settings"), "settings"), ("service", _("Service"), "build"),
@@ -443,7 +445,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         self._layout_tab = LayoutTab(self)
         pages = {}
-        for key in ("status", "devices", "layout", "notify", "scenes", "keybinds", "settings", "service", "updates"):
+        for key in ("status", "favorites", "devices", "layout", "notify", "scenes", "keybinds", "settings", "service",
+                    "updates"):
             if key == "layout":
                 self._stack.add_named(self._layout_tab, key)
                 continue
@@ -471,6 +474,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._keybinds = KeybindsPage(self, pages["keybinds"])
         from iridia.ui.scenes_tab import ScenesPage
         self._scenes = ScenesPage(self, pages["scenes"])
+        from iridia.ui.favorites_tab import FavoritesPage
+        self.favorites = FavoritesPage(self, pages["favorites"])
         root.append(self._stack)
 
         bot = hbox(8)
@@ -573,13 +578,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         elif x + w > v + page:
             adj.set_value(x + w - page)
 
+    def _arrows_soon(self):
+        """The adjustment changes while GTK lays the window out; showing a widget right then makes GTK
+        measure it with no room (a warning, and a layout pass that newer GTK may refuse), so it waits
+        for the layout to finish."""
+        if not self._arrows_due:
+            self._arrows_due = True
+            GLib.idle_add(self._update_tab_arrows)
+
     def _update_tab_arrows(self):
+        self._arrows_due = False
         adj = self._tab_scroll.get_hadjustment()
         over = adj.get_upper() - adj.get_page_size() > 1
         self._tab_arrows[0].set_visible(over)
         self._tab_arrows[1].set_visible(over)
         self._tab_arrows[0].set_sensitive(adj.get_value() > 0.5)
         self._tab_arrows[1].set_sensitive(adj.get_value() < adj.get_upper() - adj.get_page_size() - 0.5)
+        return False
 
     def _set_tight(self, tight):
         """Below TIGHT_BELOW pixels: icon-only tabs and buttons (the words become tooltips)."""
@@ -820,7 +835,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         keys = []
         for d, dc in devices.items():
             zones = dc.get("zones", {})
-            keys += [(d, z) for z in zones] if zones else [(d, "")]
+            keys += ([(d, z, bool((zc or {}).get("hidden"))) for z, zc in zones.items()] if zones
+                     else [(d, "", bool(dc.get("hidden")))])
         return tuple(keys)
 
     def _rebuild_devices(self, devices, extracted, custom):
@@ -848,20 +864,42 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if getattr(self, "_ddc_menu", None):
             self._global_card.set_monitors(*self._ddc_menu)
         self._dev_box.append(self._global_card)
+        hidden_box = vbox(10)
+        n_hidden = 0
         for d, dc in devices.items():
             sub = None if dc.get("enabled", True) else _("Disabled")
             if dc.get("net"):
                 brand = {"wiz": "WiZ", "govee": "Govee"}.get(dc["net"], dc["net"])
                 sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else f" · {sub}")
-            self._dev_box.append(section(d, sub))
             zones = dc.get("zones", {})
-            for z, zc in (zones.items() if zones else [("", dc)]):
-                key = f"{d}|{z}"
-                cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
-                                 expanded=expanded.get(key, False))
-                cardw.zone_name = z
-                self._dev_box.append(cardw)
-                self._zone_cards[key] = cardw
+            items = list(zones.items()) if zones else [("", dc)]
+            # strips you hid (a channel with nothing plugged in, say) go to Hidden at the bottom
+            shown = [(z, zc) for z, zc in items if not (zc or {}).get("hidden")]
+            gone = [(z, zc) for z, zc in items if (zc or {}).get("hidden")]
+            for box, group in ((self._dev_box, shown), (hidden_box, gone)):
+                if not group:
+                    continue
+                box.append(section(d, sub))
+                for z, zc in group:
+                    key = f"{d}|{z}"
+                    cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
+                                     expanded=expanded.get(key, False))
+                    cardw.zone_name = z
+                    if box is hidden_box:
+                        cardw.set_opacity(0.7)
+                        n_hidden += 1
+                    box.append(cardw)
+                    self._zone_cards[key] = cardw
+        if n_hidden:
+            exp = Gtk.Expander(label=ngettext("Hidden ({n})", "Hidden ({n})", n_hidden).format(n=n_hidden),
+                               expanded=getattr(self, "_hidden_open", False))
+            exp.connect("notify::expanded", lambda e, _p: setattr(self, "_hidden_open", e.get_expanded()))
+            exp.set_margin_top(18)
+            hint = label(_("Strips you hid: a channel with nothing plugged in, say. They keep their settings and "
+                           "are left out of lists elsewhere. The eye on a card shows it again."), ("small", "dim"),
+                         wrap=True)
+            exp.set_child(vbox(10, hint, hidden_box))
+            self._dev_box.append(exp)
         self._dev_box.append(self._net_card.widget)
 
     def _apply_hw(self, hw):
@@ -1781,7 +1819,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 zones = cfg.get("zones")
                 items = list(zones.items()) if isinstance(zones, dict) and zones else [("", cfg)]
                 for zn, zc in items:
-                    if isinstance(zc, dict) and zc.get("enabled", True):
+                    if isinstance(zc, dict) and zc.get("enabled", True) and not zc.get("hidden"):
                         names.append((zc.get("display_name") or zn or dev, dev, zn, zc))
             dup = {x[0] for x in names if [y[0] for y in names].count(x[0]) > 1}
             for name, dev, zn, zc in names:
@@ -2653,6 +2691,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._layout_tab.update_status(st)
         self._keybinds.update_status(st)
         self._scenes.update_status(st)
+        self.favorites.update_status(st)
+        favs = {t.get("key") for t in st.get("favorites") or [] if t.get("type") == "device"}
+        for k, c in self._zone_cards.items():
+            c.set_favorite(k in favs)
         self._render_daemon_status()
         if st.get("openrgb_connected"):
             self._orgb_status.set_label(_('Connected, but not seeing: {devices}').format(devices=', '.join(missing)) if missing else

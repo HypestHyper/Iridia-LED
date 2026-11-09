@@ -6,42 +6,61 @@ from iridia import scenes as S
 
 
 def test_clean_and_looks():
-    st = S.clean({"enabled": True, "look": {"kind": "color", "hex": "#FF8800", "bright": 250},
-                  "apps": [{"app": "mpv", "look": {"kind": "off"}}, {"app": "MPV", "look": {"kind": "dim"}},
-                           {"app": "", "look": {"kind": "off"}}, {"app": "x", "look": {"kind": "disco"}}],
-                  "ignore": ["Firefox", "firefox", ""], "on_delay": -3, "interval": 99})
-    assert st["look"] == {"kind": "color", "hex": "ff8800", "bright": 100}
-    assert st["apps"] == [{"app": "mpv", "look": {"kind": "off"}}]          # one rule per app
+    st = S.clean({"enabled": True, "scenes": [
+        {"name": "Films", "when": "apps", "apps": ["mpv", "MPV", ""], "look": {"kind": "off"}},
+        {"name": "x", "look": {"kind": "disco"}},                                   # no look: dropped
+        {"name": "Games", "look": {"kind": "color", "hex": "#FF8800", "bright": 250}, "targets": ["A|b", "nope"]},
+        {"name": "None", "look": {"kind": "off"}, "targets": []}],                  # no strips: dropped
+        "ignore": ["Firefox", "firefox", ""], "on_delay": -3, "interval": 99})
+    films, games = st["scenes"]
+    assert films["apps"] == ["mpv"] and films["when"] == "apps" and films["on"] and films["targets"] == ["*"]
+    assert games["look"] == {"kind": "color", "hex": "ff8800", "bright": 100} and games["targets"] == ["A|b"]
+    assert games["when"] == "fullscreen" and games["apps"] == []
     assert st["ignore"] == ["Firefox"] and st["on_delay"] == 0.0 and st["interval"] == 30
-    assert S.clean({})["look"] == {"kind": "dim", "bright": 20} and not S.clean({})["enabled"]
-    assert S.clean({"look": None})["look"] is None                          # only the apps' own looks
+    first = S.clean({})
+    assert not first["enabled"] and [x["look"] for x in first["scenes"]] == [{"kind": "dim", "bright": 20}]
+    assert S.clean({"scenes": []})["scenes"] == []
     assert S.clean_look({"kind": "effect", "effect": "nope"})["effect"] == "breathing"
     assert S.overlay({"kind": "off"}) == {"power": "off"}
     assert S.overlay({"kind": "dim", "bright": 20}) == {"bright": 20}
     assert S.overlay({"kind": "effect", "effect": "rainbow", "bright": 80})["effect"]["effect"] == "rainbow"
 
 
-def test_pick_prefers_the_apps_own_look_then_fullscreen():
-    st = S.clean({"enabled": True, "look": {"kind": "dim", "bright": 10},
-                  "apps": [{"app": "steam_app_1091500", "look": {"kind": "effect", "effect": "embers"}}],
-                  "ignore": ["firefox"]})
-    assert S.pick(st, "Steam_App_1091500", False)["kind"] == "effect"     # in front, fullscreen or not
-    assert S.pick(st, "mpv", True) == {"kind": "dim", "bright": 10}
-    assert S.pick(st, "mpv", False) is None
-    assert S.pick(st, "firefox", True) is None                             # ignored
-    assert S.pick(st, "", False, running={"steam_app_1091500"})["kind"] == "effect"   # fallback: running
-    assert S.pick(dict(st, enabled=False), "mpv", True) is None
+def test_older_settings_become_scenes():
+    old = {"enabled": True, "look": {"kind": "dim", "bright": 10},
+           "apps": [{"app": "mpv", "look": {"kind": "off"}}, {"app": "MPV", "look": {"kind": "dim"}}]}
+    st = S.clean(old)
+    assert [(x["name"], x["when"], x["apps"]) for x in st["scenes"]] == [
+        ("mpv", "apps", ["mpv"]), ("Anything fullscreen", "fullscreen", [])]
+    assert [x["id"] for x in S.clean(old)["scenes"]] == [x["id"] for x in st["scenes"]]   # the same each time
+    assert S.clean({"look": None})["scenes"] == []                          # had nothing for fullscreen
+
+
+def test_pick_in_order():
+    st = S.clean({"enabled": True, "ignore": ["firefox"], "scenes": [
+        {"id": "aaaa", "when": "apps", "apps": ["steam_app_1091500"], "look": {"kind": "effect", "effect": "embers"}},
+        {"id": "bbbb", "when": "fullscreen", "look": {"kind": "dim", "bright": 10}},
+        {"id": "cccc", "when": "apps", "apps": ["obs"], "look": {"kind": "off"}, "on": False}]})
+    assert S.pick(st, "Steam_App_1091500", False) == ("aaaa",)            # in front, fullscreen or not
+    assert S.pick(st, "Steam_App_1091500", True) == ("aaaa", "bbbb")      # both; the first wins where they meet
+    assert S.pick(st, "mpv", True) == ("bbbb",)
+    assert S.pick(st, "mpv", False) == ()
+    assert S.pick(st, "firefox", True) == ()                               # ignored
+    assert S.pick(st, "obs", True) == ("bbbb",)                            # a scene switched off
+    assert S.pick(st, "", False, running={"steam_app_1091500"}) == ("aaaa",)   # fallback: running
+    assert S.pick(dict(st, enabled=False), "mpv", True) == ()
+    assert S.watched_apps(st) == ["steam_app_1091500"] and S.needs_watching(st)
 
 
 def test_delay_keeps_a_quick_alt_tab_from_flickering():
     d, on, off = S.Delay(), 1.0, 2.0
-    a = {"kind": "off"}
-    assert d.update(a, 0.0, on, off) is None
+    a = ("a1",)
+    assert d.update(a, 0.0, on, off) == ()
     assert d.update(a, 1.0, on, off) == a                  # on after 1 s
-    assert d.update(None, 5.0, on, off) == a               # alt-tab out...
+    assert d.update((), 5.0, on, off) == a                 # alt-tab out...
     assert d.update(a, 6.0, on, off) == a                  # ...and back within 2 s: no change
-    assert d.update(None, 7.0, on, off) == a
-    assert d.update(None, 9.0, on, off) is None            # gone for 2 s: back to normal
+    assert d.update((), 7.0, on, off) == a
+    assert d.update((), 9.0, on, off) == ()                # gone for 2 s: back to normal
 
 
 def test_hyprland_answers():

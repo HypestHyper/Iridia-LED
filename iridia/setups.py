@@ -17,9 +17,9 @@ import json
 import os
 import tempfile
 import time
-from typing import List, Optional, Tuple
 
 from iridia.calibration import valid_name
+import builtins
 
 CONFIG_DIR = os.path.expanduser("~/.config/iridia")
 FILES = ("config.json", "layout.json", "wallpaper_colors.json", "custom_colors.json", "palette.json", "gui.json")
@@ -52,7 +52,7 @@ def _remove(path: str):
 
 def _read_json(path: str):
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except (OSError, ValueError):
         return None
@@ -85,7 +85,7 @@ class Setups:
         return {"iridia_setup": 1, "name": name, "saved": time.strftime("%Y-%m-%d %H:%M"),
                 "app_version": self.version, "complete": True, "files": files, "calibration": cal}
 
-    def restore(self, data: dict) -> Optional[str]:
+    def restore(self, data: dict) -> str | None:
         """Write a captured setup back to the config folder."""
         if not isinstance(data, dict) or data.get("iridia_setup") != 1 or not isinstance(data.get("files"), dict):
             return "That isn't an Iridia setup file."
@@ -117,7 +117,7 @@ class Setups:
     def path(self, name: str) -> str:
         return os.path.join(self.folder, f"{name}.json")
 
-    def list(self) -> List[dict]:
+    def list(self) -> list[dict]:
         out = []
         try:
             names = sorted(f[:-5] for f in os.listdir(self.folder) if f.endswith(".json"))
@@ -130,7 +130,7 @@ class Setups:
             out.append({"name": n, "saved": d.get("saved", "")})
         return out
 
-    def list_backups(self) -> List[dict]:
+    def list_backups(self) -> builtins.list[dict]:
         try:
             names = sorted((f[:-5] for f in os.listdir(self.backups) if f.endswith(".json")), reverse=True)
         except OSError:
@@ -141,7 +141,7 @@ class Setups:
             out.append({"id": n, "saved": d.get("saved", ""), "reason": d.get("reason", "")})
         return out
 
-    def save(self, name: str, overwrite: bool = True) -> Optional[str]:
+    def save(self, name: str, overwrite: bool = True) -> str | None:
         if not valid_name(name):
             return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
         if not overwrite and os.path.exists(self.path(name)):
@@ -165,14 +165,14 @@ class Setups:
                 pass
         return bid
 
-    def load(self, name: str) -> Optional[str]:
+    def load(self, name: str) -> str | None:
         data = _read_json(self.path(name))
         if data is None:
             return f"Setup '{name}' couldn't be read."
         self.backup(f"before loading '{name}'")
         return self.restore(data)
 
-    def load_backup(self, bid: str) -> Optional[str]:
+    def load_backup(self, bid: str) -> str | None:
         if not bid.startswith("auto-") or "/" in bid:
             return "Unknown backup."
         data = _read_json(os.path.join(self.backups, f"{bid}.json"))
@@ -181,7 +181,7 @@ class Setups:
         self.backup(f"before restoring {bid}")
         return self.restore(data)
 
-    def delete(self, name: str) -> Optional[str]:
+    def delete(self, name: str) -> str | None:
         try:
             os.remove(self.path(name))
         except FileNotFoundError:
@@ -190,7 +190,7 @@ class Setups:
             return str(e)
         return None
 
-    def rename(self, old: str, new: str) -> Optional[str]:
+    def rename(self, old: str, new: str) -> str | None:
         if not valid_name(new):
             return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
         if os.path.exists(self.path(new)):
@@ -203,7 +203,7 @@ class Setups:
         os.remove(self.path(old))
         return None
 
-    def export_to(self, name: str, dest: str) -> Optional[str]:
+    def export_to(self, name: str, dest: str) -> str | None:
         data = self.capture(name) if name == "" else _read_json(self.path(name))
         if data is None:
             return f"Setup '{name}' couldn't be read."
@@ -213,7 +213,7 @@ class Setups:
             return str(e)
         return None
 
-    def import_from(self, src: str) -> Tuple[Optional[str], Optional[str]]:
+    def import_from(self, src: str) -> tuple[str | None, str | None]:
         data = _read_json(os.path.expanduser(src))
         if not isinstance(data, dict) or data.get("iridia_setup") != 1:
             return None, "That isn't an Iridia setup file."

@@ -21,12 +21,12 @@ are applied afterwards, by the daemon, to every frame.
 import colorsys
 import math
 from functools import lru_cache
-from typing import Dict, List, Optional, Sequence, Tuple
+from collections.abc import Sequence
 
-RGB = Tuple[int, int, int]
+RGB = tuple[int, int, int]
 
 # effect -> {param: (kind, default, low, high) or ("choice", default, options) or ("bool", default)}
-EFFECTS: Dict[str, Dict[str, tuple]] = {
+EFFECTS: dict[str, dict[str, tuple]] = {
     "breathing": {
         "speed": ("float", 4.0, 0.5, 30.0),          # seconds per breath
         "min": ("int", 10, 0, 100),                  # % of the zone's brightness
@@ -72,7 +72,7 @@ EFFECTS: Dict[str, Dict[str, tuple]] = {
         "hold": ("float", 2.0, 0.0, 120.0),          # seconds on each color
     },
 }
-COMMON: Dict[str, tuple] = {
+COMMON: dict[str, tuple] = {
     "follow_layout": ("bool", False),                # run through 2D space on the Layout tab
     "angle": ("int", 0, 0, 359),                     # direction for follow_layout, 0 = left to right
     "sync": ("bool", True),                          # same clock as other zones with this effect
@@ -82,7 +82,7 @@ WARM = [(110, 8, 0), (200, 32, 0), (255, 80, 0), (255, 150, 18)]   # glowing to 
 OFF: RGB = (0, 0, 0)
 
 
-def clean(anim) -> Optional[dict]:
+def clean(anim) -> dict | None:
     """A zone's "animation" setting with every value valid; None when the zone is static."""
     if not isinstance(anim, dict):
         return None
@@ -147,12 +147,12 @@ def _noise(seed: int, i: int, x: float) -> float:
 
 
 @lru_cache(maxsize=64)
-def _offsets(seed: int, n: int) -> Tuple[float, ...]:
+def _offsets(seed: int, n: int) -> tuple[float, ...]:
     return tuple(_hash(seed, i, 7) * 50 for i in range(n))
 
 
 @lru_cache(maxsize=64)
-def _wobble(seed: int, n: int) -> Tuple[Tuple[float, float, float, float], ...]:
+def _wobble(seed: int, n: int) -> tuple[tuple[float, float, float, float], ...]:
     """Per LED: two frequencies and phases for a cheap, irregular wobble (sums of sines)."""
     return tuple((1.3 + 2.1 * _hash(seed, i, 11), 6.283 * _hash(seed, i, 12),
                   2.9 + 3.7 * _hash(seed, i, 13), 6.283 * _hash(seed, i, 14)) for i in range(n))
@@ -167,7 +167,7 @@ def _mix_light(a: RGB, b: RGB, t: float) -> RGB:
 
 
 @lru_cache(maxsize=64)
-def _drift(seed: int, n: int) -> Tuple[Tuple[float, float], ...]:
+def _drift(seed: int, n: int) -> tuple[tuple[float, float], ...]:
     """Per LED: where it starts among the colors and how fast it moves through them."""
     return tuple((_hash(seed, i, 21), 0.6 + 0.8 * _hash(seed, i, 22)) for i in range(n))
 
@@ -181,10 +181,10 @@ def _scale(c: RGB, k: float) -> RGB:
     return (int(c[0] * k + 0.5), int(c[1] * k + 0.5), int(c[2] * k + 0.5))
 
 
-_HUES: Dict[int, List[RGB]] = {}
+_HUES: dict[int, list[RGB]] = {}
 
 
-def hue_table(saturation: int) -> List[RGB]:
+def hue_table(saturation: int) -> list[RGB]:
     """360 fully bright colors around the hue circle, at this saturation (0..100)."""
     tab = _HUES.get(saturation)
     if tab is None:
@@ -198,7 +198,7 @@ def _positions(n: int, positions) -> Sequence[float]:
     return positions if positions is not None and len(positions) == n else range(n)
 
 
-def _span(pos: Sequence[float], p: dict) -> Tuple[float, float]:
+def _span(pos: Sequence[float], p: dict) -> tuple[float, float]:
     """(start, length) the effect runs over: these LEDs, or the shared extent of every strip that
     follows the layout (so one comet or fill travels through all of them)."""
     if p.get("_extent"):
@@ -420,8 +420,8 @@ _RENDER = {"breathing": _breathing, "comet": _comet, "fill": _fill, "embers": _e
 
 
 def render(effect: str, params: dict, n: int, t: float, colors: Sequence[RGB], seed: int = 0,
-           positions: Optional[Sequence[float]] = None, base: Optional[Sequence[RGB]] = None,
-           extent: Optional[Tuple[float, float]] = None) -> List[RGB]:
+           positions: Sequence[float] | None = None, base: Sequence[RGB] | None = None,
+           extent: tuple[float, float] | None = None) -> list[RGB]:
     """One frame of an effect: n (r, g, b) tuples at full brightness. extent: (start, length) in
     position units when several strips share one effect (follow the layout)."""
     if n <= 0:
@@ -438,7 +438,7 @@ def render(effect: str, params: dict, n: int, t: float, colors: Sequence[RGB], s
 
 # ------------------------------------------------------------- positions
 
-def strip_positions(n: int, reverse: bool = False, mirror: bool = False) -> List[float]:
+def strip_positions(n: int, reverse: bool = False, mirror: bool = False) -> list[float]:
     """Positions along one strip: reverse runs it from the other end, mirror from both ends in."""
     pos = [float(i) for i in range(n)]
     if mirror:
@@ -449,7 +449,7 @@ def strip_positions(n: int, reverse: bool = False, mirror: bool = False) -> List
     return pos
 
 
-def layout_positions(points: Sequence[Tuple[float, float]], angle_deg: float, spacing: float) -> List[float]:
+def layout_positions(points: Sequence[tuple[float, float]], angle_deg: float, spacing: float) -> list[float]:
     """Positions for LEDs placed on the Layout tab: each one's distance along the direction
     (0 degrees = left to right), in LEDs (spacing = distance between neighbouring LEDs)."""
     a = math.radians(angle_deg)

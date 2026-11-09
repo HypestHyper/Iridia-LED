@@ -9,7 +9,6 @@ import os
 import shlex
 import shutil
 import sys
-from typing import List, Optional
 
 from gi.repository import Gtk
 
@@ -27,6 +26,7 @@ OTHER = [
     (_("Night mode on / off"), "night"),
     (_("Pause / resume animations"), "animations"),
     (_("Load a setup"), "setup"),
+    (_("Turn a look on or off"), "look"),
 ]
 NO_MOD = _("No modifier")
 ALL_STRIPS = _("All strips")
@@ -41,7 +41,7 @@ def iridia_path() -> str:
     return cand if os.path.exists(cand) else "iridia"
 
 
-def bind_line(desktop: str, mods: List[str], key: str, args: List[str]) -> tuple:
+def bind_line(desktop: str, mods: list[str], key: str, args: list[str]) -> tuple:
     """(where it goes, the text to paste) for one desktop."""
     exe = iridia_path()
     cmd = " ".join(shlex.quote(a) for a in [exe] + args)
@@ -93,7 +93,7 @@ class KeybindsPage:
         self._targets = []          # [(shown name, target string)]
         self._target_sig = None
         self._overlay_sig = None
-        self._setups: List[str] = []
+        self._setups: list[str] = []
         self._chips = {}            # shown name -> ToggleButton
         self._chip_quiet = False
         self.color = "ff0000"
@@ -155,6 +155,10 @@ class KeybindsPage:
         self._setup_dd = Dropdown([], None, lambda v: self._render(), placeholder=_("No setups yet"))
         self._setup_row = hbox(10, label(_("Setup"), ("body", "dim")), self._setup_dd)
         r.append(self._setup_row)
+        self._looks = []
+        self._look_dd = Dropdown([], None, lambda v: self._render(), placeholder=_("No looks yet"))
+        self._look_row = hbox(10, label(_("Look"), ("body", "dim")), self._look_dd)
+        r.append(self._look_row)
         self._other_box.append(r)
         c.append(self._other_box)
 
@@ -279,7 +283,7 @@ class KeybindsPage:
         by = dict(self._targets)
         return ",".join(by.get(n, n) for n in chosen)
 
-    def _strip_actions(self) -> List[str]:
+    def _strip_actions(self) -> list[str]:
         if self.power == "normal":
             return ["normal"]
         acts = [self.power] if self.power in ("on", "off") else []
@@ -293,13 +297,16 @@ class KeybindsPage:
                 acts += ["bright", str(int(self._bright.get_value()))]
         return acts
 
-    def _args(self) -> Optional[List[str]]:
+    def _args(self) -> list[str] | None:
         if self.mode == "strips":
             acts = self._strip_actions()
             return ["zone", self._target()] + acts if acts else None
         kind = next((k for n, k in OTHER if n == self._other.value()), "lights")
         if kind in ("lights", "freeze", "night", "animations"):
             return [kind, "toggle"]
+        if kind == "look":
+            look = self._look_dd.value()
+            return ["look", look] if look else None
         name = self._setup_dd.value()
         return ["setup", "load", name] if name else None
 
@@ -309,6 +316,7 @@ class KeybindsPage:
         self._other_box.set_visible(not strips)
         kind = next((k for n, k in OTHER if n == self._other.value()), "lights")
         self._setup_row.set_visible(kind == "setup")
+        self._look_row.set_visible(kind == "look")
         mix = self.power not in ("off", "normal")
         self._effect_row.set_sensitive(mix)
         self._color_row.set_sensitive(mix and not self._effect_on.get_active())
@@ -343,6 +351,7 @@ class KeybindsPage:
                 "night": _("Switches night mode on or off (this one is saved)."),
                 "animations": _("Same key pauses every animated effect, then lets them run again."),
                 "setup": _("Loads the setup and keeps it (an automatic backup is made first)."),
+                "look": _("Same key puts the look on, then back to normal. Make looks on the Favourites tab."),
             }[kind])
         mods_v = self._mods.value() or NO_MOD
         mods = [] if mods_v == NO_MOD else [m.strip() for m in mods_v.split("+")]
@@ -378,6 +387,8 @@ class KeybindsPage:
             fn = lambda: c.zone_action(args[1], args[2:])
         elif args[0] == "setup":
             fn = lambda: c.setup("load", name=args[2])
+        elif args[0] == "look":
+            fn = lambda: c.looks(apply={"look": args[1], "on": "toggle"})
         elif args[0] == "night":
             fn = lambda: c.set_night(toggle=True)
         elif args[0] == "animations":
@@ -395,11 +406,19 @@ class KeybindsPage:
 
     # ------------------------------------------------------------ status
     def update_status(self, st: dict):
+        names = [lk["name"] for lk in st.get("looks") or []]
+        if names != self._looks:
+            self._looks = names
+            cur = self._look_dd.value()
+            self._look_dd.set_items(names, cur if cur in names else (names[0] if names else None))
+            self._render()
         cfgs = st.get("device_configs") or {}
         zones = []
         for dev, cfg in cfgs.items():
             zs = cfg.get("zones") or {"": cfg}
             for zn, zc in zs.items():
+                if (zc or {}).get("hidden"):
+                    continue                    # hidden on the Devices tab: not offered here either
                 zones.append((dev, zn, (zc or {}).get("display_name") or zn or dev))
         counts = {}
         for _d, _z, n in zones:
@@ -435,7 +454,7 @@ class KeybindsPage:
             self._overlay_sig = osig
             self._render_active(ov, names)
 
-    def set_setups(self, names: List[str]):
+    def set_setups(self, names: list[str]):
         if names != self._setups:
             self._setups = list(names)
             self._setup_dd.set_items(self._setups, self._setup_dd.value() if self._setup_dd.value() in names

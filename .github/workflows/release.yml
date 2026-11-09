@@ -51,10 +51,12 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      - name: Install the checks
+        run: python -m pip install --quiet -e ".[dev]"
+      - name: Lint (ruff, the version pinned in pyproject.toml)
+        run: python -m ruff check iridia scripts tests
       - name: Run the tests
-        run: |
-          python -m pip install --quiet -e ".[dev]"
-          python -m pytest -q tests
+        run: python -m pytest -q tests
       - name: Build the archive
         run: |
           git archive --format=tar.gz --prefix=iridia/ -o "iridia-$VERSION.tar.gz" HEAD \

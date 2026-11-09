@@ -49,7 +49,7 @@ class Fakes:
             for s in (self.wiz, self.gscan, self.gcmd):
                 try:
                     data, addr = s.recvfrom(4096)
-                except (socket.timeout, OSError):
+                except (TimeoutError, OSError):
                     continue
                 try:
                     self._answer(s, json.loads(data), addr)

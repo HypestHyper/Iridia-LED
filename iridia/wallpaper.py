@@ -255,7 +255,7 @@ class WallpaperDetector:
 
     def _load_cache(self):
         try:
-            with open(self.cache_path, "r", encoding="utf-8") as f:
+            with open(self.cache_path, encoding="utf-8") as f:
                 name = json.load(f).get("backend")
             native = self._native()
             if native and name != native and name in self.SHELLS:
@@ -466,7 +466,7 @@ class WallpaperDetector:
         path_file = os.path.expanduser("~/.local/state/caelestia/wallpaper/path.txt")
         if os.path.exists(path_file):
             try:
-                with open(path_file, "r") as f:
+                with open(path_file) as f:
                     path = f.read().strip()
                 if path and os.path.exists(path):
                     return path
@@ -486,7 +486,7 @@ class WallpaperDetector:
         found = {}
         section = ""
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 for line in fh:
                     line = line.strip()
                     if line.startswith("["):
@@ -519,7 +519,7 @@ class WallpaperDetector:
         """waypaper (a front end for swww, hyprpaper, swaybg, feh ...) saves its choice."""
         f = os.path.expanduser("~/.config/waypaper/config.ini")
         try:
-            with open(f, "r", encoding="utf-8") as fh:
+            with open(f, encoding="utf-8") as fh:
                 for line in fh:
                     m = re.match(r"\s*wallpaper\s*=\s*(.+)", line)
                     if m:

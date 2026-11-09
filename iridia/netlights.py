@@ -18,7 +18,6 @@ import logging
 import socket
 import threading
 import time
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("iridia")
 
@@ -33,7 +32,7 @@ MIN_GAP = {"wiz": 0.1, "govee": 0.2}     # seconds between two colours to one li
 MAX_HOSTS = 1024                # addresses asked directly per search (a /22 at most)
 
 
-def clean_hosts(raw) -> List[str]:
+def clean_hosts(raw) -> list[str]:
     """Addresses or networks to ask directly ("192.168.20.31", "192.168.20.0/24"): for lights the
     broadcast and multicast don't reach, on another VLAN or subnet. Bad entries are dropped."""
     out = []
@@ -50,7 +49,7 @@ def clean_hosts(raw) -> List[str]:
     return out
 
 
-def expand(hosts) -> List[str]:
+def expand(hosts) -> list[str]:
     """Every address to ask: a network's hosts (not its network and broadcast address)."""
     out = []
     for h in clean_hosts(hosts):
@@ -62,7 +61,7 @@ def expand(hosts) -> List[str]:
     return out
 
 
-def _hex_rgb(h: str) -> Tuple[int, int, int]:
+def _hex_rgb(h: str) -> tuple[int, int, int]:
     h = (h or "000000").lstrip("#")
     try:
         return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
@@ -70,7 +69,7 @@ def _hex_rgb(h: str) -> Tuple[int, int, int]:
         return 0, 0, 0
 
 
-def split_brightness(rgb) -> Tuple[Tuple[int, int, int], int]:
+def split_brightness(rgb) -> tuple[tuple[int, int, int], int]:
     """A colour Iridia already scaled by brightness -> (full colour, brightness 0-100), the way these
     lights take it: (40, 20, 0) is (255, 127, 0) at 16%."""
     r, g, b = (max(0, min(255, int(c))) for c in rgb)
@@ -81,7 +80,7 @@ def split_brightness(rgb) -> Tuple[Tuple[int, int, int], int]:
     return (round(r * f), round(g * f), round(b * f)), max(1, round(top * 100 / 255))
 
 
-def average(colors) -> Tuple[int, int, int]:
+def average(colors) -> tuple[int, int, int]:
     """One colour for a light from what a zone would show on its LEDs."""
     cols = [_hex_rgb(c) if isinstance(c, str) else tuple(c) for c in colors] or [(0, 0, 0)]
     n = len(cols)
@@ -104,7 +103,7 @@ def wiz_brightness(rgb) -> dict:
     return {"method": "setPilot", "params": {"state": True, "dimming": max(10, bright)}}
 
 
-def on_demand_commands(kind: str, rgb) -> List[dict]:
+def on_demand_commands(kind: str, rgb) -> list[dict]:
     """A colour asked for on the card of an "only when I change it" light: colour and brightness, never
     on or off (that stays with its own app and automations); nothing for black."""
     full, bright = split_brightness(rgb)
@@ -118,7 +117,7 @@ def on_demand_commands(kind: str, rgb) -> List[dict]:
             {"msg": {"cmd": "brightness", "data": {"value": bright}}}]
 
 
-def govee_commands(rgb, was_on: Optional[bool], keep_color: bool = False) -> List[dict]:
+def govee_commands(rgb, was_on: bool | None, keep_color: bool = False) -> list[dict]:
     full, bright = split_brightness(rgb)
     if bright == 0:
         return [] if was_on is False else [{"msg": {"cmd": "turn", "data": {"value": 0}}}]
@@ -130,7 +129,7 @@ def govee_commands(rgb, was_on: Optional[bool], keep_color: bool = False) -> Lis
     return out
 
 
-def local_firewall() -> Optional[str]:
+def local_firewall() -> str | None:
     """This PC's own firewall, when one is on: it can drop Govee's answers (to UDP 4002) before
     Iridia sees them. None when there's none (or it can't be told without root)."""
     import shutil
@@ -156,10 +155,10 @@ class Light:
         self.kind, self.ident, self.ip, self.model = kind, ident, ip, model
         self.manual = manual            # added by address: driven without ever hearing from it
         self.seen = time.monotonic()
-        self.sent: Optional[Tuple[int, int, int]] = None
+        self.sent: tuple[int, int, int] | None = None
         self.sent_at = 0.0
-        self.pending: Optional[Tuple[int, int, int]] = None
-        self.on: Optional[bool] = None
+        self.pending: tuple[int, int, int] | None = None
+        self.on: bool | None = None
 
     @property
     def name(self) -> str:
@@ -177,21 +176,21 @@ class NetLights:
 
     def __init__(self):
         self.enabled = False
-        self.lights: Dict[str, Light] = {}          # Iridia name -> light
-        self.error: Optional[str] = None            # why Govee can't be heard (port 4002 taken, ...)
+        self.lights: dict[str, Light] = {}          # Iridia name -> light
+        self.error: str | None = None            # why Govee can't be heard (port 4002 taken, ...)
         self._lock = threading.Lock()
         self._wake = threading.Event()
-        self._thread: Optional[threading.Thread] = None
-        self._sock: Optional[socket.socket] = None          # WiZ, and commands to Govee
-        self._govee: Optional[socket.socket] = None         # Govee's answers to a scan (port 4002)
+        self._thread: threading.Thread | None = None
+        self._sock: socket.socket | None = None          # WiZ, and commands to Govee
+        self._govee: socket.socket | None = None         # Govee's answers to a scan (port 4002)
         # never searched: due at once (not "60 s after time 0": the monotonic clock starts at boot, so a
         # daemon started right at login would wait for a minute)
         self._last_scan = float("-inf")
-        self.hosts: List[str] = []                  # also asked directly (other VLANs, subnets)
+        self.hosts: list[str] = []                  # also asked directly (other VLANs, subnets)
         self.keep_color: set = set()                # lights whose own colour stays: brightness and on/off only
         self.on_demand: set = set()                 # "only when I change it": never on/off, never re-sent
-        self.heard: Dict[str, List[str]] = {}       # address -> what came back from it lately (for a test)
-        self._manual: List[Tuple[str, str]] = []    # (kind, ip) added by address
+        self.heard: dict[str, list[str]] = {}       # address -> what came back from it lately (for a test)
+        self._manual: list[tuple[str, str]] = []    # (kind, ip) added by address
         self.targets = {"wiz": (BROADCAST, WIZ_PORT), "govee": GOVEE_SCAN, "govee_cmd": GOVEE_CMD,
                         "govee_listen": GOVEE_LISTEN}       # tests point these at localhost
 
@@ -288,7 +287,7 @@ class NetLights:
     def _read(self, sock, kind_hint: str):
         try:
             data, (ip, _port) = sock.recvfrom(4096)
-        except (socket.timeout, OSError):
+        except (TimeoutError, OSError):
             return False
         try:
             msg = json.loads(data.decode("utf-8", "replace"))
@@ -374,7 +373,7 @@ class NetLights:
     def has(self, name: str) -> bool:
         return name in self.lights
 
-    def list_devices(self) -> List[dict]:
+    def list_devices(self) -> list[dict]:
         """Like OpenRGB's list: one zone-less, one-colour device per light."""
         with self._lock:
             return [{"name": n, "type": f"{light.kind} light", "mode": "network", "zones": [], "led_count": 1,
@@ -393,7 +392,7 @@ class NetLights:
         self._flush()
         return True
 
-    def send_frames(self, name: str, frames) -> Optional[bool]:
+    def send_frames(self, name: str, frames) -> bool | None:
         """An animation frame: the light shows the average of its zone's frame."""
         cols = [c for f in frames.values() for c in f]
         return self.send(name, cols) if name in self.lights else None
@@ -450,7 +449,7 @@ class NetLights:
             for n in changed:
                 self.resend(n)
 
-    def resend(self, name: Optional[str] = None):
+    def resend(self, name: str | None = None):
         """Send every light (or the one named) its colour again: after a light came back, after it was
         set in its own app meanwhile, or after Iridia restarted."""
         with self._lock:

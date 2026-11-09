@@ -51,10 +51,6 @@ The installer needs GTK 4 and PyGObject on the host. Layer them (`rpm-ostree ins
 python3-gobject python3-cairo`) or run Iridia's window in a toolbox; the daemon and command line only
 need Python.
 
-**Can OpenRGB run on another machine?**
-Yes. Set `openrgb.host` and `openrgb.port` in `config.json`. Iridia never starts or restarts anything
-for a remote host; start OpenRGB there.
-
 **Where are my settings?**
 `~/.config/iridia/`. See [Configuration](Configuration.md). Save them all at once with a
 [setup](Setups-and-Backups.md).
@@ -64,6 +60,24 @@ The installer links it into `~/.local/bin`, which some shells (fish, for one) do
 `PATH` yet. See [Installation](Installation.md#running-it), or use the full path
 `~/.local/share/iridia-venv/bin/iridia`.
 
+**My controller shows channels with nothing plugged in. Can I get rid of them?**
+Hide them: the eye on the strip's card (Devices tab). OpenRGB reports every channel the controller
+has, and there's no way to tell an empty one from a strip, so Iridia can't do it by itself. Hidden
+strips wait under *Hidden* at the bottom of the Devices tab and are left out of lists elsewhere.
+
 **What is the window's class or app id, for window rules?**
 `io.github.HypestHyper.Iridia`. For example, to make the window float on Hyprland:
-`windowrule = float, class:^(io\.github\.HypestHyper\.Iridia)$`
+
+```lua
+-- ~/.config/hypr/hyprland.lua (the Lua config)
+hl.window_rule({ match = { class = "^(io\\.github\\.HypestHyper\\.Iridia)$" }, float = true })
+```
+
+```ini
+# ~/.config/hypr/hyprland.conf (Hyprland 0.53 or newer)
+windowrule = match:class ^(io\.github\.HypestHyper\.Iridia)$, float on
+# Hyprland 0.52 or older
+windowrule = float, class:^(io\.github\.HypestHyper\.Iridia)$
+```
+
+On Sway: `for_window [app_id="io.github.HypestHyper.Iridia"] floating enable`.

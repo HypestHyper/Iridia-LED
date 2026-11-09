@@ -83,9 +83,9 @@ Effects: `breathing`, `comet`, `fill`, `embers`, `rainbow`, `rainbow_vomit`, `co
 | `iridia netlights add / remove ADDRESS` | Also ask an address or network directly (lights on another VLAN) |
 | `iridia netlights [on / off / scan]` | Philips WiZ and Govee lights on the network (see [Network lights](Network-Lights.md)) |
 | `iridia looks`, `iridia look NAME [on / off / toggle]` | Your looks (see [Favourites and looks](Favourites.md)) |
-| `iridia scenes` | Scenes: settings, what's in front, what's showing |
-| `iridia scenes on / off / test [LOOK]`, `iridia scenes look LOOK` | LOOK: `off`, `dim N`, `color HEX [N]`, `effect NAME [N]` or `none` (see [Scenes](Scenes.md)) |
-| `iridia scenes app NAME LOOK`, `remove NAME`, `ignore NAME`, `unignore NAME` | An app's own look; apps that never get one |
+| `iridia scenes` | Your scenes (`*` = showing now), what's in front |
+| `iridia scenes on / off / test [LOOK]`, `iridia scenes look LOOK` | All scenes on or off; try one for 5 s; the *Anything fullscreen* scene's look. LOOK: `off`, `dim N`, `color HEX [N]`, `effect NAME [N]` or `none` (see [Scenes](Scenes.md)) |
+| `iridia scenes app NAME LOOK`, `remove NAME`, `ignore NAME`, `unignore NAME` | A scene for one app; take an app out of its scenes; apps that never count as fullscreen. Scenes for several apps or some strips are made on the Scenes tab |
 | `iridia idle on / off`, `iridia lock on / off` | For idle daemons and screen lockers Iridia can't see by itself |
 | `iridia zone list` | Strip names to use with `iridia zone` |
 | `iridia zone NAME[,NAME] [on/off] [color HEX] [bright N] [--set]` | Temporary strip changes; see [Keybinds](Keybinds.md) |

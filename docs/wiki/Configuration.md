@@ -37,7 +37,8 @@ Appearance, Window buttons). They're shown by default, on the side and in the or
 `gtk-decoration-layout` asks for (GNOME's default shows only close).
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is
-`$XDG_RUNTIME_DIR/iridia-UID.sock`.
+`$XDG_RUNTIME_DIR/iridia-UID.sock` (where `XDG_RUNTIME_DIR` isn't set: `/run/user/UID`, else
+`~/.cache/iridia/run`; never the shared `/tmp`).
 
 A broken `config.json` (invalid JSON) is moved aside to `config.json.bak` and replaced with defaults,
 and the log says so. Values of the wrong type are replaced with their defaults one by one.
@@ -50,7 +51,6 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `wallpaper.watch_folder` | `~/Pictures/Wallpapers` | Fallback: the newest image in this folder (and two levels of subfolders) |
 | `color.backend` | `auto` | Color engine: `auto`, `material` or `pillow` (see [How it works](How-It-Works.md#color-engines)) |
 | `color.frozen` | `false` | Freeze the current colors |
-| `openrgb.host` | `127.0.0.1` | Where the OpenRGB SDK server runs |
 | `openrgb.port` | `null` | Its port; `null` finds it on 6742 to 6744. The OpenRGB Iridia starts listens on it |
 | `openrgb.start_method` | `daemon` | What starts OpenRGB's server: `daemon`, `systemd` or `off` (see [Installation](Installation.md#setting-up-openrgb)). Replaces 1.1.0's `openrgb.start_server` (`false` there becomes `off`) |
 | `openrgb.server_command` | `""` | The command that runs OpenRGB's server; empty finds `openrgb` or the Flatpak |
@@ -70,12 +70,15 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | `notify.direction`, `notify.band`, `notify.repeat`, `notify.brightness` | `ab`, `3`, `1`, `100` | `ab`, `ba`, `abba` or `out`; how many LEDs light at once (1 to 30); plays (1 to 5); percent |
 | `notify.path`, `notify.spatial` | `null`, `false` | `{"a": [x, y], "b": [x, y]}` in layout units, and whether a moving flash runs between them |
 | zone `hands_off`, `independent`, `keep_color` | absent | Iridia sends it nothing; it ignores the monitor's brightness, night mode, lock and sleep; a network light keeps its own colour (brightness and on/off only) |
+| zone `on_demand` | absent | A network light gets colour and brightness only when changed on its card, never on or off (*Only when I change it*) |
+| zone `hidden` | absent | Hidden on the Devices tab and left out of lists elsewhere; it still gets its colours |
 | `looks`, `favorites` | `[]`, `[]` | Your looks and the Favourites tab's tiles, in order (see [Favourites and looks](Favourites.md)) |
 | `netlights.manual` | `[]` | Lights added by address, driven without hearing from them: `[{"kind": "govee", "ip": "192.168.20.31"}]` |
 | `netlights.hosts` | `[]` | Addresses or networks (`"192.168.20.0/24"`) also asked directly, for lights on another VLAN or subnet |
 | `netlights.enabled` | `false` | Look for Philips WiZ and Govee lights on the network; each one found becomes a device with `"net": "wiz"` or `"govee"` (see [Network lights](Network-Lights.md)) |
-| `scenes.enabled`, `scenes.look` | `false`, `{"kind": "dim", "bright": 20}` | A look while anything is fullscreen: `kind` `off`, `dim`, `color` (with `hex`) or `effect` (with `effect`), and `bright` (percent); `null` for none (see [Scenes](Scenes.md)) |
-| `scenes.apps`, `scenes.ignore` | `[]`, `[]` | `[{"app", "look"}]`: an app's own look while it's in front; apps that never get the fullscreen look |
+| `scenes.enabled` | `false` | Scenes on or off, all of them (see [Scenes](Scenes.md)) |
+| `scenes.scenes` | one: *Anything fullscreen*, dim to 20% | In order, the higher one winning on a strip two share: `{"id", "name", "on", "when": "fullscreen" or "apps", "apps": [names], "targets": ["*"] or ["Device\|Zone"], "look"}`. A look is `kind` `off`, `dim`, `color` (with `hex`) or `effect` (with `effect`), and `bright` (percent). The older `scenes.look` and `scenes.apps` become scenes by themselves |
+| `scenes.ignore` | `[]` | Apps that never count as fullscreen |
 | `scenes.on_delay`, `scenes.off_delay`, `scenes.interval` | `1`, `2`, `3` | Seconds before a look comes on and before the lights go back (0 to 10); seconds between checks where the desktop can't say (1 to 30) |
 | `notify.urgent_effect`, `notify.rules` | `same`, `[]` | an effect for urgent ones; `[{"app", "effect", "color", "hex"}]` per app (`default` keeps the general setting) |
 | `notify.color`, `notify.hex`, `notify.urgent_red` | `accent`, `ffffff`, `true` | `accent` (the wallpaper colour), `app` (one per app) or `custom` (`notify.hex`); urgent ones red |

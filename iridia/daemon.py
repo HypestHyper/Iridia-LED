@@ -252,10 +252,7 @@ class Daemon:
             self.logger.info(f"Moved {len(legacy)} custom colour(s) from config.json to {self.custom_colors.path}")
         self.patterns = PatternGenerator()
         port = self.config.get("openrgb.port")
-        self.openrgb = OpenRGBController(
-            host=self.config.get("openrgb.host"),
-            port=port if port is not None else None,
-        )
+        self.openrgb = OpenRGBController(port=port)      # OpenRGB on this PC
         self.ddc = DDCController(
             enabled=self.config.get("ddc.enabled"),
             bus_number=self.config.get("ddc.bus_number"),
@@ -1412,7 +1409,7 @@ class Daemon:
     def _orgb_settings(self):
         o = self.config.openrgb
         custom = o.get("server_command") or ""
-        return openrgb_server.method_of(o), o.get("host"), (custom if isinstance(custom, str) else ""), o.get("port")
+        return openrgb_server.method_of(o), (custom if isinstance(custom, str) else ""), o.get("port")
 
     def _migrate_openrgb_unit(self):
         try:
@@ -1425,7 +1422,7 @@ class Daemon:
     def _supervise_openrgb(self, connected: bool):
         """Start (and keep running) OpenRGB's server per openrgb.start_method; see openrgb_server.py.
         Runs off the tick thread when it may call systemctl or scan for other starters."""
-        method, host, custom, port = self._orgb_settings()
+        method, custom, port = self._orgb_settings()
         if method == "off" or self._orgb_busy or self._orgb_restarting:
             return
         if connected and not self._orgb.pid:
@@ -1434,7 +1431,7 @@ class Daemon:
 
         def run():
             try:
-                self._orgb.tick(method, host, connected, custom, port)
+                self._orgb.tick(method, connected, custom, port)
             except Exception as e:          # noqa: BLE001
                 self.logger.warning(f"Starting OpenRGB failed: {type(e).__name__}: {e}")
             finally:
@@ -1482,7 +1479,7 @@ class Daemon:
         something else started (never the OpenRGB window). Returns False if nothing will happen."""
         if self._orgb_restarting:
             return True
-        method, _host, custom, port = self._orgb_settings()
+        method, custom, port = self._orgb_settings()
         if method == "off" and manual:
             self.logger.warning("Restart OpenRGB requested, but openrgb.start_method is off: Iridia doesn't "
                                 "start or restart OpenRGB. Restart it yourself.")
@@ -1534,7 +1531,7 @@ class Daemon:
             tried = ", ".join(str(p) for p in ports)
             where = f"{self.openrgb.host} (port{'s' if len(ports) > 1 else ''} {tried})"
             method = self._orgb_settings()[0]
-            if method in ("daemon", "systemd") and openrgb_server.is_local(self.openrgb.host):
+            if method in ("daemon", "systemd"):
                 # Iridia (or its unit) brings the server up: nothing for you to do yet
                 self.logger.info(f"OpenRGB isn't reachable on {where} yet; its server is started "
                                  f"{'by Iridia' if method == 'daemon' else 'by the systemd unit'}. Colors are kept "
@@ -3500,7 +3497,6 @@ class Daemon:
             "ddc_bus": self.ddc.bus if self.ddc.is_available() and self.ddc.source == "ddc" else None,
             "openrgb_connected": self.openrgb.client is not None,
             "openrgb_protocol": getattr(self.openrgb, "protocol", None) if self.openrgb.client is not None else None,
-            "openrgb_host": self.openrgb.host,
             "openrgb_autostart": self._orgb.last_action,
             "openrgb_start_method": self._orgb_settings()[0],
             "openrgb_ours_pid": self._orgb.pid if self._orgb.alive() else None,

@@ -202,8 +202,6 @@ def cmd_openrgb(args):
         cmd = " ".join(st["command"]) or "not found (install OpenRGB, or set openrgb.server_command)"
         print(f"Start method:      {st['method']} ({METHOD_TEXT[st['method']]})")
         print(f"OpenRGB command:   {cmd}")
-        if not osrv.is_local(st["host"]):
-            print(f"Host:              {st['host']} (another machine: Iridia never starts anything)")
         print(f"OpenRGB running:   {'yes' if st['running'] else 'no'}"
               + (" (window without --server: is its SDK server on?)" if st["window_without_server"] else ""))
         print("Started by Iridia: " + (f"yes, pid {st['ours']} ({st['pid_file']})" if st["ours"] else "no"))

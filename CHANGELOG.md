@@ -19,6 +19,10 @@
   in CI, now on a fixed ruff version), the tests fail on anything Python deprecates in Iridia's code,
   the window asks for GTK 4's own Gdk and Pango up front, and the tab bar's scroll arrows no longer
   make GTK lay the window out with no room for them (a warning on every start).
+- **OpenRGB on another PC is no longer an option:** Iridia always talks to the OpenRGB on this PC
+  (`openrgb.host` is gone from `config.json`; it's removed by itself).
+- **Docs:** the window rule to float Iridia on Hyprland for the Lua config and the newer
+  `hyprland.conf` syntax; the tab tour, configuration and command line brought up to date.
 - **Hide strips:** the eye on a strip's card hides one you don't use (a channel with nothing plugged in);
   it waits under *Hidden* at the bottom of the Devices tab and stays out of the lists elsewhere.
 - **Looks:** one-tap changes you name yourself ("Movie": everything at 15%), for some strips or all:

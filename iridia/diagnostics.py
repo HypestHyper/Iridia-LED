@@ -180,9 +180,6 @@ def openrgb_login_checks(status: dict) -> list[Check]:
     """Who starts OpenRGB's server, per openrgb.start_method, and whether something else does too."""
     from iridia import openrgb_server as osrv
     label = "OpenRGB at login"
-    host = status.get("openrgb_host") or "127.0.0.1"
-    if not osrv.is_local(host):
-        return [Check(label, None, f"OpenRGB runs on another machine ({host}); start it there")]
     st = osrv.status()
     method = st["method"]
     connected = bool(status.get("openrgb_connected"))

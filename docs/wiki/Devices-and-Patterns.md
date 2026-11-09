@@ -15,7 +15,10 @@ changing that setting on Everything sets it on every zone. You can still change 
 afterwards.
 
 Each card's header has a switch (zone on or off), the zone's name with a pencil to rename it, a short
-summary, and an arrow to open the details. Names are shared with the Layout and Keybinds tabs.
+summary, and an arrow to open the details. Names are shared with the Layout and Keybinds tabs. The ★
+puts a card for the strip on [Favourites](Favourites.md), and the eye hides a strip you don't use (a
+channel with nothing plugged in): it moves to *Hidden* at the bottom of the tab, keeps its settings,
+and the eye there shows it again.
 
 ## Patterns
 

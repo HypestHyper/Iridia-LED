@@ -128,7 +128,13 @@ command handling and rendering (with OpenRGB and DDC replaced by fakes) have uni
 that need no hardware or GTK. `tests/fakes/` holds stand-ins for `openrgb` (a real process that answers
 the SDK handshake with zero devices, stays silent, or crashes) and `systemctl`, so starting, supervising
 and restarting OpenRGB is tested end to end. CI runs everything on Python 3.10 to 3.14, along with ruff
-and shellcheck.
+and shellcheck, and a release runs ruff and the tests again before it publishes anything.
+
+ruff is pinned (`pyproject.toml`, `[dev]`) so a new ruff's new rules can't fail CI on their own; to move
+to a newer one, change the version there and in `.github/workflows/tests.yml` and fix what it finds.
+Its rules are real errors, files in the shared `/tmp`, and code newer Pythons have a better way for
+(`[tool.ruff.lint]`). The tests also fail on any `DeprecationWarning` raised from Iridia's own code, so
+something Python is about to remove shows up while it still works.
 
 `tests/desktop/run.sh` checks against a real desktop: it starts KWin headless (`kwin_wayland --virtual`),
 checks that scenes see a real window open, go fullscreen, come back and close (through the KWin script),

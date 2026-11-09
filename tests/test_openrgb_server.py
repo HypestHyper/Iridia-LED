@@ -156,17 +156,17 @@ def test_command_passes_the_port_and_custom_command(env):
 def test_waits_for_the_grace_then_starts_and_remembers_it(env):
     clock = Clock()
     sup = _sup(clock)
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     time.sleep(0.3)
     assert env.starts() == []                       # login's own startup gets a chance first
     clock.t += osrv.Supervisor.QUICK_SEC + 0.5      # nothing else starts OpenRGB: no 10 s wait
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     assert wait_for(lambda: len(env.starts()) == 1)
     assert env.starts()[0].endswith(f"--server --server-port {env.port}")
     assert osrv.read_pid() == sup.pid and sup.alive()
     assert stat.S_IMODE(os.stat(osrv.pid_path()).st_mode) == 0o600
     assert wait_for(lambda: "fake openrgb" in Path(osrv.LOG_PATH).read_text())
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)    # still starting up: no second one
+    sup.tick("daemon", False, "", env.port)    # still starting up: no second one
     time.sleep(0.3)
     assert len(env.starts()) == 1
 
@@ -183,9 +183,9 @@ def test_the_server_ignores_sigpipe(env, tmp_path):
     (env.bin / "openrgb").chmod(0o755)
     clock = Clock()
     sup = _sup(clock)
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     clock.t += osrv.Supervisor.QUICK_SEC + 0.5
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     assert wait_for(lambda: seen.exists() and seen.read_text().strip())
     assert int(seen.read_text().split()[1], 16) & (1 << (signal.SIGPIPE - 1))
 
@@ -194,12 +194,12 @@ def test_a_restarted_daemon_reuses_the_running_server(env):
     clock = Clock()
     sup = _sup(clock)
     clock.t += 100
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     assert wait_for(lambda: osrv.read_pid() == sup.pid)
     again = _sup(Clock())
     assert again.pid == sup.pid
     again._clock.t += 100
-    again.tick("daemon", "127.0.0.1", False, "", env.port)
+    again.tick("daemon", False, "", env.port)
     time.sleep(0.3)
     assert len(env.starts()) == 1
 
@@ -211,7 +211,7 @@ def test_restarts_a_crashing_server_with_backoff_then_gives_up(env, monkeypatch)
     clock.t += 100
     when, last = [], None
     for _ in range(200):
-        sup.tick("daemon", "127.0.0.1", False, "", env.port)
+        sup.tick("daemon", False, "", env.port)
         if sup._proc is not None and sup._proc.pid != last:
             last = sup._proc.pid
             when.append(clock.t)
@@ -224,7 +224,7 @@ def test_restarts_a_crashing_server_with_backoff_then_gives_up(env, monkeypatch)
     gaps = [b - a for a, b in zip(when, when[1:])]
     assert gaps == [pytest.approx(w, abs=1.01) for w in osrv.Supervisor.BACKOFF]
     clock.t += 10000
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     time.sleep(0.3)
     assert len(env.starts()) == 4                   # gave up: no more tries
     assert osrv.read_pid() is None
@@ -236,19 +236,18 @@ def test_never_starts_a_second_openrgb(env):
     clock = Clock()
     sup = _sup(clock)
     clock.t += 100
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     time.sleep(0.3)
     assert len(env.starts()) == 1 and sup.pid is None
     window.terminate()
     window.wait(5)
 
 
-def test_off_and_remote_hosts_never_start_anything(env):
+def test_off_never_starts_anything(env):
     clock = Clock()
     sup = _sup(clock)
     clock.t += 100
-    sup.tick("off", "127.0.0.1", False, "", env.port)
-    sup.tick("daemon", "192.168.1.20", False, "", env.port)
+    sup.tick("off", False, "", env.port)
     time.sleep(0.3)
     assert env.starts() == []
 
@@ -262,14 +261,14 @@ def test_leaves_it_to_another_starter_until_that_is_turned_off(env):
     clock = Clock()
     sup = _sup(clock)
     clock.t += 100
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     time.sleep(0.3)
     assert env.starts() == []
     ok, _msg = osrv.hide_xdg_entry(str(entry))
     assert ok and "Hidden=true" in entry.read_text() and entry.exists()
     assert osrv.xdg_entries() == []
     clock.t += osrv.Supervisor.OTHERS_TTL + 1        # the cached scan expires
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     assert wait_for(lambda: len(env.starts()) == 1)
 
 
@@ -285,7 +284,7 @@ def test_not_installed_starts_nothing(env):
     clock = Clock()
     sup = _sup(clock)
     clock.t += 100
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)
+    sup.tick("daemon", False, "", env.port)
     assert sup.pid is None and "isn't installed" in sup._said
 
 
@@ -480,7 +479,7 @@ def test_doctor_names_a_second_starter(env):
     auto = env.home / ".config" / "autostart"
     auto.mkdir(parents=True)
     (auto / "OpenRGB.desktop").write_text("[Desktop Entry]\nExec=/usr/bin/openrgb\n")
-    checks = diagnostics.openrgb_login_checks({"openrgb_host": "127.0.0.1"})
+    checks = diagnostics.openrgb_login_checks({})
     bad = [c for c in checks if c.label == "Other OpenRGB starters"]
     assert bad and bad[0].ok is False and "hide-autostart" in bad[0].hint
 
@@ -489,7 +488,7 @@ def test_doctor_warns_when_the_unit_can_never_start(env):
     env.with_systemd(gst="inactive")
     env.config({"openrgb": {"start_method": "systemd"}})
     _write_unit(OLD_UNIT)
-    checks = diagnostics.openrgb_login_checks({"openrgb_host": "127.0.0.1"})
+    checks = diagnostics.openrgb_login_checks({})
     assert any(c.ok is False and "graphical-session.target" in c.detail for c in checks)
 
 
@@ -508,10 +507,10 @@ def test_a_server_stopped_by_a_method_change_is_not_a_crash(env):
     sup.spawn(osrv.command("", env.port), "test")
     assert wait_for(lambda: len(env.starts()) == 1)
     osrv.stop_ours()
-    sup.tick("off", "127.0.0.1", False, "", env.port)
+    sup.tick("off", False, "", env.port)
     assert sup.pid is None and sup.failures == 0
     clock.t += 100
-    sup.tick("daemon", "127.0.0.1", False, "", env.port)    # back to daemon: starts right away
+    sup.tick("daemon", False, "", env.port)    # back to daemon: starts right away
     assert wait_for(lambda: len(env.starts()) == 2) and sup.failures == 0
 
 

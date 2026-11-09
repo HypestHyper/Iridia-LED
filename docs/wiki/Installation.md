@@ -168,8 +168,8 @@ To use the OpenRGB window while the server runs, connect the window to it (its *
 window with its own server, pick `off` and turn on *Start Server* in OpenRGB's *SDK Server* tab.
 
 Iridia finds the server on ports 6742 to 6744 by itself. For another port, set `openrgb.port`: the
-OpenRGB that Iridia starts then listens on it (`--server-port`). For OpenRGB on another machine, set
-`openrgb.host`; Iridia never starts anything for a remote host (see [Configuration](Configuration.md)).
+OpenRGB that Iridia starts then listens on it (`--server-port`). OpenRGB runs on this PC: Iridia
+always talks to it at `127.0.0.1`.
 
 OpenRGB needs permission to reach your hardware. Its package normally installs the udev rules
 (`60-openrgb.rules`). Motherboard and RAM lighting also needs the `i2c-dev` kernel module (and

@@ -32,6 +32,9 @@ iridia zone all effect static                         # still colors; run again:
 
 Short forms work too: `iridia zone "Desk back" on ff0000 40%`.
 
+A [look](Favourites.md#looks) you made works the same way: `iridia look "Movie"` turns it on, and the
+same key turns it back off (the tab's *Turn a look on or off*).
+
 | Action | Meaning |
 | --- | --- |
 | `on` | Show the strip even if it's switched off in Iridia |

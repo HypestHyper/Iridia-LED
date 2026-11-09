@@ -61,3 +61,12 @@ def test_devices_view_is_shared_until_a_change(tmp_path):
     v2 = c.devices_view
     assert v2 is not v1 and v2["A"]["zones"]["Z"]["led_count"] == 9
     assert v1["A"]["zones"]["Z"]["led_count"] == 5      # an old view never changes under a reader
+
+
+def test_openrgb_host_is_dropped(tmp_path):
+    import json
+    from iridia.config import Config
+    p = tmp_path / "config.json"
+    p.write_text(json.dumps({"openrgb": {"host": "192.168.1.20", "port": 6742}}))
+    c = Config(str(p))
+    assert c.get("openrgb.host") is None and c.get("openrgb.port") == 6742

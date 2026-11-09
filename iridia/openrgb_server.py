@@ -68,13 +68,6 @@ def run_by_systemd() -> bool:
             return f.read().strip() == "systemd"
     except OSError:
         return False
-LOCAL_HOSTS = ("127.0.0.1", "localhost", "::1", "")
-
-
-def is_local(host) -> bool:
-    return str(host or "").strip().lower() in LOCAL_HOSTS
-
-
 # ----------------------------------------------------------------- settings
 
 def method_of(openrgb_cfg) -> str:
@@ -574,8 +567,7 @@ def status() -> dict:
             "command": command(custom if isinstance(custom, str) else "", cfg.get("port")),
             "systemd": has_systemd(), "graphical_session": graphical_session_active(),
             "running": bool(procs), "window_without_server": any("--server" not in a for _, a in procs),
-            "ours": read_pid(), "pid_file": pid_path(), "log": LOG_PATH,
-            "host": cfg.get("host") or "127.0.0.1"}
+            "ours": read_pid(), "pid_file": pid_path(), "log": LOG_PATH}
 
 
 def set_method(new: str, old: str, stop_running: bool = False) -> tuple[bool, list[str]]:
@@ -665,11 +657,7 @@ class Supervisor:
         return found
 
     # the tick --------------------------------------------------------------
-    def tick(self, method: str, host, reachable: bool, custom: str = "", port=None):
-        if not is_local(host):
-            if method != "off":
-                self._say(f"OpenRGB is on another machine ({host}); not starting anything here", logging.DEBUG)
-            return None
+    def tick(self, method: str, reachable: bool, custom: str = "", port=None):
         now = self._clock()
         with self._lock:
             if self.pid and not self.alive():

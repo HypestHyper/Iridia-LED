@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-10 03:09+0000\n"
+"POT-Creation-Date: 2026-11-10 23:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2112,6 +2112,15 @@ msgstr "{n} strips"
 msgid "Its strips aren't there any more."
 msgstr "Its strips have regrettably departed."
 
+msgid "Change this card"
+msgstr "Alter this card"
+
+msgid "On: click to turn off"
+msgstr "On: click to switch off"
+
+msgid "Off: click to turn on"
+msgstr "Off: click to switch on"
+
 msgid "Follow the monitor"
 msgstr "Defer to the monitor"
 
@@ -2141,9 +2150,6 @@ msgstr "Colour for {name}"
 msgid "Colour wheel…"
 msgstr "Colour wheel…"
 
-msgid "No looks picked: Arrange, ✏ on this card."
-msgstr "No looks chosen: Arrange, then ✏ on this card."
-
 msgid "Turn on"
 msgstr "Kindle"
 
@@ -2157,9 +2163,6 @@ msgstr "Loaded {name} (the previous settings were backed up)"
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Proportions: {size}"
-
-msgid "Change this card"
-msgstr "Alter this card"
 
 msgid "Change this look"
 msgstr "Alter this look"
@@ -2208,6 +2211,9 @@ msgstr "None as yet: New look makes one."
 
 msgid "Its switches (if Switches is on)"
 msgstr "Its switches (if Switches is on)"
+
+msgid "A card grows taller when what's on it needs the room."
+msgstr "A card grows taller when its contents require the room."
 
 msgid "Pick the strips it's for, or Everything."
 msgstr "Do choose the strips it is for, or Everything."
@@ -3443,6 +3449,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (customary)"
 
+msgid "Let Iridia control it: off, Iridia sends it nothing and it keeps whatever it shows"
+msgstr "Allow Iridia to control it: off, Iridia sends it nothing and it keeps whatever it shows"
+
+msgid "Let Iridia control every strip"
+msgstr "Allow Iridia to control every strip"
+
 msgid "Show again"
 msgstr "Reveal once more"
 
@@ -3512,21 +3524,8 @@ msgstr "With the others"
 msgid "Only when I change it"
 msgstr "Only when I alter it"
 
-msgid "Not at all"
-msgstr "Not in the least"
-
 msgid "How Iridia uses it"
 msgstr "How Iridia employs it"
-
-msgid "Let Iridia control it"
-msgstr "Permit Iridia to direct it"
-
-msgid ""
-"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
-"switch at the top of the card turns it off instead."
-msgstr ""
-"Off: Iridia sends it nothing whatsoever, so it retains whatever it shows (a lamp's own "
-"application may set it). The switch atop the card extinguishes it instead."
 
 msgid "On its own: ignore the monitor, night mode, lock and sleep"
 msgstr "Independent: disregard the monitor, night mode, the lock and sleep"
@@ -3622,20 +3621,32 @@ msgstr "Colours in order (click to change):"
 msgid "Change this color"
 msgstr "Change this colour"
 
+msgid "every strip"
+msgstr "every strip"
+
+msgid "this strip"
+msgstr "this strip"
+
+#, python-brace-format
+msgid "On: click to turn {what} off"
+msgstr "On: click to switch {what} off"
+
+#, python-brace-format
+msgid "Off: click to turn {what} on"
+msgstr "Off: click to switch {what} on"
+
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Like a strip: wallpaper colours, the monitor, the lock, sleep, tableaux and the rest."
 
 msgid ""
-"Iridia sends its colour and brightness only when you change them here, and never switches it on "
-"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
-" light may switch itself on when it gets a colour."
+"Iridia sends its colour and brightness only when you change them here, and switches it on or off "
+"only with the power button: its own app and automations (Google Home, say) stay in charge. While "
+"it's off here, colour changes wait. A light may switch itself on when it gets a colour."
 msgstr ""
-"Iridia sends its colour and brightness only when you alter them here, and never switches it on or"
-" off: its own application and automations (Google Home, for instance) remain in charge. Your "
-"choice is kept. A lamp may switch itself on upon receiving a colour."
-
-msgid "Iridia sends it nothing: it keeps whatever its own app set."
-msgstr "Iridia sends it nothing whatsoever: it keeps whatever its own application set."
+"Iridia sends its colour and brightness only when one changes them here, and switches it on or off"
+" only with the power button: its own app and automations (Google Home, say) remain in charge. "
+"While it is off here, colour changes wait. A light may switch itself on when it receives a "
+"colour."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

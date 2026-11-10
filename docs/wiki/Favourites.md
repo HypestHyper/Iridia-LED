@@ -10,7 +10,7 @@ title, its strips, and what's on it, in any mix:
 
 | | |
 | --- | --- |
-| On and off | All its strips at once |
+| On and off | A round ⏻ button for all its strips at once (pastel green on, red off) |
 | Brightness | One slider; every strip on the card gets the same brightness |
 | Colours | The wallpaper's colours as swatches, and 🎨 for a popup with your saved colours and the colour wheel; the card's strips all take that one colour |
 | Follow the monitor's brightness | On or off for its strips |
@@ -37,8 +37,10 @@ The ★ on a strip's card on the Devices tab makes a card for just that strip (o
 ## Sizes and order
 
 Tiles sit on a grid of squares that fits the window: *small* (one square), *wide* (two across), *tall*
-(two down) or *large* (two by two). *Arrange* shows, on each tile, a handle to drag it onto another
-one's place, the size, a pencil to change it, and ✕ to take it off. *Done* when you're finished.
+(two down) or *large* (two by two). A card grows taller when what's on it needs the room, so a small card
+still shows everything you ticked. The pencil on a card changes it (on a small card, right-click it).
+*Arrange* shows, on each tile, a handle to drag it onto another one's place, the size, a pencil, and ✕
+to take it off. *Done* when you're finished.
 
 ## Hiding strips
 

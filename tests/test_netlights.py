@@ -245,7 +245,7 @@ def test_a_test_says_what_came_back_and_a_light_can_be_added_by_address(fakes):
         assert nl.has("Govee 127.0.0.1") and nl.list_devices()[0]["net"]["manual"]
         n = len(fakes.govee_got)
         nl.send("Govee 127.0.0.1", ["ff0000"])
-        assert wait(lambda: len(fakes.govee_got) >= n + 3)
+        assert wait(lambda: len(fakes.govee_got) >= n + 3), fakes.govee_got[n:]
         nl.set_manual([])
         assert not nl.has("Govee 127.0.0.1")
     finally:
@@ -298,6 +298,41 @@ def test_only_when_i_change_it(fakes, tmp_path, monkeypatch):
         assert fakes.govee_got[1]["data"]["value"] == 50
         n = len(fakes.govee_got)
         d._update_all_devices()                                  # and only that once
+        time.sleep(0.4)
+        assert len(fakes.govee_got) == n
+        # its power button: off, once; while it's off, a colour change on its card waits
+        assert d.handle_command({"cmd": "set_zone_enabled", "device": name, "zone": "", "enabled": False})["ok"]
+        d._update_all_devices()
+        assert wait(lambda: len(fakes.govee_got) > n)
+        assert fakes.govee_got[n:] == [{"cmd": "turn", "data": {"value": 0}}]
+        n = len(fakes.govee_got)
+        assert d.handle_command({"cmd": "set_zone_manual_brightness", "device": name, "zone": "", "value": 80})["ok"]
+        d._update_all_devices()
+        time.sleep(0.4)
+        assert len(fakes.govee_got) == n
+        # on again: "turn" on, then its colour and brightness
+        assert d.handle_command({"cmd": "set_zone_enabled", "device": name, "zone": "", "enabled": True})["ok"]
+        d._update_all_devices()
+        assert wait(lambda: len(fakes.govee_got) >= n + 3), fakes.govee_got[n:]
+        assert [m["cmd"] for m in fakes.govee_got[n:n + 3]] == ["turn", "colorwc", "brightness"]
+        assert fakes.govee_got[n]["data"]["value"] == 1
+        # from a Favourites card (several strips at once) just the same: off, then a colour that waits
+        n = len(fakes.govee_got)
+        key = name + "|"
+        assert d.handle_command({"cmd": "set_zones", "targets": [key], "set": {"enabled": False}})["ok"]
+        d._update_all_devices()
+        assert wait(lambda: len(fakes.govee_got) > n)
+        assert fakes.govee_got[n:] == [{"cmd": "turn", "data": {"value": 0}}]
+        assert d.handle_command({"cmd": "set_zones", "targets": [key], "set": {"enabled": True, "color": "ff0000"}})["ok"]
+        d._update_all_devices()
+        assert wait(lambda: len(fakes.govee_got) >= n + 4), fakes.govee_got[n:]
+        assert [m["cmd"] for m in fakes.govee_got[n + 1:n + 4]] == ["turn", "colorwc", "brightness"]
+        assert fakes.govee_got[n + 2]["data"]["color"] == {"r": 255, "g": 0, "b": 0}
+        # the switch on the left off ("let Iridia control it"): nothing at all, power button included
+        n = len(fakes.govee_got)
+        assert d.handle_command({"cmd": "set_zone_strip", "device": name, "zone": "", "hands_off": True})["ok"]
+        assert d.handle_command({"cmd": "set_zone_enabled", "device": name, "zone": "", "enabled": False})["ok"]
+        d._update_all_devices()
         time.sleep(0.4)
         assert len(fakes.govee_got) == n
     finally:

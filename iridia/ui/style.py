@@ -95,6 +95,12 @@ button.small {{ min-height: 32px; padding: 0 14px; font-size: 13px; border-radiu
 button.small:active {{ border-radius: 8px; }}
 button.circle {{ padding: 0; min-width: 40px; min-height: 40px; border-radius: 20px; }}
 button.circle.small {{ min-width: 32px; min-height: 32px; border-radius: 16px; }}
+button.circle.small.power, button.circle.small.power:active {{ min-width: 28px; min-height: 28px; padding: 0;
+    border-radius: 14px; }}
+button.circle.small.power.on {{ background: #bfe8c9; color: #1f4d2c; }}
+button.circle.small.power.on:hover {{ background: #ade0b9; }}
+button.circle.small.power.off {{ background: #f6c9c9; color: #6e2121; }}
+button.circle.small.power.off:hover {{ background: #f0b6b6; }}
 button.circle:active {{ border-radius: 10px; }}
 button.fab {{ min-height: 56px; padding: 0 24px; border-radius: 18px; font-size: 15px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4); }}

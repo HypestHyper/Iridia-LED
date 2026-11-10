@@ -14,8 +14,10 @@ The **Everything** card at the top changes all zones at once. Where zones differ
 changing that setting on Everything sets it on every zone. You can still change single zones
 afterwards.
 
-Each card's header has a switch (zone on or off), the zone's name with a pencil to rename it, a short
-summary, and an arrow to open the details. Names are shared with the Layout and Keybinds tabs. The ★
+Each card's header has a switch, *Let Iridia control it* (off: Iridia sends the strip nothing and it
+keeps whatever it shows), the zone's name with a pencil to rename it, a short summary, a round ⏻ button
+that turns the strip on or off (pastel green on, red off), and an arrow to open the details. On the
+*Everything* card, the switch and ⏻ apply to every strip. Names are shared with the Layout and Keybinds tabs. The ★
 puts a card for the strip on [Favourites](Favourites.md), and the eye hides a strip you don't use (a
 channel with nothing plugged in): it moves to *Hidden* at the bottom of the tab, keeps its settings,
 and the eye there shows it again.

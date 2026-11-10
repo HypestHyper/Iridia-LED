@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-10 03:09+0000\n"
+"POT-Creation-Date: 2026-11-10 23:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "Iridia {version}"
 msgstr ""
 
 #: iridia/ui/app.py:221 iridia/ui/app.py:1397 iridia/ui/app.py:1398 iridia/ui/app.py:1455
-#: iridia/ui/app.py:1463 iridia/ui/zonecard.py:108 iridia/ui/zonecard.py:364 iridia/ui/zonecard.py:442
+#: iridia/ui/app.py:1463 iridia/ui/zonecard.py:115 iridia/ui/zonecard.py:381 iridia/ui/zonecard.py:454
 msgid "Automatic"
 msgstr ""
 
@@ -113,7 +113,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: iridia/ui/app.py:428 iridia/ui/favorites_tab.py:132
+#: iridia/ui/app.py:428 iridia/ui/favorites_tab.py:140
 msgid "Favourites"
 msgstr ""
 
@@ -182,7 +182,7 @@ msgstr ""
 msgid "Maximize"
 msgstr ""
 
-#: iridia/ui/app.py:524 iridia/ui/dialogs.py:313 iridia/ui/favorites_tab.py:599
+#: iridia/ui/app.py:524 iridia/ui/dialogs.py:313 iridia/ui/favorites_tab.py:624
 msgid "Close"
 msgstr ""
 
@@ -216,7 +216,7 @@ msgstr ""
 msgid "Monitor sync (DDC)"
 msgstr ""
 
-#: iridia/ui/app.py:659 iridia/ui/zonecard.py:420
+#: iridia/ui/app.py:659 iridia/ui/zonecard.py:432
 msgid "Color correction"
 msgstr ""
 
@@ -357,8 +357,8 @@ msgid_plural "Changes here apply to all {n} zones at once."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/app.py:862 iridia/ui/favorites_tab.py:246 iridia/ui/favorites_tab.py:638
-#: iridia/ui/favorites_tab.py:729 iridia/ui/scenes_tab.py:236 iridia/ui/scenes_tab.py:314
+#: iridia/ui/app.py:862 iridia/ui/favorites_tab.py:254 iridia/ui/favorites_tab.py:663
+#: iridia/ui/favorites_tab.py:755 iridia/ui/scenes_tab.py:236 iridia/ui/scenes_tab.py:314
 msgid "Everything"
 msgstr ""
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "System font"
 msgstr ""
 
-#: iridia/ui/app.py:985 iridia/ui/favorites_tab.py:679
+#: iridia/ui/app.py:985 iridia/ui/favorites_tab.py:704
 msgid "Size"
 msgstr ""
 
@@ -512,7 +512,7 @@ msgid ""
 "and your saved colors) under a name, and load it again later."
 msgstr ""
 
-#: iridia/ui/app.py:1061 iridia/ui/app.py:1965 iridia/ui/app.py:1974 iridia/ui/favorites_tab.py:484
+#: iridia/ui/app.py:1061 iridia/ui/app.py:1965 iridia/ui/app.py:1974 iridia/ui/favorites_tab.py:509
 #: iridia/ui/keybinds_tab.py:156
 msgid "Setup"
 msgstr ""
@@ -525,7 +525,7 @@ msgstr ""
 msgid "Save current as…"
 msgstr ""
 
-#: iridia/ui/app.py:1067 iridia/ui/app.py:1988 iridia/ui/favorites_tab.py:485
+#: iridia/ui/app.py:1067 iridia/ui/app.py:1988 iridia/ui/favorites_tab.py:510
 msgid "Load"
 msgstr ""
 
@@ -538,7 +538,7 @@ msgid "Import"
 msgstr ""
 
 #: iridia/ui/app.py:1071 iridia/ui/app.py:1099 iridia/ui/app.py:2020 iridia/ui/app.py:2110
-#: iridia/ui/favorites_tab.py:691 iridia/ui/favorites_tab.py:748 iridia/ui/scenes_tab.py:335
+#: iridia/ui/favorites_tab.py:717 iridia/ui/favorites_tab.py:774 iridia/ui/scenes_tab.py:335
 msgid "Delete"
 msgstr ""
 
@@ -572,7 +572,7 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: iridia/ui/app.py:1096 iridia/ui/app.py:1646 iridia/ui/app.py:1708 iridia/ui/favorites_tab.py:138
+#: iridia/ui/app.py:1096 iridia/ui/app.py:1646 iridia/ui/app.py:1708 iridia/ui/favorites_tab.py:146
 #: iridia/ui/netlights_card.py:36 iridia/ui/scenes_tab.py:183 iridia/ui/scenes_tab.py:300
 msgid "Add"
 msgstr ""
@@ -837,7 +837,7 @@ msgid ""
 "from this monitor."
 msgstr ""
 
-#: iridia/ui/app.py:1399 iridia/ui/app.py:1458 iridia/ui/zonecard.py:363
+#: iridia/ui/app.py:1399 iridia/ui/app.py:1458 iridia/ui/zonecard.py:380
 msgid "Monitor"
 msgstr ""
 
@@ -1085,7 +1085,7 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: iridia/ui/app.py:1653 iridia/ui/favorites_tab.py:37 iridia/ui/favorites_tab.py:329
+#: iridia/ui/app.py:1653 iridia/ui/favorites_tab.py:37 iridia/ui/favorites_tab.py:354
 #: iridia/ui/keybinds_tab.py:145 iridia/ui/layout_notify.py:358 iridia/ui/scenes_tab.py:18
 #: iridia/ui/sections_panel.py:326
 msgid "Effect"
@@ -1100,7 +1100,7 @@ msgid "Band"
 msgstr ""
 
 #: iridia/ui/app.py:1662 iridia/ui/effects.py:42 iridia/ui/effects.py:44 iridia/ui/effects.py:55
-#: iridia/ui/layout_notify.py:364 iridia/ui/zonecard.py:277
+#: iridia/ui/layout_notify.py:364 iridia/ui/zonecard.py:294
 msgid "LEDs"
 msgstr ""
 
@@ -1113,7 +1113,7 @@ msgid "times"
 msgstr ""
 
 #: iridia/ui/app.py:1670 iridia/ui/favorites_tab.py:33 iridia/ui/keybinds_tab.py:136
-#: iridia/ui/scenes_tab.py:75 iridia/ui/zonecard.py:347
+#: iridia/ui/scenes_tab.py:75 iridia/ui/zonecard.py:364
 msgid "Brightness"
 msgstr ""
 
@@ -1187,8 +1187,8 @@ msgstr ""
 msgid "Not during night mode"
 msgstr ""
 
-#: iridia/ui/app.py:1738 iridia/ui/app.py:1946 iridia/ui/app.py:1965 iridia/ui/favorites_tab.py:194
-#: iridia/ui/favorites_tab.py:202 iridia/ui/netlights_card.py:113 iridia/ui/scenes_tab.py:213
+#: iridia/ui/app.py:1738 iridia/ui/app.py:1946 iridia/ui/app.py:1965 iridia/ui/favorites_tab.py:202
+#: iridia/ui/favorites_tab.py:210 iridia/ui/netlights_card.py:113 iridia/ui/scenes_tab.py:213
 msgid "Couldn't save"
 msgstr ""
 
@@ -1782,8 +1782,8 @@ msgid "Couldn't start the uninstaller: {e}"
 msgstr ""
 
 #: iridia/ui/app.py:2465 iridia/ui/colorpicker.py:205 iridia/ui/dialogs.py:87 iridia/ui/dialogs.py:113
-#: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227 iridia/ui/favorites_tab.py:688
-#: iridia/ui/favorites_tab.py:745 iridia/ui/scenes_tab.py:332
+#: iridia/ui/dialogs.py:124 iridia/ui/dialogs.py:227 iridia/ui/favorites_tab.py:714
+#: iridia/ui/favorites_tab.py:771 iridia/ui/scenes_tab.py:332
 msgid "Cancel"
 msgstr ""
 
@@ -1936,7 +1936,7 @@ msgstr ""
 msgid "Off (turned off by command)"
 msgstr ""
 
-#: iridia/ui/app.py:2679 iridia/ui/favorites_tab.py:472
+#: iridia/ui/app.py:2679 iridia/ui/favorites_tab.py:497
 msgid "On"
 msgstr ""
 
@@ -1991,8 +1991,8 @@ msgstr ""
 msgid "Reset to defaults"
 msgstr ""
 
-#: iridia/ui/calibration_editor.py:37 iridia/ui/favorites_tab.py:511 iridia/ui/keybinds_tab.py:401
-#: iridia/ui/sections_panel.py:428 iridia/ui/zonecard.py:1032
+#: iridia/ui/calibration_editor.py:37 iridia/ui/favorites_tab.py:536 iridia/ui/keybinds_tab.py:401
+#: iridia/ui/sections_panel.py:428 iridia/ui/zonecard.py:1057
 msgid "Done"
 msgstr ""
 
@@ -2201,7 +2201,7 @@ msgstr ""
 msgid "Type a name."
 msgstr ""
 
-#: iridia/ui/dialogs.py:167 iridia/ui/favorites_tab.py:687 iridia/ui/favorites_tab.py:744
+#: iridia/ui/dialogs.py:167 iridia/ui/favorites_tab.py:713 iridia/ui/favorites_tab.py:770
 #: iridia/ui/scenes_tab.py:331
 msgid "Save"
 msgstr ""
@@ -2268,7 +2268,7 @@ msgid "Comet"
 msgstr ""
 
 #: iridia/ui/effects.py:18 iridia/ui/layout_notify.py:19 iridia/ui/layout_tab.py:34
-#: iridia/ui/zonecard.py:608
+#: iridia/ui/zonecard.py:620
 msgid "Fill"
 msgstr ""
 
@@ -2543,212 +2543,220 @@ msgstr ""
 msgid "Switches card"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:49 iridia/ui/zonecard.py:282
+#: iridia/ui/favorites_tab.py:49 iridia/ui/zonecard.py:299
 msgid "Static"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:132
+#: iridia/ui/favorites_tab.py:140
 msgid ""
 "Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
 "and switches. Drag them where you like in Arrange."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:136 iridia/ui/favorites_tab.py:154 iridia/ui/favorites_tab.py:629
+#: iridia/ui/favorites_tab.py:144 iridia/ui/favorites_tab.py:162 iridia/ui/favorites_tab.py:654
 msgid "New card"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:137 iridia/ui/favorites_tab.py:155 iridia/ui/favorites_tab.py:721
+#: iridia/ui/favorites_tab.py:145 iridia/ui/favorites_tab.py:163 iridia/ui/favorites_tab.py:747
 msgid "New look"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:139 iridia/ui/favorites_tab.py:511 iridia/ui/layout_tab.py:32
+#: iridia/ui/favorites_tab.py:147 iridia/ui/favorites_tab.py:536 iridia/ui/layout_tab.py:32
 msgid "Arrange"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:149
+#: iridia/ui/favorites_tab.py:157
 msgid "Nothing here yet"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:150
+#: iridia/ui/favorites_tab.py:158
 msgid ""
 "Make a card for some strips (or all of them) with the controls you want on it: on and off, "
 "brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
 "or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:212
+#: iridia/ui/favorites_tab.py:220
 msgid "Couldn't do that"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:251 iridia/ui/scenes_tab.py:239
+#: iridia/ui/favorites_tab.py:259 iridia/ui/scenes_tab.py:239
 #, python-brace-format
 msgid "{n} strips"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:302
+#: iridia/ui/favorites_tab.py:310
 msgid "Its strips aren't there any more."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:320
+#: iridia/ui/favorites_tab.py:315 iridia/ui/favorites_tab.py:550 iridia/ui/favorites_tab.py:654
+msgid "Change this card"
+msgstr ""
+
+#: iridia/ui/favorites_tab.py:330
+msgid "On: click to turn off"
+msgstr ""
+
+#: iridia/ui/favorites_tab.py:330
+msgid "Off: click to turn on"
+msgstr ""
+
+#: iridia/ui/favorites_tab.py:345
 msgid "Follow the monitor"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:321
+#: iridia/ui/favorites_tab.py:346
 msgid "Stay lit when locked"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:353
+#: iridia/ui/favorites_tab.py:378
 msgid "All colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:366 iridia/ui/layout_notify.py:354
+#: iridia/ui/favorites_tab.py:391 iridia/ui/layout_notify.py:354
 msgid "Colour"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:370
+#: iridia/ui/favorites_tab.py:395
 #, python-brace-format
 msgid "Wallpaper colour {n}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:390
+#: iridia/ui/favorites_tab.py:415
 msgid "Wallpaper colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:397
+#: iridia/ui/favorites_tab.py:422
 msgid "Saved colours"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:409
+#: iridia/ui/favorites_tab.py:434
 #, python-brace-format
 msgid "Colour for {name}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:410
+#: iridia/ui/favorites_tab.py:435
 msgid "Colour wheel…"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:428
-msgid "No looks picked: Arrange, ✏ on this card."
-msgstr ""
-
-#: iridia/ui/favorites_tab.py:465 iridia/ui/favorites_tab.py:472 iridia/ui/keybinds_tab.py:125
+#: iridia/ui/favorites_tab.py:490 iridia/ui/favorites_tab.py:497 iridia/ui/keybinds_tab.py:125
 msgid "Turn on"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:472
+#: iridia/ui/favorites_tab.py:497
 msgid "On: tap to go back"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:487
+#: iridia/ui/favorites_tab.py:512
 #, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:519
+#: iridia/ui/favorites_tab.py:544
 #, python-brace-format
 msgid "Size: {size}"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:525 iridia/ui/favorites_tab.py:629
-msgid "Change this card"
-msgstr ""
-
-#: iridia/ui/favorites_tab.py:529 iridia/ui/favorites_tab.py:721
+#: iridia/ui/favorites_tab.py:554 iridia/ui/favorites_tab.py:747
 msgid "Change this look"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:530 iridia/ui/zonecard.py:216
+#: iridia/ui/favorites_tab.py:555 iridia/ui/zonecard.py:233
 msgid "Take off Favourites"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:598 iridia/ui/zonecard.py:180 iridia/ui/zonecard.py:216
+#: iridia/ui/favorites_tab.py:623 iridia/ui/zonecard.py:197 iridia/ui/zonecard.py:233
 msgid "Add to Favourites"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:612 iridia/ui/scenes_tab.py:345
+#: iridia/ui/favorites_tab.py:637 iridia/ui/scenes_tab.py:345
 msgid "None yet."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:614
+#: iridia/ui/favorites_tab.py:639
 msgid "A card for one strip"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:617
+#: iridia/ui/favorites_tab.py:642
 msgid "On and off, brightness and colours; change it later. New card makes one for several strips."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:618
+#: iridia/ui/favorites_tab.py:643
 msgid "A look on its own"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:620
+#: iridia/ui/favorites_tab.py:645
 msgid "Setups"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:621
+#: iridia/ui/favorites_tab.py:646
 msgid "A switch on its own"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:631
+#: iridia/ui/favorites_tab.py:656
 msgid "Start from"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:633
+#: iridia/ui/favorites_tab.py:658
 msgid "Title (optional), like Desk or Room"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:636 iridia/ui/favorites_tab.py:727 iridia/ui/scenes_tab.py:312
+#: iridia/ui/favorites_tab.py:661 iridia/ui/favorites_tab.py:753 iridia/ui/scenes_tab.py:312
 msgid "Which strips"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:649
+#: iridia/ui/favorites_tab.py:674
 msgid "What's on it"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:658
+#: iridia/ui/favorites_tab.py:683
 msgid "Its looks (if Looks is on)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:667
+#: iridia/ui/favorites_tab.py:692
 msgid "None yet: New look makes one."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:669
+#: iridia/ui/favorites_tab.py:694
 msgid "Its switches (if Switches is on)"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:700 iridia/ui/favorites_tab.py:760 iridia/ui/favorites_tab.py:773
+#: iridia/ui/favorites_tab.py:705
+msgid "A card grows taller when what's on it needs the room."
+msgstr ""
+
+#: iridia/ui/favorites_tab.py:726 iridia/ui/favorites_tab.py:786 iridia/ui/favorites_tab.py:799
 #: iridia/ui/scenes_tab.py:369
 msgid "Pick the strips it's for, or Everything."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:703
+#: iridia/ui/favorites_tab.py:729
 msgid "Pick what goes on the card."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:722
+#: iridia/ui/favorites_tab.py:748
 msgid ""
 "One tap puts it on its strips, one more tap puts them back; your settings don't change. From a "
 "key: iridia look \"NAME\"."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:724
+#: iridia/ui/favorites_tab.py:750
 msgid "Name, like Movie or Gaming"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:740 iridia/ui/scenes_tab.py:326
+#: iridia/ui/favorites_tab.py:766 iridia/ui/scenes_tab.py:326
 msgid "What they do"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:763 iridia/ui/scenes_tab.py:222
+#: iridia/ui/favorites_tab.py:789 iridia/ui/scenes_tab.py:222
 msgid "Showing it for 5 seconds."
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:764 iridia/ui/scenes_tab.py:223
+#: iridia/ui/favorites_tab.py:790 iridia/ui/scenes_tab.py:223
 msgid "Couldn't show it"
 msgstr ""
 
-#: iridia/ui/favorites_tab.py:769
+#: iridia/ui/favorites_tab.py:795
 msgid "Give the look a name."
 msgstr ""
 
@@ -3120,7 +3128,7 @@ msgstr ""
 msgid "All settings"
 msgstr ""
 
-#: iridia/ui/layout_notify.py:345 iridia/ui/zonecard.py:609
+#: iridia/ui/layout_notify.py:345 iridia/ui/zonecard.py:621
 msgid "Clear"
 msgstr ""
 
@@ -3155,7 +3163,7 @@ msgid "Apps, urgent ones and quiet times: All settings."
 msgstr ""
 
 #: iridia/ui/layout_notify.py:396 iridia/ui/layout_tab.py:452 iridia/ui/layout_tab.py:1149
-#: iridia/ui/layout_tab.py:1294 iridia/ui/zonecard.py:263
+#: iridia/ui/layout_tab.py:1294 iridia/ui/zonecard.py:280
 #, python-brace-format
 msgid "{n} LED"
 msgid_plural "{n} LEDs"
@@ -3177,7 +3185,7 @@ msgstr ""
 msgid "Find LEDs: light one LED on the real strip"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:33 iridia/ui/zonecard.py:599 iridia/ui/zonecard.py:605
+#: iridia/ui/layout_tab.py:33 iridia/ui/zonecard.py:611 iridia/ui/zonecard.py:617
 msgid "Paint"
 msgstr ""
 
@@ -3185,7 +3193,7 @@ msgstr ""
 msgid "Erase (back to the zone's own color)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:34 iridia/ui/zonecard.py:32 iridia/ui/zonecard.py:606
+#: iridia/ui/layout_tab.py:34 iridia/ui/zonecard.py:32 iridia/ui/zonecard.py:618
 msgid "Gradient"
 msgstr ""
 
@@ -3193,8 +3201,8 @@ msgstr ""
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:111 iridia/ui/layout_tab.py:879 iridia/ui/zonecard.py:602
-#: iridia/ui/zonecard.py:806
+#: iridia/ui/layout_tab.py:111 iridia/ui/layout_tab.py:879 iridia/ui/zonecard.py:614
+#: iridia/ui/zonecard.py:818
 msgid "Paint color"
 msgstr ""
 
@@ -3401,7 +3409,7 @@ msgstr ""
 msgid "{zone} on {device}"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1141 iridia/ui/zonecard.py:187
+#: iridia/ui/layout_tab.py:1141 iridia/ui/zonecard.py:204
 msgid "Rename this strip"
 msgstr ""
 
@@ -3410,15 +3418,15 @@ msgstr ""
 msgid "clone of {strip} (shows the same colors)"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1152 iridia/ui/zonecard.py:295 iridia/ui/zonecard.py:1032
+#: iridia/ui/layout_tab.py:1152 iridia/ui/zonecard.py:312 iridia/ui/zonecard.py:1057
 msgid "Identify"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1153 iridia/ui/zonecard.py:297
+#: iridia/ui/layout_tab.py:1153 iridia/ui/zonecard.py:314
 msgid "Count LEDs"
 msgstr ""
 
-#: iridia/ui/layout_tab.py:1160 iridia/ui/sections_panel.py:312 iridia/ui/zonecard.py:281
+#: iridia/ui/layout_tab.py:1160 iridia/ui/sections_panel.py:312 iridia/ui/zonecard.py:298
 msgid "Pattern"
 msgstr ""
 
@@ -3930,7 +3938,7 @@ msgstr ""
 msgid "Add divider"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:49 iridia/ui/zonecard.py:328
+#: iridia/ui/sections_panel.py:49 iridia/ui/zonecard.py:345
 msgid "Space evenly"
 msgstr ""
 
@@ -3974,7 +3982,7 @@ msgstr ""
 msgid "LED {first}"
 msgstr ""
 
-#: iridia/ui/sections_panel.py:268 iridia/ui/zonecard.py:746
+#: iridia/ui/sections_panel.py:268 iridia/ui/zonecard.py:758
 #, python-brace-format
 msgid "{leds} LEDs: {sizes}"
 msgstr ""
@@ -3983,14 +3991,14 @@ msgstr ""
 msgid "Add a divider to split this strip into parts."
 msgstr ""
 
-#: iridia/ui/sections_panel.py:273 iridia/ui/zonecard.py:752
+#: iridia/ui/sections_panel.py:273 iridia/ui/zonecard.py:764
 #, python-brace-format
 msgid "The parts are {n} LED apart. Space evenly makes them match."
 msgid_plural "The parts are {n} LEDs apart. Space evenly makes them match."
 msgstr[0] ""
 msgstr[1] ""
 
-#: iridia/ui/sections_panel.py:276 iridia/ui/zonecard.py:755
+#: iridia/ui/sections_panel.py:276 iridia/ui/zonecard.py:767
 #, python-brace-format
 msgid "{leds} LEDs don't split into {parts} evenly, so the first part gets 1 more LED."
 msgid_plural "{leds} LEDs don't split into {parts} evenly, so the first {extra} parts get 1 more LED."
@@ -4085,7 +4093,7 @@ msgstr ""
 msgid "#{k}  (right-click to delete)"
 msgstr ""
 
-#: iridia/ui/widgets.py:709 iridia/ui/zonecard.py:965
+#: iridia/ui/widgets.py:709 iridia/ui/zonecard.py:990
 msgid "Save a new color"
 msgstr ""
 
@@ -4152,39 +4160,39 @@ msgstr ""
 msgid "Painted"
 msgstr ""
 
-#: iridia/ui/zonecard.py:109
+#: iridia/ui/zonecard.py:116
 msgid "Addressable 5V (WS2812B, SK6812)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:110
+#: iridia/ui/zonecard.py:117
 msgid "Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital."
 msgstr ""
 
-#: iridia/ui/zonecard.py:111
+#: iridia/ui/zonecard.py:118
 msgid "Addressable 12V in groups (WS2811, COB)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:112
+#: iridia/ui/zonecard.py:119
 msgid ""
 "One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
 "how many LEDs are in a pixel so the Layout tab draws the real length."
 msgstr ""
 
-#: iridia/ui/zonecard.py:114
+#: iridia/ui/zonecard.py:121
 msgid "One color (plain 12V RGB, 4 pins)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:115
+#: iridia/ui/zonecard.py:122
 msgid ""
 "The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
 "apply, so they're hidden."
 msgstr ""
 
-#: iridia/ui/zonecard.py:117
+#: iridia/ui/zonecard.py:124
 msgid "RGBW addressable (SK6812 RGBW, experimental)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:118
+#: iridia/ui/zonecard.py:125
 msgid ""
 "OpenRGB sends 3 bytes per LED, RGBW strips read 4. Iridia packs the white channel into the data "
 "itself, which needs the OpenRGB zone to be a third larger than the strip. Assumes the header "
@@ -4192,249 +4200,257 @@ msgid ""
 "these strips: set the LED count by hand."
 msgstr ""
 
-#: iridia/ui/zonecard.py:125
+#: iridia/ui/zonecard.py:132
 msgid "RGB (normal)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:186
+#: iridia/ui/zonecard.py:179
+msgid "Let Iridia control it: off, Iridia sends it nothing and it keeps whatever it shows"
+msgstr ""
+
+#: iridia/ui/zonecard.py:181
+msgid "Let Iridia control every strip"
+msgstr ""
+
+#: iridia/ui/zonecard.py:203
 msgid "Show again"
 msgstr ""
 
-#: iridia/ui/zonecard.py:186
+#: iridia/ui/zonecard.py:203
 msgid "Hide this strip (it keeps working)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:254 iridia/ui/zonecard.py:257 iridia/ui/zonecard.py:260
+#: iridia/ui/zonecard.py:271 iridia/ui/zonecard.py:274 iridia/ui/zonecard.py:277
 msgid "mixed"
 msgstr ""
 
-#: iridia/ui/zonecard.py:260
+#: iridia/ui/zonecard.py:277
 msgid "no correction"
 msgstr ""
 
-#: iridia/ui/zonecard.py:260
+#: iridia/ui/zonecard.py:277
 msgid "palette"
 msgstr ""
 
-#: iridia/ui/zonecard.py:261
+#: iridia/ui/zonecard.py:278
 msgid "calibrated"
 msgstr ""
 
-#: iridia/ui/zonecard.py:282
+#: iridia/ui/zonecard.py:299
 msgid "Animated"
 msgstr ""
 
-#: iridia/ui/zonecard.py:299
+#: iridia/ui/zonecard.py:316
 msgid "Identify lights only this zone, so you can see which strip it is."
 msgstr ""
 
-#: iridia/ui/zonecard.py:311 iridia/ui/zonecard.py:676
+#: iridia/ui/zonecard.py:328 iridia/ui/zonecard.py:688
 msgid "Edit layout"
 msgstr ""
 
-#: iridia/ui/zonecard.py:313
+#: iridia/ui/zonecard.py:330
 msgid "Reverse"
 msgstr ""
 
-#: iridia/ui/zonecard.py:314
+#: iridia/ui/zonecard.py:331
 msgid "Mirror"
 msgstr ""
 
-#: iridia/ui/zonecard.py:318
+#: iridia/ui/zonecard.py:335
 msgid ""
 "Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
 "tab."
 msgstr ""
 
-#: iridia/ui/zonecard.py:349
+#: iridia/ui/zonecard.py:366
 msgid "Follow monitor brightness"
 msgstr ""
 
-#: iridia/ui/zonecard.py:351
+#: iridia/ui/zonecard.py:368
 msgid "Manual"
 msgstr ""
 
-#: iridia/ui/zonecard.py:356
+#: iridia/ui/zonecard.py:373
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr ""
 
-#: iridia/ui/zonecard.py:369
+#: iridia/ui/zonecard.py:386
 msgid "Range"
 msgstr ""
 
-#: iridia/ui/zonecard.py:375
+#: iridia/ui/zonecard.py:392
 msgid "Invert (bias lighting)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:377
+#: iridia/ui/zonecard.py:394
 msgid "Gamma correction"
 msgstr ""
 
-#: iridia/ui/zonecard.py:383
+#: iridia/ui/zonecard.py:400
 msgid "Stay lit when the screen locks or you're away"
 msgstr ""
 
-#: iridia/ui/zonecard.py:392
+#: iridia/ui/zonecard.py:409
 msgid "With the rest"
 msgstr ""
 
-#: iridia/ui/zonecard.py:392
+#: iridia/ui/zonecard.py:409
 msgid "Only when I change it"
 msgstr ""
 
-#: iridia/ui/zonecard.py:393
-msgid "Not at all"
-msgstr ""
-
-#: iridia/ui/zonecard.py:395
+#: iridia/ui/zonecard.py:412
 msgid "How Iridia uses it"
 msgstr ""
 
-#: iridia/ui/zonecard.py:401
-msgid "Let Iridia control it"
-msgstr ""
-
-#: iridia/ui/zonecard.py:404
-msgid ""
-"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
-"switch at the top of the card turns it off instead."
-msgstr ""
-
-#: iridia/ui/zonecard.py:407
+#: iridia/ui/zonecard.py:419
 msgid "On its own: ignore the monitor, night mode, lock and sleep"
 msgstr ""
 
-#: iridia/ui/zonecard.py:414
+#: iridia/ui/zonecard.py:426
 msgid "Keep its own colour (Iridia sets only brightness and on/off)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:436
+#: iridia/ui/zonecard.py:448
 msgid "Strip type and wiring"
 msgstr ""
 
-#: iridia/ui/zonecard.py:440
+#: iridia/ui/zonecard.py:452
 msgid "Strip type"
 msgstr ""
 
-#: iridia/ui/zonecard.py:450
+#: iridia/ui/zonecard.py:462
 msgid "Color order"
 msgstr ""
 
-#: iridia/ui/zonecard.py:454 iridia/ui/zonecard.py:511 iridia/ui/zonecard.py:520
+#: iridia/ui/zonecard.py:466 iridia/ui/zonecard.py:523 iridia/ui/zonecard.py:532
 msgid "Test colors"
 msgstr ""
 
-#: iridia/ui/zonecard.py:457
+#: iridia/ui/zonecard.py:469
 msgid ""
 "Test colors lights this strip red at the LED 1 end, green in the middle and blue at the far end "
 "(a one-color strip cycles red, green, blue). If the colors are wrong, change the order until they"
 " match."
 msgstr ""
 
-#: iridia/ui/zonecard.py:462
+#: iridia/ui/zonecard.py:474
 msgid "LEDs per pixel"
 msgstr ""
 
-#: iridia/ui/zonecard.py:469
+#: iridia/ui/zonecard.py:481
 msgid "Power limit"
 msgstr ""
 
-#: iridia/ui/zonecard.py:473
+#: iridia/ui/zonecard.py:485
 msgid "A  (0 = no limit)"
 msgstr ""
 
-#: iridia/ui/zonecard.py:477
+#: iridia/ui/zonecard.py:489
 msgid ""
 "Long 5V strips at full white pull a lot of current: the far end turns orange or pink, or the "
 "controller resets. Set your power supply's amps (minus a bit) and Iridia dims only when a color "
 "would go over it. The estimate assumes 60 mA per LED at full white."
 msgstr ""
 
-#: iridia/ui/zonecard.py:486
+#: iridia/ui/zonecard.py:498
 msgid "Resize the OpenRGB zone"
 msgstr ""
 
-#: iridia/ui/zonecard.py:511
+#: iridia/ui/zonecard.py:523
 msgid "Stop test"
 msgstr ""
 
-#: iridia/ui/zonecard.py:528
+#: iridia/ui/zonecard.py:540
 #, python-brace-format
 msgid "Asked OpenRGB for {need} LEDs on this zone"
 msgstr ""
 
-#: iridia/ui/zonecard.py:546
+#: iridia/ui/zonecard.py:558
 #, python-brace-format
 msgid "Notifications: LEDs {leds}"
 msgstr ""
 
-#: iridia/ui/zonecard.py:548
+#: iridia/ui/zonecard.py:560
 msgid "(off)"
-msgstr ""
-
-#: iridia/ui/zonecard.py:570
-#, python-brace-format
-msgid "(looks like: {type})"
-msgstr ""
-
-#: iridia/ui/zonecard.py:572
-#, python-brace-format
-msgid "Strip: {type}"
-msgstr ""
-
-#: iridia/ui/zonecard.py:579
-#, python-brace-format
-msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
 msgstr ""
 
 #: iridia/ui/zonecard.py:582
 #, python-brace-format
+msgid "(looks like: {type})"
+msgstr ""
+
+#: iridia/ui/zonecard.py:584
+#, python-brace-format
+msgid "Strip: {type}"
+msgstr ""
+
+#: iridia/ui/zonecard.py:591
+#, python-brace-format
+msgid "Right now about {now:.1f} A, {full:.1f} A at full white."
+msgstr ""
+
+#: iridia/ui/zonecard.py:594
+#, python-brace-format
 msgid "Dimmed to stay under the limit (would be {amps:.1f} A)."
 msgstr ""
 
-#: iridia/ui/zonecard.py:589
+#: iridia/ui/zonecard.py:601
 #, python-brace-format
 msgid "For {n} RGBW LEDs the OpenRGB zone needs {need} LEDs; right now the end of the strip stays dark."
 msgstr ""
 
-#: iridia/ui/zonecard.py:605
+#: iridia/ui/zonecard.py:617
 msgid "Erase"
 msgstr ""
 
-#: iridia/ui/zonecard.py:676
+#: iridia/ui/zonecard.py:688
 msgid "Done editing"
 msgstr ""
 
-#: iridia/ui/zonecard.py:700
+#: iridia/ui/zonecard.py:712
 msgid "Colors in order (click to change):"
 msgstr ""
 
-#: iridia/ui/zonecard.py:720
+#: iridia/ui/zonecard.py:732
 msgid "Change this color"
 msgstr ""
 
-#: iridia/ui/zonecard.py:997
+#: iridia/ui/zonecard.py:852
+msgid "every strip"
+msgstr ""
+
+#: iridia/ui/zonecard.py:852
+msgid "this strip"
+msgstr ""
+
+#: iridia/ui/zonecard.py:853
+#, python-brace-format
+msgid "On: click to turn {what} off"
+msgstr ""
+
+#: iridia/ui/zonecard.py:854
+#, python-brace-format
+msgid "Off: click to turn {what} on"
+msgstr ""
+
+#: iridia/ui/zonecard.py:1022
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr ""
 
-#: iridia/ui/zonecard.py:998
+#: iridia/ui/zonecard.py:1023
 msgid ""
-"Iridia sends its colour and brightness only when you change them here, and never switches it on "
-"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
-" light may switch itself on when it gets a colour."
+"Iridia sends its colour and brightness only when you change them here, and switches it on or off "
+"only with the power button: its own app and automations (Google Home, say) stay in charge. While "
+"it's off here, colour changes wait. A light may switch itself on when it gets a colour."
 msgstr ""
 
-#: iridia/ui/zonecard.py:1001
-msgid "Iridia sends it nothing: it keeps whatever its own app set."
-msgstr ""
-
-#: iridia/ui/zonecard.py:1052
+#: iridia/ui/zonecard.py:1077
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
 "set the size there."
 msgstr ""
 
-#: iridia/ui/zonecard.py:1055
+#: iridia/ui/zonecard.py:1080
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."

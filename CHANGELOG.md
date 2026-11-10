@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Each strip's card:** the switch on the left now means *Let Iridia control it* (off: Iridia sends it
+  nothing and it keeps whatever it shows), and a new round ⏻ button in the header turns it on or off
+  (pastel green on, red off). For a network light set to *Only when I change it*, ⏻ sends one on or off
+  command when pressed, and colour changes wait while it's off; before, its switch was ignored. *Not at
+  all* is gone from *How Iridia uses it*: that's the switch now.
+- **Favourites cards:** changes from a card now reach network lights set to *Only when I change it*;
+  every control you tick shows, whatever the size (a card grows taller to fit); a pencil on each card
+  changes it (right-click a small one); and on/off is the same ⏻ button. A brightness change on an *Only
+  when I change it* light is sent at the brightness asked for, not the first step of a fade.
 - **System packages:** each release now has a package for Arch (and CachyOS, Manjaro, EndeavourOS),
   Debian and Ubuntu, and Fedora and openSUSE, with a `SHA256SUMS` file. The package manager brings in
   what Iridia needs and removes it all again; Iridia lives in `/usr/lib/iridia`, with a systemd user

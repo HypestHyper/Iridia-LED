@@ -1172,3 +1172,17 @@ def test_one_change_for_several_strips(d):
     assert not _cmd(d, "set_zones", targets=[], set={"enabled": True})["ok"]
     assert _cmd(d, "set_zone_strip", device="Strip", zone="", hidden=True)["ok"]
     assert d.config.get(("devices", "Strip", "hidden")) is True
+
+
+def test_hands_off_for_every_strip_from_the_everything_card(d):
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["ff0000"] * 4
+    assert _cmd(d, "set_all", field="hands_off", value=True)["ok"]
+    n = len(d.openrgb.sent)
+    _cmd(d, "set_all", field="pattern_colors", value=["00ff00"])
+    d._update_all_devices()
+    assert len(d.openrgb.sent) == n                     # nothing sent while Iridia leaves them alone
+    assert _cmd(d, "set_all", field="hands_off", value=False)["ok"]
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ff00"] * 4
+    assert not _cmd(d, "set_all", field="hands_off", value="yes")["ok"]

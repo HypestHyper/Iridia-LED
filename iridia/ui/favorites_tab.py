@@ -65,6 +65,7 @@ class Board(Gtk.Grid):
     """Square cells, as many columns as fit; items span 1 or 2 cells each way and fill gaps in order."""
 
     CELL = 150
+    ROW = 120               # a row's height
     GAP = 12
 
     def __init__(self):
@@ -72,6 +73,7 @@ class Board(Gtk.Grid):
                          row_spacing=self.GAP, hexpand=True)
         self._items: list = []
         self._cols = 4
+        self._width = 0
         self._job = None
 
     def set_items(self, items):
@@ -82,8 +84,8 @@ class Board(Gtk.Grid):
     def do_size_allocate(self, width, height, baseline):
         Gtk.Grid.do_size_allocate(self, width, height, baseline)
         cols = max(2, min(8, (width + self.GAP) // (self.CELL + self.GAP)))
-        if cols != self._cols and self._job is None:
-            self._cols = cols
+        if (cols != self._cols or abs(width - self._width) > 40) and self._job is None:
+            self._cols, self._width = cols, width
             self._job = GLib.idle_add(self._repack)     # never change children while being laid out
 
     def _repack(self):
@@ -99,9 +101,15 @@ class Board(Gtk.Grid):
             c = n
         cols = self._cols
         used: set = set()
+        colw = max(self.CELL, (self._width - self.GAP * (cols - 1)) // cols) if self._width else self.CELL
         for w, size in self._items:
             sw, sh = SPAN.get(size, (1, 1))
             sw = min(sw, cols)
+            # taller than its size when what's on it needs the room: nothing you picked is left out
+            w.set_size_request(-1, -1)
+            width = max(colw * sw + self.GAP * (sw - 1), w.measure(Gtk.Orientation.HORIZONTAL, -1)[0])
+            need = w.measure(Gtk.Orientation.VERTICAL, width)[0]
+            sh = max(sh, -(-(need + self.GAP) // (self.ROW + self.GAP)))
             row = 0
             while True:
                 spot = next((col for col in range(cols - sw + 1)
@@ -112,7 +120,7 @@ class Board(Gtk.Grid):
             for dx in range(sw):
                 for dy in range(sh):
                     used.add((spot + dx, row + dy))
-            w.set_size_request(-1, sh * 120 + (sh - 1) * self.GAP)
+            w.set_size_request(-1, sh * self.ROW + (sh - 1) * self.GAP)
             self.attach(w, spot, row, sw, sh)
         # a gap of an empty row or column keeps every cell square-ish even with few items
         for col in range(cols):
@@ -300,42 +308,59 @@ class FavoritesPage:
         ctl = t["controls"]
         if not keys:
             c.append(label(_("Its strips aren't there any more."), ("small", "faint"), wrap=True))
+        if not self._editing:
+            # change it right here: the pencil, or a right-click where a small card has no room for one
+            if not small:
+                head.append(button(None, "edit", "text small", lambda: self._open_card(t),
+                                   tooltip=_("Change this card")))
+            rc = Gtk.GestureClick(button=3)
+            rc.connect("released", lambda *_a: self._open_card(t))
+            c.add_controller(rc)
         if "power" in ctl and keys:
-            sw = Toggle(True, lambda v: self._zones(tg, enabled=v))
-            head.append(sw)
-            updaters.append(lambda st, z: sw.set_value(any(x.get("enabled", True) for x in z)))
+            # the same round on/off button as on the Devices tab: pastel green on, red off
+            pw = button(None, "power_settings_new", "text small power on", None)
+            pw.set_valign(Gtk.Align.CENTER)
+            pw.set_halign(Gtk.Align.CENTER)
+            state = {"on": True}
+
+            def show(on, pw=pw, state=state):
+                state["on"] = on
+                pw.remove_css_class("on" if not on else "off")
+                pw.add_css_class("on" if on else "off")
+                pw.set_tooltip_text(_("On: click to turn off") if on else _("Off: click to turn on"))
+
+            def press(_b, state=state, show=show):
+                show(not state["on"])
+                self._zones(tg, enabled=state["on"])
+            pw.connect("clicked", press)
+            head.append(pw)
+            updaters.append(lambda st, z, show=show: show(any(x.get("enabled", True) for x in z)))
         if "colors" in ctl and keys:
             updaters.append(self._colours(c, tg, small, t))
-        if small:
-            # a small card: what fits in one cell (the header, and colours if it has them)
-            if "looks" in ctl and t.get("looks"):
-                updaters.append(self._look_chips(c, t["looks"][:1], looks))
-            elif "switches" in ctl and t.get("switches"):
-                updaters.append(self._switch_chips(c, t["switches"][:1]))
-        else:
-            if "brightness" in ctl and keys:
-                br = MiniSlider("", 0, 100, 100, 5, "%", lambda v: self._zones(tg, brightness=int(v)))
-                c.append(br)
-                updaters.append(lambda st, z: br.set_quiet(int(z[0].get("manual_brightness", 100))))
-            for key, text, field in (("follow", _("Follow the monitor"), "brightness_sync"),
-                                     ("stay_lit", _("Stay lit when locked"), "session_ignore")):
-                if key in ctl and keys:
-                    tog = Toggle(False, lambda v, field=field: self._zones(tg, **{field: v}))
-                    c.append(hbox(8, _grow(label(text, ("body",), ellipsize=True)), tog))
-                    updaters.append(lambda st, z, tog=tog, field=field: tog.set_value(all(x.get(field) for x in z)))
-            if "effect" in ctl and keys:
-                names = [STATIC] + list(EFFECT_NAMES.values())
-                dd = Dropdown(names, STATIC, lambda v: self._zones(tg, effect=EFFECT_KEYS.get(v)))
-                c.append(hbox(8, _grow(label(_("Effect"), ("body", "dim"))), dd))
+        # every control you picked, whatever the size: the card grows to fit (Board)
+        if "brightness" in ctl and keys:
+            br = MiniSlider("", 0, 100, 100, 5, "%", lambda v: self._zones(tg, brightness=int(v)))
+            c.append(br)
+            updaters.append(lambda st, z: br.set_quiet(int(z[0].get("manual_brightness", 100))))
+        for key, text, field in (("follow", _("Follow the monitor"), "brightness_sync"),
+                                 ("stay_lit", _("Stay lit when locked"), "session_ignore")):
+            if key in ctl and keys:
+                tog = Toggle(False, lambda v, field=field: self._zones(tg, **{field: v}))
+                c.append(hbox(8, _grow(label(text, ("body",), ellipsize=True)), tog))
+                updaters.append(lambda st, z, tog=tog, field=field: tog.set_value(all(x.get(field) for x in z)))
+        if "effect" in ctl and keys:
+            names = [STATIC] + list(EFFECT_NAMES.values())
+            dd = Dropdown(names, STATIC, lambda v: self._zones(tg, effect=EFFECT_KEYS.get(v)))
+            c.append(hbox(8, _grow(label(_("Effect"), ("body", "dim"))), dd))
 
-                def eff(st, z, dd=dd):
-                    a = z[0].get("animation") if isinstance(z[0].get("animation"), dict) else None
-                    dd.set_value(EFFECT_NAMES.get((a or {}).get("effect"), STATIC))
-                updaters.append(eff)
-            if "looks" in ctl:
-                updaters.append(self._look_chips(c, t.get("looks") or [], looks))
-            if "switches" in ctl:
-                updaters.append(self._switch_chips(c, t.get("switches") or []))
+            def eff(st, z, dd=dd):
+                a = z[0].get("animation") if isinstance(z[0].get("animation"), dict) else None
+                dd.set_value(EFFECT_NAMES.get((a or {}).get("effect"), STATIC))
+            updaters.append(eff)
+        if "looks" in ctl:
+            updaters.append(self._look_chips(c, t.get("looks") or [], looks))
+        if "switches" in ctl:
+            updaters.append(self._switch_chips(c, t.get("switches") or []))
 
         def live(st):
             z = [self._zone_cfg(k, st) or {} for k in self._keys(tg, st)] or [{}]
@@ -425,7 +450,7 @@ class FavoritesPage:
             chips[lid] = b
             row.append(b)
         if not chips:
-            row.append(label(_("No looks picked: Arrange, ✏ on this card."), ("small", "faint"), wrap=True))
+            row.set_visible(False)          # none picked (or none made yet): nothing to show
 
         def upd(st, z):
             on = {x["id"] for x in st.get("looks") or [] if x.get("active")}
@@ -677,6 +702,7 @@ class FavoritesPage:
         c.append(wrow)
         self._card_size = Group([(k, SIZE_NAMES[k]) for k in ("s", "w", "t", "l")], (t or {}).get("size", "w"))
         c.append(hbox(10, label(_("Size"), ("body", "dim")), self._card_size))
+        c.append(label(_("A card grows taller when what's on it needs the room."), ("small", "faint"), wrap=True))
 
         def preset(controls, size):
             for k, cb in self._card_ctl.items():

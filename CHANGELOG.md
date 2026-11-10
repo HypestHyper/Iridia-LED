@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **System packages:** each release now has a package for Arch (and CachyOS, Manjaro, EndeavourOS),
+  Debian and Ubuntu, and Fedora and openSUSE, with a `SHA256SUMS` file. The package manager brings in
+  what Iridia needs and removes it all again; Iridia lives in `/usr/lib/iridia`, with a systemd user
+  unit, the launcher and icons in `/usr`. Installed that way, the Updates tab says when there's a new
+  version and opens its download page, *Uninstall* says how to remove the package, and `iridia doctor`
+  notices an older install.sh copy left in your home folder. Every push builds the packages and installs
+  each one on a fresh Arch, Debian, Ubuntu and Fedora (the command line, the daemon, the window, an
+  upgrade and removing it).
+
 ## 1.3.9 — 2026-11-09
 
 - **Favourites:** a tab (right after Status) with the controls you use most, on a grid you arrange

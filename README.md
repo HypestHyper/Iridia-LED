@@ -54,6 +54,14 @@ goes outside your home folder. It uses about 0.1% of one CPU core with static co
 
 ## Installation
 
+**As a system package:** download the one for your system from the
+[latest release](https://github.com/HypestHyper/Iridia-LED/releases/latest), then
+`sudo pacman -U ./iridia-*.pkg.tar.zst` (Arch, CachyOS), `sudo apt install ./iridia_*.deb` (Debian,
+Ubuntu) or `sudo dnf install ./iridia-*.rpm` (Fedora). Your package manager brings what it needs and
+removes it all again ([details](docs/wiki/Installation.md#as-a-system-package)).
+
+**With the installer**, on any distribution:
+
 ```sh
 git clone https://github.com/HypestHyper/Iridia-LED.git
 cd Iridia-LED

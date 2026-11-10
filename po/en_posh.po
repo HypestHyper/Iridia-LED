@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:44+0000\n"
+"POT-Creation-Date: 2026-11-10 03:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -533,6 +533,9 @@ msgstr "Update forthwith"
 msgid "Skip this version"
 msgstr "Pass over this edition"
 
+msgid "Download page"
+msgstr "Download page"
+
 msgid "What's new"
 msgstr "What is new"
 
@@ -590,6 +593,9 @@ msgstr "You have the very latest edition."
 msgid "Not checked yet."
 msgstr "Not yet enquired."
 
+msgid "Iridia came as a system package: download the new one and install it the same way."
+msgstr "Iridia arrived as a system package: kindly download the new one and install it in the same manner."
+
 msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
 msgstr "This Iridia runs from its source folder: kindly update it there (git pull, then bash install.sh)."
 
@@ -607,6 +613,10 @@ msgstr "Nothing retained as yet: the present edition is retained when you update
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr "Return to {v}"
+
+#, python-brace-format
+msgid "Couldn't open it: {err}"
+msgstr "Regrettably, it couldn't be opened: {err}"
 
 msgid "Checking…"
 msgstr "Making enquiries…"
@@ -1432,6 +1442,18 @@ msgstr ""
 
 msgid "Uninstall Iridia"
 msgstr "Bid Iridia farewell"
+
+#, python-brace-format
+msgid ""
+"Iridia came as a system package, so your package manager removes it{how}. Your settings stay in "
+"~/.config/iridia; delete that folder too to remove them."
+msgstr ""
+"Iridia arrived as a system package, so one's package manager removes it{how}. One's settings "
+"remain in ~/.config/iridia; delete that folder too to remove them."
+
+#, python-brace-format
+msgid ": {cmd}"
+msgstr ": {cmd}"
 
 msgid ""
 "Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "

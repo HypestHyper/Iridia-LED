@@ -14,6 +14,7 @@ SOCKET_PATH = runtime_path(f"iridia-{os.getuid()}.sock")
 
 SERVICE_NAME = "iridia-daemon.service"
 SERVICE_PATH = os.path.expanduser(f"~/.config/systemd/user/{SERVICE_NAME}")
+SYSTEM_UNIT_PATH = f"/usr/lib/systemd/user/{SERVICE_NAME}"      # the one a system package brings
 
 def _client():
     return IPCClient(SOCKET_PATH)
@@ -411,7 +412,11 @@ def cmd_uninstall(args):
         print("Kept your settings in ~/.config/iridia/.")
     print("")
     print("If you added an Iridia startup line to your compositor's config, remove it too.")
-    if own_venv:
+    from iridia import updater
+    if updater.install_kind() == "package":
+        rm = updater.package_remove_command() or "your package manager"
+        print(f"Iridia came as a system package: remove the program with {rm}.")
+    elif own_venv:
         time.sleep(0.2)
         shutil.rmtree(venv, ignore_errors=True)
         print("Removed the Iridia program files. Iridia is uninstalled.")
@@ -1020,6 +1025,11 @@ def cmd_update(args):
         print("\n" + info["notes"] + "\n")
     if args.check:
         return 0
+    if updater.install_kind() == "package":
+        cmd = updater.package_manager()
+        print(f"This Iridia is a system package: download the new one from {info.get('page') or 'the release page'}"
+              + (f" and install it: {cmd}" if cmd else " and install it with your package manager") + ".")
+        return 1
     if updater.install_kind() != "venv":
         print("This Iridia isn't the install.sh install (a git checkout or your own venv): update it the way you "
               "installed it, for example: git pull && bash install.sh")
@@ -1284,7 +1294,8 @@ def current_autostart() -> str:
     return "none"
 
 
-def _service_install(how=None, openrgb=None):
+def _write_user_files():
+    """The systemd unit, launcher and icons in your home folder (the install.sh install)."""
     bin_dir = _venv_bin_dir()
     python_bin = os.path.join(bin_dir, "python3")
     gui_bin = os.path.join(bin_dir, "iridia-gui")
@@ -1336,6 +1347,19 @@ WantedBy=graphical-session.target
     os.chmod(desktop_path, 0o644)
     _refresh_launchers(apps_dir)
     print(f"Launcher: {desktop_path}")
+    return 0
+
+
+def _service_install(how=None, openrgb=None):
+    from iridia import updater
+    if updater.install_kind() == "package":
+        # the package put the unit, the launcher and the icons in /usr: nothing of ours to write
+        if not os.path.exists(SYSTEM_UNIT_PATH):
+            print(f"{SYSTEM_UNIT_PATH} is missing: reinstall the iridia package.")
+    else:
+        r = _write_user_files()
+        if r:
+            return r
     from iridia import autostart
     if how == "keep":
         how = current_autostart()
@@ -1362,7 +1386,7 @@ WantedBy=graphical-session.target
             print("Warning: your session doesn't start graphical-session.target (Hyprland without UWSM, for "
                   "example), so this service won't start at login. Use --autostart compositor instead.")
     else:
-        if _has_user_systemd() and os.path.exists(SERVICE_PATH):
+        if _has_user_systemd() and (os.path.exists(SERVICE_PATH) or os.path.exists(SYSTEM_UNIT_PATH)):
             _systemctl("disable", SERVICE_NAME, capture=True)      # one starter is enough
         if how == "xdg":
             try:

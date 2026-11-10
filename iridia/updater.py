@@ -141,15 +141,51 @@ def check(current: str, prerelease: bool = False, api: str = API) -> dict:
 
 # ------------------------------------------------------------------ installing
 
+PACKAGE_DIR = "/usr/lib/iridia"           # where the .deb, .rpm and Arch packages put it
+
+
 def install_kind(venv: str = VENV) -> str:
-    """"venv" when this is the install.sh install (updates work), else "source" (a git checkout or a
-    venv of your own: update that the way you installed it)."""
+    """"venv" when this is the install.sh install (updates work), "package" when it came as a system
+    package (the package manager updates it), else "source" (a git checkout or a venv of your own:
+    update that the way you installed it)."""
     try:
         import sys
+
+        import iridia
         here = os.path.realpath(sys.prefix)
+        pkg = os.path.realpath(os.path.dirname(iridia.__file__))
     except Exception:          # noqa: BLE001
         return "source"
+    if pkg.startswith(os.path.realpath(PACKAGE_DIR) + os.sep):
+        return "package"
     return "venv" if here == os.path.realpath(venv) and os.path.isdir(venv) else "source"
+
+
+def package_manager() -> str:
+    """The command that installs a downloaded package on this system ("" if none is known)."""
+    import shutil
+    for tool, cmd in (("pacman", "sudo pacman -U ./iridia-*.pkg.tar.zst"), ("apt", "sudo apt install ./iridia_*.deb"),
+                      ("dnf", "sudo dnf install ./iridia-*.rpm"), ("zypper", "sudo zypper install ./iridia-*.rpm")):
+        if shutil.which(tool):
+            return cmd
+    return ""
+
+
+def package_remove_command() -> str:
+    """The command that removes the iridia package on this system ("" if none is known)."""
+    import shutil
+    for tool, cmd in (("pacman", "sudo pacman -R iridia"), ("apt", "sudo apt remove iridia"),
+                      ("dnf", "sudo dnf remove iridia"), ("zypper", "sudo zypper remove iridia")):
+        if shutil.which(tool):
+            return cmd
+    return ""
+
+
+def reinstall_hint() -> str:
+    """How to put the program files back: for the package, reinstall it; else run the installer."""
+    if install_kind() == "package":
+        return "Reinstall the iridia package (download it again from the release page)."
+    return "Run the installer again: bash install.sh"
 
 
 def prev_version(venv: str = VENV) -> str | None:

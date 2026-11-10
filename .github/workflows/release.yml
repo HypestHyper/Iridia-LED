@@ -61,6 +61,15 @@ jobs:
         run: |
           git archive --format=tar.gz --prefix=iridia/ -o "iridia-$VERSION.tar.gz" HEAD \
             -- . ':!tests' ':!.github' ':!scripts'
+      - name: System packages (.deb, .rpm, Arch)
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.46.3
+          NFPM="$(go env GOPATH)/bin/nfpm" sh packaging/build.sh pkgs
+          docker run --rm -v "$PWD:/src" -w /src archlinux:latest sh -c \
+            'pacman -Syu --noconfirm --needed base-devel git >/dev/null && git config --global --add safe.directory /src && sh packaging/arch-build.sh pkgs'
+          sudo chown -R "$(id -u)" pkgs
+          cp "iridia-$VERSION.tar.gz" pkgs/
+          (cd pkgs && sha256sum -- * > SHA256SUMS && cat SHA256SUMS)
       - name: Write the release notes
         run: |
           awk -v head="## $VERSION " 'index($0, head) == 1 {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
@@ -68,7 +77,17 @@ jobs:
 
           ## Install or update
 
-          **From the window:** the Updates tab (or \`iridia update\`) installs it and keeps your settings.
+          **As a system package** (your package manager installs what it needs and can remove it again).
+          Download the one for your system from the files below, then:
+
+              sudo pacman -U ./iridia-$VERSION-1-any.pkg.tar.zst     # Arch, CachyOS, Manjaro, EndeavourOS
+              sudo apt install ./iridia_$VERSION-1_all.deb           # Debian, Ubuntu, Mint, Pop!_OS
+              sudo dnf install ./iridia-$VERSION-1.noarch.rpm        # Fedora (zypper install on openSUSE)
+
+          To update, install the newer package the same way.
+
+          **From the window:** the Updates tab (or \`iridia update\`) installs it and keeps your settings
+          (for Iridia installed with install.sh).
 
           **With git** (easiest to keep up to date). To install:
 
@@ -106,9 +125,9 @@ jobs:
               echo "Release v$VERSION already exists. Bump the version, or tick 'Move the tag' to rebuild it."
               exit 1
             fi
-            gh release upload "v$VERSION" "iridia-$VERSION.tar.gz" --clobber
+            gh release upload "v$VERSION" pkgs/* --clobber
             gh release edit "v$VERSION" --title "Iridia $VERSION" --notes-file notes.md
           else
-            gh release create "v$VERSION" "iridia-$VERSION.tar.gz" --title "Iridia $VERSION" \
+            gh release create "v$VERSION" pkgs/* --title "Iridia $VERSION" \
               --notes-file notes.md --target "$GITHUB_SHA"
           fi

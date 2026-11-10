@@ -17,7 +17,7 @@ jobs:
       - run: pip install ruff==0.17.3          # pinned: a new ruff's new rules shouldn't turn CI red by themselves
       - run: ruff check iridia scripts tests
       - name: shellcheck
-        run: shellcheck install.sh uninstall.sh tests/validate-desktop.sh tests/desktop/run.sh
+        run: shellcheck install.sh uninstall.sh tests/validate-desktop.sh tests/desktop/run.sh packaging/*.sh packaging/scripts/*.sh
 
   test:
     runs-on: ubuntu-latest
@@ -75,3 +75,46 @@ jobs:
           /tmp/venv/bin/pip install -q -e .
       - name: Desktop checks
         run: sh tests/desktop/run.sh /tmp/venv/bin/python
+
+  packages:
+    # The system packages a release attaches: the .deb and .rpm (nfpm) and the Arch package (makepkg
+    # in an Arch container), from the same layout (packaging/stage.sh).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: nfpm
+        run: go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.46.3
+      - name: .deb and .rpm
+        run: NFPM="$(go env GOPATH)/bin/nfpm" sh packaging/build.sh dist
+      - name: Arch package
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src archlinux:latest sh -c \
+            'pacman -Syu --noconfirm --needed base-devel git >/dev/null && git config --global --add safe.directory /src && sh packaging/arch-build.sh dist'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: dist/
+          retention-days: 7
+
+  package-install:
+    # Each package installed on a fresh system with its dependencies from the distribution: the
+    # command line, the daemon, the window on a virtual display, an upgrade, and removing it.
+    needs: packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {image: "archlinux:latest", file: "*.pkg.tar.zst"}
+          - {image: "ubuntu:24.04", file: "*.deb"}
+          - {image: "debian:trixie", file: "*.deb"}
+          - {image: "fedora:latest", file: "*.rpm"}
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages
+          path: dist
+      - name: Install, use, upgrade and remove it
+        run: sh packaging/test-install.sh dist/${{ matrix.file }}

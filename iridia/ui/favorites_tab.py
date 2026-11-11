@@ -36,11 +36,19 @@ CONTROL_NAMES = {
     "colors": (_("Colours"), "palette"),
     "effect": (_("Effect"), "auto_awesome"),
     "follow": (_("Follow the monitor"), "monitor"),
+    "control": (_("Iridia controls it"), "sync"),
     "stay_lit": (_("Stay lit when locked"), "lock"),
     "looks": (_("Looks"), "palette"),
     "scenes": (_("Scenes"), "sports_esports"),
     "switches": (_("Switches"), "tune"),
 }
+DEFAULT_SWITCHES = ("lights", "night", "freeze")
+# a card's switch rows have room for a word or two (the full name is the tooltip)
+SHORT_NAMES = {
+    "follow": _("Monitor"), "stay_lit": _("Stay lit"), "control": _("Control"),
+    "lights": _("Lights"), "freeze": _("Freeze"), "night": _("Night"), "animations": _("Effects"),
+    "scenes": _("Scenes"), "notify": _("Flashes"), "netlights": _("Network"),
+}    # a card with Switches but none picked
 SIZE_NAMES = {"s": _("Small"), "w": _("Wide"), "t": _("Tall"), "l": _("Large")}
 STATIC = _("Static")
 
@@ -331,9 +339,8 @@ class FavoritesPage:
             c.append(label(_("Its strips aren't there any more."), ("small", "faint"), wrap=True))
         if not self._editing:
             # change it right here: the pencil, or a right-click where a small card has no room for one
-            if not small:
-                head.append(button(None, "edit", "text small", lambda: self._open_card(t),
-                                   tooltip=_("Change this card")))
+            head.append(button(None, "edit", "text small", lambda: self._open_card(t),
+                               tooltip=_("Change this card (or right-click it)")))
             rc = Gtk.GestureClick(button=3)
             rc.connect("released", lambda *_a: self._open_card(t))
             c.add_controller(rc)
@@ -356,57 +363,57 @@ class FavoritesPage:
             pw.connect("clicked", press)
             head.append(pw)
             updaters.append(lambda st, z, show=show: show(any(x.get("enabled", True) for x in z)))
+        narrow = t.get("size") in ("s", "t")       # one column wide
+        if "brightness" in ctl and keys:
+            self._brightness_row(c, tg, narrow, updaters)
         if "colors" in ctl and keys:
             updaters.append(self._colours(c, tg, small, t))
-        # every control you picked, whatever the size: the card grows to fit (Board)
-        if "brightness" in ctl and keys:
-            br = MiniSlider("", 0, 100, 100, 5, "%", lambda v: self._zones(tg, brightness=int(v)))
-            c.append(br)
-            updaters.append(lambda st, z: br.set_quiet(int(z[0].get("manual_brightness", 100))))
         if "effect" in ctl and keys:
-            names = [STATIC] + list(EFFECT_NAMES.values())
-            dd = Dropdown(names, STATIC, lambda v: self._zones(tg, effect=EFFECT_KEYS.get(v)))
-            dd.set_hexpand(True)
-            dd.set_tooltip_text(_("Effect"))
-            c.append(hbox(8, icon("auto_awesome", classes=("dim",)), dd))
-            # one speed for whichever effect each strip runs: slow to fast
-            spd = MiniSlider(_("Speed"), 0, 100, 50, 5, "%", lambda v: self._zones(tg, speed=int(v)))
-            c.append(spd)
+            self._effect_rows(c, tg, updaters)
 
-            def eff(st, z, dd=dd, spd=spd):
-                a = animations.clean(z[0].get("animation"))
-                dd.set_value(EFFECT_NAMES.get((a or {}).get("effect"), STATIC))
-                spd.set_visible(a is not None)
-                if a is not None:
-                    spd.set_quiet(animations.speed_level(a["effect"], a.get("speed", 0)))
-            updaters.append(eff)
-        # on/off settings as small chips on one line, not a row each
-        toggles = [(k, f) for k, f in (("follow", "brightness_sync"), ("stay_lit", "session_ignore")) if k in ctl]
-        if toggles and keys:
-            row = wrap_row(6)
-            c.append(row)
-            for key, field in toggles:
+        # everything that is on or off: a row each, its name and a switch, so it's plain which is which
+        rows = []
+        for key, field, invert in (("follow", "brightness_sync", False), ("stay_lit", "session_ignore", False),
+                                   ("control", "hands_off", True)):
+            if key in ctl and keys:
                 name, ico = CONTROL_NAMES[key]
-                b = Gtk.ToggleButton()
-                b.add_css_class("filter")
-                b.set_child(hbox(6, icon(ico), Gtk.Label(label=name)))
-                b._quiet = False
-                b.connect("toggled", lambda b, field=field: None if b._quiet else self._zones(tg, **{field: b.get_active()}))
-                row.append(b)
 
-                def upd(st, z, b=b, field=field):
-                    v = all(x.get(field) for x in z)
-                    if b.get_active() != v:
-                        b._quiet = True
-                        b.set_active(v)
-                        b._quiet = False
-                updaters.append(upd)
+                def get(st, z, field=field, invert=invert):
+                    v = all(bool(x.get(field)) for x in z)
+                    return not any(bool(x.get(field)) for x in z) if invert else v
+                rows.append((ico, SHORT_NAMES[key], name, get,
+                             lambda v, field=field, invert=invert: self._zones(tg, **{field: (not v) if invert else v})))
         if "looks" in ctl:
-            updaters.append(self._look_chips(c, t.get("looks") or [], looks))
+            for lk in self._card_looks_of(t, looks):
+                rows.append(("palette", lk["name"], lk["name"],
+                             lambda st, z, lid=lk["id"]: any(x.get("active") for x in st.get("looks") or []
+                                                             if x["id"] == lid),
+                             lambda v, lid=lk["id"]: self._looks_send(apply={"look": lid, "on": v})))
         if "scenes" in ctl:
-            updaters.append(self._scene_chips(c, t.get("scenes") or []))
+            for sc in self._card_scenes_of(t):
+                rows.append(("sports_esports", sc["name"], sc["name"],
+                             lambda st, z, sid=sc["id"]: any(x.get("on") for x in (st.get("scenes") or {}).get(
+                                 "scenes") or [] if x["id"] == sid),
+                             lambda v, sid=sc["id"]: self.app.bg(
+                                 lambda: self.app.client.scenes(scene_on={"id": sid, "on": v}), self._done_scenes)))
         if "switches" in ctl:
-            updaters.append(self._switch_chips(c, t.get("switches") or []))
+            for w in t.get("switches") or DEFAULT_SWITCHES:
+                text, ico = SWITCH_NAMES[w]
+                rows.append((ico, SHORT_NAMES[w], text, lambda st, z, w=w: switch_state(w, st),
+                             lambda v, w=w: self._switch(w, v)))
+        if rows:
+            grid = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True, column_spacing=16,
+                               row_spacing=2, min_children_per_line=1 if narrow else 2,
+                               max_children_per_line=1 if narrow else 2)
+            c.append(grid)
+            for ico, short, name, get, put in rows:
+                sw = Toggle(False, put)
+                lbl = label(short, ("body",), ellipsize=True)      # short: a word or two fits any size
+                lbl.set_hexpand(True)
+                lbl.set_tooltip_text(name)
+                sw.set_tooltip_text(name)
+                grid.append(hbox(10, icon(ico, classes=("dim",)), lbl, sw))
+                updaters.append(lambda st, z, sw=sw, get=get: sw.set_value(get(st, z)))
 
         def live(st):
             z = [self._zone_cfg(k, st) or {} for k in self._keys(tg, st)] or [{}]
@@ -416,27 +423,81 @@ class FavoritesPage:
         live(self._st)
         return c
 
+    def _brightness_row(self, c, tg, narrow, updaters):
+        """Brightness: a slider with its value. While the strips follow the monitor it shows the monitor's
+        level (Auto); moving it sets their own brightness and stops following, as on a phone."""
+        row = hbox(10, icon("light_mode", classes=("dim",)))
+        row.set_tooltip_text(_("Brightness"))
+        sl = MiniSlider("", 0, 100, 100, 5, "%", lambda v: self._zones(tg, brightness=int(v), brightness_sync=False))
+        sl.set_hexpand(True)
+        sl.scale.set_size_request(60 if narrow else 110, -1)
+        sl._lbl.set_width_chars(5)
+        row.append(sl)
+        c.append(row)
+        note = label(_("Follows the monitor: move it to set your own"), ("small", "faint"), wrap=True)
+        c.append(note)
+
+        def upd(st, z):
+            auto = all(x.get("brightness_sync") for x in z)
+            level = st.get("brightness") if auto and isinstance(st.get("brightness"), (int, float)) else \
+                round(sum(int(x.get("manual_brightness", 100)) for x in z) / len(z))
+            sl.set_quiet(int(level))
+            note.set_visible(auto)
+        updaters.append(upd)
+
+    def _effect_rows(self, c, tg, updaters):
+        """The effect (or Static), and its speed, slow to fast, while there is one."""
+        names = [STATIC] + list(EFFECT_NAMES.values())
+        dd = Dropdown(names, STATIC, lambda v: self._zones(tg, effect=EFFECT_KEYS.get(v)))
+        dd.set_hexpand(True)
+        row = hbox(10, icon("auto_awesome", classes=("dim",)), dd)
+        row.set_tooltip_text(_("Effect"))
+        c.append(row)
+        spd = MiniSlider("", 0, 100, 50, 5, "%", lambda v: self._zones(tg, speed=int(v)))
+        spd.set_hexpand(True)
+        spd.scale.set_size_request(60, -1)
+        spd._lbl.set_width_chars(5)
+        srow = hbox(10, icon("timer", classes=("dim",)), spd)
+        srow.set_tooltip_text(_("Speed: slow to fast"))
+        c.append(srow)
+
+        def upd(st, z):
+            a = animations.clean(z[0].get("animation"))
+            dd.set_value(EFFECT_NAMES.get((a or {}).get("effect"), STATIC))
+            srow.set_visible(a is not None)
+            if a is not None:
+                spd.set_quiet(animations.speed_level(a["effect"], a.get("speed", 0)))
+        updaters.append(upd)
+
+    def _card_looks_of(self, t, looks) -> list:
+        """The looks a card shows: the ones picked, or every look when none are."""
+        ids = t.get("looks") or list(looks)
+        return [looks[i] for i in ids if i in looks]
+
+    def _card_scenes_of(self, t) -> list:
+        allsc = (self._st.get("scenes") or {}).get("scenes") or []
+        ids = t.get("scenes") or [x["id"] for x in allsc]
+        by = {x["id"]: x for x in allsc}
+        return [by[i] for i in ids if i in by]
+
     def _colours(self, c, tg, small, t):
         """Swatches for the wallpaper's colours (a few), the current one ringed, and 🎨 for the rest."""
         row = hbox(6)
-        c.append(row)
+        outer = hbox(10, icon("palette", classes=("dim",)), row)
+        outer.set_tooltip_text(_("Colour"))
+        c.append(outer)
         shown = [None]
         pick = button(None, "palette", "tonal small", lambda: self._colour_popup(pick, tg, t), tooltip=_("All colours"))
 
         def upd(st, z):
             ext = list(st.get("extracted_colors") or [])
-            n = 0 if small else (6 if t.get("size") in ("w", "l") else 3)
+            n = 6 if t.get("size") in ("w", "l") else 3
             cur = (z[0].get("pattern_colors") or [0])[0]
             sig = (tuple(ext[:n]), repr(cur), n)
             if sig == shown[0]:
                 return
             shown[0] = sig
             widgets.clear(row)
-            if small:
-                h = cur if isinstance(cur, str) else (ext[cur] if isinstance(cur, int) and cur < len(ext) else "ffffff")
-                dot = Swatch(h, 26, selected=True, tooltip=_("Colour"), on_click=lambda: self._colour_popup(dot, tg, t))
-                row.append(dot)
-                return
             for i, h in enumerate(ext[:n]):
                 row.append(Swatch(h, 26, selected=cur == i, tooltip=_("Wallpaper colour {n}").format(n=i + 1),
                                   on_click=lambda i=i: self._zones(tg, color=i)))
@@ -483,93 +544,10 @@ class FavoritesPage:
         pop.connect("closed", lambda p: GLib.idle_add(p.unparent))
         pop.popup()
 
-    def _look_chips(self, c, ids, looks):
-        row = wrap_row(6)
-        c.append(row)
-        chips = {}
-        for lid in ids:
-            lk = looks.get(lid)
-            if lk is None:
-                continue
-            b = button(lk["name"], None, "tonal small", lambda lid=lid: self._looks_send(apply={"look": lid, "on": "toggle"}),
-                       tooltip=look_text(lk["look"]))
-            chips[lid] = b
-            row.append(b)
-        if not chips:
-            row.set_visible(False)          # none picked (or none made yet): nothing to show
-
-        def upd(st, z):
-            on = {x["id"] for x in st.get("looks") or [] if x.get("active")}
-            for lid, b in chips.items():
-                for cls in ("filled", "tonal"):
-                    b.remove_css_class(cls)
-                b.add_css_class("filled" if lid in on else "tonal")
-        return upd
-
-    def _scene_chips(self, c, ids):
-        """A chip per scene: on or off (a filled dot while it shows right now)."""
-        row = wrap_row(6)
-        c.append(row)
-        chips = {}
-        scenes = {sc["id"]: sc for sc in ((self._st.get("scenes") or {}).get("scenes") or [])}
-        for sid in ids:
-            sc = scenes.get(sid)
-            if sc is None:
-                continue
-            b = Gtk.ToggleButton()
-            b.add_css_class("filter")
-            dot = icon("check_circle", classes=("accent",))
-            b.set_child(hbox(6, icon("sports_esports"), Gtk.Label(label=sc["name"]), dot))
-            b._dot = dot
-            b._quiet = False
-            b.connect("toggled", lambda b, sid=sid: None if b._quiet else self.app.bg(
-                lambda: self.app.client.scenes(scene_on={"id": sid, "on": b.get_active()}), self._done_scenes))
-            chips[sid] = b
-            row.append(b)
-        row.set_visible(bool(chips))
-
-        def upd(st, z):
-            s_ = st.get("scenes") or {}
-            by = {x["id"]: x for x in s_.get("scenes") or []}
-            showing = set(s_.get("active") or [])
-            for sid, b in chips.items():
-                v = bool((by.get(sid) or {}).get("on"))
-                if b.get_active() != v:
-                    b._quiet = True
-                    b.set_active(v)
-                    b._quiet = False
-                b._dot.set_visible(sid in showing)
-                b.set_tooltip_text(_("Showing now") if sid in showing else None)
-        return upd
-
     def _done_scenes(self, r):
         if not r.get("ok"):
             self.app.toast(r.get("error") or _("Couldn't save"))
 
-    def _switch_chips(self, c, whats):
-        row = wrap_row(6)
-        c.append(row)
-        chips = {}
-        for w in whats:
-            text, ico = SWITCH_NAMES[w]
-            b = Gtk.ToggleButton()
-            b.set_child(hbox(6, icon(ico), Gtk.Label(label=text)))
-            b.add_css_class("small")
-            b._quiet = False
-            b.connect("toggled", lambda b, w=w: None if b._quiet else self._switch(w, b.get_active()))
-            chips[w] = b
-            row.append(b)
-
-        def upd(st, z):
-            for w, b in chips.items():
-                v = switch_state(w, st)
-                if b.get_active() != v:
-                    b._quiet = True
-                    b.set_active(v)
-                    b._quiet = False
-        return upd
-
-    # -- single items
     def _look_tile(self, t, lk):
         small = t.get("size") == "s"
         c, _head = self._frame("palette", lk["name"], "" if small else self._look_where(lk) + " · " + look_text(lk["look"]))
@@ -785,7 +763,7 @@ class FavoritesPage:
         c.append(row)
 
         # what the Looks, Scenes and Switches chips are for: shown only when those are on the card
-        def picker(ctl_key, title, items, picked, empty):
+        def picker(ctl_key, title, items, picked, empty, defaults=None):
             box = vbox(6)
             box.set_margin_start(12)
             box.append(label(title, ("small", "dim")))
@@ -798,7 +776,13 @@ class FavoritesPage:
             rev = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.SLIDE_DOWN, transition_duration=180,
                                reveal_child=self._card_ctl[ctl_key].get_active())
             rev.set_child(box)
-            self._card_ctl[ctl_key].connect("toggled", lambda b: rev.set_reveal_child(b.get_active()))
+
+            def on_toggle(b):
+                rev.set_reveal_child(b.get_active())
+                if b.get_active() and chips and not any(x.get_active() for x in chips.values()):
+                    for k, x in chips.items():          # never an empty list: these to start with
+                        x.set_active(defaults is None or k in defaults)
+            self._card_ctl[ctl_key].connect("toggled", on_toggle)
             c.append(rev)
             return chips
         self._card_looks = picker("looks", _("Which looks"),
@@ -810,7 +794,7 @@ class FavoritesPage:
                                    set((t or {}).get("scenes") or []), _("None yet: make them on the Scenes tab."))
         self._card_sw = picker("switches", _("Which switches"),
                                [(w, SWITCH_NAMES[w][0], SWITCH_NAMES[w][1]) for w in SWITCHES],
-                               set((t or {}).get("switches") or []), "")
+                               set((t or {}).get("switches") or []), "", defaults=DEFAULT_SWITCHES)
 
         self._card_size = Group([(k, SIZE_NAMES[k]) for k in ("s", "w", "t", "l")], (t or {}).get("size", "w"))
         c.append(hbox(10, label(_("Size"), ("body", "dim")), self._card_size))

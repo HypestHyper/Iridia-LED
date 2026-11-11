@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-11 00:24+0000\n"
+"POT-Creation-Date: 2026-11-11 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -2020,6 +2020,9 @@ msgstr "Colours"
 msgid "Follow the monitor"
 msgstr "Follow the monitor"
 
+msgid "Iridia controls it"
+msgstr "Iridia steers it"
+
 msgid "Stay lit when locked"
 msgstr "Stay lit when battened"
 
@@ -2028,6 +2031,27 @@ msgstr "Looks"
 
 msgid "Switches"
 msgstr "Switches"
+
+msgid "Stay lit"
+msgstr "Stay lit"
+
+msgid "Control"
+msgstr "Helm"
+
+msgid "Freeze"
+msgstr "Freeze"
+
+msgid "Night"
+msgstr "Night"
+
+msgid "Effects"
+msgstr "Tricks"
+
+msgid "Flashes"
+msgstr "Flashes"
+
+msgid "Network"
+msgstr "Network"
 
 msgid "Small"
 msgstr "Dinghy"
@@ -2079,8 +2103,8 @@ msgstr "{n} strips"
 msgid "Its strips aren't there any more."
 msgstr "Its strips have gone overboard."
 
-msgid "Change this card"
-msgstr "Change this chart"
+msgid "Change this card (or right-click it)"
+msgstr "Change this chart (or right-click it)"
 
 msgid "On: click to turn off"
 msgstr "Lit: click to douse"
@@ -2088,11 +2112,17 @@ msgstr "Lit: click to douse"
 msgid "Off: click to turn on"
 msgstr "Doused: click to light"
 
-msgid "All colours"
-msgstr "All the colours o' the sea"
+msgid "Follows the monitor: move it to set your own"
+msgstr "Follows the monitor: move it to set yer own"
+
+msgid "Speed: slow to fast"
+msgstr "Speed: drift to full sail"
 
 msgid "Colour"
 msgstr "Colour"
+
+msgid "All colours"
+msgstr "All the colours o' the sea"
 
 #, python-brace-format
 msgid "Wallpaper colour {n}"
@@ -2111,9 +2141,6 @@ msgstr "Colour fer {name}"
 msgid "Colour wheel…"
 msgstr "Ship's wheel o' colours…"
 
-msgid "Showing now"
-msgstr "Showin' now"
-
 msgid "Turn on"
 msgstr "Light 'em"
 
@@ -2127,6 +2154,9 @@ msgstr "Loaded {name} (the old settin's be stowed)"
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Size: {size}"
+
+msgid "Change this card"
+msgstr "Change this chart"
 
 msgid "Change this look"
 msgstr "Change this look"

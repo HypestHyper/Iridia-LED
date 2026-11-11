@@ -10,16 +10,16 @@ title, then tap the strips it's for and what goes on it:
 
 | | |
 | --- | --- |
-| On and off | A round ⏻ button for all its strips at once (pastel green on, red off) |
-| Brightness | One slider; every strip on the card gets the same brightness |
+| On and off | The round ⏻ button in the card's header, for all its strips at once (pastel green on, red off) |
+| Brightness | A slider with its value. While the strips follow the monitor it shows the monitor's level; moving it sets their own brightness and stops following, as on a phone |
 | Colours | The wallpaper's colours as swatches, and 🎨 for a popup with your saved colours and the colour wheel; the card's strips all take that one colour |
-| Effect | An effect for its strips (or *Static*), and a *Speed* slider from slow to fast: each strip's own effect at that speed |
-| Follow the monitor, Stay lit when locked | On or off for its strips, as small chips |
-| Looks | Chips that turn looks on and off |
-| Scenes | A chip per scene you pick, to switch it on or off (a dot while it's showing) |
-| Switches | Chips for all lights, freeze colours, night mode, animations, scenes, notification flashes, network lights |
+| Effect | An effect for its strips (or *Static*), and its speed, slow to fast: each strip's own effect at that speed |
+| Follow the monitor, Stay lit when locked, Iridia controls it | A switch each, for its strips |
+| Looks, Scenes | A switch per look or scene: on or off |
+| Switches | A switch each for all lights, freeze colours, night mode, animations, scenes, notification flashes, network lights |
 
-For Looks, Scenes and Switches, the editor then asks which ones. Changes on a card are its strips' own
+Every on/off setting is a row with a short name and a switch (hover it for the full name), one per line
+on a small or tall card and two on a wide or large one. For Looks, Scenes and Switches, the editor then asks which ones (all looks and scenes, and a few common switches, to start with). Changes on a card are its strips' own
 settings, the same as on the Devices tab.
 
 The ★ on a strip's card on the Devices tab makes a card for just that strip (or takes it off).

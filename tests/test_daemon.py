@@ -1217,3 +1217,16 @@ def test_a_card_keeps_its_scenes():
     t = clean_card({"type": "card", "targets": ["*"], "controls": ["scenes", "nope"], "scenes": ["a1", "a1", 3, "b2"]})
     assert t["controls"] == ["scenes"] and t["scenes"] == ["a1", "b2"]
     assert clean_card({"type": "card", "targets": ["*"], "controls": ["power"]})["scenes"] == []
+
+
+def test_a_cards_control_switch_and_brightness_leave_the_monitor(d):
+    _cmd(d, "set_zone_brightness_sync", device="Strip", zone="", enabled=True)
+    # the card's slider: its own brightness, and no longer following the monitor
+    assert _cmd(d, "set_zones", targets=["Strip|"], set={"brightness": 40, "brightness_sync": False})["ok"]
+    zc = d.config.get(("devices", "Strip"))
+    assert zc["manual_brightness"] == 40 and not zc.get("brightness_sync")
+    # "Iridia controls it" off: nothing sent; on again: back
+    assert _cmd(d, "set_zones", targets=["Strip|"], set={"hands_off": True})["ok"]
+    assert d.config.get(("devices", "Strip", "hands_off"))
+    assert _cmd(d, "set_zones", targets=["Strip|"], set={"hands_off": False})["ok"]
+    assert not d.config.get(("devices", "Strip", "hands_off"))

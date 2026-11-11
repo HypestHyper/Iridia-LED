@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-11 00:24+0000\n"
+"POT-Creation-Date: 2026-11-11 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2041,6 +2041,9 @@ msgstr "Colours"
 msgid "Follow the monitor"
 msgstr "Defer to the monitor"
 
+msgid "Iridia controls it"
+msgstr "Iridia is in charge"
+
 msgid "Stay lit when locked"
 msgstr "Remain lit when locked"
 
@@ -2049,6 +2052,27 @@ msgstr "Looks"
 
 msgid "Switches"
 msgstr "Switches"
+
+msgid "Stay lit"
+msgstr "Remain lit"
+
+msgid "Control"
+msgstr "In charge"
+
+msgid "Freeze"
+msgstr "Freeze"
+
+msgid "Night"
+msgstr "Night"
+
+msgid "Effects"
+msgstr "Effects"
+
+msgid "Flashes"
+msgstr "Flashes"
+
+msgid "Network"
+msgstr "Network"
 
 msgid "Small"
 msgstr "Modest"
@@ -2100,8 +2124,8 @@ msgstr "{n} strips"
 msgid "Its strips aren't there any more."
 msgstr "Its strips have regrettably departed."
 
-msgid "Change this card"
-msgstr "Alter this card"
+msgid "Change this card (or right-click it)"
+msgstr "Alter this card (or right-click it)"
 
 msgid "On: click to turn off"
 msgstr "On: click to switch off"
@@ -2109,11 +2133,17 @@ msgstr "On: click to switch off"
 msgid "Off: click to turn on"
 msgstr "Off: click to switch on"
 
-msgid "All colours"
-msgstr "Every colour"
+msgid "Follows the monitor: move it to set your own"
+msgstr "Defers to the monitor: move it to set one's own"
+
+msgid "Speed: slow to fast"
+msgstr "Speed: leisurely to brisk"
 
 msgid "Colour"
 msgstr "Colour"
+
+msgid "All colours"
+msgstr "Every colour"
 
 #, python-brace-format
 msgid "Wallpaper colour {n}"
@@ -2132,9 +2162,6 @@ msgstr "Colour for {name}"
 msgid "Colour wheel…"
 msgstr "Colour wheel…"
 
-msgid "Showing now"
-msgstr "Presently showing"
-
 msgid "Turn on"
 msgstr "Kindle"
 
@@ -2148,6 +2175,9 @@ msgstr "Loaded {name} (the previous settings were backed up)"
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Proportions: {size}"
+
+msgid "Change this card"
+msgstr "Alter this card"
 
 msgid "Change this look"
 msgstr "Alter this look"

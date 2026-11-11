@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Favourites cards:** a wide or large card puts its switch rows two per line only when there are four
+  or more; with fewer, each row spans the card, so a card with one or two switches isn't squeezed into
+  half its width ("Contr…"). Short names always show in full.
+
 ## 1.3.11 — 2026-11-11
 
 - **Favourites cards, clearer:** every on/off setting on a card is a row with its name and a real switch,

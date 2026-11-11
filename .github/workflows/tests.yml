@@ -90,7 +90,7 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/src" -w /src archlinux:latest sh -c \
             'pacman -Syu --noconfirm --needed base-devel git >/dev/null && git config --global --add safe.directory /src && sh packaging/arch-build.sh dist'
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: packages
           path: dist/
@@ -112,7 +112,7 @@ jobs:
     container: ${{ matrix.image }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: packages
           path: dist

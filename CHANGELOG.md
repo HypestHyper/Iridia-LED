@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.13 — 2026-11-11
+
+- **The window shrinks again with Favourites open:** the card grid made the window as wide as its
+  columns, so it couldn't get narrower than it was and the grid never dropped columns (since 1.3.10). It
+  now follows the window, wide cards included, and never needs more room than there is.
+- **A card's brightness** shows what the strips really show: the monitor's level for strips that follow
+  it, their own for the rest (it showed 0% when only some followed the monitor).
+- **Window buttons** (minimize, maximize, close) are off by default on Hyprland, Sway, niri, i3 and river,
+  where the compositor handles windows; Settings, Appearance turns them on.
+
 ## 1.3.12 — 2026-11-11
 
 - **Favourites cards:** a wide or large card puts its switch rows two per line only when there are four

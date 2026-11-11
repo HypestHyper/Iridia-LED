@@ -33,7 +33,7 @@ Ctrl+plus and Ctrl+0 in the window, change it.
 ### gui.json: window_buttons
 
 `"window_buttons": false` hides the window's own minimize, maximize and close buttons (Settings,
-Appearance, Window buttons). They're shown by default, on the side and in the order your desktop's
+Appearance, Window buttons). They're shown by default (not on Hyprland, Sway, niri, i3 or river, where the compositor handles windows), on the side and in the order your desktop's
 `gtk-decoration-layout` asks for (GNOME's default shows only close).
 
 Logs go to `~/.local/share/iridia/iridia.log` when file logging is on. The daemon's socket is

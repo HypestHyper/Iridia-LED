@@ -531,8 +531,18 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 self._max_btn = b
         self.connect("notify::maximized", lambda *_a: self._max_icon())
         (hb.pack_start if on_left else hb.pack_end)(box)
-        box.set_visible(bool(self.prefs.get("window_buttons", True)))
+        box.set_visible(self._want_window_buttons())
         return box
+
+    def _want_window_buttons(self) -> bool:
+        """Shown unless Settings says otherwise; by default not on a tiling compositor, where windows
+        aren't minimized or maximized and the compositor closes them."""
+        if "window_buttons" in self.prefs:
+            return bool(self.prefs["window_buttons"])
+        tiling = any(os.environ.get(v) for v in ("HYPRLAND_INSTANCE_SIGNATURE", "SWAYSOCK", "NIRI_SOCKET", "I3SOCK")) \
+            or any(d in (os.environ.get("XDG_CURRENT_DESKTOP") or "").lower().split(":")
+                   for d in ("hyprland", "sway", "niri", "i3", "river"))
+        return not tiling
 
     def _max_icon(self):
         b = getattr(self, "_max_btn", None)
@@ -990,7 +1000,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(r)
         c.append(label(_("Automatic is Compact in a narrow window. Ctrl+minus and Ctrl+plus change it, "
                          "Ctrl+0 goes back to Automatic."), ("small", "faint")))
-        row, _u = switch_row(_("Window buttons"), bool(self.prefs.get("window_buttons", True)),
+        row, _u = switch_row(_("Window buttons"), self._want_window_buttons(),
                              self._set_window_buttons)
         c.append(row)
         c.append(label(_("Minimize, maximize and close at the top. Off: use your desktop's own keys or menu."),

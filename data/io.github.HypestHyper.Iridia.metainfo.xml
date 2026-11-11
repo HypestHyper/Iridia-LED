@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.13" date="2026-11-11">
+      <description>
+        <ul>
+          <li>The window shrinks again with Favourites open, and the cards follow its width</li>
+          <li>A card's brightness shows what the strips really show</li>
+          <li>Window buttons off by default on tiling compositors</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.12" date="2026-11-11">
       <description>
         <ul>

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.13 — 2026-11-11
 
 - **The window shrinks again with Favourites open:** the card grid made the window as wide as its
   columns, so it couldn't get narrower than it was and the grid never dropped columns (since 1.3.10). It

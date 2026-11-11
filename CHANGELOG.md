@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.12 — 2026-11-11
 
 - **Favourites cards:** a wide or large card puts its switch rows two per line only when there are four
   or more; with fewer, each row spans the card, so a card with one or two switches isn't squeezed into

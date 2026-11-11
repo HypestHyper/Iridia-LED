@@ -119,8 +119,8 @@ button.toggled, button.filled.toggled {{ background: {PRIMARY}; color: {ON_PRIMA
 button.filter {{ border-radius: 8px; padding: 4px 12px; min-height: 24px; background: transparent;
   border: 1px solid {OUTLINE_VARIANT}; color: {ON_SURFACE_VARIANT}; font-weight: 500; box-shadow: none; }}
 button.filter:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
-button.filter:checked {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY_CONTAINER};
-  border-color: {SECONDARY_CONTAINER}; }}
+button.filter:checked {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-color: {PRIMARY}; }}
+button.filter:checked:hover {{ background: {PRIMARY_HOVER}; }}
 .group > button:checked .icon {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .group > button:active {{ border-radius: 4px; }}
 

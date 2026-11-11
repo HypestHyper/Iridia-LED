@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Favourites cards, simpler:** the card editor is chips you tap (strips, what's on the card, and then
+  which looks, scenes and switches) instead of rows of checkboxes; on a card, *Follow the monitor* and
+  *Stay lit* are small chips, not a row each. New on cards: a *Speed* slider under the effect (slow to
+  fast, whatever the effect), and *Scenes*: a chip per scene to switch it on or off. Cards are sized to
+  what's on them.
 - **Each strip's card:** the switch on the left now means *Let Iridia control it* (off: Iridia sends it
   nothing and it keeps whatever it shows), and a new round ⏻ button in the header turns it on or off
   (pastel green on, red off). For a network light set to *Only when I change it*, ⏻ sends one on or off

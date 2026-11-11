@@ -1186,3 +1186,34 @@ def test_hands_off_for_every_strip_from_the_everything_card(d):
     d._update_all_devices()
     assert d.openrgb.last("Strip") == ["00ff00"] * 4
     assert not _cmd(d, "set_all", field="hands_off", value="yes")["ok"]
+
+
+def test_a_cards_speed_slider_sets_each_strips_own_effect(d):
+    from iridia import animations
+    assert _cmd(d, "set_zone_animation", device="Strip", zone="", animation={"effect": "breathing"})["ok"]
+    r = _cmd(d, "set_zones", targets=["Strip|"], set={"speed": 100})          # fastest
+    assert r["ok"]
+    a = d.config.get(("devices", "Strip", "animation"))
+    assert a["effect"] == "breathing" and a["speed"] == animations.speed_value("breathing", 100) == 0.5
+    assert _cmd(d, "set_zones", targets=["Strip|"], set={"speed": 0})["ok"]  # slowest: the longest breath
+    assert d.config.get(("devices", "Strip", "animation"))["speed"] == 30.0
+    assert not _cmd(d, "set_zones", targets=["Strip|"], set={"speed": 150})["ok"]
+    _cmd(d, "set_zone_animation", device="Strip", zone="", animation=None)
+    assert _cmd(d, "set_zones", targets=["Strip|"], set={"speed": 70})["ok"]  # no effect: left alone
+    assert d.config.get(("devices", "Strip", "animation")) is None
+
+
+def test_speed_levels_round_trip():
+    from iridia import animations as A
+    for e in A.ORDER:
+        if "speed" in A.EFFECTS[e]:
+            for lvl in (0, 25, 50, 100):
+                assert abs(A.speed_level(e, A.speed_value(e, lvl)) - lvl) <= 1
+            assert A.speed_level(e, A.speed_value(e, 80)) > A.speed_level(e, A.speed_value(e, 20))
+
+
+def test_a_card_keeps_its_scenes():
+    from iridia.looks import clean_card
+    t = clean_card({"type": "card", "targets": ["*"], "controls": ["scenes", "nope"], "scenes": ["a1", "a1", 3, "b2"]})
+    assert t["controls"] == ["scenes"] and t["scenes"] == ["a1", "b2"]
+    assert clean_card({"type": "card", "targets": ["*"], "controls": ["power"]})["scenes"] == []

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-10 23:45+0000\n"
+"POT-Creation-Date: 2026-11-11 00:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -2017,11 +2017,11 @@ msgstr "Light 'n' douse"
 msgid "Colours"
 msgstr "Colours"
 
-msgid "Follow the monitor's brightness"
-msgstr "Follow the monitor's glow"
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
 
-msgid "Stay lit when the screen locks"
-msgstr "Stay lit when the hatch is battened"
+msgid "Stay lit when locked"
+msgstr "Stay lit when battened"
 
 msgid "Looks"
 msgstr "Looks"
@@ -2037,18 +2037,6 @@ msgstr "Sloop"
 
 msgid "Tall"
 msgstr "Mast"
-
-msgid "Colour card"
-msgstr "Colour chart"
-
-msgid "Brightness card"
-msgstr "Glow chart"
-
-msgid "Looks card"
-msgstr "Looks chart"
-
-msgid "Switches card"
-msgstr "Levers chart"
 
 msgid "Static"
 msgstr "Becalmed"
@@ -2100,12 +2088,6 @@ msgstr "Lit: click to douse"
 msgid "Off: click to turn on"
 msgstr "Doused: click to light"
 
-msgid "Follow the monitor"
-msgstr "Follow the monitor"
-
-msgid "Stay lit when locked"
-msgstr "Stay lit when battened"
-
 msgid "All colours"
 msgstr "All the colours o' the sea"
 
@@ -2128,6 +2110,9 @@ msgstr "Colour fer {name}"
 
 msgid "Colour wheel…"
 msgstr "Ship's wheel o' colours…"
+
+msgid "Showing now"
+msgstr "Showin' now"
 
 msgid "Turn on"
 msgstr "Light 'em"
@@ -2170,26 +2155,29 @@ msgstr "Setups"
 msgid "A switch on its own"
 msgstr "A lever on its lonesome"
 
-msgid "Start from"
-msgstr "Set sail from"
-
 msgid "Title (optional), like Desk or Room"
 msgstr "Name (if ye like), like Desk or Cabin"
 
 msgid "Which strips"
 msgstr "Which strips"
 
-msgid "What's on it"
-msgstr "What's aboard"
+msgid "On the card"
+msgstr "Aboard the chart"
 
-msgid "Its looks (if Looks is on)"
-msgstr "Its looks (if Looks be on)"
+msgid "Which looks"
+msgstr "Which looks"
 
 msgid "None yet: New look makes one."
 msgstr "None yet: New look makes one."
 
-msgid "Its switches (if Switches is on)"
-msgstr "Its levers (if Switches be on)"
+msgid "Which scenes"
+msgstr "Which scenes"
+
+msgid "None yet: make them on the Scenes tab."
+msgstr "None yet: make 'em on the Scenes tab."
+
+msgid "Which switches"
+msgstr "Which levers"
 
 msgid "A card grows taller when what's on it needs the room."
 msgstr "A chart grows taller when what's aboard needs the room."

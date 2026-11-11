@@ -3320,7 +3320,8 @@ class Daemon:
         """One change for several strips at once (a Favourites card): targets (zone keys, or ["*"] for
         every strip) and set, any of: enabled, brightness (0-100), color (a wallpaper colour's number
         or a hex: one solid colour), brightness_sync, session_ignore, effect (an animation, or null for
-        static). Each goes through the strip's own command."""
+        static), speed (0 slowest to 100 fastest, for each strip's own effect). Each goes through the
+        strip's own command."""
         targets = req.get("targets") or []
         devices = self.config.devices_view
         if targets == ["*"]:
@@ -3344,12 +3345,24 @@ class Daemon:
                 cmds.append({"cmd": "set_zone_strip", "session_ignore": bool(v)})
             elif f == "effect":
                 cmds.append({"cmd": "set_zone_animation", "animation": {"effect": v} if v else None})
+            elif f == "speed":
+                if not isinstance(v, (int, float)) or isinstance(v, bool) or not 0 <= v <= 100:
+                    return {"ok": False, "error": "speed is 0 (slowest) to 100 (fastest)"}
+                cmds.append({"cmd": "set_zone_animation", "speed_level": v})
             else:
                 return {"ok": False, "error": f"can't set {f} on several strips"}
         errors = []
         for k in keys:
             dev, _sep, zone = k.partition("|")
             for c in cmds:
+                if "speed_level" in c:
+                    # each strip's own effect, at that speed (a strip without one is left as it is)
+                    cur = animations.clean(self.config.get(self._zone_config_path(dev, zone, "animation")))
+                    if cur is None or "speed" not in cur:
+                        continue
+                    c = {"cmd": "set_zone_animation",
+                         "animation": {"effect": cur["effect"],
+                                       "speed": animations.speed_value(cur["effect"], c["speed_level"])}}
                 sub = dict(c, device=dev, zone=zone)
                 r = self._dispatch(sub)
                 self._mark_on_demand(sub)       # an "only when I change it" light changed here gets it too

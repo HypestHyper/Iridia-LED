@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-10 23:45+0000\n"
+"POT-Creation-Date: 2026-11-11 00:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -1921,11 +1921,11 @@ msgstr "Allumé, éteint"
 msgid "Colours"
 msgstr "Couleurs"
 
-msgid "Follow the monitor's brightness"
-msgstr "Suivre la luminosité de l'écran"
+msgid "Follow the monitor"
+msgstr "Suivre l'écran"
 
-msgid "Stay lit when the screen locks"
-msgstr "Rester allumé quand l'écran se verrouille"
+msgid "Stay lit when locked"
+msgstr "Allumé si verrouillé"
 
 msgid "Looks"
 msgstr "Looks"
@@ -1941,18 +1941,6 @@ msgstr "Baguette"
 
 msgid "Tall"
 msgstr "Tour Eiffel"
-
-msgid "Colour card"
-msgstr "Carte couleur"
-
-msgid "Brightness card"
-msgstr "Carte bisou"
-
-msgid "Looks card"
-msgstr "Carte looks"
-
-msgid "Switches card"
-msgstr "Carte interrupteurs"
 
 msgid "Static"
 msgstr "Immobile comme une statue"
@@ -2004,12 +1992,6 @@ msgstr "Allumé : cliquer pour éteindre"
 msgid "Off: click to turn on"
 msgstr "Éteint : cliquer pour allumer"
 
-msgid "Follow the monitor"
-msgstr "Suivre l'écran"
-
-msgid "Stay lit when locked"
-msgstr "Allumé si verrouillé"
-
 msgid "All colours"
 msgstr "Toutes les couleurs"
 
@@ -2032,6 +2014,9 @@ msgstr "Couleur pour {name}"
 
 msgid "Colour wheel…"
 msgstr "Roue des couleurs…"
+
+msgid "Showing now"
+msgstr "Affiché en ce moment"
 
 msgid "Turn on"
 msgstr "C'est la vie"
@@ -2076,26 +2061,29 @@ msgstr "Setups"
 msgid "A switch on its own"
 msgstr "Un interrupteur tout seul"
 
-msgid "Start from"
-msgstr "Partir de"
-
 msgid "Title (optional), like Desk or Room"
 msgstr "Titre (facultatif), comme Bureau ou Salon"
 
 msgid "Which strips"
 msgstr "Quelles bandes"
 
-msgid "What's on it"
-msgstr "Ce qu'il y a dessus"
+msgid "On the card"
+msgstr "Sur la carte"
 
-msgid "Its looks (if Looks is on)"
-msgstr "Ses looks (si Looks est coché)"
+msgid "Which looks"
+msgstr "Quels looks"
 
 msgid "None yet: New look makes one."
 msgstr "Aucun : Nouveau look en fait un."
 
-msgid "Its switches (if Switches is on)"
-msgstr "Ses interrupteurs (si Interrupteurs est coché)"
+msgid "Which scenes"
+msgstr "Quelles scènes"
+
+msgid "None yet: make them on the Scenes tab."
+msgstr "Aucune : créez-les dans l'onglet Scènes."
+
+msgid "Which switches"
+msgstr "Quels interrupteurs"
 
 msgid "A card grows taller when what's on it needs the room."
 msgstr "Une carte grandit quand son contenu a besoin de place."

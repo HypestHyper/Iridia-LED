@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-10 23:45+0000\n"
+"POT-Creation-Date: 2026-11-11 00:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -2015,11 +2015,11 @@ msgstr "On and off"
 msgid "Colours"
 msgstr "Colours"
 
-msgid "Follow the monitor's brightness"
-msgstr "Follow the monitor's brightness"
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
 
-msgid "Stay lit when the screen locks"
-msgstr "Stay lit when the screen locks"
+msgid "Stay lit when locked"
+msgstr "Stay lit when locked"
 
 msgid "Looks"
 msgstr "Looks"
@@ -2035,18 +2035,6 @@ msgstr "Wide"
 
 msgid "Tall"
 msgstr "Tall"
-
-msgid "Colour card"
-msgstr "Colour card"
-
-msgid "Brightness card"
-msgstr "Brightness card"
-
-msgid "Looks card"
-msgstr "Looks card"
-
-msgid "Switches card"
-msgstr "Switches card"
 
 msgid "Static"
 msgstr "Static"
@@ -2098,12 +2086,6 @@ msgstr "On: click to turn off"
 msgid "Off: click to turn on"
 msgstr "Off: click to turn on"
 
-msgid "Follow the monitor"
-msgstr "Follow the monitor"
-
-msgid "Stay lit when locked"
-msgstr "Stay lit when locked"
-
 msgid "All colours"
 msgstr "All colours"
 
@@ -2126,6 +2108,9 @@ msgstr "Colour for {name}"
 
 msgid "Colour wheel…"
 msgstr "Colour wheel…"
+
+msgid "Showing now"
+msgstr "Showing now"
 
 msgid "Turn on"
 msgstr "Turn on"
@@ -2168,26 +2153,29 @@ msgstr "Setups"
 msgid "A switch on its own"
 msgstr "A switch on its own"
 
-msgid "Start from"
-msgstr "Start from"
-
 msgid "Title (optional), like Desk or Room"
 msgstr "Title (optional), like Desk or Room"
 
 msgid "Which strips"
 msgstr "Which strips"
 
-msgid "What's on it"
-msgstr "What's on it"
+msgid "On the card"
+msgstr "On the card"
 
-msgid "Its looks (if Looks is on)"
-msgstr "Its looks (if Looks is on)"
+msgid "Which looks"
+msgstr "Which looks"
 
 msgid "None yet: New look makes one."
 msgstr "None yet: New look makes one."
 
-msgid "Its switches (if Switches is on)"
-msgstr "Its switches (if Switches is on)"
+msgid "Which scenes"
+msgstr "Which scenes"
+
+msgid "None yet: make them on the Scenes tab."
+msgstr "None yet: make them on the Scenes tab."
+
+msgid "Which switches"
+msgstr "Which switches"
 
 msgid "A card grows taller when what's on it needs the room."
 msgstr "A card grows taller when what's on it needs the room."

@@ -402,14 +402,16 @@ class FavoritesPage:
                 rows.append((ico, SHORT_NAMES[w], text, lambda st, z, w=w: switch_state(w, st),
                              lambda v, w=w: self._switch(w, v)))
         if rows:
+            # two per line on a wide or large card, once there are enough to fill both columns
+            cols = 1 if narrow or len(rows) < 4 else 2
             grid = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True, column_spacing=16,
-                               row_spacing=2, min_children_per_line=1 if narrow else 2,
-                               max_children_per_line=1 if narrow else 2)
+                               row_spacing=2, min_children_per_line=cols, max_children_per_line=cols)
             c.append(grid)
             for ico, short, name, get, put in rows:
                 sw = Toggle(False, put)
                 lbl = label(short, ("body",), ellipsize=True)      # short: a word or two fits any size
                 lbl.set_hexpand(True)
+                lbl.set_width_chars(min(len(short), 10))       # the whole word, before anything else gives
                 lbl.set_tooltip_text(name)
                 sw.set_tooltip_text(name)
                 grid.append(hbox(10, icon(ico, classes=("dim",)), lbl, sw))

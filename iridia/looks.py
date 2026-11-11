@@ -27,7 +27,8 @@ from iridia import scenes
 SWITCHES = ("lights", "freeze", "night", "animations", "scenes", "notify", "netlights")
 TILE_TYPES = ("card", "look", "setup", "switch")
 # what a card can show, for its strips
-CONTROLS = ("power", "brightness", "colors", "follow", "stay_lit", "effect", "looks", "scenes", "switches")
+CONTROLS = ("power", "brightness", "colors", "effect", "follow", "stay_lit", "control", "looks", "scenes",
+            "switches")
 SIZES = ("s", "w", "t", "l")        # small 1x1, wide 2x1, tall 1x2, large 2x2
 SPAN = {"s": (1, 1), "w": (2, 1), "t": (1, 2), "l": (2, 2)}
 LOOKS_MAX = 60

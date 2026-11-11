@@ -3343,6 +3343,8 @@ class Daemon:
                 cmds.append({"cmd": "set_zone_brightness_sync", "enabled": bool(v)})
             elif f == "session_ignore":
                 cmds.append({"cmd": "set_zone_strip", "session_ignore": bool(v)})
+            elif f == "hands_off":
+                cmds.append({"cmd": "set_zone_strip", "hands_off": bool(v)})
             elif f == "effect":
                 cmds.append({"cmd": "set_zone_animation", "animation": {"effect": v} if v else None})
             elif f == "speed":

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-11 00:24+0000\n"
+"POT-Creation-Date: 2026-11-11 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -1924,6 +1924,9 @@ msgstr "Couleurs"
 msgid "Follow the monitor"
 msgstr "Suivre l'écran"
 
+msgid "Iridia controls it"
+msgstr "Iridia s'en occupe"
+
 msgid "Stay lit when locked"
 msgstr "Allumé si verrouillé"
 
@@ -1932,6 +1935,27 @@ msgstr "Looks"
 
 msgid "Switches"
 msgstr "Interrupteurs"
+
+msgid "Stay lit"
+msgstr "Reste allumé"
+
+msgid "Control"
+msgstr "Contrôle"
+
+msgid "Freeze"
+msgstr "Figer"
+
+msgid "Night"
+msgstr "Nuit"
+
+msgid "Effects"
+msgstr "Effets"
+
+msgid "Flashes"
+msgstr "Flashs"
+
+msgid "Network"
+msgstr "Réseau"
 
 msgid "Small"
 msgstr "Petit four"
@@ -1983,8 +2007,8 @@ msgstr "{n} bandes"
 msgid "Its strips aren't there any more."
 msgstr "Ses bandes ont disparu."
 
-msgid "Change this card"
-msgstr "Changer cette carte"
+msgid "Change this card (or right-click it)"
+msgstr "Changer cette carte (ou clic droit)"
 
 msgid "On: click to turn off"
 msgstr "Allumé : cliquer pour éteindre"
@@ -1992,11 +2016,17 @@ msgstr "Allumé : cliquer pour éteindre"
 msgid "Off: click to turn on"
 msgstr "Éteint : cliquer pour allumer"
 
-msgid "All colours"
-msgstr "Toutes les couleurs"
+msgid "Follows the monitor: move it to set your own"
+msgstr "Suit l'écran : bougez-le pour régler vous-même"
+
+msgid "Speed: slow to fast"
+msgstr "Vitesse : lent à rapide"
 
 msgid "Colour"
 msgstr "Couleur"
+
+msgid "All colours"
+msgstr "Toutes les couleurs"
 
 #, python-brace-format
 msgid "Wallpaper colour {n}"
@@ -2015,9 +2045,6 @@ msgstr "Couleur pour {name}"
 msgid "Colour wheel…"
 msgstr "Roue des couleurs…"
 
-msgid "Showing now"
-msgstr "Affiché en ce moment"
-
 msgid "Turn on"
 msgstr "C'est la vie"
 
@@ -2031,6 +2058,9 @@ msgstr "{name} chargé. Voilà."
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Taille : {size}"
+
+msgid "Change this card"
+msgstr "Changer cette carte"
 
 msgid "Change this look"
 msgstr "Changer ce look"

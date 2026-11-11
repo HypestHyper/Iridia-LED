@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.11 — 2026-11-11
+
+- **Favourites cards, clearer:** every on/off setting on a card is a row with its name and a real switch,
+  so what's on is plain to see (no more wide buttons that look the same either way); one per line on
+  small and tall cards, two on wide and large ones. The brightness slider has its icon and value, shows
+  the monitor's level while the strips follow it, and moving it sets their own brightness (before, it
+  seemed to do nothing while they followed the monitor). Effect and speed have their icons too. New: an
+  *Iridia controls it* switch. Looks, Scenes and Switches never come out empty: with none picked, a
+  card shows all looks and scenes, and the common switches. A pencil on every card, small ones too.
+
 ## 1.3.10 — 2026-11-11
 
 - **Favourites cards, simpler:** the card editor is chips you tap (strips, what's on the card, and then

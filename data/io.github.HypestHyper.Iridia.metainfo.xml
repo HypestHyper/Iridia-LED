@@ -47,6 +47,14 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.11" date="2026-11-11">
+      <description>
+        <ul>
+          <li>Favourites cards: every setting is a row with its name and a switch, laid out for each card size</li>
+          <li>A card's brightness slider shows and sets the real brightness, also while following the monitor</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.10" date="2026-11-11">
       <description>
         <ul>

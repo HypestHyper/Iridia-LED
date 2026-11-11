@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.11 — 2026-11-11
 
 - **Favourites cards, clearer:** every on/off setting on a card is a row with its name and a real switch,
   so what's on is plain to see (no more wide buttons that look the same either way); one per line on

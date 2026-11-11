@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.10 — 2026-11-11
 
 - **Favourites cards, simpler:** the card editor is chips you tap (strips, what's on the card, and then
   which looks, scenes and switches) instead of rows of checkboxes; on a card, *Follow the monitor* and

@@ -1172,7 +1172,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._upd_check_btn = button(_("Check now"), "refresh", "tonal", lambda: self._update_check(force=True))
         self._upd_install_btn = button(_("Update now"), "download", "filled", self._update_install)
         self._upd_skip_btn = button(_("Skip this version"), "close", "text", self._update_skip)
-        for b in (self._upd_check_btn, self._upd_install_btn, self._upd_skip_btn):
+        self._upd_page_btn = button(_("Download page"), "download", "filled", self._update_page)
+        self._upd_page_btn.set_visible(False)
+        for b in (self._upd_check_btn, self._upd_install_btn, self._upd_page_btn, self._upd_skip_btn):
             r.append(b)
         c.append(r)
         self._upd_notes_exp = Gtk.Expander(label=_("What's new"))
@@ -1253,7 +1255,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         info = last.get("latest") or {}
         cur = r.get("version", "")
         available = bool(last.get("available")) and info.get("version") != cur
-        source = r.get("kind") == "source"
+        packaged = r.get("kind") == "package"
+        source = r.get("kind") == "source" or packaged       # updated some other way than from here
         if self._upd_running:
             pass
         elif last.get("error"):
@@ -1268,9 +1271,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
         else:
             self._upd_title.set_label(_("Iridia {v}").format(v=cur))
             self._upd_sub.set_label(_("Not checked yet."))
-        if available and source:
+        if available and packaged:
+            self._upd_sub.set_label(self._upd_sub.get_label() + " " + _(
+                "Iridia came as a system package: download the new one and install it the same way."))
+        elif available and source:
             self._upd_sub.set_label(self._upd_sub.get_label() + " " + _(
                 "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."))
+        self._upd_page_btn.set_visible(available and packaged and bool(info.get("page")))
+        self._upd_page_url = info.get("page") or ""
         self._upd_install_btn.set_visible(available and not source and not self._upd_running)
         self._upd_skip_btn.set_visible(available and s.get("skip") != info.get("version") and not self._upd_running)
         self._upd_check_btn.set_sensitive(not self._upd_running)
@@ -1287,6 +1295,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
         # the tab's icon lights up while there's something to install
         tab_icon = self._tabs["updates"].get_child().get_first_child()
         (tab_icon.add_css_class if available and not source else tab_icon.remove_css_class)("accent")
+
+    def _update_page(self):
+        if getattr(self, "_upd_page_url", ""):
+            try:
+                Gio.AppInfo.launch_default_for_uri(self._upd_page_url, None)
+            except GLib.Error as e:
+                self.toast(_("Couldn't open it: {err}").format(err=e.message))
 
     def _updates_set(self, **kw):
         self.bg(lambda: self.client.updates(**kw), lambda r: self._update_refresh() if r.get("ok") else None)
@@ -2424,6 +2439,14 @@ class IridiaWindow(Gtk.ApplicationWindow):
         dialogs.diagnostics_window(self, diagnostics.run_checks(self._status if reachable else {}, reachable))
 
     def _uninstall(self):
+        from iridia import updater
+        if updater.install_kind() == "package":
+            rm = updater.package_remove_command()
+            dialogs.message(self, _("Uninstall Iridia"), _(
+                "Iridia came as a system package, so your package manager removes it{how}. Your settings stay in "
+                "~/.config/iridia; delete that folder too to remove them.").format(
+                    how=(_(": {cmd}").format(cmd=rm) if rm else "")))
+            return
         d = dialogs.Dialog(self, _("Uninstall Iridia"))
         d.body.append(label(_("Uninstall Iridia"), ("title",)))
         d.body.append(label(_("Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors "

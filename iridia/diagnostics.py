@@ -26,7 +26,7 @@ def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
             "Start it: run 'iridia-daemon' in a terminal to see it live, or "
             "'systemctl --user start iridia-daemon.service' if it's installed as a service."
         ))
-        return checks  # nothing else here is knowable without the daemon
+        return checks + two_installs_check()  # nothing else here is knowable without the daemon
 
     checks.append(Check("Daemon reachable", True,
                         f"pid {status.get('pid', '?')}, socket {status.get('socket_path', '?')}"))
@@ -88,7 +88,8 @@ def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
         if since:
             err = f"OpenRGB is running but has reported no devices for {int(time.time() - since)}s"
         if "library is missing" in err:
-            hint = "Run the installer again so the library is installed: bash install.sh"
+            from iridia import updater
+            hint = "The library is missing. " + updater.reinstall_hint()
         elif since or "no devices" in err:
             hint = ("It probably started before your session could reach the hardware, and OpenRGB never looks "
                     "again by itself. " + ("Iridia started it, so it restarts it automatically (up to twice)."
@@ -144,7 +145,22 @@ def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
 
     checks += daemon_login_checks(status)
     checks += openrgb_login_checks(status)
+    checks += two_installs_check()
     return checks
+
+
+def two_installs_check(venv: str | None = None) -> list[Check]:
+    """A system package and the install.sh copy in your home folder side by side: the home copy comes
+    first on the PATH and its own login entries, so the package's updates never show."""
+    import os
+
+    from iridia import updater
+    venv = venv or updater.VENV
+    if updater.install_kind() != "package" or not os.path.isdir(venv):
+        return []
+    return [Check("One copy of Iridia", False, f"the iridia package, and an install.sh copy in {venv}",
+                  f"Remove the copy in your home folder (your settings stay): {venv}/bin/iridia uninstall "
+                  "--keep-settings")]
 
 
 def daemon_login_checks(status: dict) -> list[Check]:

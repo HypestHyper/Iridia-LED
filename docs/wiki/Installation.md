@@ -2,6 +2,8 @@
 
 ## Requirements
 
+(For [the system packages](#as-a-system-package), your package manager takes care of these.)
+
 | What | Needed for | Notes |
 | --- | --- | --- |
 | Linux | everything | Any desktop or compositor, Wayland or X11 |
@@ -14,6 +16,38 @@
 The Python libraries Iridia uses (`openrgb-python`, `Pillow`, `watchdog`) are installed into the virtual
 environment by the installer. `material-color-utilities` is optional: it adds the *Material* color
 engine (see [How it works](How-It-Works.md#color-engines)).
+
+## As a system package
+
+Each [release](https://github.com/HypestHyper/Iridia-LED/releases/latest) has packages for the big
+families of distributions. Your package manager installs what Iridia needs from your distribution, and
+removes it all again. Download the one for your system, then:
+
+| System | Install | Remove |
+| --- | --- | --- |
+| Arch, CachyOS, Manjaro, EndeavourOS | `sudo pacman -U ./iridia-VERSION-1-any.pkg.tar.zst` | `sudo pacman -R iridia` |
+| Debian, Ubuntu, Mint, Pop!_OS | `sudo apt install ./iridia_VERSION-1_all.deb` | `sudo apt remove iridia` |
+| Fedora | `sudo dnf install ./iridia-VERSION-1.noarch.rpm` | `sudo dnf remove iridia` |
+| openSUSE | `sudo zypper install ./iridia-VERSION-1.noarch.rpm` | `sudo zypper remove iridia` |
+
+`SHA256SUMS` next to them lets you check a download: `sha256sum -c SHA256SUMS --ignore-missing`.
+
+Iridia goes into `/usr/lib/iridia`, with `iridia`, `iridia-gui` and `iridia-daemon` in `/usr/bin`, the
+launcher and icons in `/usr/share`, and a systemd user unit, `iridia-daemon.service`. Nothing is set to
+start at login until you say so: open Iridia from your app menu and pick how on the *Service* tab, or
+`systemctl --user enable --now iridia-daemon.service`. OpenRGB comes along where your distribution has
+it (Arch, Fedora); elsewhere install it from [openrgb.org](https://openrgb.org/).
+
+To update, install the newer package the same way: the *Updates* tab says when there is one and opens
+its download page. Settings stay in `~/.config/iridia` through updates and removal.
+
+**Moving from install.sh to the package:** remove the copy in your home folder first, keeping your
+settings, then install the package and set start at login again:
+`~/.local/share/iridia-venv/bin/iridia uninstall --keep-settings`. (`iridia doctor` points it out if both
+are there: the home copy would come first and the package's updates would never show.)
+
+The packages are pure Python, so the same one works on every version of its distribution with Python
+3.10 or newer.
 
 ## Quick install
 

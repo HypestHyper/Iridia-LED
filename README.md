@@ -3,7 +3,7 @@
 <p align="center">Sets the RGB lights in your room and PC to the colours of your wallpaper, through OpenRGB.
 It can also animate them, map them to your room, follow your monitor's brightness and show sensors.</p>
 <p align="center">
-  <img alt="Version 1.3.9" src="https://img.shields.io/badge/version-1.3.9-1f9e80">
+  <img alt="Version 1.3.10" src="https://img.shields.io/badge/version-1.3.10-1f9e80">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="Platform Linux" src="https://img.shields.io/badge/platform-Linux-informational">
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB">
@@ -53,6 +53,14 @@ Settings change only when you change them, and a backup is kept before anything 
 goes outside your home folder. It uses about 0.1% of one CPU core with static colours.
 
 ## Installation
+
+**As a system package:** download the one for your system from the
+[latest release](https://github.com/HypestHyper/Iridia-LED/releases/latest), then
+`sudo pacman -U ./iridia-*.pkg.tar.zst` (Arch, CachyOS), `sudo apt install ./iridia_*.deb` (Debian,
+Ubuntu) or `sudo dnf install ./iridia-*.rpm` (Fedora). Your package manager brings what it needs and
+removes it all again ([details](docs/wiki/Installation.md#as-a-system-package)).
+
+**With the installer**, on any distribution:
 
 ```sh
 git clone https://github.com/HypestHyper/Iridia-LED.git

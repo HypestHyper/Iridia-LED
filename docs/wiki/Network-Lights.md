@@ -39,17 +39,19 @@ At the top of a network light's card, *How Iridia uses it*:
 | | |
 | --- | --- |
 | *With the rest* (the default) | Like a strip: wallpaper colours, monitor brightness, lock, sleep, night mode, scenes, keybinds, notifications |
-| *Only when I change it* | Iridia sends its colour and brightness only at the moment you change them on its card, and **never switches it on or off**: its own app and automations (a Google Home routine that switches it on with the TV, say) stay in charge. Wallpaper changes, the monitor, lock, sleep, night mode, scenes and notifications leave it alone. Your choice stays saved, but isn't sent again by itself (not after a restart either). A light may switch itself on when it gets a colour: that's the light's doing |
-| *Not at all* | Iridia sends it nothing |
+| *Only when I change it* | Iridia sends its colour and brightness only at the moment you change them on its card (or on a Favourites card with it), and switches it on or off **only when you press its ⏻ button**: its own app and automations (a Google Home routine that switches it on with the TV, say) stay in charge. Wallpaper changes, the monitor, lock, sleep, night mode, scenes and notifications leave it alone. While its ⏻ is off, colour changes wait, since a light may switch itself on when it gets a colour. Your choice stays saved, but isn't sent again by itself (not after a restart either) |
+
+To have Iridia send it nothing at all, turn off the switch on the left of its card.
 
 ## Using a light only now and then
 
-Three switches on each device's card (under Brightness) decide how much Iridia does with it. They work
-for any device; the third is for network lights only.
+The card's header and two switches (under Brightness) decide how much Iridia does with it. They work
+for any device; the last is for network lights only.
 
 | | |
 | --- | --- |
-| *Let Iridia control it* | Off: Iridia sends it nothing at all, so it keeps whatever it shows, and its own app (Govee, WiZ, Google Home) can set it. On again: Iridia's colours come back. The switch at the top of the card is different: it turns the device *off* (dark) |
+| The switch on the left of the card | *Let Iridia control it*. Off: Iridia sends it nothing at all, so it keeps whatever it shows, and its own app (Govee, WiZ, Google Home) can set it. On again: Iridia's colours come back |
+| The round ⏻ button in the header | On (pastel green) or off (pastel red): off, the device is dark. For a network light that's a "turn off" command |
 | *On its own: ignore the monitor, night mode, lock and sleep* | Its own brightness (the Manual value), whatever the monitor's brightness, night mode, the lock screen or sleep say. Keybinds, scenes and notifications still reach it |
 | *Keep its own colour* | Iridia sets only its brightness and switches it on and off; the colour stays what its own app set. With *On its own* as well, that's only when you ask (a keybind, a scene that turns it off) |
 

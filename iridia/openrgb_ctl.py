@@ -205,8 +205,11 @@ class OpenRGBController:
             self.client = None
             return False
         except ImportError as e:
+            from iridia import updater
             self._record_error(f"The openrgb-python library is missing from Iridia's environment ({e}). "
-                               "Run the installer again: bash install.sh")
+                               + (updater.reinstall_hint() if updater.install_kind() != "package" else
+                                  "OpenRGB before 1.0 needs it: install python-openrgb (openrgb-python), or update "
+                                  "OpenRGB to 1.0 or newer."))
             self.client = None
             return False
         except Exception as e:

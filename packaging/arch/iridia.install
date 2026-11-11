@@ -1,0 +1,14 @@
+post_install() {
+  python3 -m compileall -q /usr/lib/iridia >/dev/null 2>&1 || true
+  echo "Open Iridia from your app menu (or run iridia-gui). To start it at login: the Service tab,"
+  echo "or: systemctl --user enable --now iridia-daemon.service"
+}
+
+post_upgrade() {
+  find /usr/lib/iridia -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
+  python3 -m compileall -q /usr/lib/iridia >/dev/null 2>&1 || true
+}
+
+pre_remove() {
+  find /usr/lib/iridia -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
+}

@@ -6,21 +6,21 @@ in Iridia, as tiles you arrange yourself.
 ## Cards
 
 A card is a few controls for the strips you choose: one strip, a few, or *Everything*. *New card*: a
-title, its strips, and what's on it, in any mix:
+title, then tap the strips it's for and what goes on it:
 
 | | |
 | --- | --- |
-| On and off | All its strips at once |
+| On and off | A round ⏻ button for all its strips at once (pastel green on, red off) |
 | Brightness | One slider; every strip on the card gets the same brightness |
 | Colours | The wallpaper's colours as swatches, and 🎨 for a popup with your saved colours and the colour wheel; the card's strips all take that one colour |
-| Follow the monitor's brightness | On or off for its strips |
-| Stay lit when the screen locks | On or off for its strips |
-| Effect | An effect for its strips (or *Static*) |
+| Effect | An effect for its strips (or *Static*), and a *Speed* slider from slow to fast: each strip's own effect at that speed |
+| Follow the monitor, Stay lit when locked | On or off for its strips, as small chips |
 | Looks | Chips that turn looks on and off |
+| Scenes | A chip per scene you pick, to switch it on or off (a dot while it's showing) |
 | Switches | Chips for all lights, freeze colours, night mode, animations, scenes, notification flashes, network lights |
 
-*Start from* fills it in for you: a colour card, a brightness card, a looks card, a switches card.
-Changes on a card are its strips' own settings, the same as on the Devices tab.
+For Looks, Scenes and Switches, the editor then asks which ones. Changes on a card are its strips' own
+settings, the same as on the Devices tab.
 
 The ★ on a strip's card on the Devices tab makes a card for just that strip (or takes it off).
 
@@ -37,8 +37,10 @@ The ★ on a strip's card on the Devices tab makes a card for just that strip (o
 ## Sizes and order
 
 Tiles sit on a grid of squares that fits the window: *small* (one square), *wide* (two across), *tall*
-(two down) or *large* (two by two). *Arrange* shows, on each tile, a handle to drag it onto another
-one's place, the size, a pencil to change it, and ✕ to take it off. *Done* when you're finished.
+(two down) or *large* (two by two). A card grows taller when what's on it needs the room, so a small card
+still shows everything you ticked. The pencil on a card changes it (on a small card, right-click it).
+*Arrange* shows, on each tile, a handle to drag it onto another one's place, the size, a pencil, and ✕
+to take it off. *Done* when you're finished.
 
 ## Hiding strips
 

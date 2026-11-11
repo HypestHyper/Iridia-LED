@@ -449,6 +449,23 @@ class NetLights:
             for n in changed:
                 self.resend(n)
 
+    def power(self, name: str, on: bool):
+        """Switch a light on or off, now (its power button, for one Iridia otherwise never switches)."""
+        light = self.lights.get(name)
+        s = self._sock
+        if light is None or s is None:
+            return
+        try:
+            if light.kind == "wiz":
+                s.sendto(json.dumps({"method": "setState", "params": {"state": bool(on)}}).encode(),
+                         (light.ip, self.targets["wiz"][1]))
+            else:
+                s.sendto(json.dumps({"msg": {"cmd": "turn", "data": {"value": 1 if on else 0}}}).encode(),
+                         (light.ip, self.targets["govee_cmd"]))
+            light.on = bool(on)
+        except OSError as e:
+            logger.debug(f"Couldn't switch {light.name} at {light.ip}: {e}")
+
     def resend(self, name: str | None = None):
         """Send every light (or the one named) its colour again: after a light came back, after it was
         set in its own app meanwhile, or after Iridia restarted."""

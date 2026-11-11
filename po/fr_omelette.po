@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:44+0000\n"
+"POT-Creation-Date: 2026-11-11 00:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -510,6 +510,9 @@ msgstr "Mettre à jour"
 msgid "Skip this version"
 msgstr "Pas celle-ci"
 
+msgid "Download page"
+msgstr "Page de téléchargement"
+
 msgid "What's new"
 msgstr "Quoi de neuf"
 
@@ -563,6 +566,9 @@ msgstr "Tu as la dernière baguette."
 msgid "Not checked yet."
 msgstr "Pas encore vérifié."
 
+msgid "Iridia came as a system package: download the new one and install it the same way."
+msgstr "Iridia est venu en paquet système : téléchargez le nouveau et installez-le pareil."
+
 msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
 msgstr "Mets à jour avec git pull, puis bash install.sh."
 
@@ -580,6 +586,10 @@ msgstr "Rien de gardé."
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr "Revenir à {v}"
+
+#, python-brace-format
+msgid "Couldn't open it: {err}"
+msgstr "Impossible de l'ouvrir : {err}"
 
 msgid "Checking…"
 msgstr "Oui"
@@ -1341,6 +1351,18 @@ msgstr "Qui a mangé mon fromage. La crêpe est tombée par terre."
 msgid "Uninstall Iridia"
 msgstr "Ooh la la"
 
+#, python-brace-format
+msgid ""
+"Iridia came as a system package, so your package manager removes it{how}. Your settings stay in "
+"~/.config/iridia; delete that folder too to remove them."
+msgstr ""
+"Iridia est venu en paquet système, c'est donc votre gestionnaire de paquets qui l'enlève{how}. "
+"Vos réglages restent dans ~/.config/iridia ; supprimez ce dossier aussi pour les enlever."
+
+#, python-brace-format
+msgid ": {cmd}"
+msgstr " : {cmd}"
+
 msgid ""
 "Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
 "something else changes them."
@@ -1899,11 +1921,11 @@ msgstr "Allumé, éteint"
 msgid "Colours"
 msgstr "Couleurs"
 
-msgid "Follow the monitor's brightness"
-msgstr "Suivre la luminosité de l'écran"
+msgid "Follow the monitor"
+msgstr "Suivre l'écran"
 
-msgid "Stay lit when the screen locks"
-msgstr "Rester allumé quand l'écran se verrouille"
+msgid "Stay lit when locked"
+msgstr "Allumé si verrouillé"
 
 msgid "Looks"
 msgstr "Looks"
@@ -1919,18 +1941,6 @@ msgstr "Baguette"
 
 msgid "Tall"
 msgstr "Tour Eiffel"
-
-msgid "Colour card"
-msgstr "Carte couleur"
-
-msgid "Brightness card"
-msgstr "Carte bisou"
-
-msgid "Looks card"
-msgstr "Carte looks"
-
-msgid "Switches card"
-msgstr "Carte interrupteurs"
 
 msgid "Static"
 msgstr "Immobile comme une statue"
@@ -1973,11 +1983,14 @@ msgstr "{n} bandes"
 msgid "Its strips aren't there any more."
 msgstr "Ses bandes ont disparu."
 
-msgid "Follow the monitor"
-msgstr "Suivre l'écran"
+msgid "Change this card"
+msgstr "Changer cette carte"
 
-msgid "Stay lit when locked"
-msgstr "Allumé si verrouillé"
+msgid "On: click to turn off"
+msgstr "Allumé : cliquer pour éteindre"
+
+msgid "Off: click to turn on"
+msgstr "Éteint : cliquer pour allumer"
 
 msgid "All colours"
 msgstr "Toutes les couleurs"
@@ -2002,8 +2015,8 @@ msgstr "Couleur pour {name}"
 msgid "Colour wheel…"
 msgstr "Roue des couleurs…"
 
-msgid "No looks picked: Arrange, ✏ on this card."
-msgstr "Aucun look choisi : Déjà vu, ✏ sur cette carte."
+msgid "Showing now"
+msgstr "Affiché en ce moment"
 
 msgid "Turn on"
 msgstr "C'est la vie"
@@ -2018,9 +2031,6 @@ msgstr "{name} chargé. Voilà."
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Taille : {size}"
-
-msgid "Change this card"
-msgstr "Changer cette carte"
 
 msgid "Change this look"
 msgstr "Changer ce look"
@@ -2051,26 +2061,32 @@ msgstr "Setups"
 msgid "A switch on its own"
 msgstr "Un interrupteur tout seul"
 
-msgid "Start from"
-msgstr "Partir de"
-
 msgid "Title (optional), like Desk or Room"
 msgstr "Titre (facultatif), comme Bureau ou Salon"
 
 msgid "Which strips"
 msgstr "Quelles bandes"
 
-msgid "What's on it"
-msgstr "Ce qu'il y a dessus"
+msgid "On the card"
+msgstr "Sur la carte"
 
-msgid "Its looks (if Looks is on)"
-msgstr "Ses looks (si Looks est coché)"
+msgid "Which looks"
+msgstr "Quels looks"
 
 msgid "None yet: New look makes one."
 msgstr "Aucun : Nouveau look en fait un."
 
-msgid "Its switches (if Switches is on)"
-msgstr "Ses interrupteurs (si Interrupteurs est coché)"
+msgid "Which scenes"
+msgstr "Quelles scènes"
+
+msgid "None yet: make them on the Scenes tab."
+msgstr "Aucune : créez-les dans l'onglet Scènes."
+
+msgid "Which switches"
+msgstr "Quels interrupteurs"
+
+msgid "A card grows taller when what's on it needs the room."
+msgstr "Une carte grandit quand son contenu a besoin de place."
 
 msgid "Pick the strips it's for, or Everything."
 msgstr "Choisis des bandes."
@@ -3229,6 +3245,14 @@ msgstr "Le béret de mon grand-père. J'ai une baguette. Mon oncle est un champi
 msgid "RGB (normal)"
 msgstr "Bonne nuit"
 
+msgid "Let Iridia control it: off, Iridia sends it nothing and it keeps whatever it shows"
+msgstr ""
+"Laisser Iridia s'en occuper : désactivé, Iridia ne lui envoie rien et elle garde ce qu'elle "
+"affiche"
+
+msgid "Let Iridia control every strip"
+msgstr "Laisser Iridia s'occuper de toutes les bandes"
+
 msgid "Show again"
 msgstr "Revoir"
 
@@ -3294,19 +3318,8 @@ msgstr "Avec le reste"
 msgid "Only when I change it"
 msgstr "Seulement quand je change"
 
-msgid "Not at all"
-msgstr "Pas du tout"
-
 msgid "How Iridia uses it"
 msgstr "Comment Iridia l'utilise"
-
-msgid "Let Iridia control it"
-msgstr "Laisser Iridia la piloter"
-
-msgid ""
-"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
-"switch at the top of the card turns it off instead."
-msgstr "Non : Iridia ne lui envoie rien. Son app peut la régler. Voilà."
 
 msgid "On its own: ignore the monitor, night mode, lock and sleep"
 msgstr "Indépendante : ignore l'écran, la nuit, le verrouillage et la veille"
@@ -3396,19 +3409,32 @@ msgstr "Je ne sais quoi"
 msgid "Change this color"
 msgstr "Ceci n'est pas une pipe"
 
+msgid "every strip"
+msgstr "toutes les bandes"
+
+msgid "this strip"
+msgstr "cette bande"
+
+#, python-brace-format
+msgid "On: click to turn {what} off"
+msgstr "Allumé : cliquer pour éteindre {what}"
+
+#, python-brace-format
+msgid "Off: click to turn {what} on"
+msgstr "Éteint : cliquer pour allumer {what}"
+
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Comme une bande. Voilà."
 
 msgid ""
-"Iridia sends its colour and brightness only when you change them here, and never switches it on "
-"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
-" light may switch itself on when it gets a colour."
+"Iridia sends its colour and brightness only when you change them here, and switches it on or off "
+"only with the power button: its own app and automations (Google Home, say) stay in charge. While "
+"it's off here, colour changes wait. A light may switch itself on when it gets a colour."
 msgstr ""
-"Couleur et luminosité seulement quand tu les changes ici. Jamais allumée ou éteinte par Iridia. "
-"Google Home reste le chef."
-
-msgid "Iridia sends it nothing: it keeps whatever its own app set."
-msgstr "Iridia ne lui envoie rien."
+"Iridia envoie sa couleur et sa luminosité seulement quand vous les changez ici, et ne l'allume ou"
+" l'éteint qu'avec le bouton marche/arrêt : son appli et ses automatismes (Google Home, par "
+"exemple) gardent la main. Tant qu'elle est éteinte ici, les changements de couleur attendent. Une"
+" lampe peut s'allumer toute seule en recevant une couleur."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-07 22:44+0000\n"
+"POT-Creation-Date: 2026-11-11 00:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -527,6 +527,9 @@ msgstr "Hoist the new sails"
 msgid "Skip this version"
 msgstr "Let this one sail by"
 
+msgid "Download page"
+msgstr "Where the loot be"
+
 msgid "What's new"
 msgstr "What be new"
 
@@ -584,6 +587,9 @@ msgstr "Ye have the latest version."
 msgid "Not checked yet."
 msgstr "Not checked yet."
 
+msgid "Iridia came as a system package: download the new one and install it the same way."
+msgstr "Iridia came aboard as a system package: fetch the new one an' stow it the same way."
+
 msgid "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."
 msgstr "This Iridia sails from its source folder: update it there (git pull, then bash install.sh)."
 
@@ -601,6 +607,10 @@ msgstr "Nothin' kept yet: the version ye have now be kept when ye update."
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr "Sail back to {v}"
+
+#, python-brace-format
+msgid "Couldn't open it: {err}"
+msgstr "Couldn't pry it open: {err}"
 
 msgid "Checking…"
 msgstr "Checkin'…"
@@ -1413,6 +1423,18 @@ msgstr ""
 msgid "Uninstall Iridia"
 msgstr "Make Iridia jump ship"
 
+#, python-brace-format
+msgid ""
+"Iridia came as a system package, so your package manager removes it{how}. Your settings stay in "
+"~/.config/iridia; delete that folder too to remove them."
+msgstr ""
+"Iridia came aboard as a system package, so yer package manager makes it walk the plank{how}. Yer "
+"settings stay in ~/.config/iridia; scuttle that folder too to be rid o' them."
+
+#, python-brace-format
+msgid ": {cmd}"
+msgstr ": {cmd}"
+
 msgid ""
 "Remove Iridia from this computer? The daemon stops, so your LEDs keep their last colors until "
 "something else changes them."
@@ -1995,11 +2017,11 @@ msgstr "Light 'n' douse"
 msgid "Colours"
 msgstr "Colours"
 
-msgid "Follow the monitor's brightness"
-msgstr "Follow the monitor's glow"
+msgid "Follow the monitor"
+msgstr "Follow the monitor"
 
-msgid "Stay lit when the screen locks"
-msgstr "Stay lit when the hatch is battened"
+msgid "Stay lit when locked"
+msgstr "Stay lit when battened"
 
 msgid "Looks"
 msgstr "Looks"
@@ -2015,18 +2037,6 @@ msgstr "Sloop"
 
 msgid "Tall"
 msgstr "Mast"
-
-msgid "Colour card"
-msgstr "Colour chart"
-
-msgid "Brightness card"
-msgstr "Glow chart"
-
-msgid "Looks card"
-msgstr "Looks chart"
-
-msgid "Switches card"
-msgstr "Levers chart"
 
 msgid "Static"
 msgstr "Becalmed"
@@ -2069,11 +2079,14 @@ msgstr "{n} strips"
 msgid "Its strips aren't there any more."
 msgstr "Its strips have gone overboard."
 
-msgid "Follow the monitor"
-msgstr "Follow the monitor"
+msgid "Change this card"
+msgstr "Change this chart"
 
-msgid "Stay lit when locked"
-msgstr "Stay lit when battened"
+msgid "On: click to turn off"
+msgstr "Lit: click to douse"
+
+msgid "Off: click to turn on"
+msgstr "Doused: click to light"
 
 msgid "All colours"
 msgstr "All the colours o' the sea"
@@ -2098,8 +2111,8 @@ msgstr "Colour fer {name}"
 msgid "Colour wheel…"
 msgstr "Ship's wheel o' colours…"
 
-msgid "No looks picked: Arrange, ✏ on this card."
-msgstr "No looks picked: Haul, ✏ on this chart."
+msgid "Showing now"
+msgstr "Showin' now"
 
 msgid "Turn on"
 msgstr "Light 'em"
@@ -2114,9 +2127,6 @@ msgstr "Loaded {name} (the old settin's be stowed)"
 #, python-brace-format
 msgid "Size: {size}"
 msgstr "Size: {size}"
-
-msgid "Change this card"
-msgstr "Change this chart"
 
 msgid "Change this look"
 msgstr "Change this look"
@@ -2145,26 +2155,32 @@ msgstr "Setups"
 msgid "A switch on its own"
 msgstr "A lever on its lonesome"
 
-msgid "Start from"
-msgstr "Set sail from"
-
 msgid "Title (optional), like Desk or Room"
 msgstr "Name (if ye like), like Desk or Cabin"
 
 msgid "Which strips"
 msgstr "Which strips"
 
-msgid "What's on it"
-msgstr "What's aboard"
+msgid "On the card"
+msgstr "Aboard the chart"
 
-msgid "Its looks (if Looks is on)"
-msgstr "Its looks (if Looks be on)"
+msgid "Which looks"
+msgstr "Which looks"
 
 msgid "None yet: New look makes one."
 msgstr "None yet: New look makes one."
 
-msgid "Its switches (if Switches is on)"
-msgstr "Its levers (if Switches be on)"
+msgid "Which scenes"
+msgstr "Which scenes"
+
+msgid "None yet: make them on the Scenes tab."
+msgstr "None yet: make 'em on the Scenes tab."
+
+msgid "Which switches"
+msgstr "Which levers"
+
+msgid "A card grows taller when what's on it needs the room."
+msgstr "A chart grows taller when what's aboard needs the room."
 
 msgid "Pick the strips it's for, or Everything."
 msgstr "Pick the strips it be fer, or Everything."
@@ -3390,6 +3406,12 @@ msgstr ""
 msgid "RGB (normal)"
 msgstr "RGB (normal)"
 
+msgid "Let Iridia control it: off, Iridia sends it nothing and it keeps whatever it shows"
+msgstr "Let Iridia steer it: off, Iridia sends it nothin' and it keeps whatever it shows"
+
+msgid "Let Iridia control every strip"
+msgstr "Let Iridia steer every strip"
+
 msgid "Show again"
 msgstr "Bring back on deck"
 
@@ -3455,21 +3477,8 @@ msgstr "With the crew"
 msgid "Only when I change it"
 msgstr "Only when I change it"
 
-msgid "Not at all"
-msgstr "Not at all"
-
 msgid "How Iridia uses it"
 msgstr "How Iridia uses it"
-
-msgid "Let Iridia control it"
-msgstr "Let Iridia steer it"
-
-msgid ""
-"Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app can set it). The "
-"switch at the top of the card turns it off instead."
-msgstr ""
-"Off: Iridia sends it nothin', so it keeps whatever it shows (a lantern's own app can set it). The"
-" switch atop the card snuffs it instead."
 
 msgid "On its own: ignore the monitor, night mode, lock and sleep"
 msgstr "On its own: ignore the monitor, night watch, lock an' sleep"
@@ -3565,20 +3574,31 @@ msgstr "Colors in order (click to change):"
 msgid "Change this color"
 msgstr "Change this color"
 
+msgid "every strip"
+msgstr "every strip"
+
+msgid "this strip"
+msgstr "this strip"
+
+#, python-brace-format
+msgid "On: click to turn {what} off"
+msgstr "Lit: click to douse {what}"
+
+#, python-brace-format
+msgid "Off: click to turn {what} on"
+msgstr "Doused: click to light {what}"
+
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes an' the rest."
 
 msgid ""
-"Iridia sends its colour and brightness only when you change them here, and never switches it on "
-"or off: its own app and automations (Google Home, say) stay in charge. Your choice stays saved. A"
-" light may switch itself on when it gets a colour."
+"Iridia sends its colour and brightness only when you change them here, and switches it on or off "
+"only with the power button: its own app and automations (Google Home, say) stay in charge. While "
+"it's off here, colour changes wait. A light may switch itself on when it gets a colour."
 msgstr ""
-"Iridia sends its colour an' brightness only when ye change 'em here, an' never switches it on or "
-"off: its own app an' automations (Google Home, say) stay at the helm. Yer choice be kept. A "
-"lantern may light itself when it gets a colour."
-
-msgid "Iridia sends it nothing: it keeps whatever its own app set."
-msgstr "Iridia sends it nothin': it keeps whatever its own app set."
+"Iridia sends its colour an' glow only when ye change 'em here, and lights or douses it only with "
+"the power button: its own app an' automations (Google Home, say) stay at the helm. While it's "
+"doused here, colour changes wait. A light may light itself when it gets a colour."
 
 msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "

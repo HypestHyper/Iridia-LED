@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.3.10 — 2026-11-11
+
+- **Favourites cards, simpler:** the card editor is chips you tap (strips, what's on the card, and then
+  which looks, scenes and switches) instead of rows of checkboxes; on a card, *Follow the monitor* and
+  *Stay lit* are small chips, not a row each. New on cards: a *Speed* slider under the effect (slow to
+  fast, whatever the effect), and *Scenes*: a chip per scene to switch it on or off. Cards are sized to
+  what's on them.
+- **Each strip's card:** the switch on the left now means *Let Iridia control it* (off: Iridia sends it
+  nothing and it keeps whatever it shows), and a new round ⏻ button in the header turns it on or off
+  (pastel green on, red off). For a network light set to *Only when I change it*, ⏻ sends one on or off
+  command when pressed, and colour changes wait while it's off; before, its switch was ignored. *Not at
+  all* is gone from *How Iridia uses it*: that's the switch now.
+- **Favourites cards:** changes from a card now reach network lights set to *Only when I change it*;
+  every control you tick shows, whatever the size (a card grows taller to fit); a pencil on each card
+  changes it (right-click a small one); and on/off is the same ⏻ button. A brightness change on an *Only
+  when I change it* light is sent at the brightness asked for, not the first step of a fade.
+- **System packages:** each release now has a package for Arch (and CachyOS, Manjaro, EndeavourOS),
+  Debian and Ubuntu, and Fedora and openSUSE, with a `SHA256SUMS` file. The package manager brings in
+  what Iridia needs and removes it all again; Iridia lives in `/usr/lib/iridia`, with a systemd user
+  unit, the launcher and icons in `/usr`. Installed that way, the Updates tab says when there's a new
+  version and opens its download page, *Uninstall* says how to remove the package, and `iridia doctor`
+  notices an older install.sh copy left in your home folder. Every push builds the packages and installs
+  each one on a fresh Arch, Debian, Ubuntu and Fedora (the command line, the daemon, the window, an
+  upgrade and removing it).
+
 ## 1.3.9 — 2026-11-09
 
 - **Favourites:** a tab (right after Status) with the controls you use most, on a grid you arrange

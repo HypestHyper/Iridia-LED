@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.10" date="2026-11-11">
+      <description>
+        <ul>
+          <li>System packages for Arch, Debian and Ubuntu, and Fedora and openSUSE, on each release</li>
+          <li>Each strip: a switch for whether Iridia controls it, and a round power button</li>
+          <li>Favourites cards: a simpler editor, effect speed and scene switches, and every control shows</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.9" date="2026-11-09">
       <description>
         <ul>

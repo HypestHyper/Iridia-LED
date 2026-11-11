@@ -95,6 +95,12 @@ button.small {{ min-height: 32px; padding: 0 14px; font-size: 13px; border-radiu
 button.small:active {{ border-radius: 8px; }}
 button.circle {{ padding: 0; min-width: 40px; min-height: 40px; border-radius: 20px; }}
 button.circle.small {{ min-width: 32px; min-height: 32px; border-radius: 16px; }}
+button.circle.small.power, button.circle.small.power:active {{ min-width: 28px; min-height: 28px; padding: 0;
+    border-radius: 14px; }}
+button.circle.small.power.on {{ background: #bfe8c9; color: #1f4d2c; }}
+button.circle.small.power.on:hover {{ background: #ade0b9; }}
+button.circle.small.power.off {{ background: #f6c9c9; color: #6e2121; }}
+button.circle.small.power.off:hover {{ background: #f0b6b6; }}
 button.circle:active {{ border-radius: 10px; }}
 button.fab {{ min-height: 56px; padding: 0 24px; border-radius: 18px; font-size: 15px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4); }}
@@ -113,8 +119,8 @@ button.toggled, button.filled.toggled {{ background: {PRIMARY}; color: {ON_PRIMA
 button.filter {{ border-radius: 8px; padding: 4px 12px; min-height: 24px; background: transparent;
   border: 1px solid {OUTLINE_VARIANT}; color: {ON_SURFACE_VARIANT}; font-weight: 500; box-shadow: none; }}
 button.filter:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
-button.filter:checked {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY_CONTAINER};
-  border-color: {SECONDARY_CONTAINER}; }}
+button.filter:checked {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-color: {PRIMARY}; }}
+button.filter:checked:hover {{ background: {PRIMARY_HOVER}; }}
 .group > button:checked .icon {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .group > button:active {{ border-radius: 4px; }}
 

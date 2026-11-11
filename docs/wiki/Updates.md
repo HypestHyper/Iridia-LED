@@ -5,6 +5,10 @@ It works for the usual install (the one `install.sh` makes in `~/.local/share/ir
 Iridia from a git checkout or a virtualenv of your own, update it the way you installed it
 (`git pull`, then `bash install.sh`).
 
+Installed as a [system package](Installation.md#as-a-system-package), Iridia still checks and tells you
+about new versions, but your package manager installs them: *Download page* opens the new release, and
+you install its package the same way as the first one.
+
 ## In the window
 
 The **Updates** tab shows the version you have, whether a newer one exists, and what's new in it:
@@ -13,6 +17,7 @@ The **Updates** tab shows the version you have, whether a newer one exists, and 
 | --- | --- |
 | **Check now** | Ask GitHub right away |
 | **Update now** | Install the new version (see below); the window restarts by itself when it's done |
+| **Download page** | (System package) the new release's page, to download its package |
 | **Skip this version** | No more notifications for this one; newer versions still show up |
 | **Go back to …** | Put the version from before the last update back |
 

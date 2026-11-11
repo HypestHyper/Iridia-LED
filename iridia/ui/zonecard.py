@@ -15,7 +15,7 @@ from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, St
                                button, card, hbox, icon, label, set_button_text, switch_row, vbox, wrap_row)
 
 ZONE_FIELDS_DEFAULT = {
-    "enabled": True, "led_count": 20, "pattern": "solid", "mode": "full",
+    "enabled": True, "hands_off": False, "led_count": 20, "pattern": "solid", "mode": "full",
     "pattern_colors": [0], "brightness_sync": False, "manual_brightness": 100,
     "brightness_range": [0, 100], "invert_brightness": False, "gamma_correction": False,
     "pattern_params": {}, "calibration_profile": "WS2812B", "animation": None,
@@ -53,6 +53,13 @@ class GlobalClient:
 
     def set_zone_enabled(self, d, z, v):
         return self._c.set_all("enabled", v)
+
+    def set_zone_strip(self, d, z, **fields):
+        r = {"ok": True}
+        for k, v in fields.items():          # only what makes sense for every strip at once
+            if k == "hands_off":
+                r = self._c.set_all("hands_off", bool(v))
+        return r
 
     def set_zone_pattern(self, d, z, v):
         return self._c.set_all("pattern", v)
@@ -167,14 +174,24 @@ class ZoneCard(Gtk.Box):
     # ------------------------------------------------------------ header
     def _build_header(self, expanded):
         hdr = hbox(14)
-        self._enabled = Toggle(self.cfg.get("enabled", True), self._on_enabled)
-        hdr.append(self._enabled)
+        # the switch: does Iridia send this strip anything? (off: it keeps whatever it shows)
+        self._control_sw = Toggle(not self.cfg.get("hands_off"), lambda v: self._strip_set(hands_off=not v))
+        self._control_sw.set_tooltip_text(_("Let Iridia control it: off, Iridia sends it nothing and it keeps "
+                                            "whatever it shows") if not self.global_mode else
+                                          _("Let Iridia control every strip"))
+        hdr.append(self._control_sw)
         txt = vbox(0, hexpand=True)
         self._title_lbl = label(self._display_title(), ("heading",))
         txt.append(self._title_lbl)
         self._summary = label("", ("small", "dim"))
         txt.append(self._summary)
         hdr.append(txt)
+        # the power button: the strip on or off
+        self._power = button(icon_name="power_settings_new", style="text small power", cb=self._on_power)
+        self._power.set_valign(Gtk.Align.CENTER)            # a round dot, not stretched to the row's height
+        self._power.set_halign(Gtk.Align.CENTER)
+        self._show_power(self.cfg.get("enabled", True))
+        hdr.append(self._power)
         self._star = None
         if not self.global_mode:
             self._star = button(icon_name="star", style="text small", cb=self._on_star, tooltip=_("Add to Favourites"))
@@ -389,8 +406,8 @@ class ZoneCard(Gtk.Box):
             self._control_row = self._sess_row = row5
             if self.cfg.get("net"):
                 # a network light: how much Iridia does with it, next to its own app and automations
-                self._usage = Group([("rest", _("With the rest")), ("demand", _("Only when I change it")),
-                                     ("none", _("Not at all"))], self._usage_of(self.cfg), self._on_usage)
+                self._usage = Group([("rest", _("With the rest")), ("demand", _("Only when I change it"))],
+                                    self._usage_of(self.cfg), self._on_usage)
                 # at the top of the card: it decides what the rest of the card does
                 box = hbox(10, label(_("How Iridia uses it"), ("body",)), self._usage)
                 self._usage_note = label("", ("small", "faint"), wrap=True)
@@ -398,12 +415,7 @@ class ZoneCard(Gtk.Box):
                 self._details.insert_child_after(self._usage_note, box)
                 self._control = None
             else:
-                row6, self._control = switch_row(_("Let Iridia control it"), not self.cfg.get("hands_off"),
-                                                 lambda v: self._strip_set(hands_off=not v))
-                br.append(row6)
-                br.append(label(_("Off: Iridia sends it nothing, so it keeps whatever it shows (a light's own app "
-                                  "can set it). The switch at the top of the card turns it off instead."),
-                                ("small", "faint"), wrap=True))
+                self._control = None
             self._indep_row, self._indep = switch_row(_("On its own: ignore the monitor, night mode, lock and sleep"),
                                                       bool(self.cfg.get("independent")),
                                                       lambda v: self._strip_set(independent=bool(v)))
@@ -825,8 +837,21 @@ class ZoneCard(Gtk.Box):
         else:
             self._jobs[key] = GLib.timeout_add(delay, run)
 
-    def _on_enabled(self, v):
-        self._call(self.client.set_zone_enabled, self.device_name, self.zone_name, v)
+    def _on_power(self):
+        on = not self._power_on
+        self._show_power(on)
+        self.cfg = dict(self.cfg, enabled=on)
+        self._hold_until = time.time() + 2.0
+        self._call(self.client.set_zone_enabled, self.device_name, self.zone_name, on)
+
+    def _show_power(self, on):
+        self._power_on = bool(on)
+        for c in ("on", "off"):
+            self._power.remove_css_class(c)
+        self._power.add_css_class("on" if on else "off")
+        what = _("every strip") if self.global_mode else _("this strip")
+        self._power.set_tooltip_text((_("On: click to turn {what} off") if on else
+                                      _("Off: click to turn {what} on")).format(what=what))
 
     def _on_led_change(self, v):
         count = int(v)
@@ -995,18 +1020,18 @@ class ZoneCard(Gtk.Box):
 
     USAGE_NOTES = {
         "rest": _("Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."),
-        "demand": _("Iridia sends its colour and brightness only when you change them here, and never switches "
-                    "it on or off: its own app and automations (Google Home, say) stay in charge. Your choice "
-                    "stays saved. A light may switch itself on when it gets a colour."),
-        "none": _("Iridia sends it nothing: it keeps whatever its own app set."),
+        "demand": _("Iridia sends its colour and brightness only when you change them here, and switches it on or "
+                    "off only with the power button: its own app and automations (Google Home, say) stay in "
+                    "charge. While it's off here, colour changes wait. A light may switch itself on when it "
+                    "gets a colour."),
     }
 
     @staticmethod
     def _usage_of(cfg) -> str:
-        return "none" if cfg.get("hands_off") else "demand" if cfg.get("on_demand") else "rest"
+        return "demand" if cfg.get("on_demand") else "rest"
 
     def _on_usage(self, v):
-        self._strip_set(hands_off=v == "none", on_demand=v == "demand")
+        self._strip_set(on_demand=v == "demand")
         self._show_usage(v)
 
     def _show_usage(self, v):
@@ -1074,7 +1099,9 @@ class ZoneCard(Gtk.Box):
             if not self._plimit.busy():
                 self._plimit.set_quiet(zcfg.get("power_limit", 0))
         if not holding:
-            self._enabled.set_value(zcfg.get("enabled", True))
+            self._control_sw.set_value(not zcfg.get("hands_off"))
+            if bool(zcfg.get("enabled", True)) != self._power_on:
+                self._show_power(zcfg.get("enabled", True))
             if self._sections is not None:
                 self._sections.set_config(zcfg)
             if self._led_spin is not None and not self._led_spin.busy():
@@ -1115,8 +1142,6 @@ class ZoneCard(Gtk.Box):
         self._gamma.set_value(zcfg.get("gamma_correction", False))
         if hasattr(self, "_sess_ignore"):
             self._sess_ignore.set_value(bool(zcfg.get("session_ignore")))
-            if self._control is not None:
-                self._control.set_value(not zcfg.get("hands_off"))
             if self._usage is not None:
                 self._usage.set_active(self._usage_of(zcfg))
                 self._show_usage(self._usage_of(zcfg))

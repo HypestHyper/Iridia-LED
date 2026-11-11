@@ -97,6 +97,36 @@ def clean(anim) -> dict | None:
     return out
 
 
+# effects whose "speed" is a time (bigger is slower); the others are a rate (bigger is faster)
+SLOW_IS_BIGGER = ("breathing", "color_cycle")
+
+
+def _speed_range(effect: str) -> tuple:
+    spec = EFFECTS[effect]["speed"]
+    lo, hi = float(spec[2]), float(spec[3])
+    return max(lo, hi / 600.0), hi          # a rate of 0 stands still: the slider starts just above it
+
+
+def speed_level(effect: str, value) -> int:
+    """An effect's speed as 0 (slowest) to 100 (fastest), on a log scale, whatever its unit."""
+    import math
+    if effect not in EFFECTS or "speed" not in EFFECTS[effect]:
+        return 50
+    lo, hi = _speed_range(effect)
+    v = min(hi, max(lo, float(value)))
+    level = math.log(v / lo) / math.log(hi / lo) * 100
+    return int(round(100 - level if effect in SLOW_IS_BIGGER else level))
+
+
+def speed_value(effect: str, level) -> float:
+    """The effect's own speed for a 0 (slowest) to 100 (fastest) level."""
+    lo, hi = _speed_range(effect)
+    x = min(100.0, max(0.0, float(level))) / 100.0
+    if effect in SLOW_IS_BIGGER:
+        x = 1.0 - x
+    return round(lo * (hi / lo) ** x, 3)
+
+
 def defaults(effect: str) -> dict:
     return clean({"effect": effect}) or {}
 

@@ -216,6 +216,7 @@ class Daemon:
         self.netlights = NetLights()              # WiZ and Govee lights on the network (off until switched on)
         self._left_alone: set = set()             # zone keys Iridia doesn't control right now ("hands_off")
         self._on_demand_due: set = set()          # "only when I change it" devices just changed: send once
+        self._on_demand_power: dict = {}          # ... whose power button was just pressed: name -> on
         self.focuswatch = None
         self._scene_ovs: list = []                # [(zone keys or None for all, overlay)], first wins
         self._scene_shown: tuple = ()             # ids of the scenes showing (a keybind's overlay wins)
@@ -2351,18 +2352,25 @@ class Daemon:
         if on_demand and name not in self._on_demand_due:
             return                          # only when you change it on its card: nothing to send now
         self._on_demand_due.discard(name)
+        if on_demand and self.netlights.has(name):
+            # its power button, pressed on its card: on or off, once (never by itself)
+            pressed = self._on_demand_power.pop(name, None)
+            if pressed is not None and not dev_cfg.get("hands_off"):
+                self.netlights.power(name, pressed)
         for zname, zcfg in targets:
             key = self._zone_key(name, zname)
+            if zcfg.get("hands_off"):
+                # not controlled by Iridia right now: nothing is sent, it keeps what it shows
+                self._left_alone.add(key)
+                continue
+            if on_demand and (dev_off or (bool(zname) and not zcfg.get("enabled", True))):
+                continue                    # switched off: a colour now could switch it back on
             if on_demand:
                 # what its card says, and nothing else: no wallpaper change, monitor, lock, sleep, scene
                 # or keybind on top, and never on or off (that's left to its own app and automations)
                 zc = dict(clean_zone_cfg(zcfg), independent=True, on_demand=True)
                 self._last_sent.pop(key, None)
                 self._update_zone(name, zname, zc, t)
-                continue
-            if zcfg.get("hands_off"):
-                # not controlled by Iridia right now: nothing is sent, it keeps what it shows
-                self._left_alone.add(key)
                 continue
             if key in self._left_alone:
                 self._left_alone.discard(key)
@@ -2552,6 +2560,9 @@ class Daemon:
     def _brightness_now(self, key: str, zcfg: dict) -> float:
         """The zone's brightness, faded down while the screen is locked or you're away (unless the
         zone ignores that)."""
+        if zcfg.get("on_demand"):
+            # sent once, when changed on its card: the brightness asked for, not the first step of a glide
+            return float(self._get_zone_brightness(zcfg))
         b = self._brightness_glide(key, zcfg)
         return b if zcfg.get("session_ignore") or zcfg.get("independent") else b * self._session_factor()
 
@@ -2978,10 +2989,16 @@ class Daemon:
             return
         dev = req.get("device")
         demand = self._on_demand_devices()
+        power = req.get("enabled") if req.get("cmd") == "set_zone_enabled" else \
+            req.get("value") if req.get("cmd") == "set_all" and req.get("field") == "enabled" else None
         if dev in demand:
             self._on_demand_due.add(dev)
+            if isinstance(power, bool):
+                self._on_demand_power[dev] = power
         elif req.get("cmd") == "set_all":
             self._on_demand_due |= demand
+            if isinstance(power, bool):
+                self._on_demand_power.update({d: power for d in demand})
         else:
             return
         self._needs_update = True
@@ -3303,7 +3320,8 @@ class Daemon:
         """One change for several strips at once (a Favourites card): targets (zone keys, or ["*"] for
         every strip) and set, any of: enabled, brightness (0-100), color (a wallpaper colour's number
         or a hex: one solid colour), brightness_sync, session_ignore, effect (an animation, or null for
-        static). Each goes through the strip's own command."""
+        static), speed (0 slowest to 100 fastest, for each strip's own effect). Each goes through the
+        strip's own command."""
         targets = req.get("targets") or []
         devices = self.config.devices_view
         if targets == ["*"]:
@@ -3327,13 +3345,27 @@ class Daemon:
                 cmds.append({"cmd": "set_zone_strip", "session_ignore": bool(v)})
             elif f == "effect":
                 cmds.append({"cmd": "set_zone_animation", "animation": {"effect": v} if v else None})
+            elif f == "speed":
+                if not isinstance(v, (int, float)) or isinstance(v, bool) or not 0 <= v <= 100:
+                    return {"ok": False, "error": "speed is 0 (slowest) to 100 (fastest)"}
+                cmds.append({"cmd": "set_zone_animation", "speed_level": v})
             else:
                 return {"ok": False, "error": f"can't set {f} on several strips"}
         errors = []
         for k in keys:
             dev, _sep, zone = k.partition("|")
             for c in cmds:
-                r = self._dispatch(dict(c, device=dev, zone=zone))
+                if "speed_level" in c:
+                    # each strip's own effect, at that speed (a strip without one is left as it is)
+                    cur = animations.clean(self.config.get(self._zone_config_path(dev, zone, "animation")))
+                    if cur is None or "speed" not in cur:
+                        continue
+                    c = {"cmd": "set_zone_animation",
+                         "animation": {"effect": cur["effect"],
+                                       "speed": animations.speed_value(cur["effect"], c["speed_level"])}}
+                sub = dict(c, device=dev, zone=zone)
+                r = self._dispatch(sub)
+                self._mark_on_demand(sub)       # an "only when I change it" light changed here gets it too
                 if not r.get("ok"):
                     errors.append(f"{k.rstrip('|')}: {r.get('error')}")
                     break
@@ -3805,6 +3837,7 @@ class Daemon:
     # Fields that "apply to everything" may set, and how each is validated.
     _GLOBAL_FIELDS = {
         "enabled": lambda v: isinstance(v, bool),
+        "hands_off": lambda v: isinstance(v, bool),
         "pattern": lambda v: v in PatternGenerator.PATTERNS,
         "mode": lambda v: v in ("palette", "full", "calibrated"),
         "calibration_profile": lambda v: isinstance(v, str) and valid_name(v),

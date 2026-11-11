@@ -13,7 +13,8 @@ mode, animations, scenes, notifications, network lights). Each has a size: small
 Config:
   looks      [{"id": "a1b2", "name": "Movie", "targets": ["*"] or ["Device|Zone", ...], "look": {...}}]
   favorites  [{"type": "card", "id": "c3d4", "title": "Desk", "targets": ["Device|Zone", ...] or ["*"],
-               "controls": ["power", "brightness", "colors", ...], "looks": [ids], "switches": [...],
+               "controls": ["power", "brightness", "colors", ...], "looks": [ids], "scenes": [scene ids],
+              "switches": [...],
                "size": "s"|"w"|"t"|"l"},
               {"type": "look", "id": "a1b2", "size": "s"}, {"type": "setup", "name": "Evening"},
               {"type": "switch", "what": "lights"}]
@@ -26,7 +27,7 @@ from iridia import scenes
 SWITCHES = ("lights", "freeze", "night", "animations", "scenes", "notify", "netlights")
 TILE_TYPES = ("card", "look", "setup", "switch")
 # what a card can show, for its strips
-CONTROLS = ("power", "brightness", "colors", "follow", "stay_lit", "effect", "looks", "switches")
+CONTROLS = ("power", "brightness", "colors", "follow", "stay_lit", "effect", "looks", "scenes", "switches")
 SIZES = ("s", "w", "t", "l")        # small 1x1, wide 2x1, tall 1x2, large 2x2
 SPAN = {"s": (1, 1), "w": (2, 1), "t": (1, 2), "l": (2, 2)}
 LOOKS_MAX = 60
@@ -83,6 +84,7 @@ def clean_card(raw) -> dict | None:
             "title": re.sub(r"\s+", " ", str(raw.get("title") or "")).strip()[:40], "targets": targets,
             "controls": controls,
             "looks": [x for x in dict.fromkeys(raw.get("looks") or []) if isinstance(x, str)][:12],
+            "scenes": [x for x in dict.fromkeys(raw.get("scenes") or []) if isinstance(x, str)][:12],
             "switches": [x for x in dict.fromkeys(raw.get("switches") or []) if x in SWITCHES],
             "size": raw.get("size") if raw.get("size") in SIZES else "w"}
 

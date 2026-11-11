@@ -88,14 +88,10 @@ class Board(Gtk.Grid):
         self._pack()
 
     def _avail(self) -> int:
-        """The width there is to fill: the visible area (not the board's own width, which grows with
-        its columns), less the page's margins on both sides."""
+        """The width there is to fill: that of the scroller holding the board (which, unlike the board,
+        follows the window, not the board's own columns)."""
         sw = self.get_ancestor(Gtk.ScrolledWindow)
-        if sw is None:
-            return self.get_width()
-        r = self.translate_coordinates(sw, 0, 0)       # (ok, x, y) or (x, y), by PyGObject version
-        x = r[-2] if r and (len(r) == 2 or r[0]) else 0
-        return sw.get_width() - 2 * int(x)
+        return sw.get_width() if sw is not None else self.get_width()
 
     def _tick(self, _w, _clock):
         """Each frame: the width there is now. A change in columns (or a big change in width, which
@@ -124,8 +120,9 @@ class Board(Gtk.Grid):
         used: set = set()
         for w, _size in self._items:
             w.set_size_request(-1, -1)
-        self._cellmin = max([w.measure(Gtk.Orientation.HORIZONTAL, -1)[0] for w, size in self._items
-                             if SPAN.get(size, (1, 1))[0] == 1] or [0])
+        # the narrowest a column can be: what each card needs, shared out over the columns it spans
+        self._cellmin = max([(w.measure(Gtk.Orientation.HORIZONTAL, -1)[0] - self.GAP * (SPAN.get(size, (1, 1))[0] - 1))
+                             // SPAN.get(size, (1, 1))[0] for w, size in self._items] or [0])
         if self._width:
             # no more columns than fit with the narrowest a card can be
             cols = self._cols = max(1, min(cols, (self._width + self.GAP) // (max(self.CELL, self._cellmin)
@@ -191,7 +188,13 @@ class FavoritesPage:
                                 button(_("New look"), "palette", "tonal small", lambda: self._open_look(None))))
         page.append(self._empty)
         self._board = Board()
-        page.append(self._board)
+        # The board sits in its own scroller that never scrolls sideways: it doesn't make the window as
+        # wide as its columns, so the window can shrink and the board then drops columns to fit.
+        holder = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
+                                    vscrollbar_policy=Gtk.PolicyType.NEVER, hexpand=True,
+                                    propagate_natural_height=True)
+        holder.set_child(self._board)
+        page.append(holder)
 
     # ---------------------------------------------------------------- status
     def update_status(self, st):
@@ -437,14 +440,17 @@ class FavoritesPage:
         row.append(sl)
         c.append(row)
         note = label(_("Follows the monitor: move it to set your own"), ("small", "faint"), wrap=True)
+        note.set_xalign(0.0)
         c.append(note)
 
         def upd(st, z):
-            auto = all(x.get("brightness_sync") for x in z)
-            level = st.get("brightness") if auto and isinstance(st.get("brightness"), (int, float)) else \
-                round(sum(int(x.get("manual_brightness", 100)) for x in z) / len(z))
-            sl.set_quiet(int(level))
-            note.set_visible(auto)
+            # what the strips really show: the monitor's level for those that follow it, their own
+            # brightness for the rest
+            mon = st.get("brightness") if isinstance(st.get("brightness"), (int, float)) else None
+            levels = [mon if x.get("brightness_sync") and mon is not None else int(x.get("manual_brightness", 100))
+                      for x in z]
+            sl.set_quiet(int(round(sum(levels) / len(levels))))
+            note.set_visible(any(x.get("brightness_sync") for x in z))
         updaters.append(upd)
 
     def _effect_rows(self, c, tg, updaters):

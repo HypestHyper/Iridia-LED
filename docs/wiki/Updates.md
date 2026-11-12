@@ -5,9 +5,11 @@ It works for the usual install (the one `install.sh` makes in `~/.local/share/ir
 Iridia from a git checkout or a virtualenv of your own, update it the way you installed it
 (`git pull`, then `bash install.sh`).
 
-Installed as a [system package](Installation.md#as-a-system-package), Iridia still checks and tells you
-about new versions, but your package manager installs them: *Download page* opens the new release, and
-you install its package the same way as the first one.
+Installed as a [system package](Installation.md#as-a-system-package) (Arch, `.deb`, `.rpm`), *Update now*
+downloads the new release's package for your system, checks it against its SHA-256, and installs it with
+pacman, apt, dnf or zypper, which asks for your password (pkexec). Going back isn't offered there: install
+an older package from its release page. On a minimal desktop without a polkit agent there's no password
+prompt; the Updates tab then says the command to run in a terminal.
 
 ## In the window
 
@@ -17,7 +19,7 @@ The **Updates** tab shows the version you have, whether a newer one exists, and 
 | --- | --- |
 | **Check now** | Ask GitHub right away |
 | **Update now** | Install the new version (see below); the window restarts by itself when it's done |
-| **Download page** | (System package) the new release's page, to download its package |
+| **Download page** | (System package, when the release has no package for your package manager) the release's page |
 | **Skip this version** | No more notifications for this one; newer versions still show up |
 | **Go back to …** | Put the version from before the last update back |
 
@@ -65,3 +67,9 @@ The daemon sends the notification through the desktop's notification service (GN
 Cinnamon, MATE, Budgie, COSMIC, and on tiling compositors mako, dunst, swaync, fnott, ...), using
 `gdbus`, or `notify-send` when `gdbus` isn't there. Without a notification service the Updates tab still
 shows it.
+
+Where Iridia can install the new version by itself (the install.sh install, or a system package with a
+package for your package manager), the notification has an **Update now** button: it updates without
+opening the window (a system package asks for your password), and a second notification says when it's
+done or what went wrong. Notification servers that don't show buttons (some minimal ones) show it without;
+the Updates tab works the same either way.

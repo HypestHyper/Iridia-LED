@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **One-click updates for the system packages (Arch, `.deb`, `.rpm`):** *Update now* on the Updates tab
+  downloads the new release's package for your system, checks it against its SHA-256, and installs it
+  with pacman, apt, dnf or zypper through your system's password prompt, then restarts the daemon and the
+  window. Before, it only opened the download page.
+- **Update from the notification:** the "new version" notification has an *Update now* button (for the
+  install.sh install and the packages alike); a second notification says when it's done.
+
 ## 1.3.13 — 2026-11-11
 
 - **The window shrinks again with Favourites open:** the card grid made the window as wide as its

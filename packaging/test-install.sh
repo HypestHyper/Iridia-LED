@@ -96,6 +96,27 @@ iridia --version
 find /usr/lib/iridia -name '*.pyc' | grep -q . || { echo "caches gone after the upgrade"; exit 1; }
 echo ok
 
+say "updating itself the way the Updates tab does (the package manager, from a release's package)"
+mkdir -p /tmp/iridia-stub && printf '#!/bin/sh\necho "iridia $*"\n' > /tmp/iridia-stub/iridia
+chmod 755 /tmp/iridia-stub/iridia
+PATH="/tmp/iridia-stub:$PATH" python3 - "$PKG" <<'PY'
+import hashlib
+import os
+import sys
+sys.path.insert(0, "/usr/lib/iridia")
+from iridia import updater
+pkg = sys.argv[1]
+name = os.path.basename(pkg)
+version = name.replace("_", "-").split("-")[1]
+info = {"version": version, "files": {name: {"url": "file://" + pkg, "size": os.path.getsize(pkg),
+                                             "sha256": hashlib.sha256(open(pkg, "rb").read()).hexdigest()}}}
+fmt = updater.package_format()
+assert updater.package_file(info, fmt), (fmt, name)
+updater.apply_package(info, folder="/tmp/iridia-update", log=print, fmt=fmt)
+PY
+iridia --version
+echo ok
+
 say "removing"
 case "$PKG" in
     *.deb) apt-get remove -y -qq iridia >/dev/null ;;

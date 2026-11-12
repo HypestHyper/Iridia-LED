@@ -38,8 +38,10 @@ start at login until you say so: open Iridia from your app menu and pick how on 
 `systemctl --user enable --now iridia-daemon.service`. OpenRGB comes along where your distribution has
 it (Arch, Fedora); elsewhere install it from [openrgb.org](https://openrgb.org/).
 
-To update, install the newer package the same way: the *Updates* tab says when there is one and opens
-its download page. Settings stay in `~/.config/iridia` through updates and removal.
+To update, use *Update now* on the *Updates* tab or in the "new version" notification: Iridia downloads
+the new package, checks it, and installs it with your package manager, which asks for your password. Or
+install the newer package by hand the same way as the first. Settings stay in `~/.config/iridia` through
+updates and removal.
 
 **Moving from install.sh to the package:** remove the copy in your home folder first, keeping your
 settings, then install the package and set start at login again:

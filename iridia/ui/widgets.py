@@ -70,8 +70,31 @@ def icon(name: str, fill: bool = False, classes=()) -> Gtk.Label:
     return lbl
 
 
-def label(text: str = "", classes=(), wrap: bool = False, xalign: float = 0.0, selectable: bool = False,
+def _clickable(w: Gtk.Widget) -> bool:
+    """Inside something you click (a button, a dropdown, a row or header that reacts to clicks)? Text
+    there isn't selectable: selecting it would eat the click."""
+    p = w.get_parent()
+    while p is not None and not isinstance(p, (Gtk.ScrolledWindow, Gtk.Window, Gtk.Popover)):
+        if isinstance(p, (Gtk.Button, Gtk.DropDown, Gtk.MenuButton, Gtk.Switch, Gtk.CheckButton, Gtk.FlowBoxChild)):
+            return True
+        if isinstance(p, Gtk.ListBoxRow) and p.get_activatable():
+            return True
+        ctls = p.observe_controllers()
+        if any(isinstance(ctls.get_item(i), Gtk.GestureClick) for i in range(ctls.get_n_items())):
+            return True
+        p = p.get_parent()
+    return False
+
+
+def _auto_select(lbl: Gtk.Label):
+    if lbl.get_selectable() and _clickable(lbl):
+        lbl.set_selectable(False)
+
+
+def label(text: str = "", classes=(), wrap: bool = False, xalign: float = 0.0, selectable: bool | None = None,
           chars: int = 0, ellipsize: bool = False) -> Gtk.Label:
+    """selectable: None (the default) lets you select and copy the text unless it sits in something
+    you click; True or False decides it."""
     lbl = Gtk.Label(label=text, xalign=xalign)
     # A long line of help text wraps instead of holding the window wide.
     wrap = wrap or (len(text) > 60 and not ellipsize and not chars and bool({"small", "tiny", "faint"} & set(classes)))
@@ -82,7 +105,9 @@ def label(text: str = "", classes=(), wrap: bool = False, xalign: float = 0.0, s
         lbl.set_max_width_chars(chars)
     if ellipsize:
         lbl.set_ellipsize(Pango.EllipsizeMode.END)
-    lbl.set_selectable(selectable)
+    lbl.set_selectable(selectable is not False)
+    if selectable is None:
+        lbl.connect("realize", _auto_select)       # where it sits is only known once it's shown
     for c in classes:
         lbl.add_css_class(c)
     return lbl

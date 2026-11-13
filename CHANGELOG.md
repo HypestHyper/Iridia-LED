@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.14 — 2026-11-13
 
 - **One-click updates for the system packages (Arch, `.deb`, `.rpm`):** *Update now* on the Updates tab
   downloads the new release's package for your system, checks it against its SHA-256, and installs it

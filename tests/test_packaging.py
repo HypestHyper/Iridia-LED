@@ -73,3 +73,66 @@ def test_nfpm_config_has_what_build_fills_in():
     assert '"@VERSION@"' in text and '"@STAGE@/usr/"' in text
     pkgbuild = open(os.path.join(ROOT, "packaging", "arch", "PKGBUILD")).read()
     assert f"pkgver={iridia.VERSION}" in pkgbuild
+
+
+def _info(tmp_path, data=b"pkg-bytes"):
+    import hashlib
+    rel = {"tag_name": "v9.9.9", "body": "", "html_url": "https://x/rel", "published_at": "2026-11-12",
+           "assets": [{"name": "iridia-9.9.9.tar.gz", "browser_download_url": "https://x/t", "size": 1,
+                       "digest": "sha256:" + "0" * 64},
+                      {"name": "iridia-9.9.9-1-any.pkg.tar.zst", "browser_download_url": "https://x/a",
+                       "size": len(data), "digest": "sha256:" + hashlib.sha256(data).hexdigest()}]}
+    return updater._release_info(rel)
+
+
+def test_a_release_names_its_packages(tmp_path):
+    info = _info(tmp_path)
+    assert updater.package_file(info, "arch")["url"] == "https://x/a"
+    assert updater.package_file(info, "deb") is None                    # this release has no .deb
+
+
+def test_a_package_update(monkeypatch, tmp_path):
+    info = _info(tmp_path)
+    monkeypatch.setattr(updater, "_get", lambda url, timeout=0: b"pkg-bytes")
+    ran = []
+    monkeypatch.setattr(updater, "_run", lambda cmd, log, cwd=None: ran.append(cmd) or 0)
+    monkeypatch.setattr(updater.os, "geteuid", lambda: 1000)
+    monkeypatch.setattr("shutil.which", lambda t: "/usr/bin/" + t)
+    updater.apply_package(info, folder=str(tmp_path), log=lambda m: None, fmt="arch")
+    path = str(tmp_path / "iridia-9.9.9-1-any.pkg.tar.zst")
+    assert open(path, "rb").read() == b"pkg-bytes"
+    assert ran[0] == ["pkexec", "pacman", "-U", "--noconfirm", path]      # as root, through the password prompt
+    assert ran[1][1:] == ["daemon", "stop"] and ran[2][1:] == ["daemon", "start"]
+
+
+def test_a_package_update_that_cant_go_ahead(monkeypatch, tmp_path):
+    import pytest
+    info = _info(tmp_path)
+    monkeypatch.setattr(updater.os, "geteuid", lambda: 1000)
+    monkeypatch.setattr("shutil.which", lambda t: "/usr/bin/" + t)
+    monkeypatch.setattr(updater, "_get", lambda url, timeout=0: b"changed on the way")
+    with pytest.raises(updater.UpdateError, match="checksum"):
+        updater.apply_package(info, folder=str(tmp_path), log=lambda m: None, fmt="arch")
+    monkeypatch.setattr(updater, "_get", lambda url, timeout=0: b"pkg-bytes")
+    monkeypatch.setattr(updater, "_run", lambda cmd, log, cwd=None: 126)  # the password prompt closed
+    with pytest.raises(updater.UpdateError, match="sudo pacman -U"):
+        updater.apply_package(info, folder=str(tmp_path), log=lambda m: None, fmt="arch")
+    with pytest.raises(updater.UpdateError, match="no deb package"):
+        updater.apply_package(info, folder=str(tmp_path), log=lambda m: None, fmt="deb")
+
+
+def test_the_notifications_update_button(monkeypatch, tmp_path):
+    fake = tmp_path / "gdbus"
+    fake.write_text("#!/bin/sh\necho \"/org/freedesktop/Notifications: org.freedesktop.Notifications.ActionInvoked "
+                    "(uint32 6, 'update')\"\necho \"/org/freedesktop/Notifications: "
+                    "org.freedesktop.Notifications.ActionInvoked (uint32 7, 'update')\"\nsleep 5\n")
+    fake.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{tmp_path}:{os.environ['PATH']}")
+    assert updater.wait_for_update_button(7, timeout=4) is True               # its own, not another's
+    fake.write_text("#!/bin/sh\necho \"/org/freedesktop/Notifications: org.freedesktop.Notifications."
+                    "NotificationClosed (uint32 7, uint32 2)\"\nsleep 5\n")
+    assert updater.wait_for_update_button(7, timeout=4) is False              # closed without updating
+
+
+def test_no_release_checked_yet():
+    assert updater.package_file({}, "arch") is None and updater.package_file(None, "deb") is None

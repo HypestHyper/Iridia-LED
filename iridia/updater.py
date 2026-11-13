@@ -82,7 +82,13 @@ def _release_info(rel: dict) -> dict | None:
     if asset is None:
         return None
     digest = str(asset.get("digest") or "")
-    return {"version": version, "notes": str(rel.get("body") or "").strip(), "url": asset.get("browser_download_url"),
+    files = {}                              # every file of the release: the packages too
+    for a in rel.get("assets") or []:
+        d = str(a.get("digest") or "")
+        if a.get("name") and a.get("browser_download_url"):
+            files[a["name"]] = {"url": a["browser_download_url"], "size": a.get("size") or 0,
+                                "sha256": d[7:].lower() if d.startswith("sha256:") else ""}
+    return {"version": version, "files": files, "notes": str(rel.get("body") or "").strip(), "url": asset.get("browser_download_url"),
             "sha256": digest[7:].lower() if digest.startswith("sha256:") else "", "size": asset.get("size") or 0,
             "page": rel.get("html_url") or "", "published": str(rel.get("published_at") or "")[:10],
             "prerelease": bool(rel.get("prerelease"))}
@@ -179,6 +185,84 @@ def package_remove_command() -> str:
         if shutil.which(tool):
             return cmd
     return ""
+
+
+# ------------------------------------------------------------------ system packages
+
+# which package of a release this system takes, and how it installs it (as root)
+PACKAGES = {
+    "arch": ("iridia-{v}-1-any.pkg.tar.zst", ["pacman", "-U", "--noconfirm"]),
+    "deb": ("iridia_{v}-1_all.deb", ["env", "DEBIAN_FRONTEND=noninteractive", "apt-get", "install", "-y"]),
+    "rpm": ("iridia-{v}-1.noarch.rpm", ["dnf", "install", "-y"]),
+    "rpm-zypper": ("iridia-{v}-1.noarch.rpm", ["zypper", "--non-interactive", "install", "--allow-unsigned-rpm"]),
+}
+
+
+def package_format() -> str | None:
+    """The kind of package this system installs: arch, deb, rpm or rpm-zypper (None: none known)."""
+    import shutil
+    for tool, fmt in (("pacman", "arch"), ("apt-get", "deb"), ("dnf", "rpm"), ("zypper", "rpm-zypper")):
+        if shutil.which(tool):
+            return fmt
+    return None
+
+
+def package_file(info: dict, fmt: str) -> dict | None:
+    """The release's package for this system: {name, url, sha256, size}, or None if it has none (or there's
+    no release yet: nothing checked)."""
+    if not (info or {}).get("version") or fmt not in PACKAGES:
+        return None
+    name = PACKAGES[fmt][0].format(v=info["version"])
+    f = (info.get("files") or {}).get(name)
+    return dict(f, name=name) if f else None
+
+
+def apply_package(info: dict, folder: str = CACHE, log: Callable[[str], None] = print, fmt: str | None = None) -> None:
+    """Update a system-package install: the release's package for this system, checked against its SHA-256,
+    installed by the package manager as root (pkexec asks for the password the desktop's way), then the
+    daemon restarted on the new version."""
+    import shutil
+    fmt = fmt or package_format()
+    if fmt is None:
+        raise UpdateError("No package manager this release has a package for (pacman, apt, dnf or zypper).")
+    pkg = package_file(info, fmt)
+    if pkg is None:
+        raise UpdateError(f"Iridia {info['version']} has no {fmt.split('-')[0]} package; install it from its "
+                          "release page.")
+    if not pkg.get("sha256"):
+        raise UpdateError("This package has no checksum to check the download against, so it isn't installed "
+                          "automatically. Install it by hand from its release page.")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, pkg["name"])
+    log(f"Downloading {pkg['name']}…")
+    data = _get(pkg["url"], timeout=120)
+    if hashlib.sha256(data).hexdigest() != pkg["sha256"]:
+        raise UpdateError("The download doesn't match its checksum (damaged or changed on the way); nothing "
+                          "was installed. Try again later.")
+    with open(path, "wb") as f:
+        f.write(data)
+    log("Download checked.")
+    cmd = PACKAGES[fmt][1] + [path]
+    by_hand = {"arch": "sudo pacman -U", "deb": "sudo apt install", "rpm": "sudo dnf install",
+               "rpm-zypper": "sudo zypper install"}[fmt] + f" {path}"
+    if os.geteuid() != 0:
+        if not shutil.which("pkexec"):
+            raise UpdateError("Installing needs your password, and this system has no pkexec to ask for it. "
+                              f"Install it yourself: {by_hand}")
+        cmd = ["pkexec"] + cmd
+    log("Installing (your system asks for your password)…")
+    rc = _run(cmd, log)
+    if rc in (126, 127) and cmd[0] == "pkexec":
+        raise UpdateError("The password prompt was closed, or no password prompt could be shown (on a "
+                          "minimal desktop, start a polkit agent). Nothing was installed. Or install it "
+                          f"yourself: {by_hand}")
+    if rc != 0:
+        raise UpdateError(f"The package manager stopped with an error ({rc}); see above. Nothing changed if it "
+                          "stopped before installing.")
+    log(f"Iridia {info['version']} is installed.")
+    exe = shutil.which("iridia") or "/usr/bin/iridia"
+    for action in ("stop", "start"):            # the daemon on the new version
+        _run([exe, "daemon", action], log)
 
 
 def reinstall_hint() -> str:
@@ -333,3 +417,89 @@ def notify(summary: str, body: str) -> bool:
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
         return r.returncode == 0
     return False
+
+
+def can_update_here(info: dict) -> bool:
+    """Whether `iridia update` can install this release by itself here (the install.sh copy, or a system
+    package with a package for this system's package manager)."""
+    kind = install_kind()
+    if kind == "venv":
+        return bool(info.get("sha256"))
+    if kind == "package":
+        fmt = package_format()
+        return fmt is not None and package_file(info, fmt) is not None
+    return False
+
+
+def notify_with_update(summary: str, body: str, label: str = "Update now") -> int | None:
+    """A notification with an Update button; its id (to watch for the button), or None when it couldn't
+    be shown that way (a server without gdbus, say)."""
+    import re
+    import shutil
+    if not shutil.which("gdbus"):
+        return None
+    try:
+        r = subprocess.run(["gdbus", "call", "--session", "--dest", "org.freedesktop.Notifications",
+                            "--object-path", "/org/freedesktop/Notifications",
+                            "--method", "org.freedesktop.Notifications.Notify",
+                            "Iridia", "0", ICON, summary, body, f"['update', '{label}']",
+                            "{'desktop-entry': <'%s'>, 'urgency': <byte 1>, 'resident': <true>}" % APP_ID, "0"],
+                           capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    m = re.search(r"uint32 (\d+)", r.stdout or "")
+    return int(m.group(1)) if r.returncode == 0 and m else None
+
+
+def wait_for_update_button(nid: int, timeout: float = 12 * 3600, stop=None) -> bool:
+    """True once the notification's Update button is pressed; False when it's closed, the wait runs out,
+    or `stop` (a threading.Event) is set."""
+    import re
+    import time
+    try:
+        p = subprocess.Popen(["gdbus", "monitor", "--session", "--dest", "org.freedesktop.Notifications",
+                              "--object-path", "/org/freedesktop/Notifications"],
+                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    except OSError:
+        return False
+    import queue
+    import threading
+    lines: queue.Queue = queue.Queue()
+
+    def read():
+        for line in p.stdout:
+            lines.put(line)
+        lines.put(None)
+    threading.Thread(target=read, daemon=True, name="update-button").start()
+    end = time.monotonic() + timeout
+    pressed = False
+    try:
+        while time.monotonic() < end and not (stop is not None and stop.is_set()):
+            try:
+                line = lines.get(timeout=1.0)
+            except queue.Empty:
+                continue
+            if line is None:
+                break
+            m = re.search(r"ActionInvoked \(uint32 (\d+), '([^']*)'\)", line)
+            if m and int(m.group(1)) == nid and m.group(2) == "update":
+                pressed = True
+                break
+            m = re.search(r"NotificationClosed \(uint32 (\d+),", line)
+            if m and int(m.group(1)) == nid:
+                break
+    finally:
+        p.terminate()
+        try:
+            p.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            p.kill()
+    return pressed
+
+
+def cli_command() -> str:
+    """The `iridia` command of this install."""
+    import shutil
+    import sys
+    here = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "iridia")
+    return here if os.path.exists(here) else (shutil.which("iridia") or "/usr/bin/iridia")

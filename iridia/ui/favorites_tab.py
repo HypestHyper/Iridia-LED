@@ -80,7 +80,11 @@ class Board(Gtk.Grid):
         self._width = 0
         self._cellmin = 0       # the narrowest a one-column card can be
         self._job = None
-        self.add_tick_callback(self._tick)
+
+    def watch(self, sw: Gtk.ScrolledWindow):
+        """Follow the width of the scroller holding the board: its page size is that width, and changes
+        only when the window does (no work at all while nothing changes)."""
+        sw.get_hadjustment().connect("notify::page-size", lambda *_a: self._check())
 
     def set_items(self, items):
         """items: [(widget, size)], in order."""
@@ -93,9 +97,9 @@ class Board(Gtk.Grid):
         sw = self.get_ancestor(Gtk.ScrolledWindow)
         return sw.get_width() if sw is not None else self.get_width()
 
-    def _tick(self, _w, _clock):
-        """Each frame: the width there is now. A change in columns (or a big change in width, which
-        changes how tall a card needs to be) repacks it, after this frame's layout."""
+    def _check(self):
+        """The width there is now. A change in columns (or a big change in width, which changes how
+        tall a card needs to be) repacks it, after this layout."""
         width = self._avail()
         if width > 0 and self._job is None:
             cell = max(self.CELL, self._cellmin)
@@ -103,7 +107,6 @@ class Board(Gtk.Grid):
             if cols != self._cols or abs(width - self._width) > 40:
                 self._cols, self._width = cols, width
                 self._job = GLib.idle_add(self._repack)     # never change children while being laid out
-        return True
 
     def _repack(self):
         self._job = None
@@ -194,6 +197,7 @@ class FavoritesPage:
                                     vscrollbar_policy=Gtk.PolicyType.NEVER, hexpand=True,
                                     propagate_natural_height=True)
         holder.set_child(self._board)
+        self._board.watch(holder)
         page.append(holder)
 
     # ---------------------------------------------------------------- status

@@ -1266,7 +1266,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         cur = r.get("version", "")
         available = bool(last.get("available")) and info.get("version") != cur
         packaged = r.get("kind") == "package"
-        source = r.get("kind") == "source" or packaged       # updated some other way than from here
+        # a system package installs from here when the release has one for this system's package manager
+        pkg_ok = packaged and self._package_here(info)
+        source = r.get("kind") == "source" or (packaged and not pkg_ok)     # updated some other way
         if self._upd_running:
             pass
         elif last.get("error"):
@@ -1281,13 +1283,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
         else:
             self._upd_title.set_label(_("Iridia {v}").format(v=cur))
             self._upd_sub.set_label(_("Not checked yet."))
-        if available and packaged:
+        if available and packaged and not pkg_ok:
             self._upd_sub.set_label(self._upd_sub.get_label() + " " + _(
                 "Iridia came as a system package: download the new one and install it the same way."))
         elif available and source:
             self._upd_sub.set_label(self._upd_sub.get_label() + " " + _(
                 "This Iridia runs from its source folder: update it there (git pull, then bash install.sh)."))
-        self._upd_page_btn.set_visible(available and packaged and bool(info.get("page")))
+        self._upd_page_btn.set_visible(available and packaged and not pkg_ok and bool(info.get("page")))
         self._upd_page_url = info.get("page") or ""
         self._upd_install_btn.set_visible(available and not source and not self._upd_running)
         self._upd_skip_btn.set_visible(available and s.get("skip") != info.get("version") and not self._upd_running)
@@ -1298,7 +1300,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         prev = r.get("previous")
         self._upd_prev_lbl.set_label(_("Kept from before the last update: Iridia {v}.").format(v=prev) if prev
                                      else _("Nothing kept yet: the version you have now is kept when you update."))
-        self._upd_back_btn.set_visible(bool(prev) and not source)
+        self._upd_back_btn.set_visible(bool(prev) and not source and not packaged)
         if prev:
             set_button_text(self._upd_back_btn, _("Go back to {v}").format(v=prev), "history")
         self._upd_back_btn.set_sensitive(not self._upd_running)
@@ -1339,8 +1341,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._updates_set(skip=v)
         self.toast(_("Iridia {v} skipped. Newer versions still show up.").format(v=v))
 
+    @staticmethod
+    def _package_here(info) -> bool:
+        from iridia import updater
+        fmt = updater.package_format()
+        return fmt is not None and updater.package_file(info, fmt) is not None
+
     def _update_install(self):
         v = ((self._upd.get("last") or {}).get("latest") or {}).get("version", "")
+        if self._upd.get("kind") == "package":
+            dialogs.confirm(self, _("Install Iridia {v}?").format(v=v),
+                            _("Iridia downloads the new package, checks it, and installs it with your system's "
+                              "package manager, which asks for your password. Your settings are backed up "
+                              "first. The LEDs pause for a few seconds while the daemon restarts, and this "
+                              "window restarts when it's done."),
+                            lambda: self._update_run(["update", "--yes"], _("Updating to {v}…").format(v=v)),
+                            yes=_("Update"))
+            return
         dialogs.confirm(self, _("Install Iridia {v}?").format(v=v),
                         _("Your settings are backed up first, and the version you have now is kept so you can go "
                           "back. The LEDs pause for a few seconds while the daemon restarts, and this window "

@@ -136,6 +136,10 @@ def button(text: str | None = None, icon_name: str | None = None, style: str = "
 
 
 def set_button_text(b: Gtk.Button, text: str, icon_name: str | None = None):
+    # status updates call this every poll: building the same contents again would lay the window out again
+    if getattr(b, "_iridia_text", None) == (text, icon_name):
+        return
+    b._iridia_text = (text, icon_name)
     if icon_name:
         b.set_child(hbox(8, icon(icon_name), Gtk.Label(label=text)))
     else:
@@ -1275,13 +1279,23 @@ class LoadingIndicator(Gtk.DrawingArea):
         self.set_content_height(size)
         self.set_draw_func(self._draw)
         self._tick = None
+        self._drawn = 0
         self._t0 = time.monotonic()
 
     def start(self):
         if self._tick is None and motion():
             self._t0 = time.monotonic()
-            self._tick = self.add_tick_callback(lambda *_a: (self.queue_draw(), GLib.SOURCE_CONTINUE)[1])
+            self._tick = self.add_tick_callback(self._frame)
         self.set_visible(True)
+
+    FRAME_US = 33000        # 30 frames a second is smooth for this, and half the drawing of the screen's rate
+
+    def _frame(self, _w, clock):
+        t = clock.get_frame_time()
+        if t - self._drawn >= self.FRAME_US:
+            self._drawn = t
+            self.queue_draw()
+        return GLib.SOURCE_CONTINUE
 
     def stop(self):
         if self._tick is not None:

@@ -1026,10 +1026,27 @@ def cmd_update(args):
     if args.check:
         return 0
     if updater.install_kind() == "package":
-        cmd = updater.package_manager()
-        print(f"This Iridia is a system package: download the new one from {info.get('page') or 'the release page'}"
-              + (f" and install it: {cmd}" if cmd else " and install it with your package manager") + ".")
-        return 1
+        fmt = updater.package_format()
+        if fmt is None or updater.package_file(info, fmt) is None:
+            print(f"There's no package of Iridia {info['version']} for this system's package manager; download it "
+                  f"from {info.get('page') or 'the release page'}.")
+            return 1
+        if not confirm(f"Install Iridia {info['version']} now? Your system asks for your password, and your "
+                       "settings are backed up first."):
+            return 1
+        try:
+            bid = Setups(version=current).backup(f"before updating to {info['version']}")
+            print(f"Settings backed up ({bid}).")
+            updater.apply_package(info, log=print, fmt=fmt)
+        except (updater.UpdateError, OSError) as e:
+            print(f"Update failed: {e}", file=sys.stderr)
+            if args.notify:
+                updater.notify("Iridia wasn't updated", str(e))
+            return 1
+        print("Done. If the window is open, it restarts by itself; otherwise open it again.")
+        if args.notify:
+            updater.notify(f"Iridia {info['version']} is installed", "Open Iridia to use it.")
+        return 0
     if updater.install_kind() != "venv":
         print("This Iridia isn't the install.sh install (a git checkout or your own venv): update it the way you "
               "installed it, for example: git pull && bash install.sh")
@@ -1043,8 +1060,12 @@ def cmd_update(args):
         updater.apply(info, log=print)
     except (updater.UpdateError, OSError) as e:
         print(f"Update failed: {e}", file=sys.stderr)
+        if args.notify:
+            updater.notify("Iridia wasn't updated", str(e))
         return 1
     print("Done. If the window is open, it restarts by itself; otherwise open it again.")
+    if args.notify:
+        updater.notify(f"Iridia {info['version']} is installed", "Open Iridia to use it.")
     return 0
 
 
@@ -1792,6 +1813,7 @@ def main(argv=None):
     up_parser.add_argument("--rollback", action="store_true", help="go back to the version before the last update")
     up_parser.add_argument("--prerelease", action="store_true", help="include test versions")
     up_parser.add_argument("-y", "--yes", action="store_true", help="don't ask")
+    up_parser.add_argument("--notify", action="store_true", help="say how it went in a desktop notification")
     an_parser = subparsers.add_parser("animations", help="Pause, resume or show animated effects")
     an_parser.add_argument("action", choices=["pause", "resume", "toggle", "status"])
     subparsers.add_parser("unfreeze", help="Follow the wallpaper again")

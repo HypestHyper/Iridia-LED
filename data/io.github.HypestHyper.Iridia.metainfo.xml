@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.3.14" date="2026-11-13">
+      <description>
+        <ul>
+          <li>One-click updates for the Arch, .deb and .rpm packages</li>
+          <li>Update now button on the new-version notification</li>
+          <li>The window uses less CPU while it sits open</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.13" date="2026-11-11">
       <description>
         <ul>

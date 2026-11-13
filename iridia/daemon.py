@@ -399,10 +399,29 @@ class Daemon:
                 self.logger.info(f"Iridia {v} is available (this is {get_version()}); see the window's Updates tab")
                 state = updater.load_state()
                 if s["notify"] and v != s["skip"] and state.get("notified") != v:
-                    if updater.notify(f"Iridia {v} is available",
-                                      "Open Iridia, Updates, to see what's new and install it."):
-                        updater.save_state(notified=v)
+                    self._notify_update(info)
             return
+
+    def _notify_update(self, info: dict):
+        """'Iridia X is available', with an Update now button where it can install by itself here; the
+        button runs `iridia update` in its own process (which stops and starts this daemon)."""
+        import subprocess
+
+        from iridia import updater
+        v = info["version"]
+        if updater.can_update_here(info):
+            nid = updater.notify_with_update(f"Iridia {v} is available",
+                                             "Update now, or open Iridia, Updates, to see what's new first.")
+            if nid is not None:
+                updater.save_state(notified=v)
+                if updater.wait_for_update_button(nid, stop=self._stopping):
+                    self.logger.info(f"Updating to Iridia {v} (from the notification)")
+                    subprocess.Popen([updater.cli_command(), "update", "--yes", "--notify"],
+                                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                     stderr=subprocess.DEVNULL, start_new_session=True)
+                return
+        if updater.notify(f"Iridia {v} is available", "Open Iridia, Updates, to see what's new and install it."):
+            updater.save_state(notified=v)
 
     def _cmd_updates(self, req: dict) -> dict:
         """Update settings (check, notify, prerelease, skip) and what the last check found."""

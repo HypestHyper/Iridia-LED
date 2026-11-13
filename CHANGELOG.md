@@ -9,6 +9,12 @@
 - **Update from the notification:** the "new version" notification has an *Update now* button (for the
   install.sh install and the packages alike); a second notification says when it's done.
 
+- **The window uses less CPU while it sits open:** the Favourites tab checked the window's width on every
+  screen frame (60 times a second, on any tab); it now only reacts when the width changes. Status
+  updates no longer rebuild the notification chip on every device card each poll, which laid the whole
+  window out again every 2 seconds. Loading animations draw at 30 frames a second instead of the
+  screen's rate (the "daemon isn't running" page used about 8% of a core, now about half that).
+
 ## 1.3.13 — 2026-11-11
 
 - **The window shrinks again with Favourites open:** the card grid made the window as wide as its

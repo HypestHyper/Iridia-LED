@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.15 — 2026-11-13
 
 - **Text in the window can be selected and copied** (drag over it, then Ctrl+C or right-click, Copy):
   help text, names, values, paths, error messages. Text on buttons, menus and clickable headers stays

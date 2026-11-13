@@ -2791,6 +2791,9 @@ class IridiaApp(Gtk.Application):
                 settings.set_property("gtk-interface-color-scheme", scheme.DARK)     # GTK 4.20+
             else:
                 settings.set_property("gtk-application-prefer-dark-theme", True)
+            if settings.find_property("gtk-label-select-on-focus"):
+                # text is selectable: moving through the window with Tab mustn't highlight all of it
+                settings.set_property("gtk-label-select-on-focus", False)
 
     def do_activate(self):
         if self.win is None:

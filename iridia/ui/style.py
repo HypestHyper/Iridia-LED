@@ -47,6 +47,8 @@ headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
 .dim {{ color: {ON_SURFACE_VARIANT}; }}
 .faint {{ color: {OUTLINE}; }}
 .accent {{ color: {PRIMARY}; }}
+/* selected text: the theme's own colours, not the toolkit's blue */
+label > selection, text > selection, entry > text > selection {{ background: alpha({PRIMARY}, 0.40); color: {ON_SURFACE}; }}
 .ok-text {{ color: {PRIMARY}; }}
 .error-text {{ color: {ERROR}; }}
 .warn-text {{ color: {TERTIARY}; }}

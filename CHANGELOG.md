@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Strips hidden on the Devices tab stay out of the Layout tab too** (the room and its strip list).
+  Their place in the room is kept for when you show them again, and room effects still reach them.
+
 ## 1.3.14 — 2026-11-13
 
 - **One-click updates for the system packages (Arch, `.deb`, `.rpm`):** *Update now* on the Updates tab

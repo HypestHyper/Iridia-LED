@@ -187,7 +187,14 @@ class LayoutTab(NotifyLayer, Gtk.Box):
                     self._cfg[k] = zc
                 if dc.get("enabled", True) and zc.get("enabled", True):
                     keys.append(k)
-        self._enabled = set(keys)
+        # strips hidden on the Devices tab stay out of the room too (their place in it is kept)
+        enabled = {k for k in keys if not (self._cfg.get(k) or {}).get("hidden")}
+        shown_changed = enabled != self._enabled
+        self._enabled = enabled
+        if shown_changed:
+            sel = self.layout.get(self._sel) if self._sel else None
+            if sel is not None and sel["zone"] not in enabled:
+                self._sel = None
         self._nt_update(status)
         if self.layout.ensure_zones(keys):
             self._schedule_save()
@@ -199,8 +206,11 @@ class LayoutTab(NotifyLayer, Gtk.Box):
             self._sig = sig
             if self._visible and self._drag is None:
                 self.cv.queue_draw()
-                self._refresh_panel_values()
-                self._nt_refresh_panel()
+                if shown_changed:
+                    self._build_panel()         # the strip list
+                else:
+                    self._refresh_panel_values()
+                    self._nt_refresh_panel()
             else:
                 self._dirty = True
 

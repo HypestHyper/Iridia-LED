@@ -1230,3 +1230,24 @@ def test_a_cards_control_switch_and_brightness_leave_the_monitor(d):
     assert d.config.get(("devices", "Strip", "hands_off"))
     assert _cmd(d, "set_zones", targets=["Strip|"], set={"hands_off": False})["ok"]
     assert not d.config.get(("devices", "Strip", "hands_off"))
+
+
+def test_a_colour_for_a_dark_strip_brings_its_brightness_back(d):
+    """Brightness 0 shows any colour as black: picking a colour (its card, a Favourites card, Everything)
+    brings it back up, unless the strip follows the monitor or the same change sets a brightness."""
+    _cmd(d, "set_zone_manual_brightness", device="Strip", zone="", value=0)
+    assert _cmd(d, "set_zone_colors", device="Strip", zone="", indices=["00ffff"])["ok"]
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 100
+    d._update_all_devices()
+    assert d.openrgb.last("Strip") == ["00ffff"] * 4
+    _cmd(d, "set_zone_manual_brightness", device="Strip", zone="", value=0)
+    _cmd(d, "set_zones", targets=["Strip|"], set={"color": "ff0000"})
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 100
+    _cmd(d, "set_zones", targets=["Strip|"], set={"brightness": 0, "color": "00ff00"})
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 0          # asked for with it
+    _cmd(d, "set_all", field="pattern_colors", value=[1])
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 100
+    _cmd(d, "set_zone_manual_brightness", device="Strip", zone="", value=0)
+    _cmd(d, "set_zone_brightness_sync", device="Strip", zone="", enabled=True)
+    _cmd(d, "set_zone_colors", device="Strip", zone="", indices=[0])
+    assert d.config.get(("devices", "Strip", "manual_brightness")) == 0          # follows the monitor

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Picking a colour for a light whose brightness is at 0 works:** the colour showed as black (and a
+  network light set to "only when I change it" got nothing at all), so nothing seemed to happen. Picking a
+  colour now brings its brightness back to 100%, on its card, a Favourites card or Everything. A strip
+  that follows the monitor keeps following it, and a brightness set with the same change stays.
+
 ## 1.3.15 — 2026-11-13
 
 - **Text in the window can be selected and copied** (drag over it, then Ctrl+C or right-click, Copy):

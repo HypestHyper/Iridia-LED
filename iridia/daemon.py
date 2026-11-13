@@ -3372,6 +3372,8 @@ class Daemon:
                 cmds.append({"cmd": "set_zone_animation", "speed_level": v})
             else:
                 return {"ok": False, "error": f"can't set {f} on several strips"}
+        # a brightness asked for with the colour wins over the colour lifting a dark strip
+        cmds.sort(key=lambda c: c["cmd"] == "set_zone_manual_brightness")
         errors = []
         for k in keys:
             dev, _sep, zone = k.partition("|")
@@ -3851,6 +3853,9 @@ class Daemon:
         if entries is None:
             return {"ok": False, "error": "colors must be a non-empty list of indices or hex strings"}
         self.config.set(self._zone_config_path(dev, zone, "pattern_colors"), entries)
+        bright = self._zone_config_path(dev, zone, "manual_brightness")
+        if self.config.get(bright) == 0 and not self.config.get(self._zone_config_path(dev, zone, "brightness_sync")):
+            self.config.set(bright, 100)        # what _lift_dark does, for one strip
         self._remember_zone_colors({self._zone_key(dev, zone): entries})
         self._needs_update = True
         return {"ok": True}
@@ -3922,6 +3927,8 @@ class Daemon:
                 target["pattern_params"].pop("stops", None)
             if field == "pattern":
                 target.pop("animation", None)          # a static pattern means static
+            if field == "pattern_colors":
+                self._lift_dark(target)
             n += 1
         if field == "pattern_colors":
             self._remember_zone_colors(picks)
@@ -3930,6 +3937,14 @@ class Daemon:
         self._needs_update = True
         self.logger.info(f"Applied {field}={value!r} to all {n} zone(s)")
         return {"ok": True, "zones": n}
+
+    @staticmethod
+    def _lift_dark(zcfg: dict):
+        """A colour picked for a strip whose own brightness is 0 would show as black (and a light set to
+        "only when I change it" gets nothing for black): picking one brings its brightness back up, as on
+        a phone. Strips that follow the monitor keep following it."""
+        if zcfg.get("manual_brightness") == 0 and not zcfg.get("brightness_sync"):
+            zcfg["manual_brightness"] = 100
 
     def _cmd_add_custom_color(self, req: dict) -> dict:
         h = normalize_hex(req.get("hex", ""))

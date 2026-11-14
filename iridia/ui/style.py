@@ -151,6 +151,12 @@ flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 
 
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}
+.row-card {{ border-radius: 20px; padding: 12px 16px; }}
+popover button.menu-item {{ background: transparent; color: {ON_SURFACE}; border-radius: 10px; min-height: 36px; }}
+popover button.menu-item:hover {{ background: {SECONDARY_CONTAINER}; }}
+menubutton.flat-menu > button {{ background: transparent; min-height: 32px; min-width: 32px; padding: 0;
+  border-radius: 16px; color: {ON_SURFACE_VARIANT}; }}
+menubutton.flat-menu > button:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
 .card-inner {{ background: {SURFACE_CONTAINER_HIGH}; border-radius: 20px; padding: 16px; }}
 .zone-header {{ border-radius: 20px; }}
 .hero {{ background: {PRIMARY_CONTAINER}; color: {ON_PRIMARY_CONTAINER}; border-radius: 32px; padding: 20px 24px; }}

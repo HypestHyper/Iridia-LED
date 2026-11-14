@@ -816,9 +816,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
             return
         cfgs = self._all_zone_cfgs(devices)
         merged, mixed = merge_zone_cfgs(cfgs)
-        self._dev_box.append(section(_("All devices"), ngettext('Changes here apply to {n} zone.', 'Changes here apply to all {n} zones at once.', len(cfgs)).format(n=len(cfgs)), 10))
+        head = section(_("Devices"), None, 4)
+        head.set_tooltip_text(ngettext('Everything changes {n} strip at once.', 'Everything changes all {n} strips at once.',
+                                       len(cfgs)).format(n=len(cfgs)))
+        self._dev_box.append(head)
         self._global_card = ZoneCard(self, "*", "*", merged, extracted, custom, GlobalClient(self.client),
-                                     global_mode=True, expanded=expanded.get("*", True), title=_("Everything"))
+                                     global_mode=True, expanded=expanded.get("*", False), title=_("Everything"))
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
         if getattr(self, "_ddc_menu", None):
             self._global_card.set_monitors(*self._ddc_menu)
@@ -829,7 +832,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             sub = None if dc.get("enabled", True) else _("Disabled")
             if dc.get("net"):
                 brand = {"wiz": "WiZ", "govee": "Govee"}.get(dc["net"], dc["net"])
-                sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else f" · {sub}")
+                sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else ", " + sub.lower())
             zones = dc.get("zones", {})
             items = list(zones.items()) if zones else [("", dc)]
             # strips you hid (a channel with nothing plugged in, say) go to Hidden at the bottom
@@ -838,11 +841,18 @@ class IridiaWindow(Gtk.ApplicationWindow):
             for box, group in ((self._dev_box, shown), (hidden_box, gone)):
                 if not group:
                     continue
-                box.append(section(d, sub))
+                # a device of several strips gets a heading; a one-light device is just its row
+                if zones:
+                    head = section(d, sub, 14)
+                    head.get_first_child().remove_css_class("title")
+                    head.get_first_child().add_css_class("heading")
+                    box.append(head)
+                else:
+                    box.append(Gtk.Box(height_request=4))
                 for z, zc in group:
                     key = f"{d}|{z}"
-                    cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
-                                     expanded=expanded.get(key, False))
+                    cardw = ZoneCard(self, d, z or d, zc, extracted, custom, self.client,
+                                     expanded=expanded.get(key, False), kind=None if zones else sub)
                     cardw.zone_name = z
                     if box is hidden_box:
                         cardw.set_opacity(0.7)
@@ -855,7 +865,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             exp.connect("notify::expanded", lambda e, _p: setattr(self, "_hidden_open", e.get_expanded()))
             exp.set_margin_top(18)
             hint = label(_("Strips you hid: a channel with nothing plugged in, say. They keep their settings and "
-                           "are left out of lists elsewhere. The eye on a card shows it again."), ("small", "dim"),
+                           "are left out of lists elsewhere. Its ⋮ menu shows it again."), ("small", "dim"),
                          wrap=True)
             exp.set_child(vbox(10, hint, hidden_box))
             self._dev_box.append(exp)

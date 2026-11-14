@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:09+0000\n"
+"POT-Creation-Date: 2026-11-14 04:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -33,6 +33,48 @@ msgstr "Baguette"
 
 msgid "Large"
 msgstr "Gros fromage"
+
+msgid "This list"
+msgstr "Cette liste"
+
+msgid "Close the window (the daemon keeps your lights going)"
+msgstr "Fermer la fenêtre (la crêpe garde les lumières)"
+
+msgid "Make everything bigger or smaller"
+msgstr "Tout plus grand ou plus petit"
+
+msgid "Size back to automatic"
+msgstr "Taille automatique, voilà"
+
+msgid "Move between controls"
+msgstr "Aller d'un contrôle à l'autre"
+
+msgid "Press the button, pick the colour or open the strip in focus"
+msgstr "Appuyer, choisir la couleur ou ouvrir la bande"
+
+msgid "A saved colour's right-click action"
+msgstr "Le clic droit d'une couleur gardée"
+
+msgid "Close a dialog or menu"
+msgstr "Fermer un dialogue ou un menu"
+
+msgid "Scroll, drag"
+msgstr "Molette, glisser"
+
+msgid "Layout: zoom, and move the map"
+msgstr "Croissant : zoomer et déplacer la carte"
+
+msgid "Shift while turning"
+msgstr "Maj en tournant"
+
+msgid "Layout: turn freely instead of in 15° steps"
+msgstr "Croissant : tourner librement, pas par 15°"
+
+msgid "Keyboard shortcuts"
+msgstr "Raccourcis clavier"
+
+msgid "Close"
+msgstr "Bonne nuit"
 
 msgid "Target"
 msgstr "Fromage"
@@ -73,7 +115,7 @@ msgstr "Croissant"
 msgid "A name for {device}."
 msgstr "Crêpe"
 
-msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgid "It shows on the Devices and Layout pages. Leave it empty to use the original name."
 msgstr "Le poisson rouge est en vacances. Ma tante joue de l'accordéon."
 
 msgid "Keep it under 40 characters."
@@ -123,9 +165,6 @@ msgstr "Petit"
 
 msgid "Maximize"
 msgstr "Grand"
-
-msgid "Close"
-msgstr "Bonne nuit"
 
 msgid "Restore"
 msgstr "Santé !"
@@ -186,7 +225,7 @@ msgstr "Voulez-vous du fromage ?"
 msgid "None yet. Pick one with “Custom color…” below."
 msgstr "Mon aéroglisseur est plein d'anguilles"
 
-msgid "Your zones use different colors (see the Devices tab)"
+msgid "Your zones use different colors (see the Devices page)"
 msgstr "Omelette du fromage"
 
 #, python-brace-format
@@ -228,7 +267,7 @@ msgstr "J'aime les escargots au beurre"
 msgid "The daemon isn't running."
 msgstr "Où est la bibliothèque ?"
 
-msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgid "Your devices show up here once it runs. Start it here or from the Service page."
 msgstr "Ma tante joue de l'accordéon. Il pleut des cordes."
 
 msgid "Start daemon"
@@ -272,7 +311,7 @@ msgstr "Bandes cachées sous la moustache. Elles gardent leurs réglages. Son me
 msgid "Animations"
 msgstr "Le cinéma est fermé le lundi"
 
-msgid "Animated effects are picked per zone on the Devices tab."
+msgid "Animated effects are picked per zone on the Devices page."
 msgstr "Mon voisin collectionne les cuillères en bois."
 
 msgid "Run animations"
@@ -349,8 +388,8 @@ msgstr "Une grenouille dans mon café. Je ne sais quoi."
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Mon chien mange du camembert"
 
-msgid "Flashing LEDs for desktop notifications has its own tab now."
-msgstr "Le facteur a son propre onglet maintenant. Oh là là."
+msgid "Flashing LEDs for desktop notifications has its own page now."
+msgstr "Le facteur a son propre page maintenant. Oh là là."
 
 msgid "Open"
 msgstr "Ooh la la"
@@ -395,7 +434,7 @@ msgstr "Une grenouille dans mon café"
 
 msgid ""
 "Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
-" Calibrated on the Devices tab."
+" Calibrated on the Devices page."
 msgstr "Ceci n'est pas une pipe. La plume de ma tante."
 
 msgid "Profile"
@@ -788,7 +827,7 @@ msgstr "Sur la carte"
 
 msgid ""
 "Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
-"the Layout tab."
+"the Layout page."
 msgstr "Choisis les bisous et peins-les, sur la carte."
 
 msgid "Edit on the map"
@@ -801,8 +840,8 @@ msgid "Which LEDs"
 msgstr "Quels bisous"
 
 msgid ""
-"Or pick them on the Layout tab with the Notifications tool, which also sets the A and B points a "
-"moving flash runs between."
+"Or pick them on the Layout page with the Notifications tool, which also sets the A and B points a"
+" moving flash runs between."
 msgstr "Ou choisis-les sur la carte, avec l'outil du facteur. Oh là là."
 
 msgid "No strips yet"
@@ -1224,6 +1263,19 @@ msgstr "Voilà"
 msgid "Couldn't stop it."
 msgstr "Je ne sais quoi"
 
+msgid "Stop the daemon?"
+msgstr "Arrêter la crêpe ?"
+
+msgid ""
+"Your lights keep their last colours but stop following the wallpaper, the monitor and everything "
+"else until you start it again."
+msgstr ""
+"Les lumières gardent leurs dernières couleurs mais ne suivent plus rien jusqu'au redémarrage. "
+"C'est la vie."
+
+msgid "Stop it"
+msgstr "Éteignez-le"
+
 msgid "Enabled. The daemon now starts at login."
 msgstr "Je voudrais un éclair au chocolat"
 
@@ -1299,9 +1351,6 @@ msgid ""
 "Also stop the OpenRGB server Iridia started? Other programs may be using it. If you keep it, it "
 "runs until you log out."
 msgstr "Faut-il aussi éteindre le four qu'Iridia a allumé ? Quelqu'un fait peut-être un soufflé."
-
-msgid "Stop it"
-msgstr "Éteignez-le"
 
 msgid "Keep it running"
 msgstr "Laissez mijoter"
@@ -1881,7 +1930,7 @@ msgstr "Couleurs choisies"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
-"where the LEDs are on the Layout tab."
+"where the LEDs are on the Layout page."
 msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
 
 msgid "All lights"
@@ -2087,8 +2136,8 @@ msgstr "Aucun : Nouveau look en fait un."
 msgid "Which scenes"
 msgstr "Quelles scènes"
 
-msgid "None yet: make them on the Scenes tab."
-msgstr "Aucune : créez-les dans l'onglet Scènes."
+msgid "None yet: make them on the Scenes page."
+msgstr "Aucune : créez-les dans l'page Scènes."
 
 msgid "Which switches"
 msgstr "Quels interrupteurs"
@@ -2128,6 +2177,12 @@ msgstr "Mon chien mange du camembert"
 msgid "Pick any colour for all your lights"
 msgstr "N'importe quelle couleur pour toutes les lumières"
 
+msgid "Brightness of all your lights. Moving it stops them following the monitor."
+msgstr "Bisou de toutes les lumières. Le bouger arrête de suivre l'écran."
+
+msgid "Brightness of all your lights"
+msgstr "Bisou de toutes les lumières"
+
 msgid "Keep these colours when the wallpaper changes"
 msgstr "Garder ces couleurs, non merci au papier peint"
 
@@ -2159,8 +2214,9 @@ msgstr "Ces couleurs en attendant le papier peint. Patience."
 msgid "Your lights follow this wallpaper"
 msgstr "Vos lumières suivent ce papier peint"
 
-msgid "Use this colour on all your lights"
-msgstr "Cette couleur partout, s'il vous plaît"
+#, python-brace-format
+msgid "Wallpaper colour {n} (#{hex}): use it on all your lights"
+msgstr "Couleur du papier peint {n} (#{hex}) : partout, s'il vous plaît"
 
 msgid "No colours yet"
 msgstr "Pas encore de couleurs"
@@ -2718,7 +2774,7 @@ msgid ""
 msgstr "Joyeux anniversaire. Ceci n'est pas une pipe."
 
 #, python-brace-format
-msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices page, Strip type)."
 msgstr "Le fromage qui pue. Le train est encore en retard."
 
 #, python-brace-format
@@ -2782,10 +2838,10 @@ msgstr "Rebaptiser le jumeau"
 
 #, python-brace-format
 msgid ""
-"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"A name for this clone of {strip}. It only shows on the Layout page. Leave it empty to use the "
 "strip's name."
 msgstr ""
-"Un nom pour ce jumeau de {strip}. On ne le voit que dans l'onglet Disposition. Laisser vide pour "
+"Un nom pour ce jumeau de {strip}. On ne le voit que dans l'page Disposition. Laisser vide pour "
 "garder le nom du ruban."
 
 msgid ""
@@ -3201,6 +3257,9 @@ msgstr "Le milieu du fromage"
 msgid "The other end"
 msgstr "La baguette"
 
+msgid "Add a colour"
+msgstr "Ajouter une couleur"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "Joyeux anniversaire"
@@ -3285,7 +3344,7 @@ msgstr "Le fromage qui pue"
 
 msgid ""
 "One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
-"how many LEDs are in a pixel so the Layout tab draws the real length."
+"how many LEDs are in a pixel so the Layout page draws the real length."
 msgstr "J'aime les escargots au beurre. Le chat est sous la table. Deux cafés et l'addition."
 
 msgid "One color (plain 12V RGB, 4 pins)"
@@ -3323,6 +3382,16 @@ msgstr "Encore plus, oh là là"
 msgid "Show again"
 msgstr "Revoir"
 
+#, python-brace-format
+msgid "Settings for {strip}"
+msgstr "Réglages de {strip}"
+
+msgid "Hide the settings"
+msgstr "Cacher les réglages"
+
+msgid "Show all settings"
+msgstr "Montrer tous les réglages"
+
 msgid "mixed"
 msgstr "Ooh la la"
 
@@ -3334,6 +3403,12 @@ msgstr "couleurs de la palette"
 
 msgid "calibrated"
 msgstr "Bof"
+
+msgid "Not controlled by Iridia (the switch on the left)"
+msgstr "Pas contrôlé par Iridia (l'interrupteur à gauche)"
+
+msgid "Not controlled by Iridia"
+msgstr "Pas contrôlé par Iridia"
 
 msgid "Animated"
 msgstr "Animé comme un marché"
@@ -3352,7 +3427,7 @@ msgstr "Ratatouille"
 
 msgid ""
 "Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
-"tab."
+"page."
 msgstr "Ces bisous clignotent pour le facteur. Oh là là."
 
 msgid "Follow monitor brightness"
@@ -3429,6 +3504,10 @@ msgstr "Un verre de vin rouge, merci. Je suis une baguette. Joyeux anniversaire.
 
 msgid "Resize the OpenRGB zone"
 msgstr "Ma tante joue de l'accordéon"
+
+#, python-brace-format
+msgid "{strip} is hidden, under Hidden at the bottom."
+msgstr "{strip} est caché, sous Caché en bas."
 
 msgid "Stop test"
 msgstr "Bonjour"

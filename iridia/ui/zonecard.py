@@ -161,7 +161,7 @@ STRIP_TYPES = [
      _("Every LED has its own chip and color (3 pins: 5V, data, GND). Sold as ARGB, RGBIC or digital.")),
     ("addressable12", _("Addressable 12V in groups (WS2811, COB)"),
      _("One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
-       "how many LEDs are in a pixel so the Layout tab draws the real length.")),
+       "how many LEDs are in a pixel so the Layout page draws the real length.")),
     ("single", _("One color (plain 12V RGB, 4 pins)"),
      _("The whole strip shows one color (12V, R, G, B pins). Patterns, painting and color stops don't "
        "apply, so they're hidden.")),
@@ -224,6 +224,7 @@ class ZoneCard(Gtk.Box):
         hdr = hbox(14)
         # the switch: does Iridia send this strip anything? (off: it keeps whatever it shows)
         self._control_sw = Toggle(not self.cfg.get("hands_off"), lambda v: self._strip_set(hands_off=not v))
+        self._control_sw.update_property([Gtk.AccessibleProperty.LABEL], [_("Iridia controls it")])
         self._control_sw.set_tooltip_text(_("Let Iridia control it: off, Iridia sends it nothing and it keeps "
                                             "whatever it shows") if not self.global_mode else
                                           _("Let Iridia control every strip"))
@@ -272,14 +273,22 @@ class ZoneCard(Gtk.Box):
             pop.set_child(items)
             menu.set_popover(pop)
             hdr.append(menu)
+        # the arrow is a real button: Tab reaches it, Enter or Space opens the row, and screen readers
+        # hear whether it's open (clicking the name still opens it too)
         self._chev = Chevron(expanded)
-        hdr.append(self._chev)
+        self._chev_btn = Gtk.Button()
+        self._chev_btn.set_child(self._chev)
+        self._chev_btn.add_css_class("chev-btn")
+        self._chev_btn.set_valign(Gtk.Align.CENTER)
+        self._chev_btn.connect("clicked", lambda _b: self._toggle_expand())
+        self._chev_btn.update_property([Gtk.AccessibleProperty.LABEL],
+                                       [_("Settings for {strip}").format(strip=self._display_title())])
+        self._chev_btn.update_state([Gtk.AccessibleState.EXPANDED], [expanded])
+        self._chev_btn.set_tooltip_text(_("Hide the settings") if expanded else _("Show all settings"))
+        hdr.append(self._chev_btn)
         click = Gtk.GestureClick()
         click.connect("released", lambda *_a: self._toggle_expand())
         txt.add_controller(click)
-        click2 = Gtk.GestureClick()
-        click2.connect("released", lambda *_a: self._toggle_expand())
-        self._chev.add_controller(click2)
         self.append(hdr)
         self._rev = Gtk.Revealer(transition_type=Gtk.RevealerTransitionType.SLIDE_DOWN, transition_duration=260,
                                  reveal_child=expanded)
@@ -331,6 +340,8 @@ class ZoneCard(Gtk.Box):
         on = not self._rev.get_reveal_child()
         self._rev.set_reveal_child(on)
         (self.add_css_class if on else self.remove_css_class)("open")
+        self._chev_btn.update_state([Gtk.AccessibleState.EXPANDED], [on])
+        self._chev_btn.set_tooltip_text(_("Hide the settings") if on else _("Show all settings"))
         self._chev.set_open(on)
         if on:
             GLib.idle_add(lambda: (self._ensure_preview(), False)[1])
@@ -364,6 +375,10 @@ class ZoneCard(Gtk.Box):
             parts.insert(0, self.zone_name or self.device_name)
         if self._kind_text:
             parts.insert(0, self._kind_text)
+        if self.cfg.get("hands_off"):
+            # the switch on the left, said in words: two on/off controls side by side need telling apart
+            parts = [_("Not controlled by Iridia (the switch on the left)") if not self.global_mode
+                     else _("Not controlled by Iridia")]
         text = ", ".join(p for p in parts if p)
         self._summary.set_label(text[:1].upper() + text[1:])
 
@@ -418,7 +433,7 @@ class ZoneCard(Gtk.Box):
         self._layout_row.append(self._mir_row)
         self._nt_chip = button("", "bolt", "text small", lambda: self.app.open_notify_settings(),
                                tooltip=_("Some LEDs of this strip flash for notifications (the line under them). "
-                                         "Opens the Notifications tab."))
+                                         "Opens the Notifications page."))
         self._nt_chip.set_visible(False)
         self._nt_chip.set_halign(Gtk.Align.START)
         d.insert_child_after(self._nt_chip, self._strip)
@@ -600,6 +615,13 @@ class ZoneCard(Gtk.Box):
                 self._stype = fields["strip_type"]
         self.cfg.update({k: v for k, v in fields.items() if k != "strip_type"})
         self._hold_until = time.time() + 2.0
+        if "hands_off" in fields:
+            self._refresh_summary()
+            self._mini_update(self._mini.colors)
+        if fields.get("hidden") and not self.global_mode:
+            # hidden from its menu: say where it went, with a way back
+            self.app.toast(_("{strip} is hidden, under Hidden at the bottom.").format(strip=self._display_title()),
+                           _("Undo"), lambda: self._strip_set(hidden=False))
         self._call(lambda: self.client.set_zone_strip(self.device_name, self.zone_name, **fields))
         self._apply_strip_ui()
 

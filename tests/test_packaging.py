@@ -1,6 +1,7 @@
 """System packages: the layout stage.sh makes, and Iridia knowing it was installed that way."""
 import configparser
 import os
+import types
 import subprocess
 
 import iridia
@@ -132,6 +133,19 @@ def test_the_notifications_update_button(monkeypatch, tmp_path):
     fake.write_text("#!/bin/sh\necho \"/org/freedesktop/Notifications: org.freedesktop.Notifications."
                     "NotificationClosed (uint32 7, uint32 2)\"\nsleep 5\n")
     assert updater.wait_for_update_button(7, timeout=4) is False              # closed without updating
+
+
+def test_the_update_notification_goes_away_by_itself(monkeypatch):
+    """The server's own timeout, like any notification: not 0 (never) and not resident."""
+    seen = {}
+
+    def run(cmd, **kw):
+        seen["cmd"] = cmd
+        return types.SimpleNamespace(returncode=0, stdout="(uint32 42,)\n", stderr="")
+    monkeypatch.setattr(updater.subprocess, "run", run)
+    monkeypatch.setattr("shutil.which", lambda name: "/usr/bin/" + name)
+    assert updater.notify_with_update("Iridia 9.9 is available", "body") == 42
+    assert seen["cmd"][-1] == "-1" and "resident" not in seen["cmd"][-2]
 
 
 def test_no_release_checked_yet():

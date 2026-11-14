@@ -123,7 +123,7 @@ button.circle.small.power, button.circle.small.power:active {{ min-width: 32px; 
 button.circle.small.power.on {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-radius: 10px; }}
 button.circle.small.power.on:hover {{ background: {PRIMARY_HOVER}; }}
 button.circle.small.power.off {{ background: transparent; color: {ON_SURFACE_VARIANT}; border-radius: 16px;
-  box-shadow: inset 0 0 0 2px {OUTLINE_VARIANT}; }}
+  box-shadow: inset 0 0 0 2px {OUTLINE}; }}
 button.circle.small.power.off:hover {{ background: alpha({ON_SURFACE}, 0.08); color: {ON_SURFACE}; }}
 button.circle.small.power.on:active, button.circle.small.power.off:active {{ border-radius: 8px; }}
 /* the lights' power on Home is the medium size */
@@ -157,6 +157,13 @@ button.filter:checked:hover {{ background: {PRIMARY_HOVER}; }}
 
 flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 0; }}
 
+/* ---------- keyboard focus: a ring in the accent, only when moving with the keyboard ---------- */
+button:focus-visible, menubutton > button:focus-visible, dropdown > button:focus-visible,
+switch:focus-visible, checkbutton:focus-visible > check, scale:focus-visible slider,
+drawingarea.focusable:focus-visible, expander title:focus-visible, label:focus-visible {{
+  outline: 2px solid {PRIMARY}; outline-offset: 2px; }}
+.rail > button:focus-visible {{ outline-offset: -2px; }}
+
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}
 /* set-up pages: groups are plain sections, a line between them */
@@ -173,6 +180,8 @@ flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 
 .row-card.open scale slider {{ box-shadow: 0 0 0 6px {SURFACE_CONTAINER_HIGH}; }}
 popover button.menu-item {{ background: transparent; color: {ON_SURFACE}; border-radius: 10px; min-height: 36px; }}
 popover button.menu-item:hover {{ background: {SECONDARY_CONTAINER}; }}
+button.chev-btn {{ background: transparent; min-height: 32px; min-width: 32px; padding: 0; border-radius: 16px; }}
+button.chev-btn:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
 menubutton.flat-menu > button {{ background: transparent; min-height: 32px; min-width: 32px; padding: 0;
   border-radius: 16px; color: {ON_SURFACE_VARIANT}; }}
 menubutton.flat-menu > button:hover {{ background: alpha({ON_SURFACE}, 0.08); }}

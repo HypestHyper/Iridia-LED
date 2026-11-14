@@ -13,7 +13,8 @@ from iridia.colors import resolve_colors
 from iridia.i18n import _
 from iridia.theme import hex_rgb
 from iridia.ui import widgets
-from iridia.ui.widgets import Swatch, WavyBar, button, hbox, icon, label, rgb, themed, vbox
+from iridia.ui.layout_notify import MiniSlider
+from iridia.ui.widgets import Swatch, button, hbox, icon, label, rgb, themed, vbox
 
 RADIUS = 28
 
@@ -197,12 +198,15 @@ class Hero(Gtk.Overlay):
 
         bottom = hbox(12)
         bottom.append(icon("light_mode", classes=("dim",)))
-        self.wave = WavyBar(180)
+        # every light's brightness, as on a phone: moving it sets their own and stops them following
+        # the monitor (the Favourites cards and Devices rows work the same)
+        self.wave = MiniSlider("", 0, 100, 100, 5, "%", self._set_brightness)
+        self.wave.scale.set_size_request(200, -1)
+        self.wave._lbl.set_width_chars(5)
         self.wave.set_hexpand(False)
+        self.wave.set_tooltip_text(_("Brightness of all your lights. Moving it stops them following the monitor."))
+        self.wave.scale.update_property([Gtk.AccessibleProperty.LABEL], [_("Brightness of all your lights")])
         bottom.append(self.wave)
-        self.bright = label("", ("subheading", "tnum"))
-        self.bright.set_width_chars(4)
-        bottom.append(self.bright)
         bottom.append(Gtk.Box(hexpand=True))
         app._freeze_btn = button(_("Freeze colours"), "ac_unit", "tonal medium", app._toggle_freeze,
                                  tooltip=_("Keep these colours when the wallpaper changes"))
@@ -213,6 +217,11 @@ class Hero(Gtk.Overlay):
         bottom.append(self.power)
         body.append(bottom)
         self._off = False
+
+    def _set_brightness(self, v):
+        c = self.app.client
+        self.app.bg(lambda: (c.set_all("brightness_sync", False), c.set_all("manual_brightness", int(v))),
+                    lambda _r: self.app._poll_once())
 
     def _toggle_power(self):
         on = self._off
@@ -248,19 +257,32 @@ class Hero(Gtk.Overlay):
             sub = _("Your lights follow this wallpaper")
         self.sub.set_label(sub)
         self.thumb.show_path(wallpaper)
-        self.wave.set_value(brightness / 100)
-        self.bright.set_label(f"{brightness}%")
+        self.wave.set_quiet(int(brightness))
         if self._off != off:
             self._show_power(not off)
         level = 0.0 if off else brightness / 100
         self.light.set_state(lit_colors(st), level)
 
     def set_swatches(self, colors, choice):
+        # rebuilding the row must not lose the keyboard: the swatch that had focus gets it back
+        focus_at = None
+        c, i = self.swatches.get_first_child(), 0
+        while c is not None:
+            if c.has_focus():
+                focus_at = i
+            c, i = c.get_next_sibling(), i + 1
         widgets.clear(self.swatches)
         for i, c in enumerate(colors[:8]):
             self.swatches.append(Swatch(c, 36, bool(choice) and choice.get("index") == i,
                                         on_click=lambda i=i: self.app._set_color_choice(index=i),
-                                        tooltip=_("Use this colour on all your lights")))
+                                        tooltip=_("Wallpaper colour {n} (#{hex}): use it on all your lights")
+                                        .format(n=i + 1, hex=c)))
         if not colors:
             self.swatches.append(label(_("No colours yet"), ("small", "faint")))
+        if focus_at is not None:
+            c, i = self.swatches.get_first_child(), 0
+            while c is not None and i < focus_at:
+                c, i = c.get_next_sibling(), i + 1
+            if c is not None:
+                c.grab_focus()
 

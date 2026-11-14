@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+- **The update notification goes away by itself again,** after your notification server's usual time,
+  like before it had the *Update now* button; it stayed on screen until you closed it. The Updates page
+  still has the update after that.
+- **Keyboard:** a ring in the accent shows which control has the focus (it was invisible). A strip's
+  row opens with its arrow, now a real button, and colours are picked with Enter or Space (Menu or
+  Shift+F10 for a saved colour's right-click). Picking one keeps the focus there. Dialogs start on their
+  main button. Ctrl+? (or Settings, Keyboard shortcuts) lists every shortcut.
+- **Screen readers** hear what a colour is ("Wallpaper colour 2, #ff5a2a"), what the switch on a strip
+  means, and whether a strip's settings are open.
+- **Easier to see:** a switched-off power button has a clear ring (it was nearly invisible), and small
+  grey text is lighter (at least 4.7:1 against every background, with any wallpaper colour).
+- **Clearer:** a strip Iridia doesn't control says so in its row; the brightness on Home is a real
+  slider for all your lights; hiding a strip has Undo; Kill daemon asks first; texts say "page" instead
+  of "tab". All of it in every language.
+
 ## 1.4.0 — 2026-11-14
 
 A new look for the window: quieter, so your lights' own colours are what stands out.

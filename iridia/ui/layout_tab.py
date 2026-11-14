@@ -1261,7 +1261,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
         p.append(dens)
         p.append(label(_("The density printed on the strip or its listing: 30, 60, 96 or 144 are common. The strip is "
                        "drawn at its real length.")
-                       + (" " + _('Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type).').format(lpp=lpp) if lpp > 1
+                       + (" " + _('Each dot is one pixel of {lpp} LEDs (set on the Devices page, Strip type).').format(lpp=lpp) if lpp > 1
                           else ""), ("tiny", "faint"), wrap=True))
 
         def ends(i):
@@ -1425,7 +1425,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
             self.cv.queue_draw()
             self._build_panel()
         dialogs.ask_text(self.app, _("Rename clone"),
-                         _("A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use "
+                         _("A name for this clone of {strip}. It only shows on the Layout page. Leave it empty to use "
                            "the strip's name.").format(strip=self._name(s["zone"])),
                          s.get("name", ""), done,
                          check=lambda t: None if len(t) <= 40 else _("Keep it under 40 characters."),

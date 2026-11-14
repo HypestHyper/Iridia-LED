@@ -443,7 +443,9 @@ def notify_with_update(summary: str, body: str, label: str = "Update now") -> in
                             "--object-path", "/org/freedesktop/Notifications",
                             "--method", "org.freedesktop.Notifications.Notify",
                             "Iridia", "0", ICON, summary, body, f"['update', '{label}']",
-                            "{'desktop-entry': <'%s'>, 'urgency': <byte 1>, 'resident': <true>}" % APP_ID, "0"],
+                            # the notification server's own timeout (-1), like every other notification:
+                            # it goes away by itself; the Updates page still has the update after that
+                            "{'desktop-entry': <'%s'>, 'urgency': <byte 1>}" % APP_ID, "-1"],
                            capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.SubprocessError):
         return None

@@ -394,8 +394,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         rail = vbox(2)
         rail.add_css_class("rail")
         self._rail = rail
-        self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.CROSSFADE,
-                                transition_duration=160)
+        # pages switch at once: a crossfade draws two whole pages every frame (four times the work, and
+        # visible stutter on a slower GPU); the rail's own highlight fade says which page you picked
+        self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.NONE)
         self._stack.set_hhomogeneous(False)      # only the page on show sets how narrow the window can be
         self._tabs = {}
         self._rail_heads = []
@@ -559,7 +560,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _tab_toggled(self, b, key):
         if not b.get_active():
             return
-        self._stack.set_transition_duration(160 if widgets.motion() else 0)
         self._stack.set_visible_child_name(key)
         self._layout_tab.set_visible_tab(key == "layout")
 
@@ -829,6 +829,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
         if getattr(self, "_ddc_menu", None):
             self._global_card.set_monitors(*self._ddc_menu)
+        self._global_card.add_css_class("seg-first")
+        self._global_card.add_css_class("seg-last")
         self._dev_box.append(self._global_card)
         hidden_box = vbox(10)
         n_hidden = 0
@@ -853,15 +855,22 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     box.append(head)
                 else:
                     box.append(Gtk.Box(height_request=4))
-                for z, zc in group:
+                # a device's strips are one group: rows 2px apart, the group's ends rounded
+                seg = vbox(2)
+                box.append(seg)
+                for pos, (z, zc) in enumerate(group):
                     key = f"{d}|{z}"
                     cardw = ZoneCard(self, d, z or d, zc, extracted, custom, self.client,
                                      expanded=expanded.get(key, False), kind=None if zones else sub)
                     cardw.zone_name = z
+                    if pos == 0:
+                        cardw.add_css_class("seg-first")
+                    if pos == len(group) - 1:
+                        cardw.add_css_class("seg-last")
                     if box is hidden_box:
                         cardw.set_opacity(0.7)
                         n_hidden += 1
-                    box.append(cardw)
+                    seg.append(cardw)
                     self._zone_cards[key] = cardw
         if n_hidden:
             exp = Gtk.Expander(label=ngettext("Hidden ({n})", "Hidden ({n})", n_hidden).format(n=n_hidden),

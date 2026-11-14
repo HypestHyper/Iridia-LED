@@ -19,6 +19,12 @@ A new look for the window: quieter, so your lights' own colours are what stands 
   window updates itself), and Ctrl+Q closes the window like its close button.
 - **Calmer colours:** grey surfaces instead of tinted ones, the accent only where there's light, power
   buttons lit in it when on (no pastel green and red), and a blue window until there are colours.
+- **Material 3 Expressive touches:** a device's strips are one grouped list (2px apart, rounded at the
+  group's ends, an open row fully rounded); the selected page in the rail sits on a pill; power buttons
+  are round and outlined when off and a filled square when on; sliders have a 16px track with a gap
+  round a thin handle; headings are heavier; Freeze and the lights' power on Home are the bigger size.
+- **Smooth:** pages switch at once instead of crossfading (which drew two whole pages every frame), and
+  only colours and corners animate, so nothing jumps; every frame measured well within 60 fps.
 - Set-up pages use plain sections instead of boxes, shorter texts, and the status chip only shows when
   something needs you. The wallpaper picture stays sharp on HiDPI screens.
 

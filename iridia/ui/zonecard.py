@@ -209,6 +209,8 @@ class ZoneCard(Gtk.Box):
         self._preview_last = None
         self._sections = None
         self._build_header(expanded)
+        if expanded:
+            self.add_css_class("open")
         self._build_details()
         self._refresh_summary()
         self._apply_color_limit()
@@ -328,6 +330,7 @@ class ZoneCard(Gtk.Box):
     def _toggle_expand(self):
         on = not self._rev.get_reveal_child()
         self._rev.set_reveal_child(on)
+        (self.add_css_class if on else self.remove_css_class)("open")
         self._chev.set_label(fonts.codepoint("expand_less" if on else "expand_more"))
         if on:
             GLib.idle_add(lambda: (self._ensure_preview(), False)[1])

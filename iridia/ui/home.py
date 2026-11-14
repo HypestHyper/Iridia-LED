@@ -204,7 +204,7 @@ class Hero(Gtk.Overlay):
         self.bright.set_width_chars(4)
         bottom.append(self.bright)
         bottom.append(Gtk.Box(hexpand=True))
-        app._freeze_btn = button(_("Freeze colours"), "ac_unit", "tonal small", app._toggle_freeze,
+        app._freeze_btn = button(_("Freeze colours"), "ac_unit", "tonal medium", app._toggle_freeze,
                                  tooltip=_("Keep these colours when the wallpaper changes"))
         app._freeze_btn.set_valign(Gtk.Align.CENTER)
         bottom.append(app._freeze_btn)

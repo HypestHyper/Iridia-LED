@@ -234,9 +234,36 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._apply_ui_size(order[max(0, order.index(cur) - 1)])
         elif name in ("0", "KP_0"):
             self._apply_ui_size("auto")
+        elif name in ("question", "slash"):
+            self.show_shortcuts()
         else:
             return False
         return True
+
+    def show_shortcuts(self):
+        """Every keyboard shortcut in the window, in one place (Ctrl+?, or Settings)."""
+        rows = [("Ctrl+?", _("This list")),
+                ("Ctrl+Q, Ctrl+W", _("Close the window (the daemon keeps your lights going)")),
+                ("Ctrl++, Ctrl+−", _("Make everything bigger or smaller")),
+                ("Ctrl+0", _("Size back to automatic")),
+                ("Tab, Shift+Tab", _("Move between controls")),
+                ("Enter, Space", _("Press the button, pick the colour or open the strip in focus")),
+                ("Menu, Shift+F10", _("A saved colour's right-click action")),
+                ("Esc", _("Close a dialog or menu")),
+                (_("Scroll, drag"), _("Layout: zoom, and move the map")),
+                (_("Shift while turning"), _("Layout: turn freely instead of in 15° steps"))]
+        d = dialogs.Dialog(self, _("Keyboard shortcuts"))
+        d.body.append(label(_("Keyboard shortcuts"), ("title",)))
+        grid = Gtk.Grid(column_spacing=24, row_spacing=8)
+        for i, (keys, what) in enumerate(rows):
+            k = label(keys, ("body", "mono"))
+            k.add_css_class("keycap")
+            grid.attach(k, 0, i, 1, 1)
+            grid.attach(label(what, ("body",), wrap=True, chars=44), 1, i, 1, 1)
+        d.body.append(grid)
+        d.buttons(button(_("Close"), style="filled", cb=d.close))
+        d.on_enter = d.close
+        d.present()
 
     TIGHT_BELOW = 760
     FOLD_LAYOUT_BELOW = 960        # the Layout tab's side panel moves under the canvas
@@ -356,7 +383,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 self._poll_once()
             self.bg(lambda: self.client.set_zone_name(device, zone, name), finished)
         dialogs.ask_text(self, _("Rename strip"),
-                         (_('A name for {zone} on {device}.').format(zone=zone, device=device) if zone else _('A name for {device}.').format(device=device)) + ' ' + _('It shows on the Devices and Layout tabs. Leave it empty to use the original name.'), current or "", done,
+                         (_('A name for {zone} on {device}.').format(zone=zone, device=device) if zone else _('A name for {device}.').format(device=device)) + ' ' + _('It shows on the Devices and Layout pages. Leave it empty to use the original name.'), current or "", done,
                          check=lambda t: None if len(t) <= 40 else _("Keep it under 40 characters."), ok_label=_("Rename"))
 
     def toast(self, text, action_label=None, action=None):
@@ -705,7 +732,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._custom_flow.append(label(_("None yet. Pick one with “Custom color…” below."),
                                            ("small", "faint")))
         if not choice:
-            t = _("Your zones use different colors (see the Devices tab)")
+            t = _("Your zones use different colors (see the Devices page)")
         elif "hex" in choice:
             t = _("All zones use #{hex}").format(hex=choice['hex'])
         else:
@@ -798,7 +825,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         li.start()
         b.append(li)
         b.append(label(_("The daemon isn't running."), ("title",), xalign=0.5))
-        b.append(label(_("Your devices show up here once it runs. Start it here or from the Service tab."),
+        b.append(label(_("Your devices show up here once it runs. Start it here or from the Service page."),
                        ("small", "dim"), xalign=0.5))
         st = button(_("Start daemon"), "play_arrow", "filled", self._daemon_start)
         st.set_halign(Gtk.Align.CENTER)
@@ -931,7 +958,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._anim_night_slow.set_value(bool(a.get("night_slow", False)))
 
     def _build_animation_settings(self, p):
-        p.append(section(_("Animations"), _("Animated effects are picked per zone on the Devices tab.")))
+        p.append(section(_("Animations"), _("Animated effects are picked per zone on the Devices page.")))
         c = card()
         a = self.config.get("animations", {}) or {}
         row, self._anim_sw = switch_row(_("Run animations"), bool(a.get("enabled", True)),
@@ -1001,6 +1028,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         row, _u = switch_row(_("Reduce motion"), bool(self.prefs.get("reduce_motion", False)), self._set_reduce_motion)
         c.append(row)
         c.append(label(_("Turns off shape morphs, sliding panels and the color cross-fade."), ("small", "faint")))
+        kb = button(_("Keyboard shortcuts"), "keyboard", "tonal small", self.show_shortcuts)
+        kb.set_halign(Gtk.Align.START)
+        c.append(kb)
         p.append(c)
 
         self._build_monitor_settings(p)
@@ -1037,7 +1067,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._build_session_settings(p)
         p.append(section(_("Notifications")))
         c = card()
-        r = hbox(10, label(_("Flashing LEDs for desktop notifications has its own tab now."), ("body", "dim"),
+        r = hbox(10, label(_("Flashing LEDs for desktop notifications has its own page now."), ("body", "dim"),
                            wrap=True))
         r.get_first_child().set_hexpand(True)
         r.append(button(_("Open"), "bolt", "tonal small", self.open_notify_settings))
@@ -1077,7 +1107,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
         # calibration
         p.append(section(_("Color calibration"), _("Profiles that correct colors for your kind of LED strip. Pick one per "
-                                              "zone with Color correction: Calibrated on the Devices tab.")))
+                                              "zone with Color correction: Calibrated on the Devices page.")))
         c = card()
         r = hbox(10)
         r.append(label(_("Profile"), ("body", "dim")))
@@ -1625,7 +1655,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c = card(inner=False)
         c.append(label(_("On the map"), ("heading",)))
         c.append(label(_("Choose the LEDs, paint their colours and set the A and B points a moving flash runs "
-                         "between, on the Layout tab."), ("small", "dim"), wrap=True))
+                         "between, on the Layout page."), ("small", "dim"), wrap=True))
         emap = button(_("Edit on the map"), "polyline", "tonal small", self.open_notify_map)
         emap.set_halign(Gtk.Align.START)
         c.append(emap)
@@ -1637,7 +1667,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                               lambda v: self._notify_set(enabled=v))
         c.append(row)
         c.append(label(_("Which LEDs"), ("body",)))
-        c.append(label(_("Or pick them on the Layout tab with the Notifications tool, which also sets the A and B "
+        c.append(label(_("Or pick them on the Layout page with the Notifications tool, which also sets the A and B "
                          "points a moving flash runs between."), ("small", "faint"), wrap=True))
         self._nt_list = vbox(6)
         self._nt_targets = None
@@ -2323,7 +2353,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
             if getattr(r, "returncode", 1) != 0:
                 dialogs.message(self, _("Daemon"), (getattr(r, "stderr", "") or "").strip() or _("Couldn't stop it."), True)
             GLib.timeout_add(800, lambda: (self._poll_once(), False)[1])
-        self._cli("daemon", "stop", done=done)
+        dialogs.confirm(self, _("Stop the daemon?"),
+                        _("Your lights keep their last colours but stop following the wallpaper, the monitor and "
+                          "everything else until you start it again."),
+                        lambda: self._cli("daemon", "stop", done=done), yes=_("Stop it"), danger=True)
 
     def _svc_install(self):
         self._cli("service", "install", "--autostart", "systemd", done=lambda r: (

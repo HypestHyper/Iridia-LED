@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:09+0000\n"
+"POT-Creation-Date: 2026-11-14 04:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -33,6 +33,48 @@ msgstr "Customary"
 
 msgid "Large"
 msgstr "Generous"
+
+msgid "This list"
+msgstr "This very list"
+
+msgid "Close the window (the daemon keeps your lights going)"
+msgstr "Close the window (the daemon keeps one's lights going)"
+
+msgid "Make everything bigger or smaller"
+msgstr "Enlarge or reduce everything"
+
+msgid "Size back to automatic"
+msgstr "Size returned to automatic"
+
+msgid "Move between controls"
+msgstr "Proceed between controls"
+
+msgid "Press the button, pick the colour or open the strip in focus"
+msgstr "Press the button, select the colour or open the strip in focus"
+
+msgid "A saved colour's right-click action"
+msgstr "A saved colour's right-click action"
+
+msgid "Close a dialog or menu"
+msgstr "Dismiss a dialogue or menu"
+
+msgid "Scroll, drag"
+msgstr "Scroll, drag"
+
+msgid "Layout: zoom, and move the map"
+msgstr "Floor Plan: zoom, and move the plan"
+
+msgid "Shift while turning"
+msgstr "Shift whilst turning"
+
+msgid "Layout: turn freely instead of in 15° steps"
+msgstr "Floor Plan: turn freely rather than in 15° steps"
+
+msgid "Keyboard shortcuts"
+msgstr "Keyboard shortcuts"
+
+msgid "Close"
+msgstr "Close"
 
 msgid "Target"
 msgstr "Intended"
@@ -73,7 +115,7 @@ msgstr "Pray, what shall we call {zone} upon {device}?"
 msgid "A name for {device}."
 msgstr "Pray, what shall we call {device}?"
 
-msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgid "It shows on the Devices and Layout pages. Leave it empty to use the original name."
 msgstr ""
 "The name shall appear upon the Apparatus and Floor Plan pages. Leave it blank to restore its "
 "given name."
@@ -125,9 +167,6 @@ msgstr "Retire to the dock"
 
 msgid "Maximize"
 msgstr "Fill the screen"
-
-msgid "Close"
-msgstr "Close"
 
 msgid "Restore"
 msgstr "Restore"
@@ -188,7 +227,7 @@ msgstr "#{c}  (right-click to dismiss)"
 msgid "None yet. Pick one with “Custom color…” below."
 msgstr "None as yet. Pray choose one with “A colour of one's own…” below."
 
-msgid "Your zones use different colors (see the Devices tab)"
+msgid "Your zones use different colors (see the Devices page)"
 msgstr "Your zones are dressed in differing colours (see the Apparatus page)"
 
 #, python-brace-format
@@ -234,7 +273,7 @@ msgstr "#{h} has been dismissed from your treasured colours."
 msgid "The daemon isn't running."
 msgstr "The daemon is not presently in attendance."
 
-msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgid "Your devices show up here once it runs. Start it here or from the Service page."
 msgstr "Your apparatus shall appear once it attends. Summon it here or from the Household page."
 
 msgid "Start daemon"
@@ -282,8 +321,8 @@ msgstr ""
 msgid "Animations"
 msgstr "Animated Spectacles"
 
-msgid "Animated effects are picked per zone on the Devices tab."
-msgstr "Animated spectacles are chosen zone by zone, upon the Devices tab."
+msgid "Animated effects are picked per zone on the Devices page."
+msgstr "Animated spectacles are chosen zone by zone, upon the Devices page."
 
 msgid "Run animations"
 msgstr "Permit the spectacles"
@@ -363,8 +402,8 @@ msgstr "Times are kept on the twenty-four hour clock, as 23:00. The span may cro
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Extinguish the lamps whilst the machine slumbers"
 
-msgid "Flashing LEDs for desktop notifications has its own tab now."
-msgstr "Flashing the lamps for correspondence now has a tab of its own."
+msgid "Flashing LEDs for desktop notifications has its own page now."
+msgstr "Flashing the lamps for correspondence now has a page of its own."
 
 msgid "Open"
 msgstr "Open"
@@ -411,7 +450,7 @@ msgstr "Colour calibration"
 
 msgid ""
 "Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
-" Calibrated on the Devices tab."
+" Calibrated on the Devices page."
 msgstr ""
 "Profiles that correct colours for your manner of strip. Choose one per zone with Colour "
 "correction: Calibrated, upon the Apparatus page."
@@ -831,10 +870,10 @@ msgstr "Upon the map"
 
 msgid ""
 "Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
-"the Layout tab."
+"the Layout page."
 msgstr ""
 "Choose the lamps, paint their colours and place the points A and B between which a moving flash "
-"travels, on the Layout tab."
+"travels, on the Layout page."
 
 msgid "Edit on the map"
 msgstr "Arrange upon the map"
@@ -846,11 +885,11 @@ msgid "Which LEDs"
 msgstr "Which lamps"
 
 msgid ""
-"Or pick them on the Layout tab with the Notifications tool, which also sets the A and B points a "
-"moving flash runs between."
+"Or pick them on the Layout page with the Notifications tool, which also sets the A and B points a"
+" moving flash runs between."
 msgstr ""
-"Or choose them on the Layout tab with the Correspondence tool, which also sets the points A and B"
-" between which a moving flash travels."
+"Or choose them on the Layout page with the Correspondence tool, which also sets the points A and "
+"B between which a moving flash travels."
 
 msgid "No strips yet"
 msgstr "No strips as yet"
@@ -1291,6 +1330,19 @@ msgstr "The daemon"
 msgid "Couldn't stop it."
 msgstr "It declined to stop."
 
+msgid "Stop the daemon?"
+msgstr "Dismiss the daemon?"
+
+msgid ""
+"Your lights keep their last colours but stop following the wallpaper, the monitor and everything "
+"else until you start it again."
+msgstr ""
+"One's lights retain their last colours but cease following the wallpaper, the monitor and all "
+"else until it is summoned again."
+
+msgid "Stop it"
+msgstr "Dismiss it"
+
 msgid "Enabled. The daemon now starts at login."
 msgstr "Engaged. The daemon shall now attend at every arrival."
 
@@ -1380,9 +1432,6 @@ msgid ""
 msgstr ""
 "Shall the OpenRGB server Iridia summoned also be dismissed? Other programmes may be relying upon "
 "it. If kept, it remains until you take your leave."
-
-msgid "Stop it"
-msgstr "Dismiss it"
 
 msgid "Keep it running"
 msgstr "Let it remain"
@@ -1989,10 +2038,10 @@ msgstr "Chosen colours"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
-"where the LEDs are on the Layout tab."
+"where the LEDs are on the Layout page."
 msgstr ""
 "Following the arrangement conducts the spectacle through the room, across every strip that "
-"follows it, according to where the LEDs sit upon the Layout tab."
+"follows it, according to where the LEDs sit upon the Layout page."
 
 msgid "All lights"
 msgstr "All lamps"
@@ -2199,8 +2248,8 @@ msgstr "None as yet: New look makes one."
 msgid "Which scenes"
 msgstr "Which scenes"
 
-msgid "None yet: make them on the Scenes tab."
-msgstr "None as yet: make them on the Scenes tab."
+msgid "None yet: make them on the Scenes page."
+msgstr "None as yet: make them on the Scenes page."
 
 msgid "Which switches"
 msgstr "Which switches"
@@ -2242,6 +2291,12 @@ msgstr "Awaiting the daemon's pleasure…"
 msgid "Pick any colour for all your lights"
 msgstr "Select any colour for all of one's lights"
 
+msgid "Brightness of all your lights. Moving it stops them following the monitor."
+msgstr "Brightness of all one's lights. Moving it stops them following the monitor."
+
+msgid "Brightness of all your lights"
+msgstr "Brightness of all one's lights"
+
 msgid "Keep these colours when the wallpaper changes"
 msgstr "Preserve these colours when the wallpaper changes"
 
@@ -2273,8 +2328,9 @@ msgstr "One's lights use these colours until Iridia locates the wallpaper"
 msgid "Your lights follow this wallpaper"
 msgstr "One's lights follow this wallpaper"
 
-msgid "Use this colour on all your lights"
-msgstr "Apply this colour to all of one's lights"
+#, python-brace-format
+msgid "Wallpaper colour {n} (#{hex}): use it on all your lights"
+msgstr "Wallpaper colour {n} (#{hex}): apply it to all one's lights"
 
 msgid "No colours yet"
 msgstr "No colours as yet"
@@ -2873,7 +2929,7 @@ msgstr ""
 "strip is drawn at its true length."
 
 #, python-brace-format
-msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices page, Strip type)."
 msgstr "Each dot is one pixel of {lpp} lamps (set upon the Apparatus page, Strip type)."
 
 #, python-brace-format
@@ -2939,10 +2995,10 @@ msgstr "Rechristen the twin"
 
 #, python-brace-format
 msgid ""
-"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"A name for this clone of {strip}. It only shows on the Layout page. Leave it empty to use the "
 "strip's name."
 msgstr ""
-"A name for this twin of {strip}. It appears only on the Layout tab. Leave it empty to use the "
+"A name for this twin of {strip}. It appears only on the Layout page. Leave it empty to use the "
 "strip's own name."
 
 msgid ""
@@ -3380,6 +3436,9 @@ msgstr "The centre"
 msgid "The other end"
 msgstr "The far end"
 
+msgid "Add a colour"
+msgstr "Add a colour"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click for the first colour, right-click for the second"
@@ -3468,7 +3527,7 @@ msgstr "Addressable 12V in companies (WS2811, COB)"
 
 msgid ""
 "One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
-"how many LEDs are in a pixel so the Layout tab draws the real length."
+"how many LEDs are in a pixel so the Layout page draws the real length."
 msgstr ""
 "One chip governs a company of lamps, so a company is one pixel. OpenRGB counts pixels, not lamps;"
 " set how many lamps are in a pixel so the Floor Plan draws the true length."
@@ -3512,6 +3571,16 @@ msgstr "Further options for this strip"
 msgid "Show again"
 msgstr "Reveal once more"
 
+#, python-brace-format
+msgid "Settings for {strip}"
+msgstr "Settings for {strip}"
+
+msgid "Hide the settings"
+msgstr "Conceal the settings"
+
+msgid "Show all settings"
+msgstr "Reveal all settings"
+
 msgid "mixed"
 msgstr "assorted"
 
@@ -3523,6 +3592,12 @@ msgstr "palette colours"
 
 msgid "calibrated"
 msgstr "calibrated"
+
+msgid "Not controlled by Iridia (the switch on the left)"
+msgstr "Not attended to by Iridia (the switch on the left)"
+
+msgid "Not controlled by Iridia"
+msgstr "Not attended to by Iridia"
 
 msgid "Animated"
 msgstr "Animated"
@@ -3541,10 +3616,10 @@ msgstr "Mirror"
 
 msgid ""
 "Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
-"tab."
+"page."
 msgstr ""
 "Some lamps of this strip flash for correspondence (the line beneath them). Opens the "
-"Correspondence tab."
+"Correspondence page."
 
 msgid "Follow monitor brightness"
 msgstr "Defer to the looking-glass's brightness"
@@ -3628,6 +3703,10 @@ msgstr ""
 
 msgid "Resize the OpenRGB zone"
 msgstr "Resize the OpenRGB zone"
+
+#, python-brace-format
+msgid "{strip} is hidden, under Hidden at the bottom."
+msgstr "{strip} is concealed, under Hidden at the bottom."
 
 msgid "Stop test"
 msgstr "Conclude the test"

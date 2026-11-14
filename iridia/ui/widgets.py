@@ -567,7 +567,9 @@ class Swatch(Gtk.DrawingArea):
     def __init__(self, hex6: str, size: int = 44, selected: bool = False, badge: str = "",
                  on_click: Callable | None = None, on_right: Callable | None = None, tooltip: str = "",
                  add: bool = False):
-        super().__init__()
+        clickable = bool(on_click or on_right)
+        # a swatch you can pick is a button to the keyboard and to screen readers too
+        super().__init__(**({"accessible_role": Gtk.AccessibleRole.BUTTON} if clickable else {}))
         themed(self)
         self.hex = hex6
         self.size = size
@@ -583,11 +585,35 @@ class Swatch(Gtk.DrawingArea):
         if tooltip:
             self.set_tooltip_text(tooltip)
         self._anim = Animator(self, self._step)
-        if on_click or on_right:
+        if clickable:
             self.set_cursor(Gdk.Cursor.new_from_name("pointer"))
             g = Gtk.GestureClick(button=0)
             g.connect("pressed", self._pressed, on_click, on_right)
             self.add_controller(g)
+            self.set_focusable(True)
+            self.add_css_class("focusable")
+            name = tooltip or ("#" + hex6 if hex6 else "")
+            if add and not tooltip:
+                name = _("Add a colour")
+            if name:
+                self.update_property([Gtk.AccessibleProperty.LABEL], [name])
+            if selected:
+                self.update_state([Gtk.AccessibleState.PRESSED], [True])
+            keys = Gtk.EventControllerKey()
+            keys.connect("key-pressed", self._key, on_click, on_right)
+            self.add_controller(keys)
+            self.connect("notify::has-focus", lambda *_a: self.queue_draw())
+
+    def _key(self, _c, keyval, _code, state, on_click, on_right):
+        """Enter or Space picks it; the Menu key, or Shift+F10, does what a right-click does."""
+        name = Gdk.keyval_name(keyval) or ""
+        if name in ("Return", "KP_Enter", "space") and on_click:
+            on_click()
+            return True
+        if on_right and (name == "Menu" or (name == "F10" and state & Gdk.ModifierType.SHIFT_MASK)):
+            on_right()
+            return True
+        return False
 
     def _pressed(self, g, _n, _x, _y, on_click, on_right):
         btn = g.get_current_button()
@@ -630,6 +656,7 @@ class Swatch(Gtk.DrawingArea):
             cr.move_to(cx, cy - r * 0.32)
             cr.line_to(cx, cy + r * 0.32)
             cr.stroke()
+            self._draw_focus(cr, cx, cy, r)
             return
         if t > 0.01:
             cr.set_source_rgb(*rgb("PRIMARY"))
@@ -657,6 +684,16 @@ class Swatch(Gtk.DrawingArea):
             cr.arc(dx, dy, dr, 0, 2 * math.pi)
             cr.set_source_rgb(*rgb("ON_SURFACE"))
             cr.fill()
+        self._draw_focus(cr, cx, cy, r)
+
+    def _draw_focus(self, cr, cx, cy, r):
+        """The keyboard focus ring, drawn here: GTK leaves a CSS outline off drawn widgets."""
+        root = self.get_root()
+        if self.has_focus() and root is not None and root.get_focus_visible():
+            cr.set_source_rgb(*rgb("PRIMARY"))
+            cr.set_line_width(2)
+            shape_path(cr, cx, cy, r - 1, "squircle")
+            cr.stroke()
 
 
 class QuickColors(Gtk.Box):

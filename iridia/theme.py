@@ -55,7 +55,7 @@ def palette_for(seed_hex: str) -> dict:
         "ON_ERROR_CONTAINER": "#f6cdc7",
         "ON_SURFACE": _hsl(hue, 0.04, 0.905),
         "ON_SURFACE_VARIANT": _hsl(hue, 0.05, 0.69),
-        "OUTLINE": _hsl(hue, 0.05, 0.52),
+        "OUTLINE": _hsl(hue, 0.05, 0.57),      # small grey help text: at least 5:1 on every surface
         "OUTLINE_VARIANT": _hsl(hue, 0.05, 0.24),
         "GRID": _hsl(hue, 0.05, 0.16),
         "INVERSE_SURFACE": _hsl(hue, 0.04, 0.89),

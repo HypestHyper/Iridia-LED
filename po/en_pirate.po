@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:09+0000\n"
+"POT-Creation-Date: 2026-11-14 04:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -33,6 +33,48 @@ msgstr "Sloop"
 
 msgid "Large"
 msgstr "Galleon"
+
+msgid "This list"
+msgstr "This here list"
+
+msgid "Close the window (the daemon keeps your lights going)"
+msgstr "Shut the porthole (the bosun keeps yer lanterns burnin')"
+
+msgid "Make everything bigger or smaller"
+msgstr "Make everythin' bigger or smaller"
+
+msgid "Size back to automatic"
+msgstr "Size back to the ship's choosin'"
+
+msgid "Move between controls"
+msgstr "Sail between controls"
+
+msgid "Press the button, pick the colour or open the strip in focus"
+msgstr "Press the button, pick the colour or open the strip ye're on"
+
+msgid "A saved colour's right-click action"
+msgstr "A hoarded colour's right-click doin's"
+
+msgid "Close a dialog or menu"
+msgstr "Shut a dialog or menu"
+
+msgid "Scroll, drag"
+msgstr "Scroll, drag"
+
+msgid "Layout: zoom, and move the map"
+msgstr "Treasure Map: zoom, an' haul the map about"
+
+msgid "Shift while turning"
+msgstr "Shift while turnin'"
+
+msgid "Layout: turn freely instead of in 15° steps"
+msgstr "Treasure Map: turn free instead o' 15° steps"
+
+msgid "Keyboard shortcuts"
+msgstr "Keyboard shortcuts"
+
+msgid "Close"
+msgstr "Close"
 
 msgid "Target"
 msgstr "Aimin' for"
@@ -73,7 +115,7 @@ msgstr "What be the name for {zone} on {device}?"
 msgid "A name for {device}."
 msgstr "What be the name for {device}?"
 
-msgid "It shows on the Devices and Layout tabs. Leave it empty to use the original name."
+msgid "It shows on the Devices and Layout pages. Leave it empty to use the original name."
 msgstr "It shows on the Cargo and Treasure Map decks. Leave it empty fer the name she was born with."
 
 msgid "Keep it under 40 characters."
@@ -123,9 +165,6 @@ msgstr "Stow it"
 
 msgid "Maximize"
 msgstr "Hoist it"
-
-msgid "Close"
-msgstr "Close"
 
 msgid "Restore"
 msgstr "Dig it up"
@@ -186,7 +225,7 @@ msgstr "#{c}  (right-click to make it walk the plank)"
 msgid "None yet. Pick one with “Custom color…” below."
 msgstr "Nothin' yet. Pick one with “A color o' yer own…” below."
 
-msgid "Your zones use different colors (see the Devices tab)"
+msgid "Your zones use different colors (see the Devices page)"
 msgstr "Yer zones fly different colors (see the Cargo deck)"
 
 #, python-brace-format
@@ -230,7 +269,7 @@ msgstr "#{h} walked the plank out o' yer chest."
 msgid "The daemon isn't running."
 msgstr "The bosun ain't aboard."
 
-msgid "Your devices show up here once it runs. Start it here or from the Service tab."
+msgid "Your devices show up here once it runs. Start it here or from the Service page."
 msgstr "Yer cargo shows up here once he's aboard. Rouse him here or from Below Decks."
 
 msgid "Start daemon"
@@ -278,7 +317,7 @@ msgstr ""
 msgid "Animations"
 msgstr "Dancin' lanterns"
 
-msgid "Animated effects are picked per zone on the Devices tab."
+msgid "Animated effects are picked per zone on the Devices page."
 msgstr "Pick the dancin' for each zone in the Cargo hold."
 
 msgid "Run animations"
@@ -357,8 +396,8 @@ msgstr "Ship's time be 24 hour, like 23:00. The watch can sail past midnight."
 msgid "Turn the LEDs off while the PC sleeps"
 msgstr "Douse the lanterns while the ship sleeps"
 
-msgid "Flashing LEDs for desktop notifications has its own tab now."
-msgstr "Flashin' lanterns fer messages has its own tab now."
+msgid "Flashing LEDs for desktop notifications has its own page now."
+msgstr "Flashin' lanterns fer messages has its own page now."
 
 msgid "Open"
 msgstr "Open"
@@ -405,7 +444,7 @@ msgstr "Color calibration"
 
 msgid ""
 "Profiles that correct colors for your kind of LED strip. Pick one per zone with Color correction:"
-" Calibrated on the Devices tab."
+" Calibrated on the Devices page."
 msgstr ""
 "Profiles that correct colors fer yer kind o' strip. Pick one per zone with Color correction: "
 "Calibrated on the Cargo deck."
@@ -821,10 +860,10 @@ msgstr "On the chart"
 
 msgid ""
 "Choose the LEDs, paint their colours and set the A and B points a moving flash runs between, on "
-"the Layout tab."
+"the Layout page."
 msgstr ""
 "Pick the lanterns, paint their colours an' set the A an' B points a movin' flash sails between, "
-"on the Layout tab."
+"on the Layout page."
 
 msgid "Edit on the map"
 msgstr "Edit on the chart"
@@ -836,11 +875,11 @@ msgid "Which LEDs"
 msgstr "Which lanterns"
 
 msgid ""
-"Or pick them on the Layout tab with the Notifications tool, which also sets the A and B points a "
-"moving flash runs between."
+"Or pick them on the Layout page with the Notifications tool, which also sets the A and B points a"
+" moving flash runs between."
 msgstr ""
-"Or pick 'em on the Layout tab with the Messages tool, which also sets the A an' B points a movin'"
-" flash sails between."
+"Or pick 'em on the Layout page with the Messages tool, which also sets the A an' B points a "
+"movin' flash sails between."
 
 msgid "No strips yet"
 msgstr "No strips yet"
@@ -1278,6 +1317,19 @@ msgstr "The bosun"
 msgid "Couldn't stop it."
 msgstr "He wouldn't stop."
 
+msgid "Stop the daemon?"
+msgstr "Send the bosun ashore?"
+
+msgid ""
+"Your lights keep their last colours but stop following the wallpaper, the monitor and everything "
+"else until you start it again."
+msgstr ""
+"Yer lanterns keep their last colours but stop followin' the wallpaper, the monitor an' all else "
+"till ye rouse him again."
+
+msgid "Stop it"
+msgstr "Sink it"
+
 msgid "Enabled. The daemon now starts at login."
 msgstr "Aye. The bosun now rouses when ye come aboard."
 
@@ -1363,9 +1415,6 @@ msgid ""
 msgstr ""
 "Also sink the OpenRGB server Iridia raised? Other hands may be usin' it. Keep it, and it sails "
 "till ye go ashore."
-
-msgid "Stop it"
-msgstr "Sink it"
 
 msgid "Keep it running"
 msgstr "Let it sail"
@@ -1971,7 +2020,7 @@ msgstr "Yer colours"
 
 msgid ""
 "Follow the layout runs the effect through the room, across every strip that follows it, using "
-"where the LEDs are on the Layout tab."
+"where the LEDs are on the Layout page."
 msgstr ""
 "Follow the map sails the dance through the whole room, across every lantern string that follows "
 "it, using where they hang on the Treasure Map."
@@ -2179,8 +2228,8 @@ msgstr "None yet: New look makes one."
 msgid "Which scenes"
 msgstr "Which scenes"
 
-msgid "None yet: make them on the Scenes tab."
-msgstr "None yet: make 'em on the Scenes tab."
+msgid "None yet: make them on the Scenes page."
+msgstr "None yet: make 'em on the Scenes page."
 
 msgid "Which switches"
 msgstr "Which levers"
@@ -2222,6 +2271,12 @@ msgstr "Waitin' on the bosun…"
 msgid "Pick any colour for all your lights"
 msgstr "Pick any colour fer all yer lanterns"
 
+msgid "Brightness of all your lights. Moving it stops them following the monitor."
+msgstr "Brightness o' all yer lanterns. Movin' it stops 'em followin' the monitor."
+
+msgid "Brightness of all your lights"
+msgstr "Brightness o' all yer lanterns"
+
 msgid "Keep these colours when the wallpaper changes"
 msgstr "Keep these colours when the wallpaper changes"
 
@@ -2253,8 +2308,9 @@ msgstr "Yer lanterns use these colours till Iridia spots yer wallpaper"
 msgid "Your lights follow this wallpaper"
 msgstr "Yer lanterns follow this wallpaper"
 
-msgid "Use this colour on all your lights"
-msgstr "Hoist this colour on all yer lanterns"
+#, python-brace-format
+msgid "Wallpaper colour {n} (#{hex}): use it on all your lights"
+msgstr "Wallpaper colour {n} (#{hex}): hoist it on all yer lanterns"
 
 msgid "No colours yet"
 msgstr "No colours yet"
@@ -2847,7 +2903,7 @@ msgstr ""
 "at its real length."
 
 #, python-brace-format
-msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices tab, Strip type)."
+msgid "Each dot is one pixel of {lpp} LEDs (set on the Devices page, Strip type)."
 msgstr "Each dot be one pixel of {lpp} lanterns (set on the Cargo deck, Strip type)."
 
 #, python-brace-format
@@ -2913,7 +2969,7 @@ msgstr "Rechristen the twin"
 
 #, python-brace-format
 msgid ""
-"A name for this clone of {strip}. It only shows on the Layout tab. Leave it empty to use the "
+"A name for this clone of {strip}. It only shows on the Layout page. Leave it empty to use the "
 "strip's name."
 msgstr ""
 "A name fer this twin o' {strip}. It only shows on the Layout chart. Leave it empty to use the "
@@ -3350,6 +3406,9 @@ msgstr "Amidships"
 msgid "The other end"
 msgstr "The stern"
 
+msgid "Add a colour"
+msgstr "Add a colour"
+
 #, python-brace-format
 msgid "#{hex}: click for the first color, right-click for the second"
 msgstr "#{hex}: click fer the first color, right-click fer the second"
@@ -3436,7 +3495,7 @@ msgstr "Addressable 12V in crews (WS2811, COB)"
 
 msgid ""
 "One chip drives a group of LEDs, so a group is one pixel. OpenRGB counts pixels, not LEDs; set "
-"how many LEDs are in a pixel so the Layout tab draws the real length."
+"how many LEDs are in a pixel so the Layout page draws the real length."
 msgstr ""
 "One chip drives a crew o' lanterns, so a crew be one pixel. OpenRGB counts pixels, not lanterns; "
 "set how many lanterns be in a pixel so the Treasure Map draws the real length."
@@ -3480,6 +3539,16 @@ msgstr "More fer this strip"
 msgid "Show again"
 msgstr "Bring back on deck"
 
+#, python-brace-format
+msgid "Settings for {strip}"
+msgstr "Settings fer {strip}"
+
+msgid "Hide the settings"
+msgstr "Stow the settings"
+
+msgid "Show all settings"
+msgstr "Show all the settings"
+
 msgid "mixed"
 msgstr "motley"
 
@@ -3491,6 +3560,12 @@ msgstr "palette colours"
 
 msgid "calibrated"
 msgstr "calibrated"
+
+msgid "Not controlled by Iridia (the switch on the left)"
+msgstr "Not under Iridia's command (the switch on the left)"
+
+msgid "Not controlled by Iridia"
+msgstr "Not under Iridia's command"
 
 msgid "Animated"
 msgstr "Dancin'"
@@ -3509,8 +3584,8 @@ msgstr "Mirror"
 
 msgid ""
 "Some LEDs of this strip flash for notifications (the line under them). Opens the Notifications "
-"tab."
-msgstr "Some lanterns o' this strip flash fer messages (the line under 'em). Opens the Messages tab."
+"page."
+msgstr "Some lanterns o' this strip flash fer messages (the line under 'em). Opens the Messages page."
 
 msgid "Follow monitor brightness"
 msgstr "Follow the spyglass brightness"
@@ -3592,6 +3667,10 @@ msgstr ""
 
 msgid "Resize the OpenRGB zone"
 msgstr "Resize the OpenRGB zone"
+
+#, python-brace-format
+msgid "{strip} is hidden, under Hidden at the bottom."
+msgstr "{strip} be stowed, under Hidden at the bottom."
 
 msgid "Stop test"
 msgstr "End the test"

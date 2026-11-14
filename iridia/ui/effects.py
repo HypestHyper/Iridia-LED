@@ -264,7 +264,7 @@ class EffectControls(Gtk.Box):
             r.append(self._dial_box)
             self.append(r)
             self.append(label(_("Follow the layout runs the effect through the room, across every strip that follows "
-                                "it, using where the LEDs are on the Layout tab."), ("tiny", "faint"), wrap=True))
+                                "it, using where the LEDs are on the Layout page."), ("tiny", "faint"), wrap=True))
         if self._show_sync:
             row, sw = switch_row(_LABELS["sync"][0], bool(p["sync"]), lambda v: self._set("sync", v))
             self._widgets["sync"] = sw

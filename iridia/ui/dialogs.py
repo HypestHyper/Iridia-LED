@@ -55,6 +55,10 @@ class Dialog(Gtk.Window):
         for b in btns:
             row.append(b)
         self.body.append(row)
+        # the first focus goes to the main (last) button, not to the first bit of selectable text
+        if btns:
+            main = btns[-1]
+            self.connect("map", lambda *_a: GLib.idle_add(lambda: (main.grab_focus(), False)[1]))
         return row
 
 

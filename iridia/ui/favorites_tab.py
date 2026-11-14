@@ -804,7 +804,7 @@ class FavoritesPage:
         self._card_scenes = picker("scenes", _("Which scenes"),
                                    [(sc["id"], sc["name"], None)
                                     for sc in (self._st.get("scenes") or {}).get("scenes") or []],
-                                   set((t or {}).get("scenes") or []), _("None yet: make them on the Scenes tab."))
+                                   set((t or {}).get("scenes") or []), _("None yet: make them on the Scenes page."))
         self._card_sw = picker("switches", _("Which switches"),
                                [(w, SWITCH_NAMES[w][0], SWITCH_NAMES[w][1]) for w in SWITCHES],
                                set((t or {}).get("switches") or []), "", defaults=DEFAULT_SWITCHES)

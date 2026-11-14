@@ -47,6 +47,16 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.2" date="2026-11-14">
+      <description>
+        <ul>
+          <li>Arranging Favourites is easier, and cards keep their size</li>
+          <li>A card's colour ring shows what its strips really show</li>
+          <li>A dot on Updates when there's a new version</li>
+          <li>Everything counts as controlled while any strip is</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.1" date="2026-11-14">
       <description>
         <ul>

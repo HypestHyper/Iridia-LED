@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.2 — 2026-11-14
 
 - **A dot on Updates** in the side rail while there's a newer version (in the narrow rail too); its
   tooltip names the version.

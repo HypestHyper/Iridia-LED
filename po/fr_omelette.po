@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-12 23:45+0000\n"
+"POT-Creation-Date: 2026-11-14 04:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -85,14 +85,8 @@ msgstr "Iridia"
 msgid "Connecting…"
 msgstr "Baguette"
 
-msgid "Freeze colors"
-msgstr "Camembert"
-
-msgid "Status"
-msgstr "Fromage"
-
-msgid "Favourites"
-msgstr "Favoris"
+msgid "Home"
+msgstr "Maison"
 
 msgid "Devices"
 msgstr "Baguette"
@@ -100,17 +94,14 @@ msgstr "Baguette"
 msgid "Layout"
 msgstr "Croissant"
 
-msgid "Notifications"
-msgstr "Le facteur"
-
 msgid "Scenes"
 msgstr "Scènes"
 
+msgid "Notifications"
+msgstr "Le facteur"
+
 msgid "Keybinds"
 msgstr "Moustache"
-
-msgid "Settings"
-msgstr "Oh là là"
 
 msgid "Service"
 msgstr "Allez !"
@@ -118,23 +109,14 @@ msgstr "Allez !"
 msgid "Updates"
 msgstr "Mises à jour"
 
+msgid "Settings"
+msgstr "Oh là là"
+
+msgid "Setup"
+msgstr "Moustache"
+
 msgid "Try it"
 msgstr "Champagne"
-
-msgid "Refresh"
-msgstr "Oui"
-
-msgid "Restart daemon"
-msgstr "Pardon ?"
-
-msgid "Config folder"
-msgstr "Bonne nuit"
-
-msgid "Log folder"
-msgstr "Oui"
-
-msgid "Quit"
-msgstr "Camembert"
 
 msgid "Minimize"
 msgstr "Petit"
@@ -152,11 +134,20 @@ msgstr "Santé !"
 msgid "Couldn't open a file manager. The folder is {path}"
 msgstr "Le poisson rouge est en vacances"
 
-msgid "Waiting for the daemon…"
-msgstr "Mon chien mange du camembert"
+msgid "Saved colours and colour correction"
+msgstr "Couleurs gardées et zut !"
 
-msgid "Now playing"
-msgstr "Quiche"
+msgid "Pick a colour…"
+msgstr "Choisir une couleur…"
+
+msgid "Forget picks for this wallpaper"
+msgstr "Oublier, c'est la vie"
+
+msgid "Colour correction preview"
+msgstr "Un petit aperçu de zut !"
+
+msgid "What the daemon sees"
+msgstr "Ce que voit la crêpe"
 
 msgid "Wallpaper"
 msgstr "Ooh la la"
@@ -182,30 +173,11 @@ msgstr "C'est la vie"
 msgid "Extraction backend"
 msgstr "Deux cafés et l'addition"
 
-msgid "Color for this wallpaper"
-msgstr "Ceci n'est pas une pipe"
+msgid "Open config folder"
+msgstr "Ouvrir le placard"
 
-msgid ""
-"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
-"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
-" follows its own colors."
-msgstr "Il était une fois un croissant. Je voudrais un éclair au chocolat. Je ne sais quoi."
-
-msgid "Color correction preview"
-msgstr "Le train est encore en retard"
-
-msgid "Your saved colors"
-msgstr "Qui a mangé mon fromage ?"
-
-msgid "Custom color…"
-msgstr "Brioche"
-
-msgid "Reset saved colors for this wallpaper"
-msgstr "Il pleut des cordes"
-
-#, python-brace-format
-msgid "Wallpaper color {n}  #{hex}"
-msgstr "Le fromage qui pue"
+msgid "Open log folder"
+msgstr "Ouvrir le journal"
 
 #, python-brace-format
 msgid "#{c}  (right-click to delete)"
@@ -246,6 +218,9 @@ msgstr "Ratatouille"
 msgid "Saved colors for this wallpaper were reset."
 msgstr "Il pleut des cordes"
 
+msgid "Color for this wallpaper"
+msgstr "Ceci n'est pas une pipe"
+
 #, python-brace-format
 msgid "Deleted #{h} from your saved colors."
 msgstr "J'aime les escargots au beurre"
@@ -267,14 +242,11 @@ msgid ""
 "Server) and make sure it lists your devices."
 msgstr "La plume de ma tante. Omelette du fromage. Une grenouille dans mon café."
 
-msgid "All devices"
-msgstr "Crêpe"
-
 #, python-brace-format
-msgid "Changes here apply to {n} zone."
-msgid_plural "Changes here apply to all {n} zones at once."
-msgstr[0] "J'ai une baguette"
-msgstr[1] "J'ai une baguette"
+msgid "Everything changes {n} strip at once."
+msgid_plural "Everything changes all {n} strips at once."
+msgstr[0] "Bof change {n} bande à la fois."
+msgstr[1] "Bof change toutes les {n} bandes à la fois."
 
 msgid "Everything"
 msgstr "Bof"
@@ -286,9 +258,6 @@ msgstr "Bonsoir"
 msgid "Network light ({brand})"
 msgstr "Lampe réseau ({brand})"
 
-msgid "Whole device"
-msgstr "Oh là là"
-
 #, python-brace-format
 msgid "Hidden ({n})"
 msgid_plural "Hidden ({n})"
@@ -297,10 +266,8 @@ msgstr[1] "Cache-cache ({n})"
 
 msgid ""
 "Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
-" of lists elsewhere. The eye on a card shows it again."
-msgstr ""
-"Les bandes cachées : un canal sans rien de branché, par exemple. Elles gardent leurs réglages et "
-"sortent des listes ailleurs. L'œil sur une carte les fait revenir."
+" of lists elsewhere. Its ⋮ menu shows it again."
+msgstr "Bandes cachées sous la moustache. Elles gardent leurs réglages. Son menu ⋮ les ramène, voilà."
 
 msgid "Animations"
 msgstr "Le cinéma est fermé le lundi"
@@ -395,9 +362,6 @@ msgid ""
 "Save everything (devices, zones, layout, night mode, calibration, your colors for each wallpaper "
 "and your saved colors) under a name, and load it again later."
 msgstr "Bonjour, je m'appelle Jacques. La tour Eiffel est fermée aujourd'hui. Je ne sais quoi."
-
-msgid "Setup"
-msgstr "Moustache"
 
 msgid "No setups yet"
 msgstr "Brioche"
@@ -1141,10 +1105,11 @@ msgstr "Je ne sais quoi"
 msgid "Background daemon"
 msgstr "Mon aéroglisseur est plein d'anguilles"
 
-msgid ""
-"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
-"keeps working when this window is closed. This window only changes its settings."
-msgstr "Le chat est sous la table. Une grenouille dans mon café. Les lapins sont dans la cuisine."
+msgid "It keeps your lights in sync, also while this window is closed."
+msgstr "Elle garde vos lumières en rythme, même fenêtre fermée. Magnifique."
+
+msgid "Restart daemon"
+msgstr "Pardon ?"
 
 msgid "Kill daemon"
 msgstr "Baguette"
@@ -1157,8 +1122,8 @@ msgstr "Le pamplemousse est dans le jardin. Le béret de mon grand-père."
 msgid "Start the daemon when I log in"
 msgstr "Je ne sais quoi"
 
-msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
-msgstr "Je voudrais un éclair au chocolat. Les lapins sont dans la cuisine."
+msgid "One way is enough; more than one does no harm."
+msgstr "Une façon suffit ; deux, c'est la fête."
 
 msgid "systemd service"
 msgstr "Le service est en grève"
@@ -1443,8 +1408,8 @@ msgstr "La crêpe est tombée par terre"
 msgid "The daemon isn't running"
 msgstr "Bonjour, je m'appelle Jacques"
 
-msgid "Start it from the Service tab."
-msgstr "Un croissant, s'il vous plaît"
+msgid "Start it from the Service page."
+msgstr "Démarrez-la depuis Allez !"
 
 msgid "OpenRGB not connected"
 msgstr "J'aime les escargots au beurre"
@@ -1459,6 +1424,9 @@ msgstr "Le fromage qui pue"
 
 msgid "Frozen"
 msgstr "Non"
+
+msgid "Freeze colours"
+msgstr "Geler les couleurs"
 
 msgid "No wallpaper detected yet"
 msgstr "J'ai une baguette"
@@ -1698,6 +1666,9 @@ msgstr "Ooh la la"
 msgid "No saved colors yet. “Save color” keeps the current one here and in every color list."
 msgstr "Le pamplemousse est dans le jardin. Le béret de mon grand-père."
 
+msgid "Your saved colors"
+msgstr "Qui a mangé mon fromage ?"
+
 msgid "OK"
 msgstr "Bonne nuit"
 
@@ -1916,9 +1887,6 @@ msgstr "Le plan du métro de Paris ressemble à une assiette de spaghettis."
 msgid "All lights"
 msgstr "Tous les bisous"
 
-msgid "Freeze colours"
-msgstr "Geler les couleurs"
-
 msgid "Notification flashes"
 msgstr "Flashs du facteur"
 
@@ -1979,12 +1947,16 @@ msgstr "Tour Eiffel"
 msgid "Static"
 msgstr "Immobile comme une statue"
 
+msgid "Favourites"
+msgstr "Favoris"
+
 msgid ""
-"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
-"and switches. Drag them where you like in Arrange."
-msgstr ""
-"Votre tableau de bord : des cartes pour les bandes de votre choix avec juste les commandes "
-"voulues, des looks, des réglages et des interrupteurs. Glissez-les où vous voulez dans Déjà vu."
+"Cards for the strips you choose, with just the controls you want, and your looks, setups and "
+"switches"
+msgstr "Des cartes pour vos bandes préférées, avec juste ce qu'il faut. Très chic."
+
+msgid "Arrange"
+msgstr "Déjà vu"
 
 msgid "New card"
 msgstr "Nouvelle carte"
@@ -1992,20 +1964,16 @@ msgstr "Nouvelle carte"
 msgid "New look"
 msgstr "Nouveau look"
 
-msgid "Arrange"
-msgstr "Déjà vu"
+msgid "Add a look, a setup or a switch on its own"
+msgstr "Ajouter un look, une moustache ou un interrupteur tout seul"
 
 msgid "Nothing here yet"
 msgstr "Rien encore"
 
 msgid ""
-"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
-"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
-"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
-msgstr ""
-"Faites une carte pour quelques bandes (ou toutes) avec les commandes voulues : allumé/éteint, "
-"luminosité, couleurs, suivre l'écran, un effet, vos looks, des interrupteurs. Ou ajoutez un look,"
-" un réglage ou un interrupteur seul. L'★ d'une bande dans l'onglet Appareils lui fait une carte."
+"Make a card for the strips you use most, with just the controls you want. A strip's menu on the "
+"Devices page can make one too."
+msgstr "Faites une carte pour vos bandes chéries. Le menu d'une bande dans Baguette en fait une aussi."
 
 msgid "Couldn't do that"
 msgstr "Impossible"
@@ -2153,6 +2121,49 @@ msgstr "Impossible de le montrer"
 
 msgid "Give the look a name."
 msgstr "Donne-lui un nom."
+
+msgid "Waiting for the daemon…"
+msgstr "Mon chien mange du camembert"
+
+msgid "Pick any colour for all your lights"
+msgstr "N'importe quelle couleur pour toutes les lumières"
+
+msgid "Keep these colours when the wallpaper changes"
+msgstr "Garder ces couleurs, non merci au papier peint"
+
+msgid "Lights on: click to turn them off"
+msgstr "Allumé : cliquez pour éteindre"
+
+msgid "Lights off: click to turn them on"
+msgstr "Éteint : cliquez pour allumer"
+
+msgid "No wallpaper found yet"
+msgstr "Pas encore de papier peint, hélas"
+
+msgid "Off while the PC sleeps"
+msgstr "Éteint pendant la sieste du PC"
+
+msgid "Lights are off"
+msgstr "Les lumières font dodo"
+
+msgid "Colours frozen: a new wallpaper won't change them"
+msgstr "Couleurs gelées : non, non et non"
+
+#, python-brace-format
+msgid "Night mode until {time}, at most {cap}%"
+msgstr "Bonne nuit jusqu'à {time}, {cap}% maximum"
+
+msgid "Your lights use these colours until Iridia finds your wallpaper"
+msgstr "Ces couleurs en attendant le papier peint. Patience."
+
+msgid "Your lights follow this wallpaper"
+msgstr "Vos lumières suivent ce papier peint"
+
+msgid "Use this colour on all your lights"
+msgstr "Cette couleur partout, s'il vous plaît"
+
+msgid "No colours yet"
+msgstr "Pas encore de couleurs"
 
 msgid "All lights off / on"
 msgstr "Le poisson rouge est en vacances"
@@ -2383,8 +2394,8 @@ msgstr "La même touche arrête la musique, puis la relance."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Il pleut des cordes. Le béret de mon grand-père."
 
-msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
-msgstr "Même touche : look, puis normal. Voilà."
+msgid "Same key puts the look on, then back to normal. Make looks on Home, under Favourites."
+msgstr "La même touche met le look, puis revient. Faites les looks dans Maison, sous Favoris."
 
 msgid "Keybind color"
 msgstr "Ratatouille"
@@ -2490,6 +2501,9 @@ msgstr "Oh là là"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Le facteur : quels bisous clignotent"
+
+msgid "How this tool works"
+msgstr "Comment ça marche ?"
 
 msgid "Paint color"
 msgstr "Santé !"
@@ -2647,12 +2661,18 @@ msgstr "Les lapins sont dans la cuisine. J'aime les escargots au beurre."
 msgid "Show this strip"
 msgstr "Bof"
 
+msgid "(clone)"
+msgstr "(jumeau)"
+
 #, python-brace-format
 msgid "{zone} on {device}"
 msgstr "Café"
 
 msgid "Rename this strip"
 msgstr "Il pleut des cordes"
+
+msgid "Whole device"
+msgstr "Oh là là"
 
 #, python-brace-format
 msgid "clone of {strip} (shows the same colors)"
@@ -3196,6 +3216,10 @@ msgid "Saved colors"
 msgstr "Bonjour"
 
 #, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Le fromage qui pue"
+
+#, python-brace-format
 msgid "#{k}  (right-click to delete)"
 msgstr "Le chat est sous la table"
 
@@ -3293,20 +3317,20 @@ msgstr ""
 msgid "Let Iridia control every strip"
 msgstr "Laisser Iridia s'occuper de toutes les bandes"
 
+msgid "More for this strip"
+msgstr "Encore plus, oh là là"
+
 msgid "Show again"
 msgstr "Revoir"
-
-msgid "Hide this strip (it keeps working)"
-msgstr "Cacher cette bande (elle marche toujours)"
 
 msgid "mixed"
 msgstr "Ooh la la"
 
-msgid "no correction"
-msgstr "Crêpe"
+msgid "mixed correction"
+msgstr "zut mélangé"
 
-msgid "palette"
-msgstr "Santé !"
+msgid "palette colours"
+msgstr "couleurs de la palette"
 
 msgid "calibrated"
 msgstr "Bof"
@@ -3339,6 +3363,9 @@ msgstr "Café"
 
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr "Pas de lumière (voir Réglages, Le fromage qui brille), alors Café."
+
+msgid "More: range, invert, gamma, colour correction"
+msgstr "Plus : plage, inverser, gamma, zut !"
 
 msgid "Range"
 msgstr "Oh là là"
@@ -3485,6 +3512,9 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "Je suis une baguette. La tour Eiffel est fermée aujourd'hui."
+
+msgid "Brightness: following the monitor. Move it to set this strip's own."
+msgstr "Bisou : suit l'écran. Bougez-le pour le régler vous-même."
 
 msgid "Red"
 msgstr "Quiche"

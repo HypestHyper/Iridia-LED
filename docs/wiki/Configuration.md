@@ -72,7 +72,7 @@ and the log says so. Values of the wrong type are replaced with their defaults o
 | zone `hands_off`, `independent`, `keep_color` | absent | Iridia sends it nothing; it ignores the monitor's brightness, night mode, lock and sleep; a network light keeps its own colour (brightness and on/off only) |
 | zone `on_demand` | absent | A network light gets colour and brightness only when changed on its card, never on or off (*Only when I change it*) |
 | zone `hidden` | absent | Hidden on the Devices tab and left out of lists elsewhere; it still gets its colours |
-| `looks`, `favorites` | `[]`, `[]` | Your looks and the Favourites tab's tiles, in order (see [Favourites and looks](Favourites.md)) |
+| `looks`, `favorites` | `[]`, `[]` | Your looks and the Favourites on Home, in order (see [Favourites and looks](Favourites.md)) |
 | `netlights.manual` | `[]` | Lights added by address, driven without hearing from them: `[{"kind": "govee", "ip": "192.168.20.31"}]` |
 | `netlights.hosts` | `[]` | Addresses or networks (`"192.168.20.0/24"`) also asked directly, for lights on another VLAN or subnet |
 | `netlights.enabled` | `false` | Look for Philips WiZ and Govee lights on the network; each one found becomes a device with `"net": "wiz"` or `"govee"` (see [Network lights](Network-Lights.md)) |

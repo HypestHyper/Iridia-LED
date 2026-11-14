@@ -17,7 +17,7 @@ from iridia.ui import widgets
 from iridia.ui.effects import EFFECT_KEYS, EFFECT_NAMES
 from iridia.ui.layout_notify import MiniSlider
 from iridia.ui.scenes_tab import LookEditor, look_text, strip_list
-from iridia.ui.widgets import (Dropdown, Group, Swatch, Toggle, button, card, hbox, icon, label, section, vbox,
+from iridia.ui.widgets import (Dropdown, Group, Swatch, Toggle, button, card, hbox, icon, label, vbox,
                                wrap_row)
 
 SWITCH_NAMES = {
@@ -165,16 +165,21 @@ class FavoritesPage:
         self._editing = False
         self._live = {}                 # item id -> function(status) refreshing it in place
         self._setups: list[str] | None = None
-        page.append(section(_("Favourites"), _("Your quick panel: cards for the strips you choose with just the "
-                                               "controls you want, looks, setups and switches. Drag them where you "
-                                               "like in Arrange."), top=4))
-        bar = wrap_row(8)
-        bar.append(button(_("New card"), "add", "filled small", lambda: self._open_card(None)))
-        bar.append(button(_("New look"), "palette", "tonal small", lambda: self._open_look(None)))
-        bar.append(button(_("Add"), "add", "tonal small", self._toggle_add))
-        self._edit_btn = button(_("Arrange"), "edit", "tonal small", self._toggle_edit)
-        bar.append(self._edit_btn)
-        page.append(bar)
+        head = hbox(8)
+        title = label(_("Favourites"), ("title",))
+        title.set_hexpand(True)
+        title.set_tooltip_text(_("Cards for the strips you choose, with just the controls you want, and your looks, "
+                                 "setups and switches"))
+        head.append(title)
+        self._edit_btn = button(_("Arrange"), "edit", "text small", self._toggle_edit)
+        self.head_buttons = [button(_("New card"), "add", "tonal small", lambda: self._open_card(None)),
+                             button(_("New look"), "palette", "text small", lambda: self._open_look(None)),
+                             button(_("Add"), "add", "text small", self._toggle_add,
+                                    tooltip=_("Add a look, a setup or a switch on its own")),
+                             self._edit_btn]
+        for b in self.head_buttons:
+            head.append(b)
+        page.append(head)
         self._editor = card()           # the card or look being made or changed
         self._editor.set_visible(False)
         page.append(self._editor)
@@ -183,12 +188,8 @@ class FavoritesPage:
         page.append(self._add_card)
         self._empty = card()
         self._empty.append(label(_("Nothing here yet"), ("heading",)))
-        self._empty.append(label(_("Make a card for some strips (or all of them) with the controls you want on it: "
-                                   "on and off, brightness, colours, follow the monitor, an effect, your looks, "
-                                   "switches. Or add a look, a setup or a switch on its own. A strip's ★ on the "
-                                   "Devices tab makes a card for it."), ("small", "dim"), wrap=True))
-        self._empty.append(hbox(8, button(_("New card"), "add", "filled small", lambda: self._open_card(None)),
-                                button(_("New look"), "palette", "tonal small", lambda: self._open_look(None))))
+        self._empty.append(label(_("Make a card for the strips you use most, with just the controls you want. "
+                                   "A strip's menu on the Devices page can make one too."), ("small", "dim"), wrap=True))
         page.append(self._empty)
         self._board = Board()
         # The board sits in its own scroller that never scrolls sideways: it doesn't make the window as

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-12 23:45+0000\n"
+"POT-Creation-Date: 2026-11-14 04:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -87,14 +87,8 @@ msgstr "Iridia"
 msgid "Connecting…"
 msgstr "Establishing correspondence…"
 
-msgid "Freeze colors"
-msgstr "Preserve the colours"
-
-msgid "Status"
-msgstr "Situation"
-
-msgid "Favourites"
-msgstr "Favourites"
+msgid "Home"
+msgstr "Drawing Room"
 
 msgid "Devices"
 msgstr "Apparatus"
@@ -102,17 +96,14 @@ msgstr "Apparatus"
 msgid "Layout"
 msgstr "Floor Plan"
 
-msgid "Notifications"
-msgstr "Correspondence"
-
 msgid "Scenes"
 msgstr "Tableaux"
 
+msgid "Notifications"
+msgstr "Correspondence"
+
 msgid "Keybinds"
 msgstr "Key Bindings"
-
-msgid "Settings"
-msgstr "Preferences"
 
 msgid "Service"
 msgstr "Household"
@@ -120,23 +111,14 @@ msgstr "Household"
 msgid "Updates"
 msgstr "Updates"
 
+msgid "Settings"
+msgstr "Preferences"
+
+msgid "Setup"
+msgstr "Arrangement"
+
 msgid "Try it"
 msgstr "Make an attempt"
-
-msgid "Refresh"
-msgstr "Refresh"
-
-msgid "Restart daemon"
-msgstr "Revive the daemon"
-
-msgid "Config folder"
-msgstr "Cabinet of settings"
-
-msgid "Log folder"
-msgstr "Ledger cabinet"
-
-msgid "Quit"
-msgstr "Take leave"
 
 msgid "Minimize"
 msgstr "Retire to the dock"
@@ -154,11 +136,20 @@ msgstr "Restore"
 msgid "Couldn't open a file manager. The folder is {path}"
 msgstr "Alas, no file manager answered. The folder resides at {path}"
 
-msgid "Waiting for the daemon…"
-msgstr "Awaiting the daemon's pleasure…"
+msgid "Saved colours and colour correction"
+msgstr "Saved colours and colour correction"
 
-msgid "Now playing"
-msgstr "Presently performing"
+msgid "Pick a colour…"
+msgstr "Select a colour…"
+
+msgid "Forget picks for this wallpaper"
+msgstr "Disregard one's choices for this wallpaper"
+
+msgid "Colour correction preview"
+msgstr "A preview of the colour correction"
+
+msgid "What the daemon sees"
+msgstr "What the daemon observes"
 
 msgid "Wallpaper"
 msgstr "Wallpaper"
@@ -184,33 +175,11 @@ msgstr "Illumination"
 msgid "Extraction backend"
 msgstr "Method of extraction"
 
-msgid "Color for this wallpaper"
-msgstr "Colour for this wallpaper"
+msgid "Open config folder"
+msgstr "Open the configuration folder"
 
-msgid ""
-"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
-"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
-" follows its own colors."
-msgstr ""
-"Do click a colour to bestow it upon all your lamps. Your choices, for every zone or but one, are "
-"remembered for this picture and shall return when you do. A wallpaper you have not yet favoured "
-"follows its own colours."
-
-msgid "Color correction preview"
-msgstr "A preview of colour correction"
-
-msgid "Your saved colors"
-msgstr "Your treasured colours"
-
-msgid "Custom color…"
-msgstr "A colour of one's own…"
-
-msgid "Reset saved colors for this wallpaper"
-msgstr "Forget the colours chosen for this wallpaper"
-
-#, python-brace-format
-msgid "Wallpaper color {n}  #{hex}"
-msgstr "Wallpaper colour {n}  #{hex}"
+msgid "Open log folder"
+msgstr "Open the log folder"
 
 #, python-brace-format
 msgid "#{c}  (right-click to delete)"
@@ -255,6 +224,9 @@ msgstr "Colour"
 msgid "Saved colors for this wallpaper were reset."
 msgstr "The colours chosen for this wallpaper have been forgotten."
 
+msgid "Color for this wallpaper"
+msgstr "Colour for this wallpaper"
+
 #, python-brace-format
 msgid "Deleted #{h} from your saved colors."
 msgstr "#{h} has been dismissed from your treasured colours."
@@ -278,14 +250,11 @@ msgstr ""
 "Apparatus appears here once OpenRGB announces it. Kindly start OpenRGB's SDK server (the SDK "
 "Server page, Start Server) and see that it lists your devices."
 
-msgid "All devices"
-msgstr "All apparatus"
-
 #, python-brace-format
-msgid "Changes here apply to {n} zone."
-msgid_plural "Changes here apply to all {n} zones at once."
-msgstr[0] "Alterations here apply to {n} zone."
-msgstr[1] "Alterations here apply to all {n} zones at once."
+msgid "Everything changes {n} strip at once."
+msgid_plural "Everything changes all {n} strips at once."
+msgstr[0] "The Entire Household changes {n} strip at once."
+msgstr[1] "The Entire Household changes all {n} strips at once."
 
 msgid "Everything"
 msgstr "The Entire Household"
@@ -297,9 +266,6 @@ msgstr "Indisposed"
 msgid "Network light ({brand})"
 msgstr "A lamp upon the network ({brand})"
 
-msgid "Whole device"
-msgstr "The entire device"
-
 #, python-brace-format
 msgid "Hidden ({n})"
 msgid_plural "Hidden ({n})"
@@ -308,10 +274,10 @@ msgstr[1] "Discreetly Tucked Away ({n})"
 
 msgid ""
 "Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
-" of lists elsewhere. The eye on a card shows it again."
+" of lists elsewhere. Its ⋮ menu shows it again."
 msgstr ""
-"Strips one has hidden: a channel with nothing plugged in, perhaps. They keep their settings and "
-"are kept out of lists elsewhere. The eye on a card brings it back."
+"Strips one has concealed: a channel with nothing attached, perhaps. They retain their settings "
+"and are omitted from lists elsewhere. Its ⋮ menu reveals it once more."
 
 msgid "Animations"
 msgstr "Animated Spectacles"
@@ -412,9 +378,6 @@ msgid ""
 msgstr ""
 "Preserve everything (apparatus, zones, arrangement, nocturnal mode, calibration, your colours for"
 " each wallpaper and your treasured colours) under a name, to be recalled at your leisure."
-
-msgid "Setup"
-msgstr "Arrangement"
 
 msgid "No setups yet"
 msgstr "No arrangements as yet"
@@ -1195,13 +1158,11 @@ msgstr "The daemon cannot be reached: {error}"
 msgid "Background daemon"
 msgstr "The background daemon"
 
-msgid ""
-"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
-"keeps working when this window is closed. This window only changes its settings."
-msgstr ""
-"The daemon is that faithful servant of Iridia who keeps your lamps in accord. It labours in the "
-"background and carries on when this window is closed. This window merely adjusts its "
-"instructions."
+msgid "It keeps your lights in sync, also while this window is closed."
+msgstr "It keeps one's lights in harmony, even whilst this window is closed."
+
+msgid "Restart daemon"
+msgstr "Revive the daemon"
 
 msgid "Kill daemon"
 msgstr "Dismiss the daemon"
@@ -1216,10 +1177,8 @@ msgstr ""
 msgid "Start the daemon when I log in"
 msgstr "Summon the daemon upon my arrival"
 
-msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
-msgstr ""
-"Choose one manner. Should you enable more than one, no harm is done, for only one daemon ever "
-"serves."
+msgid "One way is enough; more than one does no harm."
+msgstr "One method suffices; more than one does no harm whatsoever."
 
 msgid "systemd service"
 msgstr "The systemd service"
@@ -1536,7 +1495,7 @@ msgstr "The daemon is absent"
 msgid "The daemon isn't running"
 msgstr "The daemon is not in attendance"
 
-msgid "Start it from the Service tab."
+msgid "Start it from the Service page."
 msgstr "Summon it from the Household page."
 
 msgid "OpenRGB not connected"
@@ -1552,6 +1511,9 @@ msgstr "Nocturnal until {time}"
 
 msgid "Frozen"
 msgstr "Preserved"
+
+msgid "Freeze colours"
+msgstr "Freeze colours"
 
 msgid "No wallpaper detected yet"
 msgstr "No wallpaper discovered as yet"
@@ -1804,6 +1766,9 @@ msgstr ""
 "No treasured colours as yet. “Treasure this colour” keeps the present one here and in every list "
 "of colours."
 
+msgid "Your saved colors"
+msgstr "Your treasured colours"
+
 msgid "OK"
 msgstr "Very good"
 
@@ -2032,9 +1997,6 @@ msgstr ""
 msgid "All lights"
 msgstr "All lamps"
 
-msgid "Freeze colours"
-msgstr "Freeze colours"
-
 msgid "Notification flashes"
 msgstr "Correspondence flashes"
 
@@ -2095,12 +2057,18 @@ msgstr "Lofty"
 msgid "Static"
 msgstr "Still"
 
+msgid "Favourites"
+msgstr "Favourites"
+
 msgid ""
-"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
-"and switches. Drag them where you like in Arrange."
+"Cards for the strips you choose, with just the controls you want, and your looks, setups and "
+"switches"
 msgstr ""
-"One's quick panel: cards for the strips of one's choosing with just the controls one wants, "
-"looks, setups and switches. Arrange them as one pleases."
+"Cards for the strips of one's choosing, bearing only the controls one wishes, along with one's "
+"looks, arrangements and switches"
+
+msgid "Arrange"
+msgstr "Arrange"
 
 msgid "New card"
 msgstr "New card"
@@ -2108,20 +2076,18 @@ msgstr "New card"
 msgid "New look"
 msgstr "New look"
 
-msgid "Arrange"
-msgstr "Arrange"
+msgid "Add a look, a setup or a switch on its own"
+msgstr "Add a look, an arrangement or a switch on its own"
 
 msgid "Nothing here yet"
 msgstr "Nothing here as yet"
 
 msgid ""
-"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
-"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
-"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+"Make a card for the strips you use most, with just the controls you want. A strip's menu on the "
+"Devices page can make one too."
 msgstr ""
-"Make a card for some strips (or all of them) with the controls one wishes on it: on and off, "
-"brightness, colours, defer to the monitor, an effect, one's looks, switches. Or add a look, a "
-"setup or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+"Prepare a card for the strips one uses most, with only the controls one wishes. A strip's menu in"
+" the Apparatus may prepare one too."
 
 msgid "Couldn't do that"
 msgstr "One could not do that"
@@ -2269,6 +2235,49 @@ msgstr "One could not present it"
 
 msgid "Give the look a name."
 msgstr "Do give the look a name."
+
+msgid "Waiting for the daemon…"
+msgstr "Awaiting the daemon's pleasure…"
+
+msgid "Pick any colour for all your lights"
+msgstr "Select any colour for all of one's lights"
+
+msgid "Keep these colours when the wallpaper changes"
+msgstr "Preserve these colours when the wallpaper changes"
+
+msgid "Lights on: click to turn them off"
+msgstr "Lit: click to extinguish"
+
+msgid "Lights off: click to turn them on"
+msgstr "Extinguished: click to illuminate"
+
+msgid "No wallpaper found yet"
+msgstr "No wallpaper found as yet"
+
+msgid "Off while the PC sleeps"
+msgstr "Extinguished whilst the computer slumbers"
+
+msgid "Lights are off"
+msgstr "The lights are extinguished"
+
+msgid "Colours frozen: a new wallpaper won't change them"
+msgstr "Colours preserved: a new wallpaper shan't alter them"
+
+#, python-brace-format
+msgid "Night mode until {time}, at most {cap}%"
+msgstr "Evening mode until {time}, at most {cap}%"
+
+msgid "Your lights use these colours until Iridia finds your wallpaper"
+msgstr "One's lights use these colours until Iridia locates the wallpaper"
+
+msgid "Your lights follow this wallpaper"
+msgstr "One's lights follow this wallpaper"
+
+msgid "Use this colour on all your lights"
+msgstr "Apply this colour to all of one's lights"
+
+msgid "No colours yet"
+msgstr "No colours as yet"
 
 msgid "All lights off / on"
 msgstr "All lamps out / alight"
@@ -2518,8 +2527,10 @@ msgstr "The same key suspends every spectacle, then permits them once more."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Recalls the arrangement and keeps it (with safekeeping beforehand)."
 
-msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
-msgstr "The same key applies the look, then restores matters. Make looks upon the Favourites tab."
+msgid "Same key puts the look on, then back to normal. Make looks on Home, under Favourites."
+msgstr ""
+"The same key applies the look, then returns to normal. Looks are made in the Drawing Room, under "
+"Favourites."
 
 msgid "Keybind color"
 msgstr "Key binding colour"
@@ -2627,6 +2638,9 @@ msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Correspondence: which lamps flash, and where a flash travels"
+
+msgid "How this tool works"
+msgstr "How this instrument works"
 
 msgid "Paint color"
 msgstr "Paint colour"
@@ -2800,12 +2814,18 @@ msgstr "Conceal a strip to have it out of the way; it keeps its place and its co
 msgid "Show this strip"
 msgstr "Reveal this strip"
 
+msgid "(clone)"
+msgstr "(a copy)"
+
 #, python-brace-format
 msgid "{zone} on {device}"
 msgstr "{zone} upon {device}"
 
 msgid "Rename this strip"
 msgstr "Rechristen this strip"
+
+msgid "Whole device"
+msgstr "The entire device"
 
 #, python-brace-format
 msgid "clone of {strip} (shows the same colors)"
@@ -3375,6 +3395,10 @@ msgid "Saved colors"
 msgstr "Treasured colours"
 
 #, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Wallpaper colour {n}  #{hex}"
+
+#, python-brace-format
 msgid "#{k}  (right-click to delete)"
 msgstr "#{k}  (right-click to dismiss)"
 
@@ -3482,20 +3506,20 @@ msgstr "Allow Iridia to control it: off, Iridia sends it nothing and it keeps wh
 msgid "Let Iridia control every strip"
 msgstr "Allow Iridia to control every strip"
 
+msgid "More for this strip"
+msgstr "Further options for this strip"
+
 msgid "Show again"
 msgstr "Reveal once more"
-
-msgid "Hide this strip (it keeps working)"
-msgstr "Discreetly hide this strip (it carries on working)"
 
 msgid "mixed"
 msgstr "assorted"
 
-msgid "no correction"
-msgstr "uncorrected"
+msgid "mixed correction"
+msgstr "assorted corrections"
 
-msgid "palette"
-msgstr "palette"
+msgid "palette colours"
+msgstr "palette colours"
 
 msgid "calibrated"
 msgstr "calibrated"
@@ -3532,6 +3556,9 @@ msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Ma
 msgstr ""
 "No looking-glass brightness to defer to (see Settings, The looking-glass's brightness), so By "
 "hand is used."
+
+msgid "More: range, invert, gamma, colour correction"
+msgstr "Further: range, inversion, gamma, colour correction"
 
 msgid "Range"
 msgstr "Range"
@@ -3686,6 +3713,9 @@ msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr "This device has no Direct mode, so it wears a single colour throughout (the first of the pattern)."
+
+msgid "Brightness: following the monitor. Move it to set this strip's own."
+msgstr "Brightness: following the monitor. Move it to set this strip's own."
 
 msgid "Red"
 msgstr "Crimson"

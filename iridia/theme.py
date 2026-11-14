@@ -5,7 +5,7 @@ Pure functions only: the GTK window turns the palette into CSS (iridia/ui/style.
 
 import colorsys
 
-DEFAULT_SEED = "53dbb0"
+DEFAULT_SEED = "4f7bff"      # before there is a wallpaper: a cool blue
 
 
 def _hsl(h, s, l):
@@ -27,37 +27,39 @@ def palette_for(seed_hex: str) -> dict:
     r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
     hue, _light, sat = colorsys.rgb_to_hls(r, g, b)
     sat = max(0.45, min(0.85, sat))
-    ns = 0.14  # neutral tint strength
+    # Surfaces and text are a near-neutral grey (a hint of the seed's hue, never a brown or blue wash):
+    # the wall the lights glow on. The seed's colour is kept for the few things that are light.
+    ns = 0.05
     return {
-        "SURFACE_DIM": _hsl(hue, ns, 0.065),
-        "SURFACE_CONTAINER_LOWEST": _hsl(hue, ns, 0.05),
-        "SURFACE_CONTAINER_LOW": _hsl(hue, ns, 0.095),
+        "SURFACE_DIM": _hsl(hue, ns, 0.072),
+        "SURFACE_CONTAINER_LOWEST": _hsl(hue, ns, 0.055),
+        "SURFACE_CONTAINER_LOW": _hsl(hue, ns, 0.092),
         "SURFACE_CONTAINER": _hsl(hue, ns, 0.115),
-        "SURFACE_CONTAINER_HIGH": _hsl(hue, ns, 0.15),
-        "SURFACE_CONTAINER_HIGHEST": _hsl(hue, ns, 0.19),
-        "SURFACE_BRIGHT": _hsl(hue, ns, 0.23),
-        "PRIMARY": _hsl(hue, sat, 0.66),
+        "SURFACE_CONTAINER_HIGH": _hsl(hue, ns, 0.150),
+        "SURFACE_CONTAINER_HIGHEST": _hsl(hue, ns, 0.185),
+        "SURFACE_BRIGHT": _hsl(hue, ns, 0.225),
+        "PRIMARY": _hsl(hue, sat, 0.68),
         "ON_PRIMARY": _hsl(hue, sat, 0.12),
-        "PRIMARY_HOVER": _hsl(hue, sat, 0.74),
-        "PRIMARY_CONTAINER": _hsl(hue, sat * 0.8, 0.24),
-        "ON_PRIMARY_CONTAINER": _hsl(hue, sat, 0.84),
-        "SECONDARY_CONTAINER": _hsl(hue, 0.20, 0.26),
-        "SECONDARY_CONTAINER_HOVER": _hsl(hue, 0.22, 0.31),
-        "ON_SECONDARY_CONTAINER": _hsl(hue, 0.25, 0.88),
+        "PRIMARY_HOVER": _hsl(hue, sat, 0.76),
+        "PRIMARY_CONTAINER": _hsl(hue, sat * 0.55, 0.22),
+        "ON_PRIMARY_CONTAINER": _hsl(hue, sat, 0.86),
+        "SECONDARY_CONTAINER": _hsl(hue, 0.06, 0.205),
+        "SECONDARY_CONTAINER_HOVER": _hsl(hue, 0.07, 0.25),
+        "ON_SECONDARY_CONTAINER": _hsl(hue, 0.05, 0.90),
         "TERTIARY": _hsl(hue + 0.17, 0.45, 0.72),
-        "TERTIARY_CONTAINER": _hsl(hue + 0.17, 0.25, 0.28),
+        "TERTIARY_CONTAINER": _hsl(hue + 0.17, 0.20, 0.25),
         "ON_TERTIARY_CONTAINER": _hsl(hue + 0.17, 0.35, 0.88),
-        "ERROR": "#ffb4ab",
-        "ERROR_CONTAINER": "#93000a",
-        "ERROR_HOVER": "#b3261e",
-        "ON_ERROR_CONTAINER": "#ffdad6",
-        "ON_SURFACE": _hsl(hue, 0.10, 0.90),
-        "ON_SURFACE_VARIANT": _hsl(hue, 0.08, 0.76),
-        "OUTLINE": _hsl(hue, 0.07, 0.57),
-        "OUTLINE_VARIANT": _hsl(hue, 0.09, 0.27),
-        "GRID": _hsl(hue, 0.10, 0.17),
-        "INVERSE_SURFACE": _hsl(hue, 0.10, 0.89),
-        "INVERSE_ON_SURFACE": _hsl(hue, 0.12, 0.18),
+        "ERROR": "#f2a49a",
+        "ERROR_CONTAINER": "#4a2622",
+        "ERROR_HOVER": "#5c2d28",
+        "ON_ERROR_CONTAINER": "#f6cdc7",
+        "ON_SURFACE": _hsl(hue, 0.04, 0.905),
+        "ON_SURFACE_VARIANT": _hsl(hue, 0.05, 0.69),
+        "OUTLINE": _hsl(hue, 0.05, 0.52),
+        "OUTLINE_VARIANT": _hsl(hue, 0.05, 0.24),
+        "GRID": _hsl(hue, 0.05, 0.16),
+        "INVERSE_SURFACE": _hsl(hue, 0.04, 0.89),
+        "INVERSE_ON_SURFACE": _hsl(hue, 0.05, 0.16),
         "INVERSE_PRIMARY": _hsl(hue, sat, 0.38),
         "SEED": "#" + h,
     }

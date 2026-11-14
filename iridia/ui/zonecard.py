@@ -1,18 +1,23 @@
 """Zone cards for the Devices tab (one per zone, plus the "Everything" card)."""
 
+import math
 import time
 
 from gi.repository import GLib, Gtk
+
+from iridia.theme import hex_rgb
 
 from iridia.i18n import _, ngettext, pgettext
 from iridia import animations
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
 from iridia.ui import effects as fx
-from iridia.ui import fonts, serial
+from iridia.ui import serial
+from iridia.ui.layout_notify import MiniSlider
 from iridia.ui.sections_panel import SectionsPanel
-from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
-                               button, card, hbox, icon, label, set_button_text, switch_row, vbox, wrap_row)
+from iridia.ui.widgets import (Chevron, DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
+                               button, card, hbox, icon, label, rgb, set_button_text, switch_row, themed, vbox,
+                               wrap_row)
 
 ZONE_FIELDS_DEFAULT = {
     "enabled": True, "hands_off": False, "led_count": 20, "pattern": "solid", "mode": "full",
@@ -43,6 +48,45 @@ def merge_zone_cfgs(cfgs):
         if any(v != vals[0] for v in vals[1:]):
             mixed.add(key)
     return merged, mixed
+
+
+class MiniStrip(Gtk.DrawingArea):
+    """A strip's colours as a thin line under its name: what it shows, at a glance (faded while it's off
+    or not Iridia's)."""
+
+    def __init__(self):
+        super().__init__()
+        themed(self)
+        self.colors: list[str] = []
+        self.faded = False
+        self.set_content_height(6)
+        self.set_hexpand(True)
+        self.set_margin_top(6)
+        self.set_draw_func(self._draw)
+
+    def set_colors(self, colors, faded=False):
+        cols = list(colors or [])
+        if len(cols) > 48:                       # enough to show a gradient; no need for every LED
+            cols = [cols[int(i * len(cols) / 48)] for i in range(48)]
+        if cols != self.colors or faded != self.faded:
+            self.colors, self.faded = cols, faded
+            self.queue_draw()
+
+    def _draw(self, _a, cr, w, h):
+        r = h / 2
+        cr.new_sub_path()
+        cr.arc(w - r, r, r, -math.pi / 2, math.pi / 2)
+        cr.arc(r, r, r, math.pi / 2, 3 * math.pi / 2)
+        cr.close_path()
+        cr.clip()
+        cr.set_source_rgb(*rgb("SURFACE_CONTAINER_HIGHEST"))
+        cr.paint()
+        n = len(self.colors)
+        a = 0.3 if self.faded else 1.0
+        for i, c in enumerate(self.colors):
+            cr.set_source_rgba(*hex_rgb(c), a)
+            cr.rectangle(w * i / n, 0, w / n + 0.6, h)
+            cr.fill()
 
 
 class GlobalClient:
@@ -137,9 +181,10 @@ class ZoneCard(Gtk.Box):
     PROFILES = ["WS2812B"]
 
     def __init__(self, app, device_name, zone_name, zone_cfg, extracted, custom, client,
-                 global_mode=False, expanded=False, title=None):
+                 global_mode=False, expanded=False, title=None, kind=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add_css_class("card")
+        self.add_css_class("row-card")
         self.app = app
         self.device_name, self.zone_name = device_name, zone_name
         self.cfg = dict(zone_cfg)
@@ -149,6 +194,7 @@ class ZoneCard(Gtk.Box):
         self.patterns = PatternGenerator()
         self.global_mode = global_mode
         self._title = title or zone_name
+        self._kind_text = kind              # what it is, said first in its summary ("Network light (Govee)")
         self._mixed = set()
         self._hold_until = 0.0
         self._jobs = {}
@@ -163,6 +209,8 @@ class ZoneCard(Gtk.Box):
         self._preview_last = None
         self._sections = None
         self._build_header(expanded)
+        if expanded:
+            self.add_css_class("open")
         self._build_details()
         self._refresh_summary()
         self._apply_color_limit()
@@ -183,9 +231,19 @@ class ZoneCard(Gtk.Box):
         txt = vbox(0, hexpand=True)
         self._title_lbl = label(self._display_title(), ("heading",))
         txt.append(self._title_lbl)
-        self._summary = label("", ("small", "dim"))
+        self._summary = label("", ("small", "dim"), ellipsize=True)
         txt.append(self._summary)
+        self._mini = MiniStrip()
+        txt.append(self._mini)
         hdr.append(txt)
+        # brightness, right on the row: moving it sets the strip's own and stops following the monitor
+        self._hbright = MiniSlider("", 0, 100, self.cfg.get("manual_brightness", 100), 5, "%", self._on_header_bright)
+        self._hbright.scale.set_size_request(96, -1)
+        self._hbright.set_hexpand(False)
+        self._hbright._lbl.set_width_chars(5)
+        self._hbright.set_tooltip_text(_("Brightness"))
+        self._hbright.set_valign(Gtk.Align.CENTER)
+        hdr.append(self._hbright)
         # the power button: the strip on or off
         self._power = button(icon_name="power_settings_new", style="text small power", cb=self._on_power)
         self._power.set_valign(Gtk.Align.CENTER)            # a round dot, not stretched to the row's height
@@ -194,15 +252,27 @@ class ZoneCard(Gtk.Box):
         hdr.append(self._power)
         self._star = None
         if not self.global_mode:
-            self._star = button(icon_name="star", style="text small", cb=self._on_star, tooltip=_("Add to Favourites"))
+            # the rest goes in a menu, so a row is its name, its colours and the two things you change most
             self._star_on = False
-            hdr.append(self._star)
+            menu = Gtk.MenuButton()
+            menu.set_child(icon("more_vert"))
+            menu.add_css_class("flat-menu")
+            menu.set_valign(Gtk.Align.CENTER)
+            menu.set_tooltip_text(_("More for this strip"))
+            pop = Gtk.Popover()
+            items = vbox(2)
+            self._star = button(_("Add to Favourites"), "star", "text small menu-item",
+                                lambda: (pop.popdown(), self._on_star()))
             hid = bool(self.cfg.get("hidden"))
-            hdr.append(button(icon_name="visibility" if hid else "visibility_off", style="text small",
-                              cb=lambda: self._strip_set(hidden=not self.cfg.get("hidden")),
-                              tooltip=_("Show again") if hid else _("Hide this strip (it keeps working)")))
-            hdr.append(button(icon_name="edit", style="text small", cb=self._rename, tooltip=_("Rename this strip")))
-        self._chev = icon("expand_less" if expanded else "expand_more", classes=("dim",))
+            items.append(self._star)
+            items.append(button(_("Show again") if hid else _("Hide this strip"),
+                                "visibility" if hid else "visibility_off", "text small menu-item",
+                                lambda: (pop.popdown(), self._strip_set(hidden=not self.cfg.get("hidden")))))
+            items.append(button(_("Rename"), "edit", "text small menu-item", lambda: (pop.popdown(), self._rename())))
+            pop.set_child(items)
+            menu.set_popover(pop)
+            hdr.append(menu)
+        self._chev = Chevron(expanded)
         hdr.append(self._chev)
         click = Gtk.GestureClick()
         click.connect("released", lambda *_a: self._toggle_expand())
@@ -218,6 +288,15 @@ class ZoneCard(Gtk.Box):
         self._rev.set_child(self._details)
         self.append(self._rev)
 
+    def _on_header_bright(self, v):
+        self._hold_until = time.time() + 2.0
+        self.cfg = dict(self.cfg, manual_brightness=int(v), brightness_sync=False)
+        if hasattr(self, "_manual"):
+            self._manual.set_quiet(int(v))
+            self._sync.set_value(False)
+        self._call(self.client.set_zone_brightness_sync, self.device_name, self.zone_name, False)
+        self._call(self.client.set_zone_manual_brightness, self.device_name, self.zone_name, int(v))
+
     def _on_star(self):
         fav = getattr(self.app, "favorites", None)
         if fav is not None:
@@ -229,8 +308,7 @@ class ZoneCard(Gtk.Box):
         if self._star is None or on == self._star_on:
             return
         self._star_on = on
-        self._star.set_child(icon("star", fill=on))
-        self._star.set_tooltip_text(_("Take off Favourites") if on else _("Add to Favourites"))
+        set_button_text(self._star, _("Take off Favourites") if on else _("Add to Favourites"), "star")
 
     def _display_title(self):
         return self.cfg.get("display_name") or self._title
@@ -252,7 +330,8 @@ class ZoneCard(Gtk.Box):
     def _toggle_expand(self):
         on = not self._rev.get_reveal_child()
         self._rev.set_reveal_child(on)
-        self._chev.set_label(fonts.codepoint("expand_less" if on else "expand_more"))
+        (self.add_css_class if on else self.remove_css_class)("open")
+        self._chev.set_open(on)
         if on:
             GLib.idle_add(lambda: (self._ensure_preview(), False)[1])
 
@@ -274,13 +353,19 @@ class ZoneCard(Gtk.Box):
             pat = _("mixed")
         elif self._anim is not None:
             pat = fx.EFFECT_NAMES[self._anim["effect"]]
-        mode = _("mixed") if "mode" in self._mixed else {"full": _("no correction"), "palette": _("palette"),
-                                                          "calibrated": _("calibrated")}.get(self.cfg.get("mode", "full"), "")
+        # colour correction only when it's on (off is the usual, and saying so is noise)
+        mode = _("mixed correction") if "mode" in self._mixed else {"palette": _("palette colours"),
+                                                                     "calibrated": _("calibrated")}.get(
+            self.cfg.get("mode", "full"), "")
         n_leds = int(self.cfg.get("led_count", 20) or 0)
-        parts = [pat, mode] + ([] if self.global_mode else [ngettext("{n} LED", "{n} LEDs", n_leds).format(n=n_leds)])
+        parts = [pat, mode] + ([] if self.global_mode or n_leds <= 1 else
+                               [ngettext("{n} LED", "{n} LEDs", n_leds).format(n=n_leds)])
         if not self.global_mode and self.cfg.get("display_name"):
             parts.insert(0, self.zone_name or self.device_name)
-        self._summary.set_label("  ·  ".join(p for p in parts if p))
+        if self._kind_text:
+            parts.insert(0, self._kind_text)
+        text = ", ".join(p for p in parts if p)
+        self._summary.set_label(text[:1].upper() + text[1:])
 
     # ------------------------------------------------------------ details
     def _build_details(self):
@@ -382,12 +467,18 @@ class ZoneCard(Gtk.Box):
             self._mon_row.append(self._mon_dd)
             self._mon_row.set_visible(False)
             br.append(self._mon_row)
+        # what most people never change: in a fold under the rest
+        adv = vbox(10)
+        adv.set_margin_top(8)
+        self._adv_exp = Gtk.Expander(label=_("More: range, invert, gamma, colour correction"))
+        self._adv_exp.add_css_class("plain-expander")
+        self._adv_exp.set_child(adv)
         r2 = hbox(12)
         r2.append(label(_("Range"), ("small", "dim")))
         rng = self.cfg.get("brightness_range", [0, 100])
         self._range = DualRange(rng[0], rng[1], lambda a, b: self._autosave("range", self._on_range, 400))
         r2.append(self._range)
-        br.append(r2)
+        adv.append(r2)
         r3 = hbox(24)
         row3, self._invert = switch_row(_("Invert (bias lighting)"), self.cfg.get("invert_brightness", False),
                                         self._on_invert)
@@ -395,7 +486,7 @@ class ZoneCard(Gtk.Box):
                                                   self._on_gamma)
         r3.append(row3)
         r3.append(self._gamma_row)
-        br.append(r3)
+        adv.append(r3)
         if not self.global_mode:
             row5, self._sess_ignore = switch_row(_("Stay lit when the screen locks or you're away"),
                                                  bool(self.cfg.get("session_ignore")), self._on_session_ignore)
@@ -428,7 +519,6 @@ class ZoneCard(Gtk.Box):
                 br.append(self._keep_row)
                 self._show_usage(self._usage_of(self.cfg))
         r4 = hbox(10)
-        r4.set_margin_top(6)
         r4.append(label(_("Color correction"), ("small", "dim")))
         self._mode_val = self.cfg.get("mode", "full")
         self._mode_group = Group([(m, MODE_LABELS[m]) for m in ("full", "palette", "calibrated")], self._mode_val,
@@ -436,9 +526,10 @@ class ZoneCard(Gtk.Box):
         r4.append(self._mode_group)
         self._profile = Dropdown(self.PROFILES, self.cfg.get("calibration_profile", "WS2812B"), self._on_profile)
         r4.append(self._profile)
-        br.append(r4)
+        adv.append(r4)
         self._mode_caption = label("", ("tiny", "faint"), wrap=True)
-        br.append(self._mode_caption)
+        adv.append(self._mode_caption)
+        br.append(self._adv_exp)
         d.append(br)
         self._apply_mode_ui()
         self._apply_strip_ui()
@@ -676,6 +767,7 @@ class ZoneCard(Gtk.Box):
                 shown = self._sections.compose(base)
             self._sections.refresh(base, shown)
         self._strip.set_state(count, shown, pat)
+        self._mini_update(shown)
         editable = pat in PatternGenerator.EDITABLE and PatternGenerator.handle_count(pat, len(self._current_colors())) > 0
         can_rev = pat in ("gradient", "segments", "alternating")
         self._layout_row.set_visible(editable or can_rev)
@@ -889,6 +981,10 @@ class ZoneCard(Gtk.Box):
         self._apply_color_limit()
         self._update_preview()
 
+    def _mini_update(self, colors):
+        off = not self.cfg.get("enabled", True) or bool(self.cfg.get("hands_off"))
+        self._mini.set_colors(colors, faded=off)
+
     def _preview_wanted(self) -> bool:
         moving = self._anim is not None or (self._sections is not None and self._sections.animated())
         return moving and self.expanded and self.get_mapped()
@@ -918,6 +1014,7 @@ class ZoneCard(Gtk.Box):
             self._preview_last = frame          # slow effects often show the same frame: no repaint
             if not self._layout_open:
                 self._strip.set_state(count, frame, "solid" if self._anim is not None else self._pattern_key())
+            self._mini_update(frame)
             if self._sections is not None:
                 self._sections.refresh(own, frame)
         return True
@@ -1135,6 +1232,12 @@ class ZoneCard(Gtk.Box):
         self._sync_note.set_visible(self._sync.get_active() and not self._follow_ok)
         if not self._manual.busy():
             self._manual.set_quiet(zcfg.get("manual_brightness", 100))
+        mon = (self.app._status or {}).get("brightness") if isinstance(getattr(self.app, "_status", None), dict) else None
+        follow = zcfg.get("brightness_sync", False) and isinstance(mon, (int, float))
+        self._hbright.set_quiet(int(mon) if follow else int(zcfg.get("manual_brightness", 100)))
+        self._hbright.set_tooltip_text(_("Brightness: following the monitor. Move it to set this strip's own.")
+                                       if follow else _("Brightness"))
+        self._mini_update(self._mini.colors)
         if not self._range.dragging():
             br = zcfg.get("brightness_range", [0, 100])
             self._range.set(br[0], br[1])

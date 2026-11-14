@@ -38,7 +38,7 @@ headerbar windowcontrols button image {{ -gtk-icon-size: 16px; }}
 .winctl > button.close:active {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 .app-title {{ font-size: 24px; font-weight: 700; color: {ON_SURFACE}; }}
 .display {{ font-size: 28px; font-weight: 700; }}
-.title {{ font-size: 20px; font-weight: 700; }}
+.title {{ font-size: 20px; font-weight: 800; }}
 .heading {{ font-size: 15px; font-weight: 700; }}
 .subheading {{ font-size: 13px; font-weight: 600; }}
 .body {{ font-size: 14px; }}
@@ -58,6 +58,25 @@ label > selection, text > selection, entry > text > selection {{ background: alp
 .icon.fill {{ font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
 .icon.big {{ font-size: 28px; }}
 .icon.huge {{ font-size: 40px; }}
+
+/* ---------- the side rail: daily pages, then the ones you set up once ---------- */
+.rail {{ padding: 4px 8px 14px 12px; min-width: 176px; }}
+.rail.tight {{ min-width: 0; padding: 4px 4px 14px 8px; }}
+.rail > button {{ background: transparent; color: {ON_SURFACE_VARIANT}; border-radius: 20px; min-height: 40px;
+  padding: 0 14px; font-weight: 600; transition: background-color 180ms {EASE_STD}, color 180ms {EASE_STD}; }}
+.rail.tight > button {{ padding: 0 10px; }}
+.rail > button:hover {{ background: alpha({ON_SURFACE}, 0.06); color: {ON_SURFACE}; }}
+.rail > button:active {{ border-radius: 20px; }}
+/* M3 rail: the active indicator is a full pill in the primary container colour */
+.rail > button:checked {{ background: {PRIMARY_CONTAINER}; color: {ON_PRIMARY_CONTAINER}; }}
+.rail > button:checked:hover {{ background: {PRIMARY_CONTAINER}; }}
+.rail > button:checked .icon {{ color: {ON_PRIMARY_CONTAINER}; font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
+.rail-head {{ margin: 16px 0 4px 14px; }}
+
+/* ---------- Home: the backlight ---------- */
+.display-s {{ font-size: 24px; font-weight: 800; }}
+.thumb {{ border-radius: 14px; }}
+expander.plain-expander title > label {{ color: {ON_SURFACE_VARIANT}; font-weight: 500; }}
 
 /* ---------- navigation: connected button group, selected item morphs ----------
    Radii are real half-heights (not 999px): GTK interpolates radius transitions per corner,
@@ -90,6 +109,7 @@ button.tonal {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY_CONTAINE
 button.text {{ background: transparent; color: {PRIMARY}; padding: 0 12px; }}
 button.text:hover {{ background: {SURFACE_CONTAINER_HIGH}; }}
 button.text.dim {{ color: {OUTLINE}; }}
+button.text.neutral {{ color: {ON_SURFACE}; font-weight: 500; }}
 button.outlined {{ background: transparent; color: {PRIMARY}; border: 1px solid {OUTLINE}; }}
 button.danger {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 button.danger:hover {{ background: {ERROR_HOVER}; }}
@@ -97,12 +117,21 @@ button.small {{ min-height: 32px; padding: 0 14px; font-size: 13px; border-radiu
 button.small:active {{ border-radius: 8px; }}
 button.circle {{ padding: 0; min-width: 40px; min-height: 40px; border-radius: 20px; }}
 button.circle.small {{ min-width: 32px; min-height: 32px; border-radius: 16px; }}
-button.circle.small.power, button.circle.small.power:active {{ min-width: 28px; min-height: 28px; padding: 0;
-    border-radius: 14px; }}
-button.circle.small.power.on {{ background: #bfe8c9; color: #1f4d2c; }}
-button.circle.small.power.on:hover {{ background: #ade0b9; }}
-button.circle.small.power.off {{ background: #f6c9c9; color: #6e2121; }}
-button.circle.small.power.off:hover {{ background: #f0b6b6; }}
+button.circle.small.power, button.circle.small.power:active {{ min-width: 32px; min-height: 32px; padding: 0;
+    border-radius: 16px; transition: border-radius 320ms {EASE}, background-color 180ms {EASE_STD}, color 180ms {EASE_STD}; }}
+/* power, an M3 Expressive toggle icon button: round and outlined when off, a filled square in the accent when on */
+button.circle.small.power.on {{ background: {PRIMARY}; color: {ON_PRIMARY}; border-radius: 10px; }}
+button.circle.small.power.on:hover {{ background: {PRIMARY_HOVER}; }}
+button.circle.small.power.off {{ background: transparent; color: {ON_SURFACE_VARIANT}; border-radius: 16px;
+  box-shadow: inset 0 0 0 2px {OUTLINE_VARIANT}; }}
+button.circle.small.power.off:hover {{ background: alpha({ON_SURFACE}, 0.08); color: {ON_SURFACE}; }}
+button.circle.small.power.on:active, button.circle.small.power.off:active {{ border-radius: 8px; }}
+/* the lights' power on Home is the medium size */
+button.circle.small.power.glow {{ min-width: 48px; min-height: 48px; border-radius: 24px; }}
+button.circle.small.power.glow.on {{ border-radius: 14px; box-shadow: 0 0 16px alpha({PRIMARY}, 0.55); }}
+button.circle.small.power.glow:active {{ border-radius: 12px; }}
+button.medium {{ min-height: 48px; padding: 0 22px; border-radius: 16px; }}
+button.medium:active {{ border-radius: 12px; }}
 button.circle:active {{ border-radius: 10px; }}
 button.fab {{ min-height: 56px; padding: 0 24px; border-radius: 18px; font-size: 15px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4); }}
@@ -130,6 +159,23 @@ flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 
 
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}
+/* set-up pages: groups are plain sections, a line between them */
+.plain-page > .card {{ background: transparent; border-radius: 0; padding: 6px 4px 22px 4px;
+  border-bottom: 1px solid {OUTLINE_VARIANT}; }}
+.plain-page > .card .card-inner {{ background: {SURFACE_CONTAINER}; }}
+/* M3 Expressive segmented list: a device's strips are one group, 2px apart; big corners outside, small inside.
+   An open row is fully rounded. Only corners and colour animate (no size changes, so nothing jumps). */
+.row-card {{ border-radius: 4px; padding: 12px 16px; transition: border-radius 320ms {EASE}, background-color 180ms {EASE_STD}; }}
+.row-card.seg-first {{ border-top-left-radius: 16px; border-top-right-radius: 16px; }}
+.row-card.seg-last {{ border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }}
+.row-card:hover {{ background: mix({SURFACE_CONTAINER}, {ON_SURFACE}, 0.04); }}
+.row-card.open {{ border-radius: 16px; background: {SURFACE_CONTAINER_HIGH}; }}
+.row-card.open scale slider {{ box-shadow: 0 0 0 6px {SURFACE_CONTAINER_HIGH}; }}
+popover button.menu-item {{ background: transparent; color: {ON_SURFACE}; border-radius: 10px; min-height: 36px; }}
+popover button.menu-item:hover {{ background: {SECONDARY_CONTAINER}; }}
+menubutton.flat-menu > button {{ background: transparent; min-height: 32px; min-width: 32px; padding: 0;
+  border-radius: 16px; color: {ON_SURFACE_VARIANT}; }}
+menubutton.flat-menu > button:hover {{ background: alpha({ON_SURFACE}, 0.08); }}
 .card-inner {{ background: {SURFACE_CONTAINER_HIGH}; border-radius: 20px; padding: 16px; }}
 .zone-header {{ border-radius: 20px; }}
 .hero {{ background: {PRIMARY_CONTAINER}; color: {ON_PRIMARY_CONTAINER}; border-radius: 32px; padding: 20px 24px; }}
@@ -183,12 +229,12 @@ popover listview row:hover, popover modelbutton:hover {{ background: {SECONDARY_
 popover listview row:selected {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY_CONTAINER}; }}
 
 scale {{ padding: 10px 6px; }}
-scale trough {{ background: {SECONDARY_CONTAINER}; border-radius: 999px; min-height: 12px; border: none; }}
-scale highlight {{ background: {PRIMARY}; border-radius: 999px; min-height: 12px; }}
-scale slider {{ background: {PRIMARY}; border: none; box-shadow: 0 0 0 4px {SURFACE_CONTAINER}; border-radius: 3px;
-  min-width: 4px; min-height: 36px; margin: -12px 0; transition: min-width 200ms {EASE_STD}; }}
+scale trough {{ background: {SECONDARY_CONTAINER}; border-radius: 999px; min-height: 16px; border: none; }}
+scale highlight {{ background: {PRIMARY}; border-radius: 999px; min-height: 16px; }}
+scale slider {{ background: {PRIMARY}; border: none; box-shadow: 0 0 0 6px {SURFACE_CONTAINER}; border-radius: 2px;
+  min-width: 4px; min-height: 44px; margin: -14px 0; transition: min-width 120ms {EASE_STD}; }}
 scale slider:active {{ min-width: 2px; }}
-.card-inner scale slider {{ box-shadow: 0 0 0 4px {SURFACE_CONTAINER_HIGH}; }}
+.card-inner scale slider {{ box-shadow: 0 0 0 6px {SURFACE_CONTAINER_HIGH}; }}
 
 checkbutton {{ padding: 4px 0; }}
 checkbutton check, checkbutton radio {{ background: transparent; border: 2px solid {ON_SURFACE_VARIANT}; box-shadow: none;

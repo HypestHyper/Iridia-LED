@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-12 23:45+0000\n"
+"POT-Creation-Date: 2026-11-14 04:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -85,14 +85,8 @@ msgstr "Iridia"
 msgid "Connecting…"
 msgstr "Hailin' the ship…"
 
-msgid "Freeze colors"
-msgstr "Drop anchor on colors"
-
-msgid "Status"
-msgstr "Crow's Nest"
-
-msgid "Favourites"
-msgstr "Treasures"
+msgid "Home"
+msgstr "Home Port"
 
 msgid "Devices"
 msgstr "Cargo"
@@ -100,17 +94,14 @@ msgstr "Cargo"
 msgid "Layout"
 msgstr "Treasure Map"
 
-msgid "Notifications"
-msgstr "Messages"
-
 msgid "Scenes"
 msgstr "Scenes"
 
+msgid "Notifications"
+msgstr "Messages"
+
 msgid "Keybinds"
 msgstr "Signal Flags"
-
-msgid "Settings"
-msgstr "Ship's Articles"
 
 msgid "Service"
 msgstr "Below Decks"
@@ -118,23 +109,14 @@ msgstr "Below Decks"
 msgid "Updates"
 msgstr "New charts"
 
+msgid "Settings"
+msgstr "Ship's Articles"
+
+msgid "Setup"
+msgstr "Chart"
+
 msgid "Try it"
 msgstr "Give it a go"
-
-msgid "Refresh"
-msgstr "Look again"
-
-msgid "Restart daemon"
-msgstr "Rouse the bosun"
-
-msgid "Config folder"
-msgstr "Chart room"
-
-msgid "Log folder"
-msgstr "Captain's log"
-
-msgid "Quit"
-msgstr "Abandon ship"
 
 msgid "Minimize"
 msgstr "Stow it"
@@ -152,11 +134,20 @@ msgstr "Dig it up"
 msgid "Couldn't open a file manager. The folder is {path}"
 msgstr "No file manager answered the call. The folder be at {path}"
 
-msgid "Waiting for the daemon…"
-msgstr "Waitin' on the bosun…"
+msgid "Saved colours and colour correction"
+msgstr "Hoarded colours an' colour correction"
 
-msgid "Now playing"
-msgstr "On deck now"
+msgid "Pick a colour…"
+msgstr "Pick a colour…"
+
+msgid "Forget picks for this wallpaper"
+msgstr "Forget me picks fer this wallpaper"
+
+msgid "Colour correction preview"
+msgstr "A peek at the colour correction"
+
+msgid "What the daemon sees"
+msgstr "What the bosun spies"
 
 msgid "Wallpaper"
 msgstr "Wallpaper"
@@ -182,33 +173,11 @@ msgstr "Lanterns"
 msgid "Extraction backend"
 msgstr "How we plunder the colors"
 
-msgid "Color for this wallpaper"
-msgstr "Color fer this wallpaper"
+msgid "Open config folder"
+msgstr "Open the chart room"
 
-msgid ""
-"Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
-"remembered for this image and come back when you return to it. A wallpaper you haven't picked for"
-" follows its own colors."
-msgstr ""
-"Click a color to hoist it on all yer lanterns. Yer picks, fer the whole fleet or one strip, be "
-"remembered fer this picture and come back when ye return to it. A wallpaper ye haven't picked fer"
-" sails by its own colors."
-
-msgid "Color correction preview"
-msgstr "A peek at the color correction"
-
-msgid "Your saved colors"
-msgstr "Yer treasure chest o' colors"
-
-msgid "Custom color…"
-msgstr "A color o' yer own…"
-
-msgid "Reset saved colors for this wallpaper"
-msgstr "Throw this wallpaper's picks overboard"
-
-#, python-brace-format
-msgid "Wallpaper color {n}  #{hex}"
-msgstr "Wallpaper color {n}  #{hex}"
+msgid "Open log folder"
+msgstr "Open the captain's log"
 
 #, python-brace-format
 msgid "#{c}  (right-click to delete)"
@@ -251,6 +220,9 @@ msgstr "Color"
 msgid "Saved colors for this wallpaper were reset."
 msgstr "This wallpaper's picks went overboard."
 
+msgid "Color for this wallpaper"
+msgstr "Color fer this wallpaper"
+
 #, python-brace-format
 msgid "Deleted #{h} from your saved colors."
 msgstr "#{h} walked the plank out o' yer chest."
@@ -274,14 +246,11 @@ msgstr ""
 "Cargo shows up here once OpenRGB reports it. Start OpenRGB's SDK server (SDK Server tab, Start "
 "Server) and make sure it lists yer devices."
 
-msgid "All devices"
-msgstr "The whole fleet"
-
 #, python-brace-format
-msgid "Changes here apply to {n} zone."
-msgid_plural "Changes here apply to all {n} zones at once."
-msgstr[0] "Changes here hit {n} zone."
-msgstr[1] "Changes here hit all {n} zones at once, broadside!"
+msgid "Everything changes {n} strip at once."
+msgid_plural "Everything changes all {n} strips at once."
+msgstr[0] "The Whole Fleet changes {n} strip at once."
+msgstr[1] "The Whole Fleet changes all {n} strips at once."
 
 msgid "Everything"
 msgstr "The Whole Fleet"
@@ -293,9 +262,6 @@ msgstr "Marooned"
 msgid "Network light ({brand})"
 msgstr "Lantern on the network ({brand})"
 
-msgid "Whole device"
-msgstr "The whole vessel"
-
 #, python-brace-format
 msgid "Hidden ({n})"
 msgid_plural "Hidden ({n})"
@@ -304,10 +270,10 @@ msgstr[1] "Stowed in the Hold ({n})"
 
 msgid ""
 "Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
-" of lists elsewhere. The eye on a card shows it again."
+" of lists elsewhere. Its ⋮ menu shows it again."
 msgstr ""
-"Strips ye've stowed: a channel with nothin' plugged in, belike. They keep their settings and stay"
-" out o' lists elsewhere. The eye on a card brings 'em back on deck."
+"Strips ye've stowed: a channel with nothin' plugged in, belike. They keep their settings an' stay"
+" out o' lists elsewhere. Its ⋮ menu brings 'em back on deck."
 
 msgid "Animations"
 msgstr "Dancin' lanterns"
@@ -406,9 +372,6 @@ msgid ""
 msgstr ""
 "Bury everything (cargo, zones, the treasure map, night watch, calibration, yer colors fer each "
 "wallpaper an' yer chest o' colors) under a name, and dig it up again later."
-
-msgid "Setup"
-msgstr "Chart"
 
 msgid "No setups yet"
 msgstr "No charts yet"
@@ -1183,12 +1146,11 @@ msgstr "Can't hail the bosun: {error}"
 msgid "Background daemon"
 msgstr "The bosun"
 
-msgid ""
-"The daemon is the part of Iridia that keeps your lights in sync. It runs in the background and "
-"keeps working when this window is closed. This window only changes its settings."
-msgstr ""
-"The bosun be the part o' Iridia that keeps yer lanterns in line. He works below decks and keeps "
-"at it when this window be closed. This window only gives him orders."
+msgid "It keeps your lights in sync, also while this window is closed."
+msgstr "The bosun keeps yer lanterns in step, even with this porthole shut."
+
+msgid "Restart daemon"
+msgstr "Rouse the bosun"
 
 msgid "Kill daemon"
 msgstr "Make the bosun walk the plank"
@@ -1203,8 +1165,8 @@ msgstr ""
 msgid "Start the daemon when I log in"
 msgstr "Rouse the bosun when I come aboard"
 
-msgid "Pick one method. If you enable more than one, nothing breaks, since only one daemon ever runs."
-msgstr "Pick one way. If ye enable more than one, nothin' breaks, fer only one bosun ever sails."
+msgid "One way is enough; more than one does no harm."
+msgstr "One way be enough; more don't sink the ship."
 
 msgid "systemd service"
 msgstr "systemd service"
@@ -1516,7 +1478,7 @@ msgstr "Bosun ain't aboard"
 msgid "The daemon isn't running"
 msgstr "The bosun ain't aboard"
 
-msgid "Start it from the Service tab."
+msgid "Start it from the Service page."
 msgstr "Rouse him from Below Decks."
 
 msgid "OpenRGB not connected"
@@ -1532,6 +1494,9 @@ msgstr "Night watch till {time}"
 
 msgid "Frozen"
 msgstr "Anchored"
+
+msgid "Freeze colours"
+msgstr "Freeze colours"
 
 msgid "No wallpaper detected yet"
 msgstr "No wallpaper spotted yet"
@@ -1783,6 +1748,9 @@ msgstr ""
 "No colors in the chest yet. “Stash in the chest” keeps the current one here an' in every color "
 "list."
 
+msgid "Your saved colors"
+msgstr "Yer treasure chest o' colors"
+
 msgid "OK"
 msgstr "Aye"
 
@@ -2011,9 +1979,6 @@ msgstr ""
 msgid "All lights"
 msgstr "All lanterns"
 
-msgid "Freeze colours"
-msgstr "Freeze colours"
-
 msgid "Notification flashes"
 msgstr "Message flashes"
 
@@ -2074,12 +2039,16 @@ msgstr "Mast"
 msgid "Static"
 msgstr "Becalmed"
 
+msgid "Favourites"
+msgstr "Treasures"
+
 msgid ""
-"Your quick panel: cards for the strips you choose with just the controls you want, looks, setups "
-"and switches. Drag them where you like in Arrange."
-msgstr ""
-"Yer quick panel: charts for the strips ye pick with just the controls ye want, looks, setups and "
-"levers. Haul 'em where ye like in Haul."
+"Cards for the strips you choose, with just the controls you want, and your looks, setups and "
+"switches"
+msgstr "Charts fer the strips ye pick, with just the controls ye want, an' yer looks, setups an' levers"
+
+msgid "Arrange"
+msgstr "Haul"
 
 msgid "New card"
 msgstr "New chart"
@@ -2087,20 +2056,18 @@ msgstr "New chart"
 msgid "New look"
 msgstr "New look"
 
-msgid "Arrange"
-msgstr "Haul"
+msgid "Add a look, a setup or a switch on its own"
+msgstr "Add a look, a setup or a lever on its lonesome"
 
 msgid "Nothing here yet"
 msgstr "Nothin' here yet"
 
 msgid ""
-"Make a card for some strips (or all of them) with the controls you want on it: on and off, "
-"brightness, colours, follow the monitor, an effect, your looks, switches. Or add a look, a setup "
-"or a switch on its own. A strip's ★ on the Devices tab makes a card for it."
+"Make a card for the strips you use most, with just the controls you want. A strip's menu on the "
+"Devices page can make one too."
 msgstr ""
-"Make a chart for some strips (or the whole fleet) with the controls ye want on it: light 'n' "
-"douse, glow, colours, follow the monitor, a trick, yer looks, levers. Or add a look, a setup or a"
-" lever on its own. A strip's ★ on the Devices tab makes a chart for it."
+"Make a chart fer the strips ye use most, with just the controls ye want. A strip's menu in the "
+"Cargo can make one too."
 
 msgid "Couldn't do that"
 msgstr "Couldn't do that"
@@ -2248,6 +2215,49 @@ msgstr "Couldn't show it"
 
 msgid "Give the look a name."
 msgstr "Give the look a name."
+
+msgid "Waiting for the daemon…"
+msgstr "Waitin' on the bosun…"
+
+msgid "Pick any colour for all your lights"
+msgstr "Pick any colour fer all yer lanterns"
+
+msgid "Keep these colours when the wallpaper changes"
+msgstr "Keep these colours when the wallpaper changes"
+
+msgid "Lights on: click to turn them off"
+msgstr "Lit: click to douse"
+
+msgid "Lights off: click to turn them on"
+msgstr "Doused: click to light"
+
+msgid "No wallpaper found yet"
+msgstr "No wallpaper spotted yet"
+
+msgid "Off while the PC sleeps"
+msgstr "Doused while the ship sleeps"
+
+msgid "Lights are off"
+msgstr "Lanterns be doused"
+
+msgid "Colours frozen: a new wallpaper won't change them"
+msgstr "Anchor dropped: a new wallpaper won't change these colours"
+
+#, python-brace-format
+msgid "Night mode until {time}, at most {cap}%"
+msgstr "Night watch till {time}, no more than {cap}%"
+
+msgid "Your lights use these colours until Iridia finds your wallpaper"
+msgstr "Yer lanterns use these colours till Iridia spots yer wallpaper"
+
+msgid "Your lights follow this wallpaper"
+msgstr "Yer lanterns follow this wallpaper"
+
+msgid "Use this colour on all your lights"
+msgstr "Hoist this colour on all yer lanterns"
+
+msgid "No colours yet"
+msgstr "No colours yet"
 
 msgid "All lights off / on"
 msgstr "All lanterns doused / lit"
@@ -2494,8 +2504,8 @@ msgstr "Same key stills every dancin' lantern, then sets 'em dancin' again."
 msgid "Loads the setup and keeps it (an automatic backup is made first)."
 msgstr "Digs up the chart an' keeps it (yer old one gets buried first)."
 
-msgid "Same key puts the look on, then back to normal. Make looks on the Favourites tab."
-msgstr "Same key puts the look on, then back to normal. Make looks on the Treasures tab."
+msgid "Same key puts the look on, then back to normal. Make looks on Home, under Favourites."
+msgstr "Same key puts the look on, then back to normal. Make looks in Home Port, under Treasures."
 
 msgid "Keybind color"
 msgstr "Signal color"
@@ -2603,6 +2613,9 @@ msgstr "Gradient"
 
 msgid "Notifications: which LEDs flash, and where a flash runs"
 msgstr "Messages: which lanterns flash, an' where a flash sails"
+
+msgid "How this tool works"
+msgstr "How this tool works"
 
 msgid "Paint color"
 msgstr "Paint color"
@@ -2775,12 +2788,18 @@ msgstr "Hide a strip in the hold to get it out o' the way; it keeps its place an
 msgid "Show this strip"
 msgstr "Bring this strip on deck"
 
+msgid "(clone)"
+msgstr "(stowaway)"
+
 #, python-brace-format
 msgid "{zone} on {device}"
 msgstr "{zone} on {device}"
 
 msgid "Rename this strip"
 msgstr "Rename this strip"
+
+msgid "Whole device"
+msgstr "The whole vessel"
 
 #, python-brace-format
 msgid "clone of {strip} (shows the same colors)"
@@ -3346,6 +3365,10 @@ msgid "Saved colors"
 msgstr "Chest o' colors"
 
 #, python-brace-format
+msgid "Wallpaper color {n}  #{hex}"
+msgstr "Wallpaper color {n}  #{hex}"
+
+#, python-brace-format
 msgid "#{k}  (right-click to delete)"
 msgstr "#{k}  (right-click to make it walk the plank)"
 
@@ -3451,20 +3474,20 @@ msgstr "Let Iridia steer it: off, Iridia sends it nothin' and it keeps whatever 
 msgid "Let Iridia control every strip"
 msgstr "Let Iridia steer every strip"
 
+msgid "More for this strip"
+msgstr "More fer this strip"
+
 msgid "Show again"
 msgstr "Bring back on deck"
-
-msgid "Hide this strip (it keeps working)"
-msgstr "Stow this strip (it keeps workin')"
 
 msgid "mixed"
 msgstr "motley"
 
-msgid "no correction"
-msgstr "no correction"
+msgid "mixed correction"
+msgstr "mixed correction"
 
-msgid "palette"
-msgstr "palette"
+msgid "palette colours"
+msgstr "palette colours"
 
 msgid "calibrated"
 msgstr "calibrated"
@@ -3497,6 +3520,9 @@ msgstr "By hand"
 
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr "No spyglass brightness to follow (see Settings, Spyglass brightness), so By hand be used."
+
+msgid "More: range, invert, gamma, colour correction"
+msgstr "More: range, invert, gamma, colour correction"
 
 msgid "Range"
 msgstr "Range"
@@ -3652,6 +3678,9 @@ msgid ""
 msgstr ""
 "This device has no Direct mode, so it flies one color fer the whole device (the first one o' the "
 "pattern)."
+
+msgid "Brightness: following the monitor. Move it to set this strip's own."
+msgstr "Brightness: follows the monitor. Move it to set this strip's own."
 
 msgid "Red"
 msgstr "Blood red"

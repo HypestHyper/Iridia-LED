@@ -26,7 +26,7 @@ from iridia.ui.layout_tab import LayoutTab  # noqa: E402
 from iridia.ui import style as ui_style  # noqa: E402
 from iridia.ui.style import Style  # noqa: E402
 from iridia.ui.widgets import (Animator, Chip, Dropdown, Group, LoadingIndicator, QuickColors, Snackbar, Spin, Swatch,  # noqa: E402
-                               WavyBar, button, card, divider, hbox, icon, label, rgb, section, set_button_text,
+                               button, card, divider, hbox, icon, label, rgb, section, set_button_text,
                                shape_path, spring, switch_row, vbox, wrap_row)
 from iridia.ui.keybinds_tab import KeybindsPage  # noqa: E402
 from iridia.ui.zonecard import MODE_LABELS, GlobalClient, ZoneCard, merge_zone_cfgs  # noqa: E402
@@ -382,9 +382,6 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._winbtns = self._window_buttons(hb)
         self._chip = Chip(_("Connecting…"))
         hb.pack_end(self._chip)
-        self._freeze_btn = button(_("Freeze colors"), "ac_unit", "tonal small", self._toggle_freeze)
-        self._freeze_btn.set_valign(Gtk.Align.CENTER)
-        hb.pack_end(self._freeze_btn)
         self._spinner = LoadingIndicator(30)
         hb.pack_end(self._spinner)
         self._spinner.start()
@@ -392,60 +389,56 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._frozen = False
 
         overlay = Gtk.Overlay()
-        root = vbox(10)
-        for m in ("start", "end"):
-            getattr(root, f"set_margin_{m}")(20)
-        root.set_margin_bottom(14)
-        root.set_margin_top(4)
-
-        bar = hbox(2)
-        bar.add_css_class("tabbar")
-        bar.set_halign(Gtk.Align.START)
-        # tabs scroll sideways (with arrows) when the window is too narrow for them
-        self._tab_scroll = Gtk.ScrolledWindow(hscrollbar_policy=Gtk.PolicyType.EXTERNAL,
-                                              vscrollbar_policy=Gtk.PolicyType.NEVER, hexpand=True,
-                                              propagate_natural_width=True, propagate_natural_height=True)
-        self._tab_scroll.set_child(bar)
-        self._tab_arrows = []
-        tabrow = hbox(4)
-        for step, ico in ((-1, "chevron_left"), (1, "chevron_right")):
-            a = button(icon_name=ico, style="text small", cb=lambda st=step: self._scroll_tabs(st))
-            a.set_valign(Gtk.Align.CENTER)
-            a.set_visible(False)
-            self._tab_arrows.append(a)
-        tabrow.append(self._tab_arrows[0])
-        tabrow.append(self._tab_scroll)
-        tabrow.append(self._tab_arrows[1])
-        adj = self._tab_scroll.get_hadjustment()
-        self._arrows_due = False
-        for sig in ("changed", "value-changed"):
-            adj.connect(sig, lambda *_a: self._arrows_soon())
-        self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.CROSSFADE,
-                                transition_duration=180)
+        root = hbox(0)
+        # the side rail: the pages you use every day, then the ones you set up once
+        rail = vbox(2)
+        rail.add_css_class("rail")
+        self._rail = rail
+        # pages switch at once: a crossfade draws two whole pages every frame (four times the work, and
+        # visible stutter on a slower GPU); the rail's own highlight fade says which page you picked
+        self._stack = Gtk.Stack(vexpand=True, hexpand=True, transition_type=Gtk.StackTransitionType.NONE)
         self._stack.set_hhomogeneous(False)      # only the page on show sets how narrow the window can be
         self._tabs = {}
+        self._rail_heads = []
         first = None
-        for key, text, ico in (("status", _("Status"), "home"), ("favorites", _("Favourites"), "star"),
-                               ("devices", _("Devices"), "developer_board"),
-                               ("layout", _("Layout"), "polyline"), ("notify", _("Notifications"), "bolt"),
-                               ("scenes", _("Scenes"), "sports_esports"), ("keybinds", _("Keybinds"), "keyboard"),
-                               ("settings", _("Settings"), "settings"), ("service", _("Service"), "build"),
-                               ("updates", _("Updates"), "download")):
+        pages_def = (("status", _("Home"), "home"), ("devices", _("Devices"), "developer_board"),
+                     ("layout", _("Layout"), "polyline"), ("scenes", _("Scenes"), "sports_esports"),
+                     None,
+                     ("notify", _("Notifications"), "bolt"), ("keybinds", _("Keybinds"), "keyboard"),
+                     ("service", _("Service"), "build"), ("updates", _("Updates"), "download"),
+                     "spacer",
+                     ("settings", _("Settings"), "settings"))
+        for item in pages_def:
+            if item is None:
+                head = label(_("Setup"), ("tiny", "faint"))
+                head.add_css_class("rail-head")
+                rail.append(head)
+                self._rail_heads.append(head)
+                continue
+            if item == "spacer":
+                rail.append(Gtk.Box(vexpand=True))
+                continue
+            key, text, ico = item
             b = Gtk.ToggleButton()
-            b.set_child(hbox(8, icon(ico), Gtk.Label(label=text)))
+            b.set_child(hbox(12, icon(ico), Gtk.Label(label=text, xalign=0.0)))
             b.set_tooltip_text(text)
             if first is None:
                 first = b
             else:
                 b.set_group(first)
             b.connect("toggled", self._tab_toggled, key)
-            bar.append(b)
+            rail.append(b)
             self._tabs[key] = b
-        root.append(tabrow)
+        self._tabs["favorites"] = self._tabs["status"]       # Favourites are on Home now
+        root.append(rail)
 
+        content = vbox(0, hexpand=True)
+        for m in ("start", "end"):
+            getattr(content, f"set_margin_{m}")(18)
+        content.set_margin_bottom(10)
         self._layout_tab = LayoutTab(self)
         pages = {}
-        for key in ("status", "favorites", "devices", "layout", "notify", "scenes", "keybinds", "settings", "service",
+        for key in ("status", "devices", "layout", "notify", "scenes", "keybinds", "settings", "service",
                     "updates"):
             if key == "layout":
                 self._stack.add_named(self._layout_tab, key)
@@ -467,6 +460,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 self._stack.add_named(ov, key)
                 continue
             self._stack.add_named(sc, key)
+        # set-up pages: their groups are plain sections with a line between, not boxes (boxes are for
+        # things you act on: strips, favourites, scenes)
+        for key in ("settings", "service", "updates", "notify", "keybinds"):
+            pages[key].add_css_class("plain-page")
         self._status_page, self._devices_page = pages["status"], pages["devices"]
         self._settings_page, self._service_page = pages["settings"], pages["service"]
         self._updates_page = pages["updates"]
@@ -474,23 +471,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._keybinds = KeybindsPage(self, pages["keybinds"])
         from iridia.ui.scenes_tab import ScenesPage
         self._scenes = ScenesPage(self, pages["scenes"])
-        from iridia.ui.favorites_tab import FavoritesPage
-        self.favorites = FavoritesPage(self, pages["favorites"])
-        root.append(self._stack)
-
-        bot = hbox(8)
-        self._bottom_btns = [button(_("Refresh"), "refresh", "tonal", self._do_refresh),
-                             button(_("Restart daemon"), "restart_alt", "tonal", self._do_restart),
-                             button(_("Config folder"), "folder_open", "text",
-                                    lambda: self._xdg_open("~/.config/iridia")),
-                             button(_("Log folder"), "description", "text",
-                                    lambda: self._xdg_open("~/.local/share/iridia")),
-                             button(_("Quit"), "power_settings_new", "danger", self.close)]
-        for b in self._bottom_btns[:-1]:
-            bot.append(b)
-        bot.append(Gtk.Box(hexpand=True))
-        bot.append(self._bottom_btns[-1])
-        root.append(bot)
+        content.append(self._stack)
+        root.append(content)
 
         overlay.set_child(root)
         self._snack = Snackbar()
@@ -504,6 +486,17 @@ class IridiaWindow(Gtk.ApplicationWindow):
         self._build_service()
         self._build_updates()
         self._tabs["status"].set_active(True)
+        self._install_shortcuts()
+
+    def _install_shortcuts(self):
+        """Ctrl+Q and Ctrl+W close the window, the same as its close button."""
+        app = self.get_application()
+        if app is None or app.lookup_action("quit") is not None:
+            return
+        act = Gio.SimpleAction.new("quit", None)
+        act.connect("activate", lambda *_a: self.close())
+        app.add_action(act)
+        app.set_accels_for_action("app.quit", ["<Control>q", "<Control>w"])
 
     def _window_buttons(self, hb):
         """Minimize, maximize and close as Material icons, laid out like the desktop's own buttons."""
@@ -567,47 +560,23 @@ class IridiaWindow(Gtk.ApplicationWindow):
     def _tab_toggled(self, b, key):
         if not b.get_active():
             return
-        self._stack.set_transition_duration(180 if widgets.motion() else 0)
         self._stack.set_visible_child_name(key)
         self._layout_tab.set_visible_tab(key == "layout")
-        GLib.idle_add(lambda: (self._show_tab(b), False)[1])
-
-    # ---- narrow windows: tabs scroll, buttons drop their words
-    def _scroll_tabs(self, step):
-        adj = self._tab_scroll.get_hadjustment()
-        adj.set_value(adj.get_value() + step * max(120.0, adj.get_page_size() * 0.6))
-
-    def _show_tab(self, b):
-        ok, rect = b.compute_bounds(self._tab_scroll.get_child())
-        if not ok:
-            return
-        adj = self._tab_scroll.get_hadjustment()
-        x, w, v, page = rect.get_x(), rect.get_width(), adj.get_value(), adj.get_page_size()
-        if x < v:
-            adj.set_value(x)
-        elif x + w > v + page:
-            adj.set_value(x + w - page)
-
-    def _arrows_soon(self):
-        """The adjustment changes while GTK lays the window out; showing a widget right then makes GTK
-        measure it with no room (a warning, and a layout pass that newer GTK may refuse), so it waits
-        for the layout to finish."""
-        if not self._arrows_due:
-            self._arrows_due = True
-            GLib.idle_add(self._update_tab_arrows)
-
-    def _update_tab_arrows(self):
-        self._arrows_due = False
-        adj = self._tab_scroll.get_hadjustment()
-        over = adj.get_upper() - adj.get_page_size() > 1
-        self._tab_arrows[0].set_visible(over)
-        self._tab_arrows[1].set_visible(over)
-        self._tab_arrows[0].set_sensitive(adj.get_value() > 0.5)
-        self._tab_arrows[1].set_sensitive(adj.get_value() < adj.get_upper() - adj.get_page_size() - 0.5)
-        return False
+        # the new page fades in (only it, so the cost is one page, not the two a crossfade draws);
+        # no overshoot on a fade, and nothing at all with reduced motion
+        page = self._stack.get_visible_child()
+        if page is not None and widgets.motion():
+            page.set_opacity(0.0)
+            if getattr(self, "_page_fade", None) is None:
+                self._page_fade = {}
+            anim = self._page_fade.get(key)
+            if anim is None:
+                anim = self._page_fade[key] = Animator(page, lambda p, w=page: w.set_opacity(1 - (1 - p) ** 3))
+            anim.run(150)
 
     def _set_tight(self, tight):
-        """Below TIGHT_BELOW pixels: icon-only tabs and buttons (the words become tooltips)."""
+        """Below TIGHT_BELOW pixels: the rail shows only icons, and buttons drop their words (the words
+        become tooltips)."""
         def words(btn, show):
             box = btn.get_child()
             c = box.get_first_child() if isinstance(box, Gtk.Box) else None
@@ -617,8 +586,11 @@ class IridiaWindow(Gtk.ApplicationWindow):
                     if not btn.get_tooltip_text():
                         btn.set_tooltip_text(c.get_label())
                 c = c.get_next_sibling()
-        for b in list(self._tabs.values()) + self._bottom_btns + [self._freeze_btn]:
+        for b in set(self._tabs.values()) | {self._freeze_btn} | set(self.favorites.head_buttons):
             words(b, not tight)
+        for h in self._rail_heads:
+            h.set_visible(not tight)
+        (self._rail.add_css_class if tight else self._rail.remove_css_class)("tight")
         self._app_title.set_visible(not tight)
 
     def _xdg_open(self, path):
@@ -639,30 +611,47 @@ class IridiaWindow(Gtk.ApplicationWindow):
 
     # ============================================================ status tab
     def _build_status(self):
+        """Home: the backlight (what your lights show, the wallpaper's colours), more colours on demand,
+        then your Favourites."""
+        from iridia.ui.home import Hero
         p = self._status_page
-        hero = hbox(20)
-        hero.add_css_class("hero")
-        hero.set_margin_top(10)
-        self._hero_shape = HeroShape()
-        hero.append(self._hero_shape)
-        hv = vbox(4, hexpand=True)
-        self._hero_title = label(_("Waiting for the daemon…"), ("title",))
-        self._hero_sub = label("", ("small", "dim"), ellipsize=True)
-        hv.append(self._hero_title)
-        hv.append(self._hero_sub)
-        brow = hbox(10)
-        brow.append(icon("light_mode", classes=("dim",)))
-        self._hero_wave = WavyBar(260, on_dark=True)
-        brow.append(self._hero_wave)
-        self._hero_bright = label("", ("subheading",))
-        brow.append(self._hero_bright)
-        hv.append(brow)
-        hero.append(hv)
-        p.append(hero)
+        self._hero = Hero(self)
+        self._hero.set_margin_top(6)
+        p.append(self._hero)
+        more = Gtk.Expander(label=_("Saved colours and colour correction"))
+        more.add_css_class("plain-expander")
+        more.set_margin_start(6)
+        box = vbox(10)
+        box.set_margin_top(10)
+        self._custom_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=12,
+                                        column_spacing=6, halign=Gtk.Align.START)
+        box.append(self._custom_flow)
+        self._choice_lbl = label("", ("small", "dim"))
+        box.append(self._choice_lbl)
+        btns = hbox(8)
+        btns.append(button(_("Pick a colour…"), "colorize", "tonal small", self._pick_custom_color))
+        btns.append(button(_("Forget picks for this wallpaper"), "history", "text small",
+                           lambda: self._set_color_choice(clear=True)))
+        box.append(btns)
+        self._corr_exp = Gtk.Expander(label=_("Colour correction preview"))
+        self._corr_exp.add_css_class("plain-expander")
+        self._corr_box = vbox(6)
+        self._corr_exp.set_child(self._corr_box)
+        box.append(self._corr_exp)
+        more.set_child(box)
+        p.append(more)
 
-        p.append(section(_("Now playing")))
-        info = card()
+        from iridia.ui.favorites_tab import FavoritesPage
+        fav = vbox(8)
+        fav.set_margin_top(18)
+        p.append(fav)
+        self.favorites = FavoritesPage(self, fav)
+
+    def _build_diagnostics(self, p):
+        """What the daemon is doing, line by line (the old Status tab's list), for when something's off."""
+        p.append(section(_("What the daemon sees")))
         grid = Gtk.Grid(column_spacing=24, row_spacing=8)
+        grid.set_margin_start(4)
         self._rows = {}
         for i, (key, text, ico) in enumerate([("wallpaper", _("Wallpaper"), "wallpaper"), ("dominant", _("Main color"), "palette"),
                                               ("openrgb", "OpenRGB", "cable"), ("ddc", _("Monitor sync (DDC)"), "monitor"),
@@ -671,38 +660,18 @@ class IridiaWindow(Gtk.ApplicationWindow):
                                               ("backend", _("Extraction backend"), "auto_awesome")]):
             grid.attach(icon(ico, classes=("dim",)), 0, i, 1, 1)
             grid.attach(label(text, ("body", "dim")), 1, i, 1, 1)
-            v = label("-", ("body",), selectable=True, ellipsize=True)
+            v = label("-", ("body",), ellipsize=True)
             v.set_hexpand(True)
             grid.attach(v, 2, i, 1, 1)
             self._rows[key] = v
-        info.append(grid)
-        p.append(info)
-
-        p.append(section(_("Color for this wallpaper"),
-                         _("Click a color to use it on all your LEDs. Your picks, for all zones or single zones, are "
-                         "remembered for this image and come back when you return to it. A wallpaper you haven't "
-                         "picked for follows its own colors.")))
-        c = card()
-        self._sw_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=10, column_spacing=6,
-                                    halign=Gtk.Align.START)
-        c.append(self._sw_flow)
-        self._corr_exp = Gtk.Expander(label=_("Color correction preview"))
-        self._corr_exp.add_css_class("accent")
-        self._corr_box = vbox(6)
-        self._corr_exp.set_child(self._corr_box)
-        c.append(self._corr_exp)
-        c.append(label(_("Your saved colors"), ("small", "dim")))
-        self._custom_flow = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, max_children_per_line=12,
-                                        column_spacing=6, halign=Gtk.Align.START)
-        c.append(self._custom_flow)
-        self._choice_lbl = label("", ("body",))
-        c.append(self._choice_lbl)
-        btns = hbox(8)
-        btns.append(button(_("Custom color…"), "colorize", "filled", self._pick_custom_color))
-        btns.append(button(_("Reset saved colors for this wallpaper"), "history", "tonal",
-                           lambda: self._set_color_choice(clear=True)))
-        c.append(btns)
-        p.append(c)
+        p.append(grid)
+        files = hbox(8)
+        files.set_margin_top(6)
+        files.append(button(_("Open config folder"), "folder_open", "tonal small",
+                            lambda: self._xdg_open("~/.config/iridia")))
+        files.append(button(_("Open log folder"), "description", "tonal small",
+                            lambda: self._xdg_open("~/.local/share/iridia")))
+        p.append(files)
 
     @staticmethod
     def _all_zone_cfgs(devices):
@@ -722,14 +691,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         return None
 
     def _render_swatches(self, colors, choice, custom):
-        for flow in (self._sw_flow, self._custom_flow):
-            widgets.clear(flow)
-        self._sw_flow.set_min_children_per_line(max(1, min(8, len(colors))))
+        widgets.clear(self._custom_flow)
         self._custom_flow.set_min_children_per_line(max(1, min(10, len(custom) + 1)))
-        for i, c in enumerate(colors[:8]):
-            self._sw_flow.append(Swatch(c, 52, bool(choice) and choice.get("index") == i,
-                                        on_click=lambda i=i: self._set_color_choice(index=i),
-                                        tooltip=_('Wallpaper color {n}  #{hex}').format(n=i + 1, hex=c)))
+        self._hero.set_swatches(colors, choice)
         for c in custom:
             self._custom_flow.append(Swatch(c, 46, bool(choice) and choice.get("hex") == c,
                                             on_click=lambda c=c: self._set_color_choice(hex_color=c),
@@ -867,12 +831,17 @@ class IridiaWindow(Gtk.ApplicationWindow):
             return
         cfgs = self._all_zone_cfgs(devices)
         merged, mixed = merge_zone_cfgs(cfgs)
-        self._dev_box.append(section(_("All devices"), ngettext('Changes here apply to {n} zone.', 'Changes here apply to all {n} zones at once.', len(cfgs)).format(n=len(cfgs)), 10))
+        head = section(_("Devices"), None, 4)
+        head.set_tooltip_text(ngettext('Everything changes {n} strip at once.', 'Everything changes all {n} strips at once.',
+                                       len(cfgs)).format(n=len(cfgs)))
+        self._dev_box.append(head)
         self._global_card = ZoneCard(self, "*", "*", merged, extracted, custom, GlobalClient(self.client),
-                                     global_mode=True, expanded=expanded.get("*", True), title=_("Everything"))
+                                     global_mode=True, expanded=expanded.get("*", False), title=_("Everything"))
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
         if getattr(self, "_ddc_menu", None):
             self._global_card.set_monitors(*self._ddc_menu)
+        self._global_card.add_css_class("seg-first")
+        self._global_card.add_css_class("seg-last")
         self._dev_box.append(self._global_card)
         hidden_box = vbox(10)
         n_hidden = 0
@@ -880,7 +849,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             sub = None if dc.get("enabled", True) else _("Disabled")
             if dc.get("net"):
                 brand = {"wiz": "WiZ", "govee": "Govee"}.get(dc["net"], dc["net"])
-                sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else f" · {sub}")
+                sub = _("Network light ({brand})").format(brand=brand) + ("" if sub is None else ", " + sub.lower())
             zones = dc.get("zones", {})
             items = list(zones.items()) if zones else [("", dc)]
             # strips you hid (a channel with nothing plugged in, say) go to Hidden at the bottom
@@ -889,16 +858,30 @@ class IridiaWindow(Gtk.ApplicationWindow):
             for box, group in ((self._dev_box, shown), (hidden_box, gone)):
                 if not group:
                     continue
-                box.append(section(d, sub))
-                for z, zc in group:
+                # a device of several strips gets a heading; a one-light device is just its row
+                if zones:
+                    head = section(d, sub, 14)
+                    head.get_first_child().remove_css_class("title")
+                    head.get_first_child().add_css_class("heading")
+                    box.append(head)
+                else:
+                    box.append(Gtk.Box(height_request=4))
+                # a device's strips are one group: rows 2px apart, the group's ends rounded
+                seg = vbox(2)
+                box.append(seg)
+                for pos, (z, zc) in enumerate(group):
                     key = f"{d}|{z}"
-                    cardw = ZoneCard(self, d, z or _("Whole device"), zc, extracted, custom, self.client,
-                                     expanded=expanded.get(key, False))
+                    cardw = ZoneCard(self, d, z or d, zc, extracted, custom, self.client,
+                                     expanded=expanded.get(key, False), kind=None if zones else sub)
                     cardw.zone_name = z
+                    if pos == 0:
+                        cardw.add_css_class("seg-first")
+                    if pos == len(group) - 1:
+                        cardw.add_css_class("seg-last")
                     if box is hidden_box:
                         cardw.set_opacity(0.7)
                         n_hidden += 1
-                    box.append(cardw)
+                    seg.append(cardw)
                     self._zone_cards[key] = cardw
         if n_hidden:
             exp = Gtk.Expander(label=ngettext("Hidden ({n})", "Hidden ({n})", n_hidden).format(n=n_hidden),
@@ -906,7 +889,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
             exp.connect("notify::expanded", lambda e, _p: setattr(self, "_hidden_open", e.get_expanded()))
             exp.set_margin_top(18)
             hint = label(_("Strips you hid: a channel with nothing plugged in, say. They keep their settings and "
-                           "are left out of lists elsewhere. The eye on a card shows it again."), ("small", "dim"),
+                           "are left out of lists elsewhere. Its ⋮ menu shows it again."), ("small", "dim"),
                          wrap=True)
             exp.set_child(vbox(10, hint, hidden_box))
             self._dev_box.append(exp)
@@ -1643,7 +1626,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(label(_("On the map"), ("heading",)))
         c.append(label(_("Choose the LEDs, paint their colours and set the A and B points a moving flash runs "
                          "between, on the Layout tab."), ("small", "dim"), wrap=True))
-        c.append(button(_("Edit on the map"), "polyline", "filled small", self.open_notify_map))
+        emap = button(_("Edit on the map"), "polyline", "tonal small", self.open_notify_map)
+        emap.set_halign(Gtk.Align.START)
+        c.append(emap)
         p.append(c)
         c = card()
         n = self.config.get("notify", {}) or {}
@@ -2196,22 +2181,22 @@ class IridiaWindow(Gtk.ApplicationWindow):
     # ============================================================ service tab
     def _build_service(self):
         p = self._service_page
-        p.append(section(_("Background daemon"), _("The daemon is the part of Iridia that keeps your lights in sync. It "
-                                              "runs in the background and keeps working when this window is closed. "
-                                              "This window only changes its settings."), 10))
+        p.append(section(_("Background daemon"), _("It keeps your lights in sync, also while this window is closed."),
+                         10))
         c = card()
         self._svc_status = label(_("Checking…"), ("heading",))
         c.append(self._svc_status)
         r = hbox(8)
         r.append(button(_("Start daemon"), "play_arrow", "filled", self._daemon_start))
+        r.append(button(_("Restart daemon"), "restart_alt", "tonal", self._do_restart))
         r.append(button(_("Kill daemon"), "stop", "danger", self._daemon_kill))
         c.append(r)
         c.append(label(_("Killing the daemon stops it completely. Your lights stay on their last colors until you start "
                        "it again."), ("small", "faint"), wrap=True))
         p.append(c)
+        self._build_diagnostics(p)
 
-        p.append(section(_("Start the daemon when I log in"), _("Pick one method. If you enable more than one, nothing "
-                                                           "breaks, since only one daemon ever runs.")))
+        p.append(section(_("Start the daemon when I log in"), _("One way is enough; more than one does no harm.")))
         c = card()
         c.append(label(_("systemd service"), ("subheading",)))
         self._unit_status = label(_("Checking…"), ("small", "dim"), wrap=True)
@@ -2643,8 +2628,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._spinner.stop()
             self._show_daemon_down()
             self._render_daemon_status()
-            self._hero_title.set_label(_("The daemon isn't running"))
-            self._hero_sub.set_label(_("Start it from the Service tab."))
+            self._chip.set_visible(True)
+            self._hero.title.set_label(_("The daemon isn't running"))
+            self._hero.sub.set_label(_("Start it from the Service page."))
+            self._hero.light.set_state([], 0)
             return
         self._spinner.stop()
         if self._down:
@@ -2653,9 +2640,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
             self._last_device_keys = None
         colors = list(st.get("extracted_colors", []))
         wallpaper = st.get("wallpaper") or ""
-        brightness = st.get("brightness", 0)
         dominant = st.get("led_color") or (colors[0] if colors else "00aa66")
-        self._maybe_reseed(dominant)
+        # the daemon's stand-in before it has any colours is a dull brown: the window keeps its own blue
+        self._maybe_reseed(theme.DEFAULT_SEED if dominant == "642107" else dominant)
         missing = st.get("openrgb_missing_devices", [])
         night = st.get("night") or {}
         self._apply_session(st.get("session"))
@@ -2667,21 +2654,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
         elif night.get("active"):
             self._chip.set(_('Night mode until {time}').format(time=night.get('end')), "warn")
         else:
-            self._chip.set(f"#{dominant}  ·  {brightness}%", "ok")
+            self._chip.set("", "ok")
+        self._chip.set_visible(self._chip._kind != "ok")        # all's well: Home shows it, no chip needed
         frozen = bool(st.get("frozen"))
         if frozen != self._frozen:
             self._frozen = frozen
-            set_button_text(self._freeze_btn, _("Frozen") if frozen else _("Freeze colors"), "ac_unit")
+            set_button_text(self._freeze_btn, _("Frozen") if frozen else _("Freeze colours"), "ac_unit")
             (self._freeze_btn.add_css_class if frozen else self._freeze_btn.remove_css_class)("toggled")
-        # hero
         wp = os.path.basename(wallpaper) if wallpaper else _("No wallpaper detected yet")
-        self._hero_title.set_label(f"#{dominant}")
-        self._hero_sub.set_label(wp)
-        self._hero_wave.set_value((brightness or 0) / 100)
-        self._hero_bright.set_label(f"{brightness}%")
-        state = "off" if (st.get("lights_off") or st.get("asleep")) else "frozen" if frozen else \
-            "night" if night.get("active") else "normal"
-        self._hero_shape.set_value(dominant, state)
+        self._hero.update(st, None, frozen)
         # rows
         r = self._rows
         r["wallpaper"].set_label(wp)

@@ -83,8 +83,22 @@ class LayoutTab(NotifyLayer, Gtk.Box):
 
     # ================================================================ UI
     def _build(self):
-        self._hint = label("", ("small", "faint"), wrap=True)
-        self.append(self._hint)
+        # the tool's one-line how-to; the whole of it behind ?
+        self._hint = label("", ("small", "dim"), ellipsize=True)
+        self._hint.set_hexpand(True)
+        self._help_pop = Gtk.Popover()
+        self._help_lbl = label("", ("small",), wrap=True, chars=60)
+        for m in ("top", "bottom", "start", "end"):
+            getattr(self._help_lbl, f"set_margin_{m}")(8)
+        self._help_pop.set_child(self._help_lbl)
+        help_btn = Gtk.MenuButton()
+        help_btn.set_child(icon("help"))
+        help_btn.add_css_class("flat-menu")
+        help_btn.set_tooltip_text(_("How this tool works"))
+        help_btn.set_popover(self._help_pop)
+        hint_row = hbox(6, self._hint, help_btn)
+        hint_row.set_margin_bottom(6)
+        self.append(hint_row)
         main = hbox(12, vexpand=True)
         overlay = Gtk.Overlay(hexpand=True, vexpand=True)
         frame = Gtk.Box(hexpand=True, vexpand=True)
@@ -404,6 +418,29 @@ class LayoutTab(NotifyLayer, Gtk.Box):
             cr.line_to(*spts[k])
         cr.stroke()
         cr.restore()
+        # the light the LEDs throw on the wall behind them: a soft wide line in each LED's colour (cheap
+        # enough for every frame, unlike a gradient per LED)
+        if not (self.status.get("lights_off") or self.status.get("asleep")):
+            cr.save()
+            cr.set_line_cap(1)
+            k_of = {pt: k for k, pt in enumerate(spts)}
+            for width, alpha in ((tape_w * 4.4, 0.06), (tape_w * 2.4, 0.11)):     # a soft edge, then the core
+                cr.set_line_width(width)
+                for run in runs:
+                    for a, b in zip(run, run[1:]):
+                        i = led_at_path(s, n, k_of.get(a, 0))
+                        col = colors[i] if i < len(colors) else "000000"
+                        cr.set_source_rgba(*theme.hex_rgb(col), alpha)
+                        cr.move_to(*a)
+                        cr.line_to(*b)
+                        cr.stroke()
+            if n == 1 and not hid[0]:                   # a one-colour light: a round glow
+                col = colors[0] if colors else "000000"
+                for rad, alpha in ((tape_w * 2.2, 0.06), (tape_w * 1.2, 0.11)):
+                    cr.set_source_rgba(*theme.hex_rgb(col), alpha)
+                    cr.arc(*spts[0], rad, 0, 2 * math.pi)
+                    cr.fill()
+            cr.restore()
         for run in runs:
             if sel:
                 cr.set_source_rgb(*rgb("PRIMARY"))
@@ -840,7 +877,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
             if self._grad_anchor is None or self._grad_anchor[0] != s["id"]:
                 self._grad_anchor = (s["id"], i)
                 paint[i] = self.color_a
-                self._hint.set_label(_("Gradient: now click the LED where it should end."))
+                self._set_hint(_("Gradient: now click the LED where it should end."))
             else:
                 a, b = sorted((self._grad_anchor[1], i))
                 ca, cb = ((self.color_a, self.color_b) if self._grad_anchor[1] <= i else (self.color_b, self.color_a))
@@ -900,7 +937,7 @@ class LayoutTab(NotifyLayer, Gtk.Box):
         self._found = found
         d, z = split_key(s["zone"])
         self._send(self.app.client.led_probe, d, z, i)
-        self._hint.set_label(_('LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the strip to move it. Right-click to add a bend there. Pick another tool to go back to normal.').format(led=i + 1, n=n, strip=self._strip_name(s)))
+        self._set_hint(_('LED {led} of {n} on {strip} is lit on your strip; the rest are dark. Click or drag along the strip to move it. Right-click to add a bend there. Pick another tool to go back to normal.').format(led=i + 1, n=n, strip=self._strip_name(s)))
         self.cv.queue_draw()
 
     def _stop_find(self):
@@ -949,7 +986,13 @@ class LayoutTab(NotifyLayer, Gtk.Box):
                   "ringed one to take LEDs out). Drag A and B to set where a moving flash runs; Play tries it.")
         else:
             t = _("Paint: click or drag over LEDs. Painting switches that zone to the Painted pattern.")
-        self._hint.set_label(t)
+        self._set_hint(t)
+
+    def _set_hint(self, t):
+        """The line shows the first sentence; ? and the tooltip have all of it."""
+        self._help_lbl.set_label(t)
+        self._hint.set_label(t.split(". ")[0].rstrip(".") + ".")
+        self._hint.set_tooltip_text(t)
 
     def _toggle_lock(self):
         self.layout.locked = not self.layout.locked
@@ -1126,12 +1169,13 @@ class LayoutTab(NotifyLayer, Gtk.Box):
                              cb=lambda st=st, h=hidden: self._set_hidden(st, not h),
                              tooltip=_("Show this strip") if hidden else _("Hide this strip"))
                 r_.append(eye)
-                name = self._strip_name(st) + (f"  \u00b7  {_('clone')}" if st["clone"] else "")
+                name = self._strip_name(st) + (" " + _("(clone)") if st["clone"] else "")
                 nb = Gtk.Button(label=name, hexpand=True)
                 d_, z_ = split_key(st["zone"])
                 nb.set_tooltip_text(_('{zone} on {device}').format(zone=z_, device=d_) if z_ else d_)
                 nb.add_css_class("text")
                 nb.add_css_class("small")
+                nb.add_css_class("neutral")
                 nb.get_child().set_xalign(0)
                 nb.get_child().set_ellipsize(3)
                 if hidden:

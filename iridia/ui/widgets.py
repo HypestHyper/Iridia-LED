@@ -492,6 +492,43 @@ def spring(t: float) -> float:
     return 1 - math.exp(-6 * t) * math.cos(9 * t)
 
 
+class Chevron(Gtk.DrawingArea):
+    """The arrow on a row that opens: points down when closed and turns smoothly to point up when open
+    (a font icon can only swap, not turn)."""
+
+    def __init__(self, open_: bool = False, size: int = 22):
+        super().__init__()
+        themed(self)
+        self.set_content_width(size)
+        self.set_content_height(size)
+        self.set_valign(Gtk.Align.CENTER)
+        self._angle = math.pi if open_ else 0.0
+        self._from = self._to = self._angle
+        self._anim = Animator(self, self._step)
+        self.set_draw_func(self._draw)
+
+    def set_open(self, on: bool):
+        self._from, self._to = self._angle, (math.pi if on else 0.0)
+        self._anim.run(300)
+
+    def _step(self, p):
+        self._angle = self._from + (self._to - self._from) * spring(p)
+        self.queue_draw()
+
+    def _draw(self, _a, cr, w, h):
+        cr.translate(w / 2, h / 2)
+        cr.rotate(self._angle)
+        k = min(w, h) / 22
+        cr.set_source_rgb(*rgb("ON_SURFACE_VARIANT"))
+        cr.set_line_width(2 * k)
+        cr.set_line_cap(1)
+        cr.set_line_join(1)
+        cr.move_to(-5 * k, -2.5 * k)
+        cr.line_to(0, 2.5 * k)
+        cr.line_to(5 * k, -2.5 * k)
+        cr.stroke()
+
+
 class Animator:
     """Runs a 0..1 value over `ms` on a widget's frame clock; instant when motion is reduced."""
 

@@ -11,9 +11,9 @@ strips. Other setups are supported in the code but have seen less real-world tes
 what doesn't work.
 
 <p align="center">
-  <img alt="Status tab" src="../screenshots/status.png" width="32%">
-  <img alt="Devices tab" src="../screenshots/devices.png" width="32%">
-  <img alt="Layout tab" src="../screenshots/layout.png" width="32%">
+  <img alt="Home" src="../screenshots/status.png" width="32%">
+  <img alt="Devices" src="../screenshots/devices.png" width="32%">
+  <img alt="Layout" src="../screenshots/layout.png" width="32%">
 </p>
 
 ## Start here

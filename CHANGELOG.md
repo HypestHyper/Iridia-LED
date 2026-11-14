@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.0 — 2026-11-14
 
 A new look for the window: quieter, so your lights' own colours are what stands out.
 

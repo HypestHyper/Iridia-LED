@@ -47,6 +47,18 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.0" date="2026-11-14">
+      <description>
+        <p>A new look for the window.</p>
+        <ul>
+          <li>Home brings Status and Favourites together, glowing in your lights' colours</li>
+          <li>A side rail instead of a row of tabs</li>
+          <li>Devices as a compact, grouped list with brightness and power on each row</li>
+          <li>Strips glow on the Layout map; quieter colours and shorter texts throughout</li>
+          <li>Material 3 Expressive shapes and smooth motion</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.3.15" date="2026-11-13">
       <description>
         <ul>

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.3 — 2026-11-14
 
 - **Favourites cards fit what's on them:** a wide or large card puts brightness, colours and its effect on
   the left and its switches on the right, so a wide card stays short instead of growing as tall as a large

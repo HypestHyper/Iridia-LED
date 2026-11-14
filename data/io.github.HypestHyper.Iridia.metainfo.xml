@@ -47,6 +47,13 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.3" date="2026-11-14">
+      <description>
+        <ul>
+          <li>Favourites cards fit what's on them: wide cards use two columns, no empty band at the bottom</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.2" date="2026-11-14">
       <description>
         <ul>

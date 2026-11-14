@@ -963,7 +963,7 @@ def _looks_text(r):
     from iridia.looks import describe
     looks = r.get("looks") or []
     if not looks:
-        return "No looks yet: make them on the Favourites tab."
+        return "No looks yet: make them on Home, under Favourites."
     lines = []
     for lk in looks:
         where = "everything" if lk["targets"] == ["*"] else ", ".join(t.rstrip("|").replace("|", "/") for t in lk["targets"])
@@ -1782,7 +1782,7 @@ def main(argv=None):
                            help="seconds before the lights go back (0 to 10)")
     sc_parser.add_argument("--interval", type=int,
                            help="seconds between checks, where the desktop can't say what's in front (1 to 30)")
-    lk_parser = subparsers.add_parser("look", help="Turn one of your looks on or off (made on the Favourites tab)",
+    lk_parser = subparsers.add_parser("look", help="Turn one of your looks on or off (made on Home, under Favourites)",
                                       description="A look is a one-tap change you name yourself, like 'Movie': "
                                                   "everything at 15%%. Run it again to go back. For a keybind.")
     lk_parser.add_argument("name", nargs="?", help="the look's name")

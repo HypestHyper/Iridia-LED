@@ -22,9 +22,9 @@ It can also animate them, map them to your room, follow your monitor's brightnes
 > driving WS2812B strips, but not yet on every desktop or device, so review the code before relying on it.
 
 <p align="center">
-  <img alt="Status tab" src="docs/screenshots/status.png" width="32%">
-  <img alt="Devices tab" src="docs/screenshots/devices.png" width="32%">
-  <img alt="Layout tab" src="docs/screenshots/layout.png" width="32%">
+  <img alt="Home" src="docs/screenshots/status.png" width="32%">
+  <img alt="Devices" src="docs/screenshots/devices.png" width="32%">
+  <img alt="Layout" src="docs/screenshots/layout.png" width="32%">
 </p>
 
 ## Features
@@ -74,7 +74,7 @@ your package manager (pacman, apt, dnf, zypper, xbps or apk) and asks before run
 Iridia into `~/.local/share/iridia-venv`, links `iridia` and `iridia-gui` into `~/.local/bin`, and asks
 how OpenRGB's server and the daemon should start (`--openrgb=daemon|systemd|off`,
 `--autostart=systemd|xdg|compositor|none`; `--yes` takes the defaults, `--no-deps` leaves system
-packages alone). Update from the *Updates* tab, with `iridia update`, or with `git pull && bash install.sh
+packages alone). Update from the *Updates* page, with `iridia update`, or with `git pull && bash install.sh
 --update`. `bash uninstall.sh` removes it (`--keep-settings` or `--purge`). The
 [installation guide](docs/wiki/Installation.md) has the details.
 
@@ -106,7 +106,7 @@ iridia setup save "Evening"                        # keep this look
 | Ctrl + Plus / Minus | Larger or smaller window contents |
 | Ctrl + 0 | Automatic size |
 
-Shortcuts for the lights themselves are set in your desktop: the *Keybinds* tab builds the command and the
+Shortcuts for the lights themselves are set in your desktop: the *Keybinds* page builds the command and the
 line for your desktop's config ([Keybinds](docs/wiki/Keybinds.md)).
 
 ## Files

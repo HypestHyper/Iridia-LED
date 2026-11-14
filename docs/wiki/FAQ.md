@@ -23,7 +23,7 @@ Almost none. The daemon sleeps between checks and only sends to OpenRGB when the
 change. Wallpaper colors are extracted once per image and cached.
 
 **Can I use one color for everything and ignore the wallpaper?**
-Yes. On the Status tab, pick *Custom color…*, or click a saved color. To stop following wallpaper changes
+Yes. On Home, click one of the wallpaper colours or the pipette for any colour. To stop following wallpaper changes
 for a while, use **Freeze colors**.
 
 **Can different strips show different things?**

@@ -107,6 +107,7 @@ button.tonal {{ background: {SECONDARY_CONTAINER}; color: {ON_SECONDARY_CONTAINE
 button.text {{ background: transparent; color: {PRIMARY}; padding: 0 12px; }}
 button.text:hover {{ background: {SURFACE_CONTAINER_HIGH}; }}
 button.text.dim {{ color: {OUTLINE}; }}
+button.text.neutral {{ color: {ON_SURFACE}; font-weight: 500; }}
 button.outlined {{ background: transparent; color: {PRIMARY}; border: 1px solid {OUTLINE}; }}
 button.danger {{ background: {ERROR_CONTAINER}; color: {ON_ERROR_CONTAINER}; }}
 button.danger:hover {{ background: {ERROR_HOVER}; }}
@@ -151,6 +152,10 @@ flowbox.wrap-row > flowboxchild {{ padding: 0; background: none; border-radius: 
 
 /* ---------- surfaces ---------- */
 .card {{ background: {SURFACE_CONTAINER}; border-radius: 28px; padding: 20px; }}
+/* set-up pages: groups are plain sections, a line between them */
+.plain-page > .card {{ background: transparent; border-radius: 0; padding: 6px 4px 22px 4px;
+  border-bottom: 1px solid {OUTLINE_VARIANT}; }}
+.plain-page > .card .card-inner {{ background: {SURFACE_CONTAINER}; }}
 .row-card {{ border-radius: 20px; padding: 12px 16px; }}
 popover button.menu-item {{ background: transparent; color: {ON_SURFACE}; border-radius: 10px; min-height: 36px; }}
 popover button.menu-item:hover {{ background: {SECONDARY_CONTAINER}; }}

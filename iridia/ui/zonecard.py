@@ -361,7 +361,8 @@ class ZoneCard(Gtk.Box):
             parts.insert(0, self.zone_name or self.device_name)
         if self._kind_text:
             parts.insert(0, self._kind_text)
-        self._summary.set_label(", ".join(p for p in parts if p))
+        text = ", ".join(p for p in parts if p)
+        self._summary.set_label(text[:1].upper() + text[1:])
 
     # ------------------------------------------------------------ details
     def _build_details(self):

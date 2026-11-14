@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+A new look for the window: quieter, so your lights' own colours are what stands out.
+
+- **Home** brings Status and Favourites together. At the top: your wallpaper, its colours (click one
+  to use it on all your lights) and brightness, Freeze and the lights' power, glowing from below in the
+  colours your strips show right now. Saved colours and the colour-correction preview fold away under it;
+  the daemon's details moved to Service.
+- **A side rail** instead of ten tabs in a row: Home, Devices, Layout and Scenes, then the pages you set
+  up once under *Setup*, Settings at the bottom. In a narrow window it shows just the icons.
+- **Devices is a compact list:** a row per strip with a line of the colours it shows, its brightness and
+  power; its menu (⋮) has Favourites, Hide and Rename, and a click opens the rest. A network light is one
+  row with its own name. Range, invert, gamma and colour correction fold under *More*.
+- **Layout:** the strips glow on the wall in their colours, the strip list is plain text, and the how-to
+  is one line with the rest behind **?**.
+- **No bar at the bottom any more:** Restart daemon and the folders are on Service, Refresh is gone (the
+  window updates itself), and Ctrl+Q closes the window like its close button.
+- **Calmer colours:** grey surfaces instead of tinted ones, the accent only where there's light, power
+  buttons lit in it when on (no pastel green and red), and a blue window until there are colours.
+- Set-up pages use plain sections instead of boxes, shorter texts, and the status chip only shows when
+  something needs you. The wallpaper picture stays sharp on HiDPI screens.
+
 ## 1.3.15 — 2026-11-13
 
 - **Text in the window can be selected and copied** (drag over it, then Ctrl+C or right-click, Copy):

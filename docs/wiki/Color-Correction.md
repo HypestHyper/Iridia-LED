@@ -11,7 +11,7 @@ card to set all zones):
 | **Calibrated** | Colors go through a calibration profile made for your kind of strip, which maps each hue to the hex the strip needs to look like that hue. Brightness is part of the mapping, so dim colors keep their hue. Gamma isn't used. |
 
 The window and its accent color always follow the wallpaper or the color you chose, never the corrected
-color. The *Color correction preview* on the Status tab shows what each wallpaper color becomes on your
+color. The *Colour correction preview* on Home (under the hero) shows what each wallpaper color becomes on your
 strip.
 
 ## Exact colors

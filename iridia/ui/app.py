@@ -459,6 +459,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 self._stack.add_named(ov, key)
                 continue
             self._stack.add_named(sc, key)
+        # set-up pages: their groups are plain sections with a line between, not boxes (boxes are for
+        # things you act on: strips, favourites, scenes)
+        for key in ("settings", "service", "updates", "notify", "keybinds"):
+            pages[key].add_css_class("plain-page")
         self._status_page, self._devices_page = pages["status"], pages["devices"]
         self._settings_page, self._service_page = pages["settings"], pages["service"]
         self._updates_page = pages["updates"]
@@ -1602,7 +1606,9 @@ class IridiaWindow(Gtk.ApplicationWindow):
         c.append(label(_("On the map"), ("heading",)))
         c.append(label(_("Choose the LEDs, paint their colours and set the A and B points a moving flash runs "
                          "between, on the Layout tab."), ("small", "dim"), wrap=True))
-        c.append(button(_("Edit on the map"), "polyline", "filled small", self.open_notify_map))
+        emap = button(_("Edit on the map"), "polyline", "tonal small", self.open_notify_map)
+        emap.set_halign(Gtk.Align.START)
+        c.append(emap)
         p.append(c)
         c = card()
         n = self.config.get("notify", {}) or {}
@@ -2155,9 +2161,8 @@ class IridiaWindow(Gtk.ApplicationWindow):
     # ============================================================ service tab
     def _build_service(self):
         p = self._service_page
-        p.append(section(_("Background daemon"), _("The daemon is the part of Iridia that keeps your lights in sync. It "
-                                              "runs in the background and keeps working when this window is closed. "
-                                              "This window only changes its settings."), 10))
+        p.append(section(_("Background daemon"), _("It keeps your lights in sync, also while this window is closed."),
+                         10))
         c = card()
         self._svc_status = label(_("Checking…"), ("heading",))
         c.append(self._svc_status)
@@ -2171,8 +2176,7 @@ class IridiaWindow(Gtk.ApplicationWindow):
         p.append(c)
         self._build_diagnostics(p)
 
-        p.append(section(_("Start the daemon when I log in"), _("Pick one method. If you enable more than one, nothing "
-                                                           "breaks, since only one daemon ever runs.")))
+        p.append(section(_("Start the daemon when I log in"), _("One way is enough; more than one does no harm.")))
         c = card()
         c.append(label(_("systemd service"), ("subheading",)))
         self._unit_status = label(_("Checking…"), ("small", "dim"), wrap=True)

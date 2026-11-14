@@ -104,34 +104,35 @@ def _cover(pb, w, h):
     return scaled.new_subpixbuf((tw - w) // 2, (th - h) // 2, w, h)
 
 
-class Thumb(Gtk.Picture):
-    """The wallpaper, small, loaded off the main thread (a big image takes a moment to read)."""
+class Thumb(Gtk.DrawingArea):
+    """The wallpaper, small, with rounded corners: read off the main thread (a big image takes a moment)
+    at the screen's own scale, and drawn at a fixed size (an image widget would size itself by the
+    image's pixels, twice as big on a 2x screen)."""
 
     W, H = 176, 104
 
     def __init__(self):
         super().__init__()
-        self.set_size_request(self.W, self.H)
-        self.set_content_fit(Gtk.ContentFit.COVER)
-        self.set_can_shrink(True)
-        self.set_overflow(Gtk.Overflow.HIDDEN)
-        self.add_css_class("thumb")
+        self.set_content_width(self.W)
+        self.set_content_height(self.H)
         self.set_valign(Gtk.Align.CENTER)
+        self.set_draw_func(self._draw)
         self._path = None
+        self._pb = None
+        self._k = 1
 
     def show_path(self, path):
         if path == self._path:
             return
         self._path = path
         if not path or not os.path.isfile(path):
-            self.set_paintable(None)
+            self._pb = None
             self.set_visible(False)
             return
+        k = max(1, self.get_scale_factor())
 
         def load():
             try:
-                # cover-cropped to exactly the box (at the screen's scale), so it never sets its own size
-                k = max(1, self.get_scale_factor())
                 src = GdkPixbuf.Pixbuf.new_from_file_at_scale(path, -1, self.H * k * 2, True)
                 pb = _cover(src, self.W * k, self.H * k)
             except GLib.Error:
@@ -139,15 +140,21 @@ class Thumb(Gtk.Picture):
             GLib.idle_add(done, pb)
 
         def done(pb):
-            if path != self._path:
-                return False
-            if pb is None:
-                self.set_visible(False)
-            else:
-                self.set_paintable(Gdk.Texture.new_for_pixbuf(pb))
-                self.set_visible(True)
+            if path == self._path:
+                self._pb, self._k = pb, k
+                self.set_visible(pb is not None)
+                self.queue_draw()
             return False
         threading.Thread(target=load, daemon=True).start()
+
+    def _draw(self, _a, cr, w, h):
+        if self._pb is None:
+            return
+        _rounded(cr, 0, 0, w, h, 14)
+        cr.clip()
+        cr.scale(1 / self._k, 1 / self._k)
+        Gdk.cairo_set_source_pixbuf(cr, self._pb, 0, 0)
+        cr.paint()
 
 
 class Hero(Gtk.Overlay):

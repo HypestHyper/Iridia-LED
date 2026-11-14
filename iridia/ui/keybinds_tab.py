@@ -351,7 +351,7 @@ class KeybindsPage:
                 "night": _("Switches night mode on or off (this one is saved)."),
                 "animations": _("Same key pauses every animated effect, then lets them run again."),
                 "setup": _("Loads the setup and keeps it (an automatic backup is made first)."),
-                "look": _("Same key puts the look on, then back to normal. Make looks on the Favourites tab."),
+                "look": _("Same key puts the look on, then back to normal. Make looks on Home, under Favourites."),
             }[kind])
         mods_v = self._mods.value() or NO_MOD
         mods = [] if mods_v == NO_MOD else [m.strip() for m in mods_v.split("+")]

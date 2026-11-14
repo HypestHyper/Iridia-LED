@@ -12,7 +12,7 @@ Open **Iridia** from your app launcher. The chip in the header says whether Open
 
 ## A tour of the window
 
-<img alt="The Status tab" src="../screenshots/status.png" width="420">
+<img alt="Home" src="../screenshots/status.png" width="420">
 
 | Tab | What it's for |
 | --- | --- |

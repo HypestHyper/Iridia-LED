@@ -188,12 +188,8 @@ class FavoritesPage:
         page.append(self._add_card)
         self._empty = card()
         self._empty.append(label(_("Nothing here yet"), ("heading",)))
-        self._empty.append(label(_("Make a card for some strips (or all of them) with the controls you want on it: "
-                                   "on and off, brightness, colours, follow the monitor, an effect, your looks, "
-                                   "switches. Or add a look, a setup or a switch on its own. A strip's ★ on the "
-                                   "Devices tab makes a card for it."), ("small", "dim"), wrap=True))
-        self._empty.append(hbox(8, button(_("New card"), "add", "filled small", lambda: self._open_card(None)),
-                                button(_("New look"), "palette", "tonal small", lambda: self._open_look(None))))
+        self._empty.append(label(_("Make a card for the strips you use most, with just the controls you want. "
+                                   "A strip's menu on the Devices page can make one too."), ("small", "dim"), wrap=True))
         page.append(self._empty)
         self._board = Board()
         # The board sits in its own scroller that never scrolls sideways: it doesn't make the window as

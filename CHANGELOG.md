@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.3 — 2026-11-14
+
+- **Favourites cards fit what's on them:** a wide or large card puts brightness, colours and its effect on
+  the left and its switches on the right, so a wide card stays short instead of growing as tall as a large
+  one. Cards grow in steps of a third of a row when they need more room, so none carries a big empty band
+  at the bottom any more.
+
 ## 1.4.2 — 2026-11-14
 
 - **A dot on Updates** in the side rail while there's a newer version (in the narrow rail too); its

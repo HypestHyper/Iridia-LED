@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:32+0000\n"
+"POT-Creation-Date: 2026-11-14 05:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -589,6 +589,13 @@ msgstr "Rien de gardé."
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr "Revenir à {v}"
+
+#, python-brace-format
+msgid "Updates: Iridia {v} is available"
+msgstr "Mises à jour : Iridia {v} est arrivée, voilà"
+
+msgid "Update available"
+msgstr "Mise à jour disponible"
 
 #, python-brace-format
 msgid "Couldn't open it: {err}"
@@ -2056,8 +2063,15 @@ msgid "All colours"
 msgstr "Toutes les couleurs"
 
 #, python-brace-format
-msgid "Wallpaper colour {n}"
-msgstr "Couleur du fond {n}"
+msgid "Wallpaper colour {n} (#{hex})"
+msgstr "Couleur du papier peint {n} (#{hex})"
+
+#, python-brace-format
+msgid "Your colour #{hex}"
+msgstr "Votre couleur #{hex}"
+
+msgid "Your strips use different colours here"
+msgstr "Vos bandes ne sont pas d'accord, c'est la vie"
 
 msgid "Wallpaper colours"
 msgstr "Couleurs du papier peint"
@@ -2081,6 +2095,15 @@ msgstr "Allumé : touche pour revenir"
 #, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr "{name} chargé. Voilà."
+
+msgid "Drag to move"
+msgstr "Glisser pour déplacer"
+
+msgid "Move earlier"
+msgstr "Avant, s'il vous plaît"
+
+msgid "Move later"
+msgstr "Après, voilà"
 
 #, python-brace-format
 msgid "Size: {size}"

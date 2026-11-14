@@ -45,6 +45,9 @@ def merge_zone_cfgs(cfgs):
     for key, default in ZONE_FIELDS_DEFAULT.items():
         vals = [c.get(key, default) for c in cfgs] or [default]
         merged[key] = vals[0]
+        if key == "hands_off":
+            # Everything is Iridia's while any strip is: only "not controlled" when none of them is
+            merged[key] = all(bool(v) for v in vals)
         if any(v != vals[0] for v in vals[1:]):
             mixed.add(key)
     return merged, mixed
@@ -371,11 +374,11 @@ class ZoneCard(Gtk.Box):
         n_leds = int(self.cfg.get("led_count", 20) or 0)
         parts = [pat, mode] + ([] if self.global_mode or n_leds <= 1 else
                                [ngettext("{n} LED", "{n} LEDs", n_leds).format(n=n_leds)])
-        if not self.global_mode and self.cfg.get("display_name"):
+        if not self.global_mode and self.cfg.get("display_name") and not self._kind_text:
             parts.insert(0, self.zone_name or self.device_name)
         if self._kind_text:
             parts.insert(0, self._kind_text)
-        if self.cfg.get("hands_off"):
+        if self.cfg.get("hands_off") and "hands_off" not in self._mixed:
             # the switch on the left, said in words: two on/off controls side by side need telling apart
             parts = [_("Not controlled by Iridia (the switch on the left)") if not self.global_mode
                      else _("Not controlled by Iridia")]

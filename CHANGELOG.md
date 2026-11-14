@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+- **A dot on Updates** in the side rail while there's a newer version (in the narrow rail too); its
+  tooltip names the version.
+- **No "update available" for a version you already have:** a check saved before you updated another
+  way (pacman, say) could still offer it. Only a newer version counts now.
+- **Everything** counts as controlled by Iridia while any strip is (strips you hid and left alone made
+  it look switched off), and a network light's row no longer repeats its address.
+- **Favourites: a card's colour ring shows what its strips really show.** It only rings a colour when every
+  strip on the card has it; changing one light on its own card (a Govee, say) no longer moves the ring on
+  Everything as if everything had changed. A strip's own colour, or a wallpaper colour beyond the few
+  shown, appears ringed on the card too.
+- **Arranging Favourites is easier:** each item's controls float over it in Arrange, so cards keep their
+  size (wide cards grew taller). ◀ and ▶ move an item one place, also from the keyboard. Dragging shows a
+  line on the side it will land, before or after the item you drop it on, and dropping it on the empty
+  space after the last puts it last.
+- New screenshots, from a real setup.
+
 ## 1.4.1 — 2026-11-14
 
 - **The update notification goes away by itself again,** after your notification server's usual time,

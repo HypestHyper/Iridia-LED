@@ -71,6 +71,11 @@ label > selection, text > selection, entry > text > selection {{ background: alp
 .rail > button:checked {{ background: {PRIMARY_CONTAINER}; color: {ON_PRIMARY_CONTAINER}; }}
 .rail > button:checked:hover {{ background: {PRIMARY_CONTAINER}; }}
 .rail > button:checked .icon {{ color: {ON_PRIMARY_CONTAINER}; font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
+/* the new-version dot on Updates: small, in the accent, with a ring of the rail's background so it
+   reads against the icon */
+.badge-dot {{ min-width: 8px; min-height: 8px; border-radius: 4px; background: {PRIMARY};
+  box-shadow: 0 0 0 2px {SURFACE_DIM}; margin: 3px -3px 0 0; }}
+.rail > button:checked .badge-dot {{ box-shadow: 0 0 0 2px {PRIMARY_CONTAINER}; }}
 .rail-head {{ margin: 16px 0 4px 14px; }}
 
 /* ---------- Home: the backlight ---------- */
@@ -172,6 +177,13 @@ drawingarea.focusable:focus-visible, expander title:focus-visible, label:focus-v
 .plain-page > .card .card-inner {{ background: {SURFACE_CONTAINER}; }}
 /* M3 Expressive segmented list: a device's strips are one group, 2px apart; big corners outside, small inside.
    An open row is fully rounded. Only corners and colour animate (no size changes, so nothing jumps). */
+/* Favourites, Arrange: the controls float over the item (its size never changes); a thick line in the
+   accent shows on which side a dragged item lands */
+.arrange-scrim {{ background: alpha({SURFACE_DIM}, 0.9); border-radius: 28px;
+  box-shadow: inset 0 0 0 2px alpha({PRIMARY}, 0.35); transition: box-shadow 120ms {EASE_STD}; }}
+.arrange-scrim.drop-before {{ box-shadow: inset 5px 0 0 {PRIMARY}, inset 0 0 0 2px alpha({PRIMARY}, 0.35); }}
+.arrange-scrim.drop-after {{ box-shadow: inset -5px 0 0 {PRIMARY}, inset 0 0 0 2px alpha({PRIMARY}, 0.35); }}
+.dragging {{ opacity: 0.35; }}
 .row-card {{ border-radius: 4px; padding: 12px 16px; transition: border-radius 320ms {EASE}, background-color 180ms {EASE_STD}; }}
 .row-card.seg-first {{ border-top-left-radius: 16px; border-top-right-radius: 16px; }}
 .row-card.seg-last {{ border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; }}

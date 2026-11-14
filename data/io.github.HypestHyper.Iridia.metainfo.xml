@@ -47,6 +47,16 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.1" date="2026-11-14">
+      <description>
+        <ul>
+          <li>The update notification goes away by itself again</li>
+          <li>Keyboard focus is visible, and rows and colours work from the keyboard</li>
+          <li>Clearer power buttons and lighter small text</li>
+          <li>Brightness slider on Home, Undo when hiding a strip, a list of keyboard shortcuts</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.0" date="2026-11-14">
       <description>
         <p>A new look for the window.</p>

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.1 — 2026-11-14
 
 - **The update notification goes away by itself again,** after your notification server's usual time,
   like before it had the *Update now* button; it stayed on screen until you closed it. The Updates page

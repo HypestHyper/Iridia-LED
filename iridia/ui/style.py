@@ -59,6 +59,23 @@ label > selection, text > selection, entry > text > selection {{ background: alp
 .icon.big {{ font-size: 28px; }}
 .icon.huge {{ font-size: 40px; }}
 
+/* ---------- the side rail: daily pages, then the ones you set up once ---------- */
+.rail {{ padding: 4px 8px 14px 12px; min-width: 176px; }}
+.rail.tight {{ min-width: 0; padding: 4px 4px 14px 8px; }}
+.rail > button {{ background: transparent; color: {ON_SURFACE_VARIANT}; border-radius: 12px; min-height: 40px;
+  padding: 0 14px; font-weight: 500; transition: background-color 160ms {EASE_STD}, color 160ms; }}
+.rail.tight > button {{ padding: 0 10px; }}
+.rail > button:hover {{ background: alpha({ON_SURFACE}, 0.06); color: {ON_SURFACE}; }}
+.rail > button:active {{ border-radius: 12px; }}
+.rail > button:checked {{ background: alpha({PRIMARY}, 0.14); color: {ON_SURFACE}; font-weight: 600; }}
+.rail > button:checked .icon {{ color: {PRIMARY}; font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
+.rail-head {{ margin: 16px 0 4px 14px; }}
+
+/* ---------- Home: the backlight ---------- */
+.display-s {{ font-size: 22px; font-weight: 650; }}
+.thumb {{ border-radius: 14px; }}
+expander.plain-expander title > label {{ color: {ON_SURFACE_VARIANT}; font-weight: 500; }}
+
 /* ---------- navigation: connected button group, selected item morphs ----------
    Radii are real half-heights (not 999px): GTK interpolates radius transitions per corner,
    and huge radii made pressed buttons swell oddly at one corner. */
@@ -99,10 +116,14 @@ button.circle {{ padding: 0; min-width: 40px; min-height: 40px; border-radius: 2
 button.circle.small {{ min-width: 32px; min-height: 32px; border-radius: 16px; }}
 button.circle.small.power, button.circle.small.power:active {{ min-width: 28px; min-height: 28px; padding: 0;
     border-radius: 14px; }}
-button.circle.small.power.on {{ background: #bfe8c9; color: #1f4d2c; }}
-button.circle.small.power.on:hover {{ background: #ade0b9; }}
-button.circle.small.power.off {{ background: #f6c9c9; color: #6e2121; }}
-button.circle.small.power.off:hover {{ background: #f0b6b6; }}
+/* power: lit in the light's own colour when on, an empty ring when off */
+button.circle.small.power.on {{ background: {PRIMARY}; color: {ON_PRIMARY}; }}
+button.circle.small.power.on.glow {{ box-shadow: 0 0 14px alpha({PRIMARY}, 0.6); min-width: 36px; min-height: 36px;
+  border-radius: 18px; }}
+button.circle.small.power.on:hover {{ background: {PRIMARY_HOVER}; }}
+button.circle.small.power.off {{ background: transparent; color: {ON_SURFACE_VARIANT};
+  box-shadow: inset 0 0 0 2px {OUTLINE_VARIANT}; }}
+button.circle.small.power.off:hover {{ background: alpha({ON_SURFACE}, 0.08); color: {ON_SURFACE}; }}
 button.circle:active {{ border-radius: 10px; }}
 button.fab {{ min-height: 56px; padding: 0 24px; border-radius: 18px; font-size: 15px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4); }}

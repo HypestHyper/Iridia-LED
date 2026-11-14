@@ -199,6 +199,9 @@ class FavoritesPage:
                                     propagate_natural_height=True)
         holder.set_child(self._board)
         self._board.watch(holder)
+        end = Gtk.DropTarget.new(GObject.TYPE_STRING, Gdk.DragAction.MOVE)
+        end.connect("drop", lambda _t, value, _x, _y: self._editing and self._move(int(value), len(self.favorites())))
+        holder.add_controller(end)
         page.append(holder)
 
     # ---------------------------------------------------------------- status
@@ -305,8 +308,7 @@ class FavoritesPage:
             if w is None:
                 continue
             if self._editing:
-                w.append(self._edit_bar(i, t))
-                self._dnd(w, i)
+                w = self._arrange_frame(w, i, t, len(tiles))
             items.append((w, t.get("size", "s")))
         self._board.set_items(items)
 
@@ -627,24 +629,58 @@ class FavoritesPage:
         self._shown = None
         self.update_status(self._st)
 
-    def _edit_bar(self, i, t):
-        bar = vbox(4)
-        bar.set_vexpand(True)
-        bar.set_valign(Gtk.Align.END)
-        size = button(None, "open_in_full", "flat small", None, tooltip=_("Size: {size}").format(
+    def _arrange_frame(self, w, i, t, count):
+        """In Arrange, the item's controls float over it (so it keeps its size): move it earlier or
+        later, its size, change it, take it off; and it can be dragged to a place between others."""
+        ov = Gtk.Overlay()
+        ov.set_child(w)
+        scrim = vbox(8)
+        scrim.add_css_class("arrange-scrim")
+        scrim.set_halign(Gtk.Align.FILL)
+        scrim.set_valign(Gtk.Align.FILL)
+        mid = vbox(4)
+        mid.set_valign(Gtk.Align.CENTER)
+        mid.set_halign(Gtk.Align.CENTER)
+        mid.set_vexpand(True)
+        # which item this is, since its own contents are dimmed under the controls
+        try:
+            name = self._title(t) if t["type"] == "card" else ""
+        except Exception:                               # noqa: BLE001
+            name = ""
+        if name:
+            nl = label(name, ("heading",), xalign=0.5, ellipsize=True)
+            nl.set_selectable(False)
+            mid.append(nl)
+        hint = label(_("Drag to move"), ("small", "dim"), xalign=0.5)
+        hint.set_selectable(False)
+        mid.append(hint)
+        row = hbox(4)
+        row.set_halign(Gtk.Align.CENTER)
+        earlier = button(None, "chevron_left", "tonal small", lambda: self._move(i, i - 1),
+                         tooltip=_("Move earlier"))
+        earlier.set_sensitive(i > 0)
+        later = button(None, "chevron_right", "tonal small", lambda: self._move(i, i + 2),
+                       tooltip=_("Move later"))
+        later.set_sensitive(i < count - 1)
+        size = button(None, "open_in_full", "tonal small", None, tooltip=_("Size: {size}").format(
             size=SIZE_NAMES[t.get("size", "s")]))
         size.connect("clicked", lambda b: self._size_popup(b, i, t.get("size", "s")))
-        row = hbox(2, icon("open_with", classes=("dim",)), size)
-        row.append(Gtk.Box(hexpand=True))
+        row.append(earlier)
+        row.append(size)
         if t["type"] == "card":
-            row.append(button(None, "edit", "flat small", lambda: self._open_card(t), tooltip=_("Change this card")))
+            row.append(button(None, "edit", "tonal small", lambda: self._open_card(t), tooltip=_("Change this card")))
         if t["type"] == "look":
             lk = next((x for x in self._st.get("looks") or [] if x["id"] == t["id"]), None)
             if lk:
-                row.append(button(None, "edit", "flat small", lambda: self._open_look(lk), tooltip=_("Change this look")))
-        row.append(button(None, "close", "flat small", lambda: self._remove(i), tooltip=_("Take off Favourites")))
-        bar.append(row)
-        return bar
+                row.append(button(None, "edit", "tonal small", lambda: self._open_look(lk),
+                                  tooltip=_("Change this look")))
+        row.append(button(None, "close", "tonal small", lambda: self._remove(i), tooltip=_("Take off Favourites")))
+        row.append(later)
+        mid.append(row)
+        scrim.append(mid)
+        ov.add_overlay(scrim)
+        self._dnd(ov, scrim, i)
+        return ov
 
     def _size_popup(self, anchor, i, now):
         """Small, wide, tall or large, in a popup so the bar fits on a small card."""
@@ -663,23 +699,48 @@ class FavoritesPage:
         pop.connect("closed", lambda p: GLib.idle_add(p.unparent))
         pop.popup()
 
-    def _dnd(self, w, i):
-        """In Arrange, drag an item onto another to put it there."""
+    def _dnd(self, w, mark, i):
+        """Drag an item and drop it on the left or right half of another to put it before or after that
+        one (a line shows where); drop it on the empty space after the last to put it last."""
         src = Gtk.DragSource(actions=Gdk.DragAction.MOVE)
         src.connect("prepare", lambda *_a: Gdk.ContentProvider.new_for_value(str(i)))
-        src.connect("drag-begin", lambda s, drag: s.set_icon(Gtk.WidgetPaintable.new(w), 20, 20))
+        src.connect("drag-begin", lambda s, drag: (w.add_css_class("dragging"),
+                                                   s.set_icon(Gtk.WidgetPaintable.new(w), 20, 20)))
+        src.connect("drag-end", lambda *_a: w.remove_css_class("dragging"))
         w.add_controller(src)
         dst = Gtk.DropTarget.new(GObject.TYPE_STRING, Gdk.DragAction.MOVE)
-        dst.connect("drop", lambda _t, value, _x, _y: self._move(int(value), i))
-        dst.connect("enter", lambda *_a: (w.add_css_class("drop"), Gdk.DragAction.MOVE)[1])
-        dst.connect("leave", lambda *_a: w.remove_css_class("drop"))
+
+        def side(x):
+            before = x < w.get_width() / 2
+            mark.remove_css_class("drop-after" if before else "drop-before")
+            mark.add_css_class("drop-before" if before else "drop-after")
+            return before
+
+        def motion(_t, x, _y):
+            side(x)
+            return Gdk.DragAction.MOVE
+
+        def drop(_t, value, x, _y):
+            before = side(x)
+            for c in ("drop-before", "drop-after"):
+                mark.remove_css_class(c)
+            return self._move(int(value), i if before else i + 1)
+        dst.connect("enter", lambda _t, x, y: motion(_t, x, y))
+        dst.connect("motion", motion)
+        dst.connect("leave", lambda *_a: [mark.remove_css_class(c) for c in ("drop-before", "drop-after")])
+        dst.connect("drop", drop)
         w.add_controller(dst)
 
     def _move(self, frm, to):
+        """Put item `frm` before the one now at `to` (len = last)."""
         tiles = self.favorites()
-        if frm == to or not (0 <= frm < len(tiles) and 0 <= to < len(tiles)):
+        if not (0 <= frm < len(tiles)):
             return False
-        tiles.insert(to, tiles.pop(frm))
+        to = max(0, min(len(tiles), to))
+        if to in (frm, frm + 1):
+            return False                        # already there
+        t = tiles.pop(frm)
+        tiles.insert(to - 1 if to > frm else to, t)
         self._send(set=tiles)
         return True
 

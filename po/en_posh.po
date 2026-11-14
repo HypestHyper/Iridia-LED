@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:59+0000\n"
+"POT-Creation-Date: 2026-11-14 05:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -2209,6 +2209,15 @@ msgstr "On: tap to return"
 #, python-brace-format
 msgid "Loaded {name} (the settings before were backed up)"
 msgstr "Loaded {name} (the previous settings were backed up)"
+
+msgid "Drag to move"
+msgstr "Drag to rearrange"
+
+msgid "Move earlier"
+msgstr "Move it forward"
+
+msgid "Move later"
+msgstr "Move it back"
 
 #, python-brace-format
 msgid "Size: {size}"

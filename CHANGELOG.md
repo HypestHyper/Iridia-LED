@@ -12,6 +12,10 @@
   strip on the card has it; changing one light on its own card (a Govee, say) no longer moves the ring on
   Everything as if everything had changed. A strip's own colour, or a wallpaper colour beyond the few
   shown, appears ringed on the card too.
+- **Arranging Favourites is easier:** each item's controls float over it in Arrange, so cards keep their
+  size (wide cards grew taller). ◀ and ▶ move an item one place, also from the keyboard. Dragging shows a
+  line on the side it will land, before or after the item you drop it on, and dropping it on the empty
+  space after the last puts it last.
 - New screenshots, from a real setup.
 
 ## 1.4.1 — 2026-11-14

@@ -23,8 +23,10 @@ A new look for the window: quieter, so your lights' own colours are what stands 
   group's ends, an open row fully rounded); the selected page in the rail sits on a pill; power buttons
   are round and outlined when off and a filled square when on; sliders have a 16px track with a gap
   round a thin handle; headings are heavier; Freeze and the lights' power on Home are the bigger size.
-- **Smooth:** pages switch at once instead of crossfading (which drew two whole pages every frame), and
-  only colours and corners animate, so nothing jumps; every frame measured well within 60 fps.
+- **Smooth:** the page you pick fades in on its own instead of crossfading with the old one (which drew
+  two whole pages every frame), only colours and corners animate so nothing jumps, and a row's arrow turns
+  as it opens; every frame measured well within 60 fps. Reduce motion turns all of it off.
+- The new texts are in every language: British, Pirate, Posh and Omelette.
 - Set-up pages use plain sections instead of boxes, shorter texts, and the status chip only shows when
   something needs you. The wallpaper picture stays sharp on HiDPI screens.
 

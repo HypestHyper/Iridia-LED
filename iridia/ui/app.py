@@ -562,6 +562,17 @@ class IridiaWindow(Gtk.ApplicationWindow):
             return
         self._stack.set_visible_child_name(key)
         self._layout_tab.set_visible_tab(key == "layout")
+        # the new page fades in (only it, so the cost is one page, not the two a crossfade draws);
+        # no overshoot on a fade, and nothing at all with reduced motion
+        page = self._stack.get_visible_child()
+        if page is not None and widgets.motion():
+            page.set_opacity(0.0)
+            if getattr(self, "_page_fade", None) is None:
+                self._page_fade = {}
+            anim = self._page_fade.get(key)
+            if anim is None:
+                anim = self._page_fade[key] = Animator(page, lambda p, w=page: w.set_opacity(1 - (1 - p) ** 3))
+            anim.run(150)
 
     def _set_tight(self, tight):
         """Below TIGHT_BELOW pixels: the rail shows only icons, and buttons drop their words (the words

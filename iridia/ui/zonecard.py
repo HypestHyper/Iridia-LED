@@ -12,10 +12,10 @@ from iridia import animations
 from iridia.colors import resolve_colors
 from iridia.patterns import PatternGenerator, led_even_boundaries, segment_sizes
 from iridia.ui import effects as fx
-from iridia.ui import fonts, serial
+from iridia.ui import serial
 from iridia.ui.layout_notify import MiniSlider
 from iridia.ui.sections_panel import SectionsPanel
-from iridia.ui.widgets import (DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
+from iridia.ui.widgets import (Chevron, DualRange, Dropdown, Group, QuickColors, Spin, StripEditor, Swatch, SwatchPicker, Toggle,
                                button, card, hbox, icon, label, rgb, set_button_text, switch_row, themed, vbox,
                                wrap_row)
 
@@ -272,7 +272,7 @@ class ZoneCard(Gtk.Box):
             pop.set_child(items)
             menu.set_popover(pop)
             hdr.append(menu)
-        self._chev = icon("expand_less" if expanded else "expand_more", classes=("dim",))
+        self._chev = Chevron(expanded)
         hdr.append(self._chev)
         click = Gtk.GestureClick()
         click.connect("released", lambda *_a: self._toggle_expand())
@@ -331,7 +331,7 @@ class ZoneCard(Gtk.Box):
         on = not self._rev.get_reveal_child()
         self._rev.set_reveal_child(on)
         (self.add_css_class if on else self.remove_css_class)("open")
-        self._chev.set_label(fonts.codepoint("expand_less" if on else "expand_more"))
+        self._chev.set_open(on)
         if on:
             GLib.idle_add(lambda: (self._ensure_preview(), False)[1])
 

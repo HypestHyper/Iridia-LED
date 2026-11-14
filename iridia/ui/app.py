@@ -447,7 +447,18 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 continue
             key, text, ico = item
             b = Gtk.ToggleButton()
-            b.set_child(hbox(12, icon(ico), Gtk.Label(label=text, xalign=0.0)))
+            glyph = icon(ico)
+            if key == "updates":
+                # a small dot on the icon while there's a newer version (shown in the narrow rail too)
+                ov = Gtk.Overlay()
+                ov.set_child(glyph)
+                self._upd_dot = Gtk.Box(halign=Gtk.Align.END, valign=Gtk.Align.START)
+                self._upd_dot.add_css_class("badge-dot")
+                self._upd_dot.set_can_target(False)
+                self._upd_dot.set_visible(False)
+                ov.add_overlay(self._upd_dot)
+                glyph = ov
+            b.set_child(hbox(12, glyph, Gtk.Label(label=text, xalign=0.0)))
             b.set_tooltip_text(text)
             if first is None:
                 first = b
@@ -1277,7 +1288,10 @@ class IridiaWindow(Gtk.ApplicationWindow):
         last = r.get("last") or {}
         info = last.get("latest") or {}
         cur = r.get("version", "")
-        available = bool(last.get("available")) and info.get("version") != cur
+        # newer than what runs now, not just different: a check saved before you updated by hand can
+        # name the version you already have, or an older one
+        from iridia import updater as _upd
+        available = bool(last.get("available")) and bool(info.get("version")) and _upd.newer(info["version"], cur)
         packaged = r.get("kind") == "package"
         # a system package installs from here when the release has one for this system's package manager
         pkg_ok = packaged and self._package_here(info)
@@ -1317,9 +1331,12 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if prev:
             set_button_text(self._upd_back_btn, _("Go back to {v}").format(v=prev), "history")
         self._upd_back_btn.set_sensitive(not self._upd_running)
-        # the tab's icon lights up while there's something to install
-        tab_icon = self._tabs["updates"].get_child().get_first_child()
-        (tab_icon.add_css_class if available and not source else tab_icon.remove_css_class)("accent")
+        # a dot on Updates in the rail while there's a newer version
+        self._upd_dot.set_visible(bool(available))
+        tab = self._tabs["updates"]
+        tab.set_tooltip_text(_("Updates: Iridia {v} is available").format(v=info.get("version", "")) if available
+                             else _("Updates"))
+        tab.update_property([Gtk.AccessibleProperty.DESCRIPTION], [_("Update available") if available else ""])
 
     def _update_page(self):
         if getattr(self, "_upd_page_url", ""):

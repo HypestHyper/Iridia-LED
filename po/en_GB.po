@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 04:32+0000\n"
+"POT-Creation-Date: 2026-11-14 04:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_GB\n"
@@ -609,6 +609,13 @@ msgstr "Nothing kept yet: the version you have now is kept when you update."
 #, python-brace-format
 msgid "Go back to {v}"
 msgstr "Go back to {v}"
+
+#, python-brace-format
+msgid "Updates: Iridia {v} is available"
+msgstr "Updates: Iridia {v} is available"
+
+msgid "Update available"
+msgstr "Update available"
 
 #, python-brace-format
 msgid "Couldn't open it: {err}"
@@ -2150,8 +2157,15 @@ msgid "All colours"
 msgstr "All colours"
 
 #, python-brace-format
-msgid "Wallpaper colour {n}"
-msgstr "Wallpaper colour {n}"
+msgid "Wallpaper colour {n} (#{hex})"
+msgstr "Wallpaper colour {n} (#{hex})"
+
+#, python-brace-format
+msgid "Your colour #{hex}"
+msgstr "Your colour #{hex}"
+
+msgid "Your strips use different colours here"
+msgstr "Your strips use different colours here"
 
 msgid "Wallpaper colours"
 msgstr "Wallpaper colours"

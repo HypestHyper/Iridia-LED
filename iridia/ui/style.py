@@ -71,6 +71,11 @@ label > selection, text > selection, entry > text > selection {{ background: alp
 .rail > button:checked {{ background: {PRIMARY_CONTAINER}; color: {ON_PRIMARY_CONTAINER}; }}
 .rail > button:checked:hover {{ background: {PRIMARY_CONTAINER}; }}
 .rail > button:checked .icon {{ color: {ON_PRIMARY_CONTAINER}; font-variation-settings: "FILL" 1, "wght" 500, "opsz" 24; }}
+/* the new-version dot on Updates: small, in the accent, with a ring of the rail's background so it
+   reads against the icon */
+.badge-dot {{ min-width: 8px; min-height: 8px; border-radius: 4px; background: {PRIMARY};
+  box-shadow: 0 0 0 2px {SURFACE_DIM}; margin: 3px -3px 0 0; }}
+.rail > button:checked .badge-dot {{ box-shadow: 0 0 0 2px {PRIMARY_CONTAINER}; }}
 .rail-head {{ margin: 16px 0 4px 14px; }}
 
 /* ---------- Home: the backlight ---------- */

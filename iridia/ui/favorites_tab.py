@@ -505,16 +505,29 @@ class FavoritesPage:
         def upd(st, z):
             ext = list(st.get("extracted_colors") or [])
             n = 6 if t.get("size") in ("w", "l") else 3
-            cur = (z[0].get("pattern_colors") or [0])[0]
-            sig = (tuple(ext[:n]), repr(cur), n)
+            # a colour is ringed only when every strip on the card shows it: one strip changed on its own
+            # card (a Govee, say) mustn't look like the whole card changed
+            firsts = [(x.get("pattern_colors") or [0])[0] for x in z]
+            same = len({repr(f) for f in firsts}) == 1
+            cur = firsts[0] if same and firsts else None
+            sig = (tuple(ext[:n]), repr(cur), same, n)
             if sig == shown[0]:
                 return
             shown[0] = sig
             widgets.clear(row)
             for i, h in enumerate(ext[:n]):
-                row.append(Swatch(h, 26, selected=cur == i, tooltip=_("Wallpaper colour {n}").format(n=i + 1),
+                row.append(Swatch(h, 26, selected=cur == i,
+                                  tooltip=_("Wallpaper colour {n} (#{hex})").format(n=i + 1, hex=h),
                                   on_click=lambda i=i: self._zones(tg, color=i)))
+            # the colour they share, when it isn't among the few shown: a later wallpaper colour, or your own
+            if isinstance(cur, int) and not isinstance(cur, bool) and n <= cur < len(ext):
+                row.append(Swatch(ext[cur], 26, selected=True,
+                                  tooltip=_("Wallpaper colour {n} (#{hex})").format(n=cur + 1, hex=ext[cur])))
+            elif isinstance(cur, str) and len(cur.lstrip("#")) == 6:
+                row.append(Swatch(cur.lstrip("#"), 26, selected=True,
+                                  tooltip=_("Your colour #{hex}").format(hex=cur.lstrip("#"))))
             row.append(pick)
+            outer.set_tooltip_text(_("Colour") if same else _("Your strips use different colours here"))
         return upd
 
     def _colour_popup(self, anchor, tg, t):

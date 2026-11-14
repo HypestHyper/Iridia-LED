@@ -69,7 +69,10 @@ class Board(Gtk.Grid):
     """Square cells, as many columns as fit; items span 1 or 2 cells each way and fill gaps in order."""
 
     CELL = 150
-    ROW = 120               # a row's height
+    # heights come in thirds of a row: a card is as tall as its size says, or a little taller when what's
+    # on it needs it (at most a third of a row more), not a whole row more
+    ROW = 32                # a third of a row's height
+    UNITS = 3               # thirds in one row of a size (a Small card: 3 x 32 + 2 x 12 = 120)
     GAP = 12
 
     def __init__(self):
@@ -133,6 +136,7 @@ class Board(Gtk.Grid):
         colw = max(self.CELL, (self._width - self.GAP * (cols - 1)) // cols) if self._width else self.CELL
         for w, size in self._items:
             sw, sh = SPAN.get(size, (1, 1))
+            sh *= self.UNITS
             sw = min(sw, cols)
             # taller than its size when what's on it needs the room: nothing you picked is left out
             width = max(colw * sw + self.GAP * (sw - 1), w.measure(Gtk.Orientation.HORIZONTAL, -1)[0])
@@ -374,12 +378,26 @@ class FavoritesPage:
             head.append(pw)
             updaters.append(lambda st, z, show=show: show(any(x.get("enabled", True) for x in z)))
         narrow = t.get("size") in ("s", "t")       # one column wide
+        # a wide or large card uses its width: brightness, colours and effect on the left, the switches on
+        # the right, instead of everything in one tall column (which made a wide card as tall as a large one)
+        has_upper = bool(keys) and any(k in ctl for k in ("brightness", "colors", "effect"))
+        has_rows = (bool(keys) and any(k in ctl for k in ("follow", "stay_lit", "control"))) or \
+            any(k in ctl for k in ("looks", "scenes", "switches"))
+        split = not narrow and has_upper and has_rows
+        upper = c
+        if split:
+            upper = vbox(10, hexpand=True)
+            right = vbox(2, hexpand=True)
+            right.set_valign(Gtk.Align.START)
+            pair = hbox(24, upper, right)
+            pair.set_homogeneous(True)
+            c.append(pair)
         if "brightness" in ctl and keys:
-            self._brightness_row(c, tg, narrow, updaters)
+            self._brightness_row(upper, tg, narrow or split, updaters)
         if "colors" in ctl and keys:
-            updaters.append(self._colours(c, tg, small, t))
+            updaters.append(self._colours(upper, tg, small or split, t))
         if "effect" in ctl and keys:
-            self._effect_rows(c, tg, updaters)
+            self._effect_rows(upper, tg, updaters)
 
         # everything that is on or off: a row each, its name and a switch, so it's plain which is which
         rows = []
@@ -413,10 +431,10 @@ class FavoritesPage:
                              lambda v, w=w: self._switch(w, v)))
         if rows:
             # two per line on a wide or large card, once there are enough to fill both columns
-            cols = 1 if narrow or len(rows) < 4 else 2
+            cols = 1 if narrow or split or len(rows) < 4 else 2
             grid = Gtk.FlowBox(selection_mode=Gtk.SelectionMode.NONE, homogeneous=True, column_spacing=16,
                                row_spacing=2, min_children_per_line=cols, max_children_per_line=cols)
-            c.append(grid)
+            (right if split else c).append(grid)
             for ico, short, name, get, put in rows:
                 sw = Toggle(False, put)
                 lbl = label(short, ("body",), ellipsize=True)      # short: a word or two fits any size
@@ -506,7 +524,7 @@ class FavoritesPage:
 
         def upd(st, z):
             ext = list(st.get("extracted_colors") or [])
-            n = 6 if t.get("size") in ("w", "l") else 3
+            n = 6 if t.get("size") in ("w", "l") and not small else 3     # small: a narrow card, or half of one
             # a colour is ringed only when every strip on the card shows it: one strip changed on its own
             # card (a Govee, say) mustn't look like the whole card changed
             firsts = [(x.get("pattern_colors") or [0])[0] for x in z]

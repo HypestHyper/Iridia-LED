@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.4 — 2026-11-15
 
 - **Brightness sliders show each strip's real brightness:** for a strip that follows the monitor, the
   monitor's level (through its range and night mode), not 100%. Switching a network light on or off no

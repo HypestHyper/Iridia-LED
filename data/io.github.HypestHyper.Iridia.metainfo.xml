@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.4" date="2026-11-15">
+      <description>
+        <ul>
+          <li>Brightness sliders show each strip's real brightness</li>
+          <li>Each strip can follow its own monitor</li>
+          <li>Manual brightness is a slider</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.3" date="2026-11-14">
       <description>
         <ul>

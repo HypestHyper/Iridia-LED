@@ -471,9 +471,13 @@ class FavoritesPage:
         def upd(st, z):
             # what the strips really show: the monitor's level for those that follow it, their own
             # brightness for the rest
-            mon = st.get("brightness") if isinstance(st.get("brightness"), (int, float)) else None
-            levels = [mon if x.get("brightness_sync") and mon is not None else int(x.get("manual_brightness", 100))
-                      for x in z]
+            # (each strip's level as the daemon has it now: its monitor's, through its range and night mode,
+            # or its own; a light set to "only when I change it" doesn't move it on a card of several)
+            have = st.get("zone_brightness") or {}
+            keys = self._keys(tg, st)
+            levels = [have.get(k, int((self._zone_cfg(k, st) or {}).get("manual_brightness", 100))) for k in keys
+                      if len(keys) == 1 or not (self._zone_cfg(k, st) or {}).get("on_demand")] or \
+                [int(x.get("manual_brightness", 100)) for x in z]
             sl.set_quiet(int(round(sum(levels) / len(levels))))
             note.set_visible(any(x.get("brightness_sync") for x in z))
         updaters.append(upd)

@@ -59,6 +59,10 @@ class MiniSlider(Gtk.Box):
         self._cb(round(self.scale.get_value(), self._digits))
         return False
 
+    def busy(self) -> bool:
+        """A change you made is still on its way (the callback comes once the slider rests)."""
+        return self._job is not None
+
     def set_quiet(self, v):
         if self._job is None and abs(self.scale.get_value() - v) > 1e-9:
             self._quiet = True

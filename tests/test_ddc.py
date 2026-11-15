@@ -144,3 +144,18 @@ def test_the_command_that_installs_ddcutil(tools, monkeypatch, release, tool, ex
     assert D.install_command() == expect
     script = D.install_script(expect)
     assert script.startswith(" ".join(expect) + " && ") and "modprobe i2c-dev" in script
+
+
+def test_a_second_monitor_is_read_for_the_strips_that_follow_it(two_monitors, monkeypatch):
+    monkeypatch.setenv("ANSWER4", "1")
+    c = D.DDCController(poll_interval=1)
+    _wait(c)
+    assert c.bus == 4 and c.brightness_of(None) == c.last_brightness
+    c.set_wanted({6, 4, "x"})
+    assert c.wanted == {6, 4}
+    c._poll()
+    c._poll_others()
+    assert c.brightness_of(6) == 25 and c.brightness_of(4) == c._poll() == 70
+    assert c.brightness_of(9) is None                        # a monitor that isn't there
+    c.set_wanted(set())
+    assert c.readings == {} and c.brightness_of(6) is None

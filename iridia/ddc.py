@@ -57,6 +57,8 @@ class DDCController:
         self._quiet = []                    # ddcutil 2.x: keep its own syslog messages out of the journal
         self.source = None                  # "ddc", "backlight" or None
         self._backlight = None              # (brightness file, max)
+        self.wanted: set = set()            # other monitors (I2C buses) some strip follows, read as well
+        self.readings: dict = {}            # their latest brightness, bus -> 0-100
         # ddcutil can take seconds (more on some GPU drivers), so it never runs on the
         # daemon's main loop: detection and every poll happen on a worker thread and
         # get_brightness() answers right away with the latest reading.
@@ -201,6 +203,8 @@ class DDCController:
             def poll():
                 try:
                     self._poll()
+                    if self.source == "ddc" and self.wanted:
+                        self._poll_others()
                 except Exception as e:      # noqa: BLE001
                     logger.debug(f"DDC poll failed: {type(e).__name__}: {e}")
                 finally:
@@ -248,6 +252,40 @@ class DDCController:
 
     def is_available(self):
         return self._available
+
+    def set_wanted(self, buses):
+        """The monitors besides the main one that some strip follows: read them on each poll too."""
+        self.wanted = {b for b in buses if isinstance(b, int) and not isinstance(b, bool)}
+        for b in list(self.readings):
+            if b not in self.wanted:
+                del self.readings[b]
+
+    def brightness_of(self, bus):
+        """A monitor's latest brightness: the main one for None (or its own bus), another one once it
+        has been read, else None (the caller falls back to the main one)."""
+        if bus is None or bus == self.bus:
+            return self.last_brightness if self._available else None
+        return self.readings.get(bus)
+
+    def _read_bus(self, bus):
+        out = self._run(["ddcutil", "getvcp", "10", "--bus", str(bus), "--terse"] + self._quiet)
+        parts = out.split()
+        if len(parts) >= 5:
+            try:
+                cur, mx = int(parts[3]), int(parts[4])
+                if mx > 0:
+                    return int(cur / mx * 100)
+            except (ValueError, IndexError):
+                pass
+        return None
+
+    def _poll_others(self):
+        for bus in sorted(self.wanted):
+            if bus == self.bus or not any(d.get("bus") == bus for d in self.displays):
+                continue
+            b = self._read_bus(bus)
+            if b is not None:
+                self.readings[bus] = b
 
 
 OS_RELEASE = "/etc/os-release"

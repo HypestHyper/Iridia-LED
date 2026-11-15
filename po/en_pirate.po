@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 05:03+0000\n"
+"POT-Creation-Date: 2026-11-15 08:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -3613,8 +3613,19 @@ msgstr "Some lanterns o' this strip flash fer messages (the line under 'em). Ope
 msgid "Follow monitor brightness"
 msgstr "Follow the spyglass brightness"
 
+msgid "Main monitor"
+msgstr "Main spyglass"
+
+msgid "The monitor this strip follows. Main monitor is the one picked in Settings, Monitor brightness."
+msgstr ""
+"The spyglass this strip follows. Main spyglass be the one picked in Ship's Articles, Monitor "
+"brightness."
+
 msgid "Manual"
 msgstr "By hand"
+
+msgid "Manual brightness"
+msgstr "Brightness by hand"
 
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr "No spyglass brightness to follow (see Settings, Spyglass brightness), so By hand be used."
@@ -3754,6 +3765,13 @@ msgstr "Lit: click to douse {what}"
 #, python-brace-format
 msgid "Off: click to turn {what} on"
 msgstr "Doused: click to light {what}"
+
+msgid "Used while it doesn't follow a monitor (or there's none to follow)"
+msgstr "Used while it don't follow a spyglass (or there be none to follow)"
+
+#, python-brace-format
+msgid "Monitor on I2C bus {bus}"
+msgstr "Spyglass on I2C bus {bus}"
 
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes an' the rest."

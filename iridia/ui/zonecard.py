@@ -468,10 +468,24 @@ class ZoneCard(Gtk.Box):
         r1 = hbox(10)
         row1, self._sync = switch_row(_("Follow monitor brightness"), self.cfg.get("brightness_sync", False), self._on_sync)
         r1.append(row1)
-        r1.append(label(_("Manual"), ("small", "dim"), xalign=1.0))
-        self._manual = Spin(0, 100, self.cfg.get("manual_brightness", 100), self._on_manual)
-        r1.append(self._manual)
+        # which monitor, when there's more than one that answers (hidden otherwise)
+        self._own_mon = Dropdown([_("Main monitor")], _("Main monitor"), self._on_own_monitor, placeholder="")
+        self._own_mon.set_tooltip_text(_("The monitor this strip follows. Main monitor is the one picked in "
+                                         "Settings, Monitor brightness."))
+        self._own_mon.set_visible(False)
+        self._own_mon_buses: list = [None]
+        if not self.global_mode:
+            r1.append(self._own_mon)
         br.append(r1)
+        # its own brightness, for when it doesn't follow a monitor (or there's none to follow)
+        r1b = hbox(10)
+        r1b.append(label(_("Manual"), ("small", "dim")))
+        self._manual = MiniSlider("", 0, 100, self.cfg.get("manual_brightness", 100), 5, "%", self._on_manual)
+        self._manual.set_hexpand(True)
+        self._manual.scale.update_property([Gtk.AccessibleProperty.LABEL], [_("Manual brightness")])
+        r1b.append(self._manual)
+        br.append(r1b)
+        self._manual_row = r1b
         self._follow_ok = True
         self._sync_note = label(_("No monitor brightness to follow (see Settings, Monitor brightness), so Manual is "
                                   "used."), ("small", "faint"), wrap=True)
@@ -1006,6 +1020,25 @@ class ZoneCard(Gtk.Box):
         self._apply_color_limit()
         self._update_preview()
 
+    def _level(self, st, zcfg) -> int:
+        """What its brightness slider shows: the strip's brightness as it is now (its monitor's, through
+        its range and night mode, when it follows one), from the daemon. Everything shows the brightest of
+        the strips that go with the rest (a network light set to "only when I change it" doesn't count,
+        so switching it off doesn't move it)."""
+        levels = st.get("zone_brightness") or {}
+        if not self.global_mode:
+            return levels.get(f"{self.device_name}|{self.zone_name or ''}", zcfg.get("manual_brightness", 100))
+        vals = []
+        for d, dc in (st.get("device_configs") or {}).items():
+            if not isinstance(dc, dict) or not dc.get("enabled", True) or dc.get("on_demand"):
+                continue
+            zones = dc.get("zones") or {}
+            for zn, zc in (zones.items() if zones else [("", dc)]):
+                if isinstance(zc, dict) and zc.get("enabled", True) and not zc.get("hands_off") \
+                        and not zc.get("on_demand") and f"{d}|{zn}" in levels:
+                    vals.append(levels[f"{d}|{zn}"])
+        return max(vals) if vals else zcfg.get("manual_brightness", 100)
+
     def _mini_update(self, colors):
         off = not self.cfg.get("enabled", True) or bool(self.cfg.get("hands_off"))
         self._mini.set_colors(colors, faded=off)
@@ -1121,6 +1154,9 @@ class ZoneCard(Gtk.Box):
     def _on_sync(self, v):
         self._call(self.client.set_zone_brightness_sync, self.device_name, self.zone_name, v)
         self._sync_note.set_visible(bool(v) and not self._follow_ok)
+        self.cfg = dict(self.cfg, brightness_sync=bool(v))
+        st = self.app._status if isinstance(getattr(self.app, "_status", None), dict) else {}
+        self.set_monitors_for_strip(st.get("ddc_displays") or [])
 
     def set_monitors(self, items, current, show: bool):
         """The Everything card's monitor list (the one in Settings, kept in step)."""
@@ -1132,6 +1168,44 @@ class ZoneCard(Gtk.Box):
         """Whether there's a monitor brightness to follow (the note says Manual is used otherwise)."""
         self._follow_ok = ok
         self._sync_note.set_visible(self._sync.get_active() and not ok)
+
+    def _on_own_monitor(self, v):
+        try:
+            i = self._own_mon._items.index(v)
+        except ValueError:
+            return
+        bus = self._own_mon_buses[i] if i < len(self._own_mon_buses) else None
+        self.cfg = dict(self.cfg, brightness_monitor=bus)
+        self._hold_until = time.time() + 2.0
+        self._call(lambda: self.client.set_zone_strip(self.device_name, self.zone_name, brightness_monitor=bus))
+
+    def _dim_manual(self):
+        """Manual is what it shows when it doesn't follow a monitor: faded while it does."""
+        follow = bool(self.cfg.get("brightness_sync"))
+        self._manual_row.set_opacity(0.55 if follow else 1.0)
+        self._manual_row.set_tooltip_text(_("Used while it doesn't follow a monitor (or there's none to follow)")
+                                          if follow else None)
+
+    def set_monitors_for_strip(self, displays):
+        """The monitors that answer: a choice next to Follow monitor brightness when there are two or more."""
+        ok = [d for d in displays or [] if d.get("ok")]
+        self._dim_manual()
+        if self.global_mode:
+            return
+        if len(ok) < 2:
+            self._own_mon.set_visible(False)
+            return
+        buses = [None] + [d.get("bus") for d in ok]
+        names = [_("Main monitor")] + [d.get("name") or _("Monitor on I2C bus {bus}").format(bus=d.get("bus"))
+                                       for d in ok]
+        cur = self.cfg.get("brightness_monitor")
+        sel = names[buses.index(cur)] if cur in buses else names[0]
+        if buses != self._own_mon_buses or self._own_mon._items != names:
+            self._own_mon_buses = buses
+            self._own_mon.set_items(names, sel)
+        elif self._own_mon.value() != sel:
+            self._own_mon.set_value(sel)
+        self._own_mon.set_visible(bool(self.cfg.get("brightness_sync")))
 
     def _on_manual(self, v):
         self._call(self.client.set_zone_manual_brightness, self.device_name, self.zone_name, int(v))
@@ -1257,11 +1331,13 @@ class ZoneCard(Gtk.Box):
         self._sync_note.set_visible(self._sync.get_active() and not self._follow_ok)
         if not self._manual.busy():
             self._manual.set_quiet(zcfg.get("manual_brightness", 100))
-        mon = (self.app._status or {}).get("brightness") if isinstance(getattr(self.app, "_status", None), dict) else None
-        follow = zcfg.get("brightness_sync", False) and isinstance(mon, (int, float))
-        self._hbright.set_quiet(int(mon) if follow else int(zcfg.get("manual_brightness", 100)))
+        st = self.app._status if isinstance(getattr(self.app, "_status", None), dict) else {}
+        level = self._level(st, zcfg)
+        follow = bool(zcfg.get("brightness_sync")) and st.get("monitor_brightness") is not None
+        self._hbright.set_quiet(int(level))
         self._hbright.set_tooltip_text(_("Brightness: following the monitor. Move it to set this strip's own.")
                                        if follow else _("Brightness"))
+        self.set_monitors_for_strip(st.get("ddc_displays") or [])
         self._mini_update(self._mini.colors)
         if not self._range.dragging():
             br = zcfg.get("brightness_range", [0, 100])

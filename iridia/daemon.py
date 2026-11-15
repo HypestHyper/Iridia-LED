@@ -67,6 +67,9 @@ def clean_zone_cfg(z: dict) -> dict:
     if z.get("mode") is not None and z.get("mode") not in ("full", "palette", "calibrated"):
         out.pop("mode", None)
     out["manual_brightness"] = _num(z.get("manual_brightness", 100), 100, 0, 100)
+    bm = z.get("brightness_monitor")
+    if bm is not None and (isinstance(bm, bool) or not isinstance(bm, int) or not 0 <= bm < 1000):
+        out.pop("brightness_monitor", None)         # which monitor it follows: an I2C bus, or the main one
     br = z.get("brightness_range", [0, 100])
     if not isinstance(br, (list, tuple)) or len(br) != 2:
         br = [0, 100]
@@ -2142,6 +2145,11 @@ class Daemon:
             changes["on_demand"] = True if req["on_demand"] else None
         if "hands_off" in req:                 # Iridia sends it nothing (it keeps what it shows)
             changes["hands_off"] = True if req["hands_off"] else None
+        if "brightness_monitor" in req:        # the monitor it follows: an I2C bus, or None for the main one
+            bm = req["brightness_monitor"]
+            if bm is not None and (isinstance(bm, bool) or not isinstance(bm, int) or not 0 <= bm < 1000):
+                return {"ok": False, "error": "brightness_monitor is a monitor's I2C bus number, or null"}
+            changes["brightness_monitor"] = bm
         if "keep_color" in req:                # a network light: its own app's colour stays
             changes["keep_color"] = True if req["keep_color"] else None
         for key, lo, hi in (("leds_per_pixel", 1, 20), ("power_limit", 0, 100), ("ma_per_led", 1, 500)):
@@ -2320,6 +2328,20 @@ class Daemon:
                     return True
         return False
 
+    def _zone_levels(self) -> dict:
+        """Each strip's brightness as it is now (its monitor's, through its range and night mode, or its
+        own): what its brightness slider shows."""
+        out = {}
+        for name, dev in self.config.devices_view.items():
+            if not isinstance(dev, dict):
+                continue
+            zones = dev.get("zones")
+            items = zones.items() if isinstance(zones, dict) and zones else [("", dev)]
+            for zn, z in items:
+                if isinstance(z, dict):
+                    out[self._zone_key(name, zn)] = int(round(self._get_zone_brightness(clean_zone_cfg(z))))
+        return out
+
     def _shown_brightness(self) -> int:
         """The brightness the LEDs are at (the brightest switched-on zone), for the window's header."""
         best = None
@@ -2333,10 +2355,27 @@ class Daemon:
                     best = b if best is None else max(best, b)
         return best if best is not None else 100
 
+    def _monitor_choices(self) -> set:
+        """The monitors (I2C buses) switched-on strips that follow a monitor of their own have picked."""
+        out = set()
+        for dev in self.config.devices_view.values():
+            if not isinstance(dev, dict) or not dev.get("enabled", True):
+                continue
+            zones = dev.get("zones")
+            for z in (zones.values() if isinstance(zones, dict) and zones else [dev]):
+                if isinstance(z, dict) and z.get("enabled", True) and z.get("brightness_sync") and \
+                        isinstance(z.get("brightness_monitor"), int) and not isinstance(z["brightness_monitor"], bool):
+                    out.add(z["brightness_monitor"])
+        return out
+
     def _read_brightness(self):
         if not self._follows_monitor():
             return
+        self.ddc.set_wanted(self._monitor_choices())
+        before = dict(self.ddc.readings)
         brightness = self.ddc.get_brightness()
+        if self.ddc.readings != before:
+            self._needs_update = True
         if brightness is not None and brightness != self._current_brightness:
             self.logger.debug(f"Brightness changed: {self._current_brightness}% -> {brightness}%")
             self._current_brightness = brightness
@@ -2954,6 +2993,11 @@ class Daemon:
             # nothing to follow (no ddcutil, no monitor answers, the chosen one is off): the Manual value
             return zcfg.get("manual_brightness", 100)
         brightness = self._current_brightness
+        bm = zcfg.get("brightness_monitor")
+        if bm is not None and self.ddc.source == "ddc":
+            other = self.ddc.brightness_of(bm)       # a monitor of its own, once it has been read
+            if other is not None:
+                brightness = other
         range_min, range_max = zcfg.get("brightness_range", [0, 100])
         invert = zcfg.get("invert_brightness", False)
         if invert:
@@ -3538,6 +3582,7 @@ class Daemon:
             "strip_info": dict(self._strip_info),
             "rgb_test": ({"device": self._rgbtest[0], "zone": self._rgbtest[1]} if self._rgbtest else None),
             "brightness": self._shown_brightness(),
+            "zone_brightness": self._zone_levels(),
             "monitor_brightness": (self._current_brightness if self.ddc.is_available() and self._follows_monitor()
                                    else None),
             "ddc_available": self.ddc.is_available(),

@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **Brightness sliders show each strip's real brightness:** for a strip that follows the monitor, the
+  monitor's level (through its range and night mode), not 100%. Switching a network light on or off no
+  longer moves every slider (they showed the brightest strip, which was that light while it was on).
+- **A monitor for each strip:** with more than one monitor that answers, a small menu next to *Follow
+  monitor brightness* picks which one a strip follows (the main one, from Settings, unless you choose
+  another). With one monitor it doesn't show.
+- **Manual brightness is a slider** on the Devices page, not a number box; it's faded while the strip
+  follows a monitor, since it's only used when it doesn't.
+
 ## 1.4.3 — 2026-11-14
 
 - **Favourites cards fit what's on them:** a wide or large card puts brightness, colours and its effect on

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 05:03+0000\n"
+"POT-Creation-Date: 2026-11-15 08:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_posh\n"
@@ -3647,8 +3647,19 @@ msgstr ""
 msgid "Follow monitor brightness"
 msgstr "Defer to the looking-glass's brightness"
 
+msgid "Main monitor"
+msgstr "The principal monitor"
+
+msgid "The monitor this strip follows. Main monitor is the one picked in Settings, Monitor brightness."
+msgstr ""
+"The monitor this strip follows. The principal monitor is the one chosen in Preferences, Monitor "
+"brightness."
+
 msgid "Manual"
 msgstr "By hand"
+
+msgid "Manual brightness"
+msgstr "Manual brightness"
 
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr ""
@@ -3790,6 +3801,13 @@ msgstr "On: click to switch {what} off"
 #, python-brace-format
 msgid "Off: click to turn {what} on"
 msgstr "Off: click to switch {what} on"
+
+msgid "Used while it doesn't follow a monitor (or there's none to follow)"
+msgstr "Employed whilst it doesn't follow a monitor (or there is none to follow)"
+
+#, python-brace-format
+msgid "Monitor on I2C bus {bus}"
+msgstr "Monitor upon I2C bus {bus}"
 
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Like a strip: wallpaper colours, the monitor, the lock, sleep, tableaux and the rest."

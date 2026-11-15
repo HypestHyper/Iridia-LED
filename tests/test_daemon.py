@@ -71,6 +71,15 @@ class FakeDDC:
         if choice != "unchanged":
             self.choice = choice
 
+    readings: dict = {}
+    wanted: set = set()
+
+    def set_wanted(self, buses):
+        self.wanted = set(buses)
+
+    def brightness_of(self, bus):
+        return self.brightness if bus is None or bus == self.bus else self.readings.get(bus)
+
 
 DEVICES = {
     # A flat, single-zone device (most ARGB headers)
@@ -1230,3 +1239,24 @@ def test_a_cards_control_switch_and_brightness_leave_the_monitor(d):
     assert d.config.get(("devices", "Strip", "hands_off"))
     assert _cmd(d, "set_zones", targets=["Strip|"], set={"hands_off": False})["ok"]
     assert not d.config.get(("devices", "Strip", "hands_off"))
+
+
+def test_each_strip_follows_its_own_monitor_and_reports_its_level(d):
+    """A strip can follow another monitor than the main one; the status says every strip's level."""
+    d.ddc.available, d.ddc.source, d.ddc.bus, d.ddc.brightness = True, "ddc", 3, 20
+    d.ddc.readings = {}
+    for z in ("A", "B"):
+        _cmd(d, "set_zone_brightness_sync", device="Hub v1.0", zone=z, enabled=True)
+    d._read_brightness()
+    assert _cmd(d, "set_zone_strip", device="Hub v1.0", zone="B", brightness_monitor=7)["ok"]
+    assert not _cmd(d, "set_zone_strip", device="Hub v1.0", zone="B", brightness_monitor="x")["ok"]
+    d._read_brightness()
+    assert d.ddc.wanted == {7}
+    lv = _cmd(d, "status")["zone_brightness"]
+    assert lv["Hub v1.0|A"] == 20 and lv["Hub v1.0|B"] == 20       # not read yet: the main monitor's
+    d.ddc.readings = {7: 65}
+    lv = _cmd(d, "status")["zone_brightness"]
+    assert lv["Hub v1.0|A"] == 20 and lv["Hub v1.0|B"] == 65 and lv["Strip|"] == 100
+    assert _cmd(d, "set_zone_strip", device="Hub v1.0", zone="B", brightness_monitor=None)["ok"]
+    assert "brightness_monitor" not in d.config.get(("devices", "Hub v1.0", "zones", "B"))
+    assert _cmd(d, "status")["zone_brightness"]["Hub v1.0|B"] == 20

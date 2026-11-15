@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-14 05:03+0000\n"
+"POT-Creation-Date: 2026-11-15 08:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -3456,8 +3456,19 @@ msgstr "Ces bisous clignotent pour le facteur. Oh là là."
 msgid "Follow monitor brightness"
 msgstr "La crêpe est tombée par terre"
 
+msgid "Main monitor"
+msgstr "Écran principal"
+
+msgid "The monitor this strip follows. Main monitor is the one picked in Settings, Monitor brightness."
+msgstr ""
+"L'écran que suit cette bande. L'écran principal est celui choisi dans Oh là là, Luminosité de "
+"l'écran."
+
 msgid "Manual"
 msgstr "Café"
+
+msgid "Manual brightness"
+msgstr "Bisou à la main"
 
 msgid "No monitor brightness to follow (see Settings, Monitor brightness), so Manual is used."
 msgstr "Pas de lumière (voir Réglages, Le fromage qui brille), alors Café."
@@ -3591,6 +3602,13 @@ msgstr "Allumé : cliquer pour éteindre {what}"
 #, python-brace-format
 msgid "Off: click to turn {what} on"
 msgstr "Éteint : cliquer pour allumer {what}"
+
+msgid "Used while it doesn't follow a monitor (or there's none to follow)"
+msgstr "Utilisé quand elle ne suit pas d'écran, voilà"
+
+#, python-brace-format
+msgid "Monitor on I2C bus {bus}"
+msgstr "Écran sur le bus I2C {bus}"
 
 msgid "Like a strip: wallpaper colours, the monitor, lock, sleep, scenes and the rest."
 msgstr "Comme une bande. Voilà."

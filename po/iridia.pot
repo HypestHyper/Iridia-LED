@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-15 08:44+0000\n"
+"POT-Creation-Date: 2026-11-25 08:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1140,7 +1140,7 @@ msgstr ""
 
 #: iridia/ui/app.py:1729 iridia/ui/favorites_tab.py:35 iridia/ui/favorites_tab.py:460
 #: iridia/ui/keybinds_tab.py:136 iridia/ui/scenes_tab.py:75 iridia/ui/zonecard.py:248
-#: iridia/ui/zonecard.py:467 iridia/ui/zonecard.py:1339
+#: iridia/ui/zonecard.py:467 iridia/ui/zonecard.py:1342
 msgid "Brightness"
 msgstr ""
 
@@ -4685,12 +4685,19 @@ msgid ""
 msgstr ""
 
 #: iridia/ui/zonecard.py:1276
+#, python-brace-format
+msgid ""
+"OpenRGB didn't know how many LEDs this header has, so Iridia guessed {n} to light it up. Click "
+"Count LEDs to set the real number."
+msgstr ""
+
+#: iridia/ui/zonecard.py:1279
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "
 "pattern)."
 msgstr ""
 
-#: iridia/ui/zonecard.py:1338
+#: iridia/ui/zonecard.py:1341
 msgid "Brightness: following the monitor. Move it to set this strip's own."
 msgstr ""
 

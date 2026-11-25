@@ -29,8 +29,21 @@ class FakeOpenRGB:
         self.real = {}                # device -> [zone names]: what list_devices() reports
         self.epoch = 1                # goes up when OpenRGB reconnects or its device list changes
 
+    sizes: dict = {}                  # (device, zone) -> LEDs OpenRGB reports (0 when missing)
+    resizable: bool = False           # whether its zones can be resized (an ARGB header)
+    resized: list = []
+
     def list_devices(self):
-        return [{"name": d, "zones": [{"name": z, "led_count": 0} for z in zs]} for d, zs in self.real.items()]
+        hi = 1024 if self.resizable else 0
+        return [{"name": d, "zones": [{"name": z, "led_count": self.sizes.get((d, z), 0), "leds_min": 0,
+                                       "leds_max": hi} for z in zs]} for d, zs in self.real.items()]
+
+    def resize_zone(self, device, zone, size):
+        if not self.resizable:
+            return "not resizable"
+        self.resized = [*self.resized, (device, zone, size)]
+        self.sizes = {**self.sizes, (device, zone): size}
+        return None
 
     def send_frames(self, device, frames):
         self.frames.append((device, {z: list(f) for z, f in frames.items()}))
@@ -275,6 +288,39 @@ def test_a_new_device_doesnt_follow_the_monitor(d):
     d.openrgb.real["New Board"] = ["ARGB 1"]
     d._autoadd_devices()
     assert d.config.get(("devices", "New Board", "zones", "ARGB 1", "brightness_sync")) is False
+
+
+def test_a_new_header_with_no_size_gets_one_and_lights_up(d):
+    """A fresh install: OpenRGB reports motherboard ARGB headers with 0 LEDs, so they'd stay dark.
+    Iridia gives them a size and switches them on; Count LEDs sets the real number."""
+    d.openrgb.resizable = True
+    d.openrgb.real["New Board"] = ["ARGB 1"]
+    d._autoadd_devices()
+    z = d.config.get(("devices", "New Board", "zones", "ARGB 1"))
+    assert d.openrgb.resized == [("New Board", "ARGB 1", d.GUESSED_SIZE)]
+    assert z["enabled"] and z["led_count"] == d.GUESSED_SIZE and z["size_guessed"] and not z.get("unsized")
+    # counted for real: the guess is gone
+    assert d._cmd_resize_zone({"device": "New Board", "zone": "ARGB 1", "size": 24})["ok"]
+    z = d.config.get(("devices", "New Board", "zones", "ARGB 1"))
+    assert z["led_count"] == 24 and z["hw_size"] == 24 and not z["size_guessed"]
+
+
+def test_a_zone_that_cant_be_resized_stays_off_until_it_has_a_size(d):
+    d.openrgb.real["New Board"] = ["Fixed"]
+    d._autoadd_devices()
+    z = d.config.get(("devices", "New Board", "zones", "Fixed"))
+    assert z["unsized"] and not z["enabled"] and not z.get("size_guessed")
+
+
+def test_a_header_openrgb_forgot_the_size_of_gets_it_back_once(d):
+    d.openrgb.resizable = True
+    d.openrgb.real["New Board"] = ["ARGB 1"]
+    d._autoadd_devices()
+    d.openrgb.sizes = {}                    # OpenRGB restarted: the header is back at 0
+    d.openrgb.resized = []
+    d._autoadd_devices()
+    d._autoadd_devices()
+    assert d.openrgb.resized == [("New Board", "ARGB 1", d.GUESSED_SIZE)]
 
 
 def test_colours_are_sent_again_after_openrgb_reconnects(d):

@@ -412,7 +412,9 @@ class OpenRGBController:
         # the device dict is replaced, never changed in place, so this reads one whole list.
         result = []
         for name, dev in dict(self.devices).items():
-            zones = [{"name": zn, "led_count": len(getattr(z, "leds", None) or [])} for zn, z in zones_of(dev)]
+            zones = [{"name": zn, "led_count": len(getattr(z, "leds", None) or []),
+                      "leds_min": int(getattr(z, "leds_min", 0) or 0),
+                      "leds_max": int(getattr(z, "leds_max", 0) or 0)} for zn, z in zones_of(dev)]
             result.append({"name": name, "type": str(getattr(dev, "type", "unknown")),
                            "mode": self._active_mode_name(dev), "zones": zones,
                            "led_count": len(getattr(dev, "leds", None) or []),

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Lights on from the first run:** OpenRGB reports a motherboard's ARGB headers with no size until
+  someone sets one, and Iridia added those switched off, so on a fresh install often only the RAM lit
+  up. Now Iridia gives such a header 60 LEDs and switches it on (more than the strip has costs nothing);
+  its card says the size is a guess and *Count LEDs* sets the real number. When OpenRGB restarts and
+  forgets a size Iridia set, Iridia sets it again.
+
 ## 1.4.4 — 2026-11-15
 
 - **Brightness sliders show each strip's real brightness:** for a strip that follows the monitor, the

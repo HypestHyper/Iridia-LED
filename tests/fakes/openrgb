@@ -7,6 +7,8 @@ FAKE_OPENRGB_MODE (default "zero"):
           Direct, Static, Breathing, Spectrum Cycle and Wave modes, and a RAM stick (8 LEDs)
   alive   stays running without listening (an OpenRGB window with its SDK server off)
   crash   exits right away with code 3
+FAKE_OPENRGB_UNSIZED: with "devices", the ARGB channels start with no size (0 LEDs), like a
+  motherboard's headers on a fresh OpenRGB.
 FAKE_OPENRGB_LOG: a file each start is appended to ("PID ARG ARG...").
 FAKE_OPENRGB_PACKETS: a file each colour or mode packet is appended to ("TYPE DEVICE SIZE TIME").
 FAKE_OPENRGB_UPDATE_DELAY: seconds each colour write takes, like a slow controller (default 0).
@@ -71,6 +73,7 @@ def reply(conn, ptype, payload):
 DEVICES = []
 VERSION = 1
 if mode == "devices":
+    ARGB = 0 if os.environ.get("FAKE_OPENRGB_UNSIZED") else 20     # 0: headers nobody has sized
     from openrgb import utils as U
 
     def _mode(i, name, flags=0, color_mode=U.ModeColors.NONE, speed=None, colors=None, ncol=0):
@@ -93,7 +96,7 @@ if mode == "devices":
 
     SPEED, DIR_LR, BRIGHT, MODE_COLOR, PER_LED = 1, 2, 16, 64, 32
     DEVICES = [
-        _device("Fake ARGB Controller", [("Channel 1", 20), ("Channel 2", 20)], [
+        _device("Fake ARGB Controller", [("Channel 1", ARGB), ("Channel 2", ARGB)], [
             _mode(0, "Direct", PER_LED, U.ModeColors.PER_LED),
             _mode(1, "Static", MODE_COLOR | BRIGHT, U.ModeColors.MODE_SPECIFIC, colors=(1, 1), ncol=1),
             _mode(2, "Breathing", SPEED | MODE_COLOR | BRIGHT, U.ModeColors.MODE_SPECIFIC, (1, 5, 3), (1, 2), 2),

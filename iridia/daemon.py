@@ -2309,6 +2309,31 @@ class Daemon:
         self.logger.info(f"Resized OpenRGB zone {dev}/{zone} to {size} LEDs")
         return {"ok": True, "zone_size": self._real_zone_size(dev, zone)}
 
+    def _cmd_reset_strips(self, req: dict) -> dict:
+        """Every OpenRGB device's settings back to what a new install sets up: found again, sized
+        (a header with no size gets one), switched on. Network lights keep theirs."""
+        try:
+            found = self.openrgb.list_devices()
+        except Exception:
+            found = []
+        if not found:
+            return {"ok": False, "error": "OpenRGB isn't connected or reports no devices"}
+        devices = self.config.get("devices", {})
+        devices = devices if isinstance(devices, dict) else {}
+        # the sizes Iridia gave headers stay known, so they're set again if OpenRGB forgets them
+        sizes = {(d, z): zc["hw_size"] for d, dc in devices.items() if isinstance(dc, dict)
+                 for z, zc in (dc.get("zones") or {}).items() if isinstance(zc, dict) and zc.get("hw_size")}
+        self.config.set("devices", {k: v for k, v in devices.items() if isinstance(v, dict) and v.get("net")})
+        self._resized.clear()
+        self._autoadd_devices(found)
+        for (d, z), n in sizes.items():
+            if self._zone_exists(d, z) and not self._zone_cfg(d, z).get("hw_size"):
+                self.config.set(self._zone_config_path(d, z, "hw_size"), n)
+        self._last_sent = {}
+        self._needs_update = True
+        self.logger.info(f"Strips reset to defaults ({len(found)} OpenRGB device(s))")
+        return {"ok": True, "devices": len(found)}
+
     def _cmd_lights(self, req: dict) -> dict:
         on = self._lights_off if req.get("toggle") else bool(req.get("on", True))
         self._lights_off = not on
@@ -3228,6 +3253,8 @@ class Daemon:
             return self._cmd_identify(req)
         if cmd == "led_probe":
             return self._cmd_led_probe(req)
+        if cmd == "reset_strips":
+            return self._cmd_reset_strips(req)
         if cmd == "resize_zone":
             return self._cmd_resize_zone(req)
         if cmd.startswith("setup_"):

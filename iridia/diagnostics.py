@@ -74,6 +74,27 @@ def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
                 checks.append(Check(f"Zones of '{dname}'", True,
                                     ", ".join(f"{z['name']} ({z['led_count']} LEDs)"
                                               for z in real[dname].get("zones", []))))
+            # a strip with no LED count lights nothing (OpenRGB starts ARGB headers at 0)
+            zcfgs = dcfg.get("zones") or {}
+            dark = [z["name"] for z in real[dname].get("zones", [])
+                    if not z.get("led_count") and isinstance(zcfgs.get(z["name"]), dict)
+                    and not zcfgs[z["name"]].get("hidden") and not zcfgs[z["name"]].get("hands_off")]
+            dark += [zn for zn, zc in zcfgs.items() if isinstance(zc, dict) and zc.get("unsized")
+                     and not zc.get("hidden") and zn not in dark]
+            if dark:
+                checks.append(Check(
+                    f"LED count of '{dname}'", False,
+                    f"No LED count for {', '.join(dark)}, so {'it stays' if len(dark) == 1 else 'they stay'} dark",
+                    "On the Devices page, open the strip's card and click Count LEDs to set its size, or use "
+                    "Reset strips to defaults on the Service page. A channel with nothing plugged in can be "
+                    "hidden from its ⋮ menu instead."))
+            guessed = [zn for zn, zc in zcfgs.items() if isinstance(zc, dict) and zc.get("size_guessed")
+                       and not zc.get("hidden")]
+            if guessed:
+                checks.append(Check(
+                    f"Sizes of '{dname}'", None,
+                    f"{', '.join(guessed)}: set to {zcfgs[guessed[0]].get('led_count')} LEDs by Iridia, not counted",
+                    "If a strip isn't lit to the end, or is shorter, click Count LEDs on its card."))
             mode = real[dname].get("mode", "unknown")
             if mode.lower() not in ("direct", "unknown"):
                 checks.append(Check(

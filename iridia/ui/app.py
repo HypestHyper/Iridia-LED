@@ -873,6 +873,13 @@ class IridiaWindow(Gtk.ApplicationWindow):
         head.set_tooltip_text(ngettext('Everything changes {n} strip at once.', 'Everything changes all {n} strips at once.',
                                        len(cfgs)).format(n=len(cfgs)))
         self._dev_box.append(head)
+        self._guess_card = card(spacing=6)
+        self._guess_card.add_css_class("guess-note")
+        self._guess_lbl = label("", ("body",), wrap=True)
+        self._guess_card.append(hbox(12, icon("straighten", classes=("warn-text",)), self._guess_lbl))
+        self._guess_card.set_margin_bottom(12)
+        self._dev_box.append(self._guess_card)
+        self._show_guessed(devices)
         self._global_card = ZoneCard(self, "*", "*", merged, extracted, custom, GlobalClient(self.client),
                                      global_mode=True, expanded=expanded.get("*", False), title=_("Everything"))
         self._global_card.sync_from_status(merged, extracted, custom, mixed)
@@ -948,7 +955,31 @@ class IridiaWindow(Gtk.ApplicationWindow):
                 if c is not None:
                     c.set_hw(n, single)
 
+    def _show_guessed(self, devices):
+        """Strips OpenRGB gave no size for got one from Iridia: say so until each is counted."""
+        names = []
+        for d, dc in devices.items():
+            zones = dc.get("zones") or {}
+            for z, zc in (zones.items() if zones else [("", dc)]):
+                if isinstance(zc, dict) and zc.get("size_guessed") and zc.get("enabled", True) \
+                        and not zc.get("hidden"):
+                    names.append((zc.get("display_name") or z or d, zc.get("led_count", 0)))
+        card_ = getattr(self, "_guess_card", None)
+        if card_ is None:
+            return
+        card_.set_visible(bool(names))
+        if names:
+            t = ngettext(
+                "{names} is set to {n} LEDs, because OpenRGB didn't say how many it has. If it isn't lit to the "
+                "end, or the strip is shorter, open its card and click Count LEDs to set the real number.",
+                "{names} are set to {n} LEDs each, because OpenRGB didn't say how many they have. If one isn't "
+                "lit to the end, or a strip is shorter, open its card and click Count LEDs to set the real number.",
+                len(names)).format(names=", ".join(n for n, _c in names), n=max(c for _n, c in names))
+            if t != self._guess_lbl.get_label():
+                self._guess_lbl.set_label(t)
+
     def _sync_devices(self, devices, extracted, custom):
+        self._show_guessed(devices)
         if self._global_card is not None:
             merged, mixed = merge_zone_cfgs(self._all_zone_cfgs(devices))
             self._global_card.sync_from_status(merged, extracted, custom, mixed)
@@ -2310,6 +2341,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
                        "back. It won't touch an OpenRGB window."), ("small", "faint"), wrap=True))
         p.append(c)
 
+        p.append(section(_("Strips"), _("When a strip stays dark or its settings are a mess.")))
+        c = card()
+        c.append(hbox(8, button(_("Reset strips to defaults…"), "settings_backup_restore", "danger",
+                                self._reset_strips)))
+        c.append(label(_("Finds your OpenRGB devices again and sets every strip up the way a new install does: "
+                         "switched on, sized, in the wallpaper's colours. Network lights, Favourites and your other "
+                         "settings stay."), ("small", "faint"), wrap=True))
+        p.append(c)
+
         p.append(section(_("Diagnostics")))
         c = card()
         c.append(button(_("Run diagnostics"), "troubleshoot", "filled", self._run_diagnostics))
@@ -2495,6 +2535,19 @@ class IridiaWindow(Gtk.ApplicationWindow):
         dialogs.confirm(self, _("Restart OpenRGB server"), _("This stops and relaunches the OpenRGB SDK server (about 4 "
                                                         "seconds), which briefly interrupts any other software using it."),
                         lambda: self.bg(self.client.restart_openrgb_server), yes=_("Restart"), danger=True)
+
+    def _reset_strips(self):
+        def done(r):
+            if r.get("ok"):
+                self.toast(_("Strips are back to their defaults"))
+            else:
+                self.toast(r.get("error") or _("Couldn't reset the strips"))
+            self._poll_once()
+        dialogs.confirm(self, _("Reset strips to defaults"), _(
+            "Every strip from OpenRGB goes back to how a new install sets it up: switched on, sized, in the "
+            "wallpaper's first colour. The names, sizes, patterns, brightness and hidden strips you set for "
+            "them are lost. Network lights, Favourites and your other settings stay."),
+            lambda: self.bg(self.client.reset_strips, done), yes=_("Reset"), danger=True)
 
     def _run_diagnostics(self):
         reachable = "_error" not in self._status

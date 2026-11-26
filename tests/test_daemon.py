@@ -1306,3 +1306,53 @@ def test_each_strip_follows_its_own_monitor_and_reports_its_level(d):
     assert _cmd(d, "set_zone_strip", device="Hub v1.0", zone="B", brightness_monitor=None)["ok"]
     assert "brightness_monitor" not in d.config.get(("devices", "Hub v1.0", "zones", "B"))
     assert _cmd(d, "status")["zone_brightness"]["Hub v1.0|B"] == 20
+
+
+def test_reset_strips_sets_every_openrgb_strip_up_again(d):
+    """Reset strips to defaults (Service page): OpenRGB devices are set up as on a new install, a header
+    with no size gets one; network lights keep their settings."""
+    d.openrgb.resizable = True
+    d.openrgb.real = {"New Board": ["ARGB 1"]}
+    d.config.set("devices", {
+        "New Board": {"enabled": True, "zones": {"ARGB 1": {"enabled": False, "unsized": True, "led_count": 0,
+                                                           "display_name": "Old name"}}},
+        "Lamp": {"net": "wiz", "enabled": True, "display_name": "Desk lamp"}})
+    assert d._cmd_reset_strips({})["ok"]
+    z = d.config.get(("devices", "New Board", "zones", "ARGB 1"))
+    assert z["enabled"] and z["led_count"] == d.GUESSED_SIZE and "display_name" not in z
+    assert d.config.get(("devices", "Lamp", "display_name")) == "Desk lamp"
+    assert "Strip" not in d.config.get("devices")       # not reported by OpenRGB: gone
+
+
+def test_reset_strips_needs_openrgb(d):
+    d.openrgb.real = {}
+    assert not d._cmd_reset_strips({})["ok"]
+
+
+def test_diagnostics_spot_a_strip_with_no_led_count():
+    from iridia.diagnostics import run_checks
+    st = {"openrgb_connected": True,
+          "devices": [{"name": "Board", "mode": "Direct",
+                       "zones": [{"name": "ARGB 1", "led_count": 0}, {"name": "ARGB 2", "led_count": 0},
+                                 {"name": "ARGB 3", "led_count": 60}]}],
+          "device_configs": {"Board": {"enabled": True, "zones": {
+              "ARGB 1": {"enabled": False, "unsized": True},
+              "ARGB 2": {"enabled": False, "unsized": True, "hidden": True},
+              "ARGB 3": {"enabled": True, "led_count": 60, "size_guessed": True}}}}}
+    checks = {c.label: c for c in run_checks(st, True)}
+    dark = checks["LED count of 'Board'"]
+    assert dark.ok is False and "ARGB 1" in dark.detail and "ARGB 2" not in dark.detail
+    assert "ARGB 3" in checks["Sizes of 'Board'"].detail
+
+
+def test_zone_size_limits_are_read_with_either_openrgb_client():
+    """Iridia's own client has a zone's limits on the zone; openrgb-python only in the device's raw data.
+    Without them a header with no size couldn't be given one."""
+    from types import SimpleNamespace as NS
+
+    from iridia.openrgb_ctl import _limits
+    own = NS(leds_min=0, leds_max=300)
+    assert _limits(NS(), 0, own) == {"leds_min": 0, "leds_max": 300}
+    dev = NS(data=NS(zones=[NS(leds_min=1, leds_max=120)]))
+    assert _limits(dev, 0, NS(name="ARGB 1")) == {"leds_min": 1, "leds_max": 120}
+    assert _limits(NS(), 3, NS()) == {"leds_min": 0, "leds_max": 0}

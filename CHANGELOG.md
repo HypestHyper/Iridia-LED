@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.5 — 2026-11-26
+
+- **Lights on from the first run:** OpenRGB reports a motherboard's ARGB headers with no size until
+  someone sets one, and Iridia added those switched off, so on a fresh install often only the RAM lit
+  up. Now Iridia gives such a header 60 LEDs and switches it on (more than the strip has costs nothing);
+  its card says the size is a guess and *Count LEDs* sets the real number. When OpenRGB restarts and
+  forgets a size Iridia set, Iridia sets it again. The Devices page lists the strips with a guessed size
+  until they're counted, so a strip that isn't lit to the end, or is shorter, gets its real number.
+- **Reset strips to defaults** (Service page): sets every OpenRGB strip up again the way a new install
+  does: found again, sized, switched on. Network lights, Favourites and other settings stay.
+- **Diagnostics spot a strip with no LED count** (it stays dark) and say how to fix it, and list the
+  strips whose size Iridia guessed.
+
 ## 1.4.4 — 2026-11-15
 
 - **Brightness sliders show each strip's real brightness:** for a strip that follows the monitor, the

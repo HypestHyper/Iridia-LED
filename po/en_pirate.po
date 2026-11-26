@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-15 08:44+0000\n"
+"POT-Creation-Date: 2026-11-26 14:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_pirate\n"
@@ -313,6 +313,20 @@ msgid ""
 msgstr ""
 "Strips ye've stowed: a channel with nothin' plugged in, belike. They keep their settings an' stay"
 " out o' lists elsewhere. Its ⋮ menu brings 'em back on deck."
+
+#, python-brace-format
+msgid ""
+"{names} is set to {n} LEDs, because OpenRGB didn't say how many it has. If it isn't lit to the "
+"end, or the strip is shorter, open its card and click Count LEDs to set the real number."
+msgid_plural ""
+"{names} are set to {n} LEDs each, because OpenRGB didn't say how many they have. If one isn't lit"
+" to the end, or a strip is shorter, open its card and click Count LEDs to set the real number."
+msgstr[0] ""
+"{names} be set to {n} lamps, for OpenRGB didn't say how many it has. If she ain't lit to the end,"
+" or the strip be shorter, open its card and click Count LEDs to set the true tally."
+msgstr[1] ""
+"{names} be set to {n} lamps each, for OpenRGB didn't say how many they have. If one ain't lit to "
+"the end, or a strip be shorter, open its card and click Count LEDs to set the true tally."
 
 msgid "Animations"
 msgstr "Dancin' lanterns"
@@ -1272,6 +1286,22 @@ msgstr ""
 "(or its systemd service); use it when a device stops answerin' an' hailin' doesn't bring it back."
 " It won't touch an OpenRGB window."
 
+msgid "Strips"
+msgstr "Strips"
+
+msgid "When a strip stays dark or its settings are a mess."
+msgstr "When a strip stays dark or its riggin' be a tangle."
+
+msgid "Reset strips to defaults…"
+msgstr "Scuttle strips back to defaults…"
+
+msgid ""
+"Finds your OpenRGB devices again and sets every strip up the way a new install does: switched on,"
+" sized, in the wallpaper's colours. Network lights, Favourites and your other settings stay."
+msgstr ""
+"Hunts down yer OpenRGB devices again and rigs every strip the way a fresh install does: lit, "
+"sized, in the wallpaper's colours. Network lights, Favourites and yer other settings stay aboard."
+
 msgid "Diagnostics"
 msgstr "Ship's surgeon"
 
@@ -1446,6 +1476,27 @@ msgid ""
 msgstr ""
 "This stops an' relaunches the OpenRGB SDK server (about 4 seconds), which briefly rocks any other"
 " ship tied to it."
+
+msgid "Strips are back to their defaults"
+msgstr "Strips be back to their defaults"
+
+msgid "Couldn't reset the strips"
+msgstr "Couldn't scuttle the strips"
+
+msgid "Reset strips to defaults"
+msgstr "Scuttle strips back to defaults"
+
+msgid ""
+"Every strip from OpenRGB goes back to how a new install sets it up: switched on, sized, in the "
+"wallpaper's first colour. The names, sizes, patterns, brightness and hidden strips you set for "
+"them are lost. Network lights, Favourites and your other settings stay."
+msgstr ""
+"Every strip from OpenRGB goes back to how a fresh install rigs it: lit, sized, in the wallpaper's"
+" first colour. The names, sizes, patterns, brightness and hidden strips ye set for 'em be lost to"
+" the deep. Network lights, Favourites and yer other settings stay aboard."
+
+msgid "Reset"
+msgstr "Start over"
 
 msgid "Uninstall Iridia"
 msgstr "Make Iridia jump ship"
@@ -2016,9 +2067,6 @@ msgstr "Back"
 msgid "Same way"
 msgstr "Same way"
 
-msgid "Reset"
-msgstr "Start over"
-
 msgid "Fire"
 msgstr "Fire"
 
@@ -2401,9 +2449,6 @@ msgstr "Change strips"
 
 msgid "Other actions"
 msgstr "Other orders"
-
-msgid "Strips"
-msgstr "Strips"
 
 msgid "Power"
 msgstr "Lanterns"
@@ -3791,6 +3836,14 @@ msgid ""
 msgstr ""
 "OpenRGB don't know how many lanterns this zone has yet, so nothin' lights up. Click Count the "
 "lanterns an' set the size there."
+
+#, python-brace-format
+msgid ""
+"Set to {n} LEDs, because OpenRGB didn't say how many this strip has. If it isn't lit to the end, "
+"or the strip is shorter, click Count LEDs to set the real number."
+msgstr ""
+"Set to {n} lamps, for OpenRGB didn't say how many this strip has. If she ain't lit to the end, or"
+" the strip be shorter, click Count LEDs to set the true tally."
 
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "

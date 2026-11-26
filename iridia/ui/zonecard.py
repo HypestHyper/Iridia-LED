@@ -1272,6 +1272,9 @@ class ZoneCard(Gtk.Box):
         if real_size == 0:
             t = _("OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click "
                   "Count LEDs and set the size there.")
+        elif self.cfg.get("size_guessed"):
+            t = _("Set to {n} LEDs, because OpenRGB didn't say how many this strip has. If it isn't lit to the "
+                  "end, or the strip is shorter, click Count LEDs to set the real number.").format(n=real_size)
         elif single_color:
             t = _("This device has no Direct mode, so it shows one color for the whole device "
                   "(the first one of the pattern).")

@@ -77,6 +77,19 @@ def zones_of(dev) -> list:
     return list(zip(unique_names([getattr(z, "name", "") for z in zones]), zones))
 
 
+def _limits(dev, i: int, z) -> dict:
+    """The fewest and most LEDs a zone can be sized to (both 0: it can't be resized). Iridia's own
+    client has them on the zone; openrgb-python only in the device's raw data."""
+    src = z if hasattr(z, "leds_max") else None
+    if src is None:
+        raw = getattr(getattr(dev, "data", None), "zones", None) or []
+        src = raw[i] if i < len(raw) else None
+    try:
+        return {"leds_min": int(getattr(src, "leds_min", 0) or 0), "leds_max": int(getattr(src, "leds_max", 0) or 0)}
+    except (TypeError, ValueError):
+        return {"leds_min": 0, "leds_max": 0}
+
+
 def _rgb(hex_color: str):
     from openrgb.utils import RGBColor
     h = str(hex_color)
@@ -412,7 +425,8 @@ class OpenRGBController:
         # the device dict is replaced, never changed in place, so this reads one whole list.
         result = []
         for name, dev in dict(self.devices).items():
-            zones = [{"name": zn, "led_count": len(getattr(z, "leds", None) or [])} for zn, z in zones_of(dev)]
+            zones = [{"name": zn, "led_count": len(getattr(z, "leds", None) or []), **_limits(dev, i, z)}
+                     for i, (zn, z) in enumerate(zones_of(dev))]
             result.append({"name": name, "type": str(getattr(dev, "type", "unknown")),
                            "mode": self._active_mode_name(dev), "zones": zones,
                            "led_count": len(getattr(dev, "leds", None) or []),

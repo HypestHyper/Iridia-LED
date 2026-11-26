@@ -244,6 +244,9 @@ class Client:
     def reload_config(self) -> dict:
         return self._ipc.send({"cmd": "reload_config"})
 
+    def reset_strips(self) -> dict:
+        return self._ipc.send({"cmd": "reset_strips"})
+
     def reconnect_openrgb(self) -> dict:
         return self._ipc.send({"cmd": "reconnect_openrgb"})
 

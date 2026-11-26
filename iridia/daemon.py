@@ -278,6 +278,7 @@ class Daemon:
         self._force_refresh = False
         self._last_sent: dict[str, str] = {}
         self._openrgb_epoch = 0
+        self._resized: set = set()      # headers given their size again since OpenRGB (re)connected
         self._settle_resend_at: float | None = None
         self._start_time = time.time()
         self._orgb = openrgb_server.Supervisor()
@@ -1226,6 +1227,7 @@ class Daemon:
         if self._asleep and (connected or not self.openrgb.client):
             self._sleep_sent.set()          # dark LEDs sent (or nothing to send to)
 
+    GUESSED_SIZE = 60            # LEDs for a header OpenRGB reports no size for, until it's counted
     SETTLE_RESEND_SEC = 3.0      # after (re)connecting, send everything once more after this long
 
     def _check_openrgb_epoch(self, now: float | None = None):
@@ -1237,6 +1239,7 @@ class Daemon:
         now = time.monotonic() if now is None else now
         if epoch != self._openrgb_epoch:
             self._openrgb_epoch = epoch
+            self._resized.clear()
             self._last_sent = {}
             self._needs_update = True
             self._settle_resend_at = now + self.SETTLE_RESEND_SEC
@@ -1307,8 +1310,31 @@ class Daemon:
                 z["unsized"] = True         # switched on by itself once it gets a size
             return z
 
+        def guess(dname, z):
+            """A header OpenRGB has no size for yet (a fresh install: motherboard ARGB headers
+            start at 0) lights nothing. Give it a size so the first run lights up: more LEDs
+            than the strip has costs nothing, fewer leaves its end dark. Count LEDs sets it right."""
+            lo, hi = z.get("leds_min", 0), z.get("leds_max", 0)
+            if z["led_count"] or hi <= max(lo, 0):
+                return 0                    # sized already, or not resizable
+            n = max(lo, 1, min(hi, self.GUESSED_SIZE))
+            err = self.openrgb.resize_zone(dname, z["name"], n)
+            if err:
+                self.logger.info(f"'{dname}/{z['name']}' has no size and couldn't be given one: {err}")
+                return 0
+            self.logger.info(f"'{dname}/{z['name']}' had no size; gave it {n} LEDs so it lights up "
+                             "(Count LEDs sets the real number)")
+            return n
+
+        def fresh_zone(dname, z):
+            n = guess(dname, z)
+            if not n:
+                return fresh(z["led_count"], z["led_count"] > 0)
+            return dict(fresh(n), hw_size=n, size_guessed=True)
+
         # Known devices: zones that appeared later get added; a zone that had no size
         # (and that we switched off for that reason) is switched on once it has one.
+        # A header Iridia sized that OpenRGB forgot again (it restarted) gets its size back.
         changed = False
         for dev in found:
             cfg = devices.get(dev["name"])
@@ -1319,8 +1345,16 @@ class Daemon:
                 continue                    # nothing matches: _reconcile_zones adopts the real zones
             for z in dev["zones"]:
                 zc = zcfgs.get(z["name"])
+                if isinstance(zc, dict) and not z["led_count"] and zc.get("hw_size") \
+                        and (dev["name"], z["name"]) not in self._resized:
+                    self._resized.add((dev["name"], z["name"]))     # once per connection
+                    if not self.openrgb.resize_zone(dev["name"], z["name"], int(zc["hw_size"])):
+                        self.logger.info(f"'{dev['name']}/{z['name']}' lost its size in OpenRGB; "
+                                         f"set it to {zc['hw_size']} LEDs again")
+                        self._last_sent = {}
+                        self._needs_update = True
                 if zc is None:
-                    zcfgs[z["name"]] = fresh(z["led_count"], z["led_count"] > 0)
+                    zcfgs[z["name"]] = fresh_zone(dev["name"], z)
                     self.logger.info(f"'{dev['name']}' has a new zone '{z['name']}' ({z['led_count']} LEDs); added")
                     changed = True
                 elif isinstance(zc, dict) and zc.get("unsized") and z["led_count"] > 0:
@@ -1334,9 +1368,9 @@ class Daemon:
             if dev["zones"]:
                 # Zones OpenRGB reports with 0 LEDs (an ARGB header nobody has sized yet) are
                 # added switched off, so they show up and can be sized from the window.
-                zones = {z["name"]: fresh(z["led_count"], z["led_count"] > 0) for z in dev["zones"]}
+                zones = {z["name"]: fresh_zone(dev["name"], z) for z in dev["zones"]}
                 devices[dev["name"]] = {"enabled": True, "zones": zones}
-                empty = sum(1 for z in dev["zones"] if z["led_count"] == 0)
+                empty = sum(1 for zc in zones.values() if zc.get("unsized"))
                 self.logger.info(f"Found new device '{dev['name']}' with {len(zones)} zone(s)"
                                  + (f", {empty} without a size yet (off)" if empty else "") + "; added to config")
             elif dev.get("net"):
@@ -2260,8 +2294,12 @@ class Daemon:
         err = self.openrgb.resize_zone(dev, zone, size)
         if err:
             return {"ok": False, "error": err}
+        if self._zone_exists(dev, zone):
+            # OpenRGB forgets a header's size when it restarts: Iridia sets it again
+            self.config.set(self._zone_config_path(dev, zone, "hw_size"), size)
         if self._zone_exists(dev, zone) and not req.get("keep_count"):
             self.config.set(self._zone_config_path(dev, zone, "led_count"), size)
+            self.config.set(self._zone_config_path(dev, zone, "size_guessed"), False)
             if self._zone_cfg(dev, zone).get("unsized"):
                 # Sized at last: switch on the zone we switched off for having no size.
                 self.config.set(self._zone_config_path(dev, zone, "enabled"), True)
@@ -2270,6 +2308,31 @@ class Daemon:
         self._needs_update = True
         self.logger.info(f"Resized OpenRGB zone {dev}/{zone} to {size} LEDs")
         return {"ok": True, "zone_size": self._real_zone_size(dev, zone)}
+
+    def _cmd_reset_strips(self, req: dict) -> dict:
+        """Every OpenRGB device's settings back to what a new install sets up: found again, sized
+        (a header with no size gets one), switched on. Network lights keep theirs."""
+        try:
+            found = self.openrgb.list_devices()
+        except Exception:
+            found = []
+        if not found:
+            return {"ok": False, "error": "OpenRGB isn't connected or reports no devices"}
+        devices = self.config.get("devices", {})
+        devices = devices if isinstance(devices, dict) else {}
+        # the sizes Iridia gave headers stay known, so they're set again if OpenRGB forgets them
+        sizes = {(d, z): zc["hw_size"] for d, dc in devices.items() if isinstance(dc, dict)
+                 for z, zc in (dc.get("zones") or {}).items() if isinstance(zc, dict) and zc.get("hw_size")}
+        self.config.set("devices", {k: v for k, v in devices.items() if isinstance(v, dict) and v.get("net")})
+        self._resized.clear()
+        self._autoadd_devices(found)
+        for (d, z), n in sizes.items():
+            if self._zone_exists(d, z) and not self._zone_cfg(d, z).get("hw_size"):
+                self.config.set(self._zone_config_path(d, z, "hw_size"), n)
+        self._last_sent = {}
+        self._needs_update = True
+        self.logger.info(f"Strips reset to defaults ({len(found)} OpenRGB device(s))")
+        return {"ok": True, "devices": len(found)}
 
     def _cmd_lights(self, req: dict) -> dict:
         on = self._lights_off if req.get("toggle") else bool(req.get("on", True))
@@ -3190,6 +3253,8 @@ class Daemon:
             return self._cmd_identify(req)
         if cmd == "led_probe":
             return self._cmd_led_probe(req)
+        if cmd == "reset_strips":
+            return self._cmd_reset_strips(req)
         if cmd == "resize_zone":
             return self._cmd_resize_zone(req)
         if cmd.startswith("setup_"):

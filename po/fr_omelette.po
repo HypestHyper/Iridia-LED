@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iridia 1.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-15 08:44+0000\n"
+"POT-Creation-Date: 2026-11-26 14:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr_omelette\n"
@@ -307,6 +307,22 @@ msgid ""
 "Strips you hid: a channel with nothing plugged in, say. They keep their settings and are left out"
 " of lists elsewhere. Its ⋮ menu shows it again."
 msgstr "Bandes cachées sous la moustache. Elles gardent leurs réglages. Son menu ⋮ les ramène, voilà."
+
+#, python-brace-format
+msgid ""
+"{names} is set to {n} LEDs, because OpenRGB didn't say how many it has. If it isn't lit to the "
+"end, or the strip is shorter, open its card and click Count LEDs to set the real number."
+msgid_plural ""
+"{names} are set to {n} LEDs each, because OpenRGB didn't say how many they have. If one isn't lit"
+" to the end, or a strip is shorter, open its card and click Count LEDs to set the real number."
+msgstr[0] ""
+"{names} est réglée à {n} LEDs, parce qu'OpenRGB n'a pas dit combien elle en a. Si elle n'est pas "
+"allumée jusqu'au bout, ou si la bande est plus courte, ouvrez sa carte et cliquez Count LEDs pour"
+" le vrai chiffre."
+msgstr[1] ""
+"{names} sont réglées à {n} LEDs chacune, parce qu'OpenRGB n'a pas dit combien elles en ont. Si "
+"une n'est pas allumée jusqu'au bout, ou si une bande est plus courte, ouvrez sa carte et cliquez "
+"Count LEDs pour le vrai chiffre."
 
 msgid "Animations"
 msgstr "Le cinéma est fermé le lundi"
@@ -1224,6 +1240,23 @@ msgid ""
 "It won't touch an OpenRGB window."
 msgstr "Ma tante joue de l'accordéon. Il pleut des cordes. Mon oncle est un champignon."
 
+msgid "Strips"
+msgstr "Moustache"
+
+msgid "When a strip stays dark or its settings are a mess."
+msgstr "Quand une bande reste noire ou que ses réglages sont une vraie ratatouille."
+
+msgid "Reset strips to defaults…"
+msgstr "Remettre les bandes par défaut…"
+
+msgid ""
+"Finds your OpenRGB devices again and sets every strip up the way a new install does: switched on,"
+" sized, in the wallpaper's colours. Network lights, Favourites and your other settings stay."
+msgstr ""
+"Retrouve vos appareils OpenRGB et règle chaque bande comme une installation toute neuve: allumée,"
+" mesurée, aux couleurs du fond d'écran. Les lumières réseau, les Favoris et vos autres réglages "
+"restent, voilà."
+
 msgid "Diagnostics"
 msgstr "Bisou"
 
@@ -1378,6 +1411,28 @@ msgid ""
 "This stops and relaunches the OpenRGB SDK server (about 4 seconds), which briefly interrupts any "
 "other software using it."
 msgstr "Qui a mangé mon fromage. La crêpe est tombée par terre."
+
+msgid "Strips are back to their defaults"
+msgstr "Les bandes sont revenues par défaut, magnifique"
+
+msgid "Couldn't reset the strips"
+msgstr "Impossible de remettre les bandes, quel dommage"
+
+msgid "Reset strips to defaults"
+msgstr "Remettre les bandes par défaut"
+
+msgid ""
+"Every strip from OpenRGB goes back to how a new install sets it up: switched on, sized, in the "
+"wallpaper's first colour. The names, sizes, patterns, brightness and hidden strips you set for "
+"them are lost. Network lights, Favourites and your other settings stay."
+msgstr ""
+"Chaque bande d'OpenRGB revient comme une installation toute neuve: allumée, mesurée, dans la "
+"première couleur du fond d'écran. Les noms, tailles, motifs, luminosités et bandes cachées que "
+"vous avez réglés sont perdus, c'est la vie. Les lumières réseau, les Favoris et vos autres "
+"réglages restent."
+
+msgid "Reset"
+msgstr "On recommence tout"
 
 msgid "Uninstall Iridia"
 msgstr "Ooh la la"
@@ -1926,9 +1981,6 @@ msgstr "Retour à la case départ"
 msgid "Same way"
 msgstr "Par le même chemin"
 
-msgid "Reset"
-msgstr "On recommence tout"
-
 msgid "Fire"
 msgstr "Feu"
 
@@ -2301,9 +2353,6 @@ msgstr "Crêpe"
 
 msgid "Other actions"
 msgstr "Oh là là"
-
-msgid "Strips"
-msgstr "Moustache"
 
 msgid "Power"
 msgstr "Quiche"
@@ -3627,6 +3676,14 @@ msgid ""
 "OpenRGB doesn't know how many LEDs this zone has yet, so nothing lights up. Click Count LEDs and "
 "set the size there."
 msgstr "J'aime les escargots au beurre. Le chat est sous la table."
+
+#, python-brace-format
+msgid ""
+"Set to {n} LEDs, because OpenRGB didn't say how many this strip has. If it isn't lit to the end, "
+"or the strip is shorter, click Count LEDs to set the real number."
+msgstr ""
+"Réglée à {n} LEDs, parce qu'OpenRGB n'a pas dit combien cette bande en a. Si elle n'est pas "
+"allumée jusqu'au bout, ou si la bande est plus courte, cliquez Count LEDs pour le vrai chiffre."
 
 msgid ""
 "This device has no Direct mode, so it shows one color for the whole device (the first one of the "

@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.5" date="2026-11-26">
+      <description>
+        <ul>
+          <li>Strips light up on the first run, even when OpenRGB doesn't know their size</li>
+          <li>Reset strips to defaults on the Service page</li>
+          <li>Diagnostics spot strips with no LED count</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.4" date="2026-11-15">
       <description>
         <ul>

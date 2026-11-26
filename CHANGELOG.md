@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.4.5 — 2026-11-26
 
 - **Lights on from the first run:** OpenRGB reports a motherboard's ARGB headers with no size until
   someone sets one, and Iridia added those switched off, so on a fresh install often only the RAM lit

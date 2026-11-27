@@ -181,6 +181,7 @@ class NetLights:
         self._lock = threading.Lock()
         self._wake = threading.Event()
         self._thread: threading.Thread | None = None
+        self._gen = 0                               # which _run loop is the current one
         self._sock: socket.socket | None = None          # WiZ, and commands to Govee
         self._govee: socket.socket | None = None         # Govee's answers to a scan (port 4002)
         # never searched: due at once (not "60 s after time 0": the monotonic clock starts at boot, so a
@@ -199,9 +200,10 @@ class NetLights:
         if on == self.enabled:
             return
         self.enabled = on
+        self._gen += 1                  # a loop from before (switched off, then on again quickly) ends
         if on:
             self._open()
-            self._thread = threading.Thread(target=self._run, daemon=True, name="netlights")
+            self._thread = threading.Thread(target=self._run, args=(self._gen,), daemon=True, name="netlights")
             self._thread.start()
             self.scan()
         else:
@@ -309,8 +311,8 @@ class NetLights:
             self._found("wiz", str(res.get("mac") or ""), ip, str(res.get("moduleName") or ""))
         return True
 
-    def _run(self):
-        while self.enabled:
+    def _run(self, gen: int = 0):
+        while self.enabled and gen == self._gen:
             now = time.monotonic()
             if now - self._last_scan >= SCAN_EVERY:
                 self._last_scan = now

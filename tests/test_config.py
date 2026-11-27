@@ -70,3 +70,11 @@ def test_openrgb_host_is_dropped(tmp_path):
     p.write_text(json.dumps({"openrgb": {"host": "192.168.1.20", "port": 6742}}))
     c = Config(str(p))
     assert c.get("openrgb.host") is None and c.get("openrgb.port") == 6742
+
+
+def test_infinity_in_a_number_setting_doesnt_stop_the_daemon(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text('{"timing": {"wallpaper_debounce_ms": Infinity, "ddc_poll_interval_sec": Infinity}}')
+    cfg = Config(str(path))
+    assert cfg.get("timing.wallpaper_debounce_ms") == DEFAULT_CONFIG["timing"]["wallpaper_debounce_ms"]
+    assert cfg.get("timing.ddc_poll_interval_sec") == DEFAULT_CONFIG["timing"]["ddc_poll_interval_sec"]

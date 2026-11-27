@@ -245,7 +245,8 @@ class Client:
         return self._ipc.send({"cmd": "reload_config"})
 
     def reset_strips(self) -> dict:
-        return self._ipc.send({"cmd": "reset_strips"})
+        # sizing several headers takes OpenRGB a moment each: more than the usual 2 s
+        return self._ipc.send({"cmd": "reset_strips"}, timeout=15.0)
 
     def reconnect_openrgb(self) -> dict:
         return self._ipc.send({"cmd": "reconnect_openrgb"})

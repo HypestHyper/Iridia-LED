@@ -166,6 +166,8 @@ class Setups:
         return bid
 
     def load(self, name: str) -> str | None:
+        if not valid_name(name):
+            return f"Unknown setup '{name}'."
         data = _read_json(self.path(name))
         if data is None:
             return f"Setup '{name}' couldn't be read."
@@ -182,6 +184,8 @@ class Setups:
         return self.restore(data)
 
     def delete(self, name: str) -> str | None:
+        if not valid_name(name):
+            return f"Unknown setup '{name}'."     # never a path out of the setups folder
         try:
             os.remove(self.path(name))
         except FileNotFoundError:
@@ -193,6 +197,8 @@ class Setups:
     def rename(self, old: str, new: str) -> str | None:
         if not valid_name(new):
             return "Use letters, numbers, spaces, dashes, underscores and brackets (up to 40 characters)."
+        if not valid_name(old):
+            return f"Unknown setup '{old}'."
         if os.path.exists(self.path(new)):
             return f"A setup called '{new}' already exists."
         data = _read_json(self.path(old))
@@ -204,6 +210,8 @@ class Setups:
         return None
 
     def export_to(self, name: str, dest: str) -> str | None:
+        if name != "" and not valid_name(name):
+            return f"Unknown setup '{name}'."
         data = self.capture(name) if name == "" else _read_json(self.path(name))
         if data is None:
             return f"Setup '{name}' couldn't be read."

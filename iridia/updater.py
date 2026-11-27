@@ -260,6 +260,7 @@ def apply_package(info: dict, folder: str = CACHE, log: Callable[[str], None] = 
         raise UpdateError(f"The package manager stopped with an error ({rc}); see above. Nothing changed if it "
                           "stopped before installing.")
     log(f"Iridia {info['version']} is installed.")
+    save_state(last=None, installed=info["version"], installed_at=int(time.time()))
     exe = shutil.which("iridia") or "/usr/bin/iridia"
     for action in ("stop", "start"):            # the daemon on the new version
         _run([exe, "daemon", action], log)
@@ -403,19 +404,21 @@ def rollback(venv: str = VENV, log: Callable[[str], None] = print) -> str:
 def notify(summary: str, body: str) -> bool:
     """A desktop notification (any desktop with a notification server: GNOME, KDE, XFCE, Cinnamon, MATE,
     mako, dunst, swaync, ...). Clicking it opens Iridia where the server supports that."""
-    if shutil.which("gdbus"):
-        r = subprocess.run(["gdbus", "call", "--session", "--dest", "org.freedesktop.Notifications",
-                            "--object-path", "/org/freedesktop/Notifications",
-                            "--method", "org.freedesktop.Notifications.Notify",
-                            "Iridia", "0", ICON, summary, body, "[]",
-                            "{'desktop-entry': <'%s'>, 'urgency': <byte 1>}" % APP_ID, "-1"],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-        if r.returncode == 0:
-            return True
+    def run(cmd) -> bool:
+        try:
+            return subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                  timeout=10).returncode == 0
+        except (OSError, subprocess.SubprocessError):
+            return False                # a hung or missing notification server: try the next way
+
+    if shutil.which("gdbus") and run(["gdbus", "call", "--session", "--dest", "org.freedesktop.Notifications",
+                                      "--object-path", "/org/freedesktop/Notifications",
+                                      "--method", "org.freedesktop.Notifications.Notify",
+                                      "Iridia", "0", ICON, summary, body, "[]",
+                                      "{'desktop-entry': <'%s'>, 'urgency': <byte 1>}" % APP_ID, "-1"]):
+        return True
     if shutil.which("notify-send"):
-        r = subprocess.run(["notify-send", "--app-name=Iridia", f"--icon={ICON}", summary, body],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-        return r.returncode == 0
+        return run(["notify-send", "--app-name=Iridia", f"--icon={ICON}", summary, body])
     return False
 
 

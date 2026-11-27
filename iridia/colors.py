@@ -203,13 +203,13 @@ class ColorExtractor:
             palette = quantized.getpalette()
             colors = []
             if palette:
-                count = min(12, len(palette) // 3)
+                count = min(16, len(palette) // 3)    # every quantized colour: palette order isn't by count
                 for i in range(count):
                     r, g, b = palette[i * 3:(i + 1) * 3]
                     colors.append(_rgb_to_hex(r, g, b))
 
             hist = quantized.histogram()
-            indexed = [(colors[i], hist[i]) for i in range(len(colors))]
+            indexed = [(colors[i], hist[i]) for i in range(len(colors)) if hist[i]]     # unused slots: no
             indexed.sort(key=lambda x: x[1], reverse=True)
             colors = [c for c, _ in indexed]
 

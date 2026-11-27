@@ -61,3 +61,13 @@ def test_named_setups_round_trip(tmp_path):
     assert s.export_to("Desk 2", out) is None
     name, err = s.import_from(out)
     assert err is None and name == "Desk 2 (2)"
+
+
+def test_a_setup_name_cant_reach_outside_the_setups_folder(tmp_path):
+    d = str(tmp_path)
+    _write(f"{d}/config.json", {"devices": {"A": {}}})
+    s = Setups(d)
+    assert s.delete("../config") and os.path.exists(f"{d}/config.json")
+    assert s.rename("../config", "Moved") and os.path.exists(f"{d}/config.json")
+    assert s.load("../config") and s.export_to("../config", str(tmp_path / "out.json"))
+    assert not os.path.exists(tmp_path / "out.json")

@@ -147,13 +147,20 @@ class Animator:
                 if self._last_tick is not None:
                     self._clock += (now - self._last_tick) * self.rate
                 self._last_tick = now
+                # _devs is shared with set_jobs and forget (the daemon's threads): touch it under the lock
+                with self._lock:
+                    states = {}
+                    for dev in jobs:
+                        st = self._devs.get(dev)
+                        if st is None:
+                            st = self._devs[dev] = _Dev(self.fps)
+                        states[dev] = st
                 for dev, (whole, zjobs) in jobs.items():
-                    st = self._devs.get(dev)
-                    if st is None:
-                        st = self._devs[dev] = _Dev(self.fps)
+                    st = states[dev]
                     if now >= st.next_due:
                         self._frame(dev, whole, zjobs, st)
-                due = min((d.next_due for d in self._devs.values()), default=now + 1 / self.fps)
+                with self._lock:
+                    due = min((d.next_due for d in self._devs.values()), default=now + 1 / self.fps)
                 self._wake.wait(max(0.001, due - time.monotonic()))
                 self._wake.clear()
         except Exception:                   # noqa: BLE001  (never take the daemon down)

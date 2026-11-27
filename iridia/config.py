@@ -180,11 +180,11 @@ class Config:
                 elif isinstance(dv, (int, float)):
                     try:
                         nv = type(dv)(v)
-                        if nv != nv or nv < 0:
+                        if nv != nv or nv < 0 or nv == float("inf"):
                             raise ValueError
                         if nv != v:
                             d[sec][key] = nv
-                    except (TypeError, ValueError):
+                    except (TypeError, ValueError, OverflowError):
                         logger.warning(f"Config: {sec}.{key} should be a number, using {dv}")
                         d[sec][key] = dv
                 elif isinstance(dv, str) and not isinstance(v, str):
@@ -290,6 +290,12 @@ class Config:
             if len(keys) == 2:
                 self._file_keys.add(".".join(keys))
             self._save()
+
+    @property
+    def lock(self):
+        """Hold it across a read-modify-write of a section (get, change, set) so a change another
+        thread sets in between isn't overwritten. Reentrant: get and set inside it work as usual."""
+        return self._lock
 
     @property
     def raw(self):

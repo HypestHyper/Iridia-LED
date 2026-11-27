@@ -93,7 +93,8 @@ def run_checks(status: dict, socket_reachable: bool) -> list[Check]:
             if guessed:
                 checks.append(Check(
                     f"Sizes of '{dname}'", None,
-                    f"{', '.join(guessed)}: set to {zcfgs[guessed[0]].get('led_count')} LEDs by Iridia, not counted",
+                    ", ".join(f"{zn} ({zcfgs[zn].get('led_count')} LEDs)" for zn in guessed)
+                    + ": set by Iridia, not counted",
                     "If a strip isn't lit to the end, or is shorter, click Count LEDs on its card."))
             mode = real[dname].get("mode", "unknown")
             if mode.lower() not in ("direct", "unknown"):

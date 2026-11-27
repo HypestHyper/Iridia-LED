@@ -305,6 +305,35 @@ def test_a_new_header_with_no_size_gets_one_and_lights_up(d):
     assert z["led_count"] == 24 and z["hw_size"] == 24 and not z["size_guessed"]
 
 
+def test_counting_a_guessed_strip_clears_the_guess(d):
+    """Count LEDs saves a count that fits the guessed size without resizing: the strip is counted now."""
+    d.openrgb.resizable = True
+    d.openrgb.real["New Board"] = ["ARGB 1"]
+    d._autoadd_devices()
+    assert _cmd(d, "set_zone_led_count", device="New Board", zone="ARGB 1", count=45)["ok"]
+    z = d.config.get(("devices", "New Board", "zones", "ARGB 1"))
+    assert z["led_count"] == 45 and not z["size_guessed"]
+
+
+def test_a_bad_hw_size_in_the_config_doesnt_stop_the_loop(d):
+    d.openrgb.resizable = True
+    d.openrgb.real["New Board"] = ["ARGB 1"]
+    d._autoadd_devices()
+    d.config.set(("devices", "New Board", "zones", "ARGB 1", "hw_size"), "sixty")
+    d.openrgb.sizes = {}                    # OpenRGB restarted: the header is back at 0
+    d.openrgb.resized = []
+    d._autoadd_devices()                    # no ValueError: the unusable size is ignored
+    assert d.openrgb.resized == []
+
+
+def test_a_favourite_naming_a_gone_strip_still_changes_the_others(d):
+    keys = [f"{dev}|{z}" for dev, dc in DEVICES.items() for z in (dc.get("zones") or {})][:1]
+    r = _cmd(d, "set_zones", targets=["Hub v1.0|Gone"] + keys, set={"brightness": 40})
+    assert r["ok"] and len(r["errors"]) == 1 and "Gone" in r["errors"][0]
+    dev, z = keys[0].split("|")
+    assert d.config.get(("devices", dev, "zones", z, "manual_brightness")) == 40
+
+
 def test_a_zone_that_cant_be_resized_stays_off_until_it_has_a_size(d):
     d.openrgb.real["New Board"] = ["Fixed"]
     d._autoadd_devices()

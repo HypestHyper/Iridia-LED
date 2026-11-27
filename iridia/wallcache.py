@@ -51,7 +51,15 @@ class WallpaperColorCache:
         except FileNotFoundError:
             pass
         except Exception as e:
-            logger.warning(f"Couldn't read {self.path} ({type(e).__name__}: {e}), starting with an empty color cache")
+            # keep the damaged file: the next save would otherwise overwrite every saved colour pick
+            backup = self.path + ".bak"
+            try:
+                os.replace(self.path, backup)
+                kept = f"; the old file is kept as {backup}"
+            except OSError:
+                kept = ""
+            logger.warning(f"Couldn't read {self.path} ({type(e).__name__}: {e}), starting with an empty "
+                           f"color cache{kept}")
 
     def _save(self):
         try:

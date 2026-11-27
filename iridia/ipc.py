@@ -7,7 +7,7 @@ class IPCServer(threading.Thread):
     def __init__(self, socket_path, daemon):
         super().__init__(daemon=True, name="iridia-ipc")
         self.socket_path = socket_path
-        self.daemon = daemon
+        self.handler = daemon               # the Iridia daemon (not Thread.daemon, the thread flag)
         self.server = None
         self._running = False
         self.ready = threading.Event()      # set once the socket accepts connections
@@ -64,7 +64,7 @@ class IPCServer(threading.Thread):
                     break
                 data += chunk
             req = json.loads(data.decode("utf-8"))
-            resp = self.daemon.handle_command(req)
+            resp = self.handler.handle_command(req)
             try:
                 conn.sendall(json.dumps(resp).encode("utf-8") + b"\n")
             except (TimeoutError, BrokenPipeError, ConnectionResetError):

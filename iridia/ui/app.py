@@ -968,7 +968,15 @@ class IridiaWindow(Gtk.ApplicationWindow):
         if card_ is None:
             return
         card_.set_visible(bool(names))
-        if names:
+        if names and len({c for _n, c in names}) > 1:
+            # guesses differ (a header that takes fewer, or more): each strip with its own number
+            t = _("These strips got an LED count from Iridia, because OpenRGB didn't say how many they have: "
+                  "{strips}. If one isn't lit to the end, or a strip is shorter, open its card and click Count "
+                  "LEDs to set the real number.").format(
+                strips=", ".join(_("{name} ({n} LEDs)").format(name=nm, n=c) for nm, c in names))
+            if t != self._guess_lbl.get_label():
+                self._guess_lbl.set_label(t)
+        elif names:
             t = ngettext(
                 "{names} is set to {n} LEDs, because OpenRGB didn't say how many it has. If it isn't lit to the "
                 "end, or the strip is shorter, open its card and click Count LEDs to set the real number.",

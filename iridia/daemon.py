@@ -51,6 +51,31 @@ STRIP_TYPES = ("addressable", "addressable12", "single", "rgbw")
 COLOR_ORDERS = ("RGB", "RBG", "GRB", "GBR", "BRG", "BGR")
 
 
+def _config_locked(fn):
+    """Run a daemon method holding the config's lock: it reads the devices section, changes it and
+    writes it back, and a zone setting another thread writes in between mustn't be lost."""
+    import functools
+
+    @functools.wraps(fn)
+    def wrapper(self, *a, **k):
+        with self.config.lock:
+            return fn(self, *a, **k)
+    return wrapper
+
+
+def _hw_size(zc) -> int:
+    """The LED count Iridia gave an addressable header in OpenRGB (zone config 'hw_size'),
+    or 0 when there is none or a hand edit left something unusable there."""
+    v = zc.get("hw_size") if isinstance(zc, dict) else None
+    if isinstance(v, bool):
+        return 0
+    try:
+        n = int(v)
+    except (TypeError, ValueError, OverflowError):
+        return 0
+    return n if 1 <= n <= 1000 else 0
+
+
 def clean_zone_cfg(z: dict) -> dict:
     """A zone (or flat device) config with every field the renderer reads in a usable
     type and range, whatever a hand edit or an old version left in config.json."""
@@ -210,6 +235,7 @@ class Daemon:
         self._strip_info: dict[str, dict] = {}   # zone key -> strip type, power estimate, size needs
         self._asleep = False              # PC is suspending: LEDs dark
         self._sleep_sent = threading.Event()
+        self._sleep_gen = 0                 # counts sleeps, so a late wake can tell one came after it
         self._wake = threading.Event()    # wakes the main loop early
         self._night_active = False
         self.sleepwatch = None
@@ -399,7 +425,9 @@ class Daemon:
                 continue
             info = res.get("latest") or {}
             v = info.get("version")
-            if res.get("available") and v:
+            # judged against this version, not the one a cached result was checked from
+            # (an update installed since then would otherwise be announced as new)
+            if v and updater.newer(v, get_version()):
                 self.logger.info(f"Iridia {v} is available (this is {get_version()}); see the window's Updates tab")
                 state = updater.load_state()
                 if s["notify"] and v != s["skip"] and state.get("notified") != v:
@@ -571,7 +599,11 @@ class Daemon:
         if isinstance(req.get("move_scene"), dict):
             i = next((n for n, x in enumerate(lst) if x["id"] == req["move_scene"].get("id")), None)
             if i is not None:
-                to = max(0, min(len(lst) - 1, int(req["move_scene"].get("to") or 0)))
+                try:
+                    to = int(req["move_scene"].get("to") or 0)
+                except (TypeError, ValueError, OverflowError):
+                    return {"ok": False, "error": "'to' must be a position number"}
+                to = max(0, min(len(lst) - 1, to))
                 lst.insert(to, lst.pop(i))
                 changed = True
         if isinstance(req.get("scene_on"), dict):
@@ -950,6 +982,7 @@ class Daemon:
     def _on_sleep(self):
         """Called from the watcher thread: dark LEDs, then let the PC sleep."""
         self._sleep_sent.clear()
+        self._sleep_gen += 1                # a wake still waiting to switch the LEDs on gives up
         self._asleep = True
         self._last_sent = {}
         self._needs_update = True
@@ -958,13 +991,19 @@ class Daemon:
             self.logger.warning("Couldn't confirm the LEDs went dark before sleep")
 
     def _on_wake(self):
+        gen = self._sleep_gen
+
         def later():
             time.sleep(3.0)                 # USB controllers need a moment after resume
+            if gen != self._sleep_gen:
+                return                      # it went to sleep again meanwhile: stay dark
             self._asleep = False
             self._last_sent = {}
             self._force_refresh = True
             self._wake.set()
             time.sleep(7.0)                 # and once more, in case a controller came back late
+            if gen != self._sleep_gen:
+                return
             self._last_sent = {}
             self._force_refresh = True
             self._wake.set()
@@ -1335,7 +1374,7 @@ class Daemon:
         # Known devices: zones that appeared later get added; a zone that had no size
         # (and that we switched off for that reason) is switched on once it has one.
         # A header Iridia sized that OpenRGB forgot again (it restarted) gets its size back.
-        changed = False
+        added_zones, sized = {}, {}         # what this pass changes, merged into the config at the end
         for dev in found:
             cfg = devices.get(dev["name"])
             zcfgs = cfg.get("zones") if isinstance(cfg, dict) else None
@@ -1345,45 +1384,59 @@ class Daemon:
                 continue                    # nothing matches: _reconcile_zones adopts the real zones
             for z in dev["zones"]:
                 zc = zcfgs.get(z["name"])
-                if isinstance(zc, dict) and not z["led_count"] and zc.get("hw_size") \
-                        and (dev["name"], z["name"]) not in self._resized:
+                hw = _hw_size(zc)
+                if hw and not z["led_count"] and (dev["name"], z["name"]) not in self._resized:
                     self._resized.add((dev["name"], z["name"]))     # once per connection
-                    if not self.openrgb.resize_zone(dev["name"], z["name"], int(zc["hw_size"])):
+                    if not self.openrgb.resize_zone(dev["name"], z["name"], hw):
                         self.logger.info(f"'{dev['name']}/{z['name']}' lost its size in OpenRGB; "
-                                         f"set it to {zc['hw_size']} LEDs again")
+                                         f"set it to {hw} LEDs again")
                         self._last_sent = {}
                         self._needs_update = True
                 if zc is None:
-                    zcfgs[z["name"]] = fresh_zone(dev["name"], z)
+                    added_zones[(dev["name"], z["name"])] = fresh_zone(dev["name"], z)
                     self.logger.info(f"'{dev['name']}' has a new zone '{z['name']}' ({z['led_count']} LEDs); added")
-                    changed = True
                 elif isinstance(zc, dict) and zc.get("unsized") and z["led_count"] > 0:
-                    zc.pop("unsized", None)
-                    zc.update(led_count=z["led_count"], enabled=True)
+                    sized[(dev["name"], z["name"])] = z["led_count"]
                     self.logger.info(f"'{dev['name']}/{z['name']}' now has {z['led_count']} LEDs; switched on")
-                    changed = True
-        if not new and not changed:
+        if not new and not added_zones and not sized:
             return
+        added_devs = {}
         for dev in new:
             if dev["zones"]:
                 # Zones OpenRGB reports with 0 LEDs (an ARGB header nobody has sized yet) are
                 # added switched off, so they show up and can be sized from the window.
                 zones = {z["name"]: fresh_zone(dev["name"], z) for z in dev["zones"]}
-                devices[dev["name"]] = {"enabled": True, "zones": zones}
+                added_devs[dev["name"]] = {"enabled": True, "zones": zones}
                 empty = sum(1 for zc in zones.values() if zc.get("unsized"))
                 self.logger.info(f"Found new device '{dev['name']}' with {len(zones)} zone(s)"
                                  + (f", {empty} without a size yet (off)" if empty else "") + "; added to config")
             elif dev.get("net"):
                 # a WiZ or Govee light: one colour, sent over the network
-                devices[dev["name"]] = dict(fresh(1), strip_type="single", net=dev["net"]["kind"])
+                added_devs[dev["name"]] = dict(fresh(1), strip_type="single", net=dev["net"]["kind"])
                 self.logger.info(f"Found network light '{dev['name']}' ({dev['net']['ip']}); added to config")
                 continue
             else:
                 # Whole-device control (mice, some GPUs and RAM report no zones).
-                devices[dev["name"]] = dict(fresh(max(1, dev.get("led_count") or 1)))
+                added_devs[dev["name"]] = dict(fresh(max(1, dev.get("led_count") or 1)))
                 self.logger.info(f"Found new device '{dev['name']}' (no zones, controlled as a whole); "
                                  "added to config")
-        self.config.set("devices", devices)
+        # Sizing headers above took a while: merge into the config as it is now, so a setting changed
+        # from the window meanwhile isn't overwritten by the copy read at the start.
+        with self.config.lock:
+            cur = self.config.get("devices", {})
+            cur = cur if isinstance(cur, dict) else {}
+            for (d, z), zc in added_zones.items():
+                zones = cur.get(d, {}).get("zones") if isinstance(cur.get(d), dict) else None
+                if isinstance(zones, dict) and z not in zones:
+                    zones[z] = zc
+            for (d, z), n in sized.items():
+                zc = ((cur.get(d) or {}).get("zones") or {}).get(z) if isinstance(cur.get(d), dict) else None
+                if isinstance(zc, dict) and zc.get("unsized"):
+                    zc.pop("unsized", None)
+                    zc.update(led_count=n, enabled=True)
+            for d, dc in added_devs.items():
+                cur.setdefault(d, dc)
+            self.config.set("devices", cur)
         self._last_sent = {}
         self._needs_update = True
 
@@ -1704,6 +1757,7 @@ class Daemon:
         if self._current_wallpaper and picks:
             self.wallcache.set_zone_colors(self._current_wallpaper, picks)
 
+    @_config_locked
     def _set_all_field(self, field: str, value, record: bool = False) -> int:
         devices = self.config.get("devices", {})
         n = 0
@@ -1719,6 +1773,7 @@ class Daemon:
         self._needs_update = True
         return n
 
+    @_config_locked
     def _apply_remembered_choice(self):
         """A wallpaper change brings back what you picked for that wallpaper, zone by zone.
 
@@ -2019,6 +2074,7 @@ class Daemon:
             return None, "a strip that is off shows no color or brightness: drop 'off', or use 'on'"
         return ov, None
 
+    @_config_locked
     def _cmd_zone_action(self, req: dict) -> dict:
         """A keybind: any mix of on/off, one color and a brightness for one or more strips, or back
         to normal. With toggle (the default) running the same thing again puts them back."""
@@ -2154,6 +2210,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True, "settings": self._anim_settings()}
 
+    @_config_locked
     def _cmd_set_zone_strip(self, req: dict) -> dict:
         dev, zone = req.get("device"), req.get("zone") or ""
         if not self._zone_exists(dev, zone):
@@ -2321,8 +2378,8 @@ class Daemon:
         devices = self.config.get("devices", {})
         devices = devices if isinstance(devices, dict) else {}
         # the sizes Iridia gave headers stay known, so they're set again if OpenRGB forgets them
-        sizes = {(d, z): zc["hw_size"] for d, dc in devices.items() if isinstance(dc, dict)
-                 for z, zc in (dc.get("zones") or {}).items() if isinstance(zc, dict) and zc.get("hw_size")}
+        sizes = {(d, z): _hw_size(zc) for d, dc in devices.items() if isinstance(dc, dict)
+                 for z, zc in (dc.get("zones") or {}).items() if _hw_size(zc)}
         self.config.set("devices", {k: v for k, v in devices.items() if isinstance(v, dict) and v.get("net")})
         self._resized.clear()
         self._autoadd_devices(found)
@@ -2348,6 +2405,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
+    @_config_locked
     def _cmd_set_wallpaper_color(self, req: dict) -> dict:
         if not self._current_wallpaper:
             return {"ok": False, "error": "no wallpaper detected yet"}
@@ -2486,22 +2544,22 @@ class Daemon:
                 continue
             if on_demand and (dev_off or (bool(zname) and not zcfg.get("enabled", True))):
                 continue                    # switched off: a colour now could switch it back on
-            if on_demand:
-                # what its card says, and nothing else: no wallpaper change, monitor, lock, sleep, scene
-                # or keybind on top, and never on or off (that's left to its own app and automations)
-                zc = dict(clean_zone_cfg(zcfg), independent=True, on_demand=True)
-                self._last_sent.pop(key, None)
-                self._update_zone(name, zname, zc, t)
-                continue
-            if key in self._left_alone:
+            if not on_demand and key in self._left_alone:
                 self._left_alone.discard(key)
                 self._last_sent.pop(key, None)      # back with Iridia: its colours again
                 if self.netlights.has(name):
                     self.netlights.resend(name)
             # One broken zone (a hand-edited config, odd hardware) must not stop the others.
             try:
-                self._update_zone(name, zname, clean_zone_cfg(zcfg), t,
-                                  off=dev_off or (bool(zname) and not zcfg.get("enabled", True)))
+                if on_demand:
+                    # what its card says, and nothing else: no wallpaper change, monitor, lock, sleep, scene
+                    # or keybind on top, and never on or off (that's left to its own app and automations)
+                    zc = dict(clean_zone_cfg(zcfg), independent=True, on_demand=True)
+                    self._last_sent.pop(key, None)
+                    self._update_zone(name, zname, zc, t)
+                else:
+                    self._update_zone(name, zname, clean_zone_cfg(zcfg), t,
+                                      off=dev_off or (bool(zname) and not zcfg.get("enabled", True)))
                 self._zone_errors.pop((name, zname), None)
             except Exception as e:      # noqa: BLE001
                 msg = f"{type(e).__name__}: {e}"
@@ -3494,7 +3552,10 @@ class Daemon:
                          "animation": {"effect": cur["effect"],
                                        "speed": animations.speed_value(cur["effect"], c["speed_level"])}}
                 sub = dict(c, device=dev, zone=zone)
-                r = self._dispatch(sub)
+                try:
+                    r = self._dispatch(sub)
+                except ZoneNotFound as e:
+                    r = {"ok": False, "error": str(e)}      # a strip that's gone: the others still change
                 self._mark_on_demand(sub)       # an "only when I change it" light changed here gets it too
                 if not r.get("ok"):
                     errors.append(f"{k.rstrip('|')}: {r.get('error')}")
@@ -3575,11 +3636,12 @@ class Daemon:
             ip = str(req["remove_light"]).strip()
             gone = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") == ip]
             cur["manual"] = [m for m in cur.get("manual") or [] if isinstance(m, dict) and m.get("ip") != ip]
-            devices = self.config.get("devices", {})
-            if isinstance(devices, dict):
+            with self.config.lock:
+                devices = self.config.get("devices", {})
                 # its card goes too (a light added by address is named after it)
                 names = [n for n, c in devices.items() if isinstance(c, dict) and c.get("net")
-                         and any(n == f"{'WiZ' if m['kind'] == 'wiz' else 'Govee'} {ip}" for m in gone)]
+                         and any(n == f"{'WiZ' if m['kind'] == 'wiz' else 'Govee'} {ip}" for m in gone)] \
+                    if isinstance(devices, dict) else []
                 for n in names:
                     del devices[n]
                 if names:
@@ -3734,6 +3796,7 @@ class Daemon:
         # instead of being a no-op that reports success.
         self._rescale_sections(name, zone, count)
         self.config.set(self._zone_config_path(name, zone, "led_count"), count)
+        self._count_saved(name, zone)
         self._needs_update = True
         return {"ok": True}
 
@@ -3888,6 +3951,7 @@ class Daemon:
         self._needs_update = True
         return {"ok": True}
 
+    @_config_locked
     def _migrate_patterns(self):
         """Animated patterns were removed; zones that used one become solid."""
         devices = self.config.get("devices", {})
@@ -3936,6 +4000,7 @@ class Daemon:
                 out.append(h)
         return out
 
+    @_config_locked
     def _cmd_set_zone_name(self, req: dict) -> dict:
         """Your own name for a zone ("Desk back", "Case left"), shown everywhere in the window."""
         dev, zone = req.get("device"), req.get("zone") or ""
@@ -3980,6 +4045,7 @@ class Daemon:
         "gamma_correction": lambda v: isinstance(v, bool),
     }
 
+    @_config_locked
     def _cmd_set_all(self, req: dict) -> dict:
         """Set one setting on every zone of every device in one atomic write."""
         field = req.get("field")
@@ -4047,6 +4113,7 @@ class Daemon:
             return {"ok": False, "error": f"invalid hex color: {req.get('hex')!r}"}
         return {"ok": True, "custom_colors": self.custom_colors.add(h)}
 
+    @_config_locked
     def _cmd_remove_custom_color(self, req: dict) -> dict:
         h = normalize_hex(req.get("hex", ""))
         colors = self.custom_colors.remove(h)
@@ -4074,8 +4141,14 @@ class Daemon:
             return {"ok": False, "error": f"device '{dev}' not found"}
         self._rescale_sections(dev, zone, count)
         self.config.set(self._zone_config_path(dev, zone, "led_count"), count)
+        self._count_saved(dev, zone)
         self._needs_update = True
         return {"ok": True}
+
+    def _count_saved(self, dev: str, zone: str) -> None:
+        """Someone set the strip's LED count: it isn't Iridia's guess any more."""
+        if self._zone_cfg(dev, zone).get("size_guessed"):
+            self.config.set(self._zone_config_path(dev, zone, "size_guessed"), False)
 
     def _rescale_sections(self, dev: str, zone: str, count) -> None:
         """A new LED count moves a split strip's dividers along with it."""
@@ -4204,8 +4277,7 @@ class Daemon:
 
     def _soft_restart(self):
         self.logger.info("Performing soft restart")
-        self.openrgb.client = None
-        self.openrgb.devices = {}
+        self.openrgb.disconnect()           # closes the old socket (and its reader) under the lock
         self._last_sent = {}
         self._detect_wallpaper()
         self._needs_update = True

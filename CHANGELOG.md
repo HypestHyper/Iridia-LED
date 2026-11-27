@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.4.6 — 2026-11-27
+
+- **Counted strips stop saying "guessed":** after *Count LEDs* on a strip Iridia had given 60 LEDs, its
+  card, the Devices page and Diagnostics kept saying the size was a guess. Saving a count now clears it,
+  and when guesses differ each strip is listed with its own number.
+- **A bad setting can't stop the lights:** an unusable saved strip size, or `Infinity` in a number
+  setting in config.json, no longer stops Iridia updating the LEDs or starting at all. A broken
+  "only when I change it" strip no longer holds up the devices after it.
+- **Settings aren't lost:** a change made in the window while Iridia was updating its device list could
+  be overwritten; it's kept now. A damaged `wallpaper_colors.json` is kept as `.bak` instead of being
+  replaced, so per-wallpaper colour picks aren't lost.
+- **Sleep:** putting the PC back to sleep right after waking no longer lights the LEDs while it sleeps.
+- **Favourites:** a card naming a strip that no longer exists still changes the others.
+- **Stability:** `iridia restart` closes the old OpenRGB connection; animations no longer stop by
+  themselves; switching network lights off and on quickly can't start two of them; a hung notification
+  service no longer ends the update check.
+- **Updates:** after installing an update as a package, Iridia no longer announces the version it's
+  already running.
+- **Colours:** the wallpaper's most common colours are no longer missed by the Pillow extractor.
+- **Setups:** a setup name can't point outside the setups folder.
+- Reset strips to defaults waits long enough for boards with several headers.
+
 ## 1.4.5 — 2026-11-26
 
 - **Lights on from the first run:** OpenRGB reports a motherboard's ARGB headers with no size until

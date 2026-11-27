@@ -47,6 +47,15 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="1.4.6" date="2026-11-27">
+      <description>
+        <ul>
+          <li>Counting a strip Iridia gave a size to clears the "guessed size" note</li>
+          <li>A damaged or hand-edited setting can no longer stop the lights updating</li>
+          <li>Many fixes for sleep, restarts, animations, network lights and updates</li>
+        </ul>
+      </description>
+    </release>
     <release version="1.4.5" date="2026-11-26">
       <description>
         <ul>
